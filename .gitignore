@@ -1,0 +1,26 @@
+# Unreal generated files and local editor state
+Binaries/
+DerivedDataCache/
+Intermediate/
+Saved/
+.vs/
+.vscode/
+.idea/
+.codex/
+Config/DefaultEditorPerProjectUserSettings.ini
+Content/Developers/
+Content/Collections/
+*.sln
+*.suo
+*.user
+*.VC.db
+*.VC.opendb
+
+# Local credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+Thumbs.db
+.DS_Store
