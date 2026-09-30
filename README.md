@@ -2,6 +2,11 @@
 
 Unreal Engine 5.8로 제작 중인 고양이 쿼터뷰 게임 프로젝트입니다.
 
+## 게임 기획
+
+- [기획 기준 요약과 미결정 사항](Docs/Design/GameDesign.md)
+- [사용자 제공 기획서 원문](Docs/Design/GameDesign_Source.md)
+
 ## 프로젝트 열기
 
 1. Unreal Engine 5.8을 설치합니다.
