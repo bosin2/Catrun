@@ -243,8 +243,9 @@ void FCatrunGridData::BakeDiagonalEdges()
 }
 
 // Fills WallDistance by shooting rays in many directions from the centre of every cell and
-// taking the shortest distance to a wall. Measuring the real geometry (instead of counting
-// cells) matters for narrow gaps: a 60cm cat-hole must read as "about 30cm to the wall".
+// taking the shortest distance to a wall or an obstacle (furniture). Measuring the real
+// geometry (instead of counting cells) matters for narrow gaps: a 60cm cat-hole must read
+// as "about 30cm to the wall". Obstacles only count here, never for sound (see BakeEdges).
 void FCatrunGridData::BakeWallDistance(UWorld& World, const UCatrunSoundSettings& Settings)
 {
 	constexpr int32 NumRays = 16;
@@ -274,10 +275,12 @@ void FCatrunGridData::BakeWallDistance(UWorld& World, const UCatrunSoundSettings
 			World.LineTraceMultiByObjectType(Hits, Start, End, ObjectParams, QueryParams);
 			for (const FHitResult& Hit : Hits)
 			{
-				if (Hit.GetActor() && Hit.GetActor()->ActorHasTag(Settings.WallTag))
+				const AActor* HitActor = Hit.GetActor();
+				const bool bBlocksArmor = HitActor && (HitActor->ActorHasTag(Settings.WallTag) || HitActor->ActorHasTag(Settings.ObstacleTag));
+				if (bBlocksArmor)
 				{
 					Nearest = FMath::Min(Nearest, Hit.Distance);
-					break; // hits are sorted by distance, the first wall is the nearest
+					break; // hits are sorted by distance, the first one is the nearest
 				}
 			}
 		}

@@ -157,21 +157,15 @@ void ASoundGridManager::NotifyDoorStateChanged(ACatrunDoor* Door)
 	RefreshDoorGates();
 }
 
-void ASoundGridManager::OpenDoorsNear(const FVector& Location, float Radius)
+void ASoundGridManager::GetClosedDoors(TArray<ACatrunDoor*>& OutDoors) const
 {
-	// Collect first: opening a door refreshes DoorCells, which must not happen while looping over it.
-	TArray<ACatrunDoor*> DoorsToOpen;
 	for (const TPair<TWeakObjectPtr<ACatrunDoor>, TArray<int32>>& Pair : DoorCells)
 	{
 		ACatrunDoor* Door = Pair.Key.Get();
-		if (Door && !Door->IsOpen() && FVector::Dist2D(Door->GetActorLocation(), Location) <= Radius)
+		if (Door && !Door->IsOpen())
 		{
-			DoorsToOpen.Add(Door);
+			OutDoors.Add(Door);
 		}
-	}
-	for (ACatrunDoor* Door : DoorsToOpen)
-	{
-		Door->SetOpen(true);
 	}
 }
 

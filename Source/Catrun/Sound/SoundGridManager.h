@@ -75,8 +75,8 @@ public:
 	// Called by ACatrunDoor when it opens or closes.
 	void NotifyDoorStateChanged(ACatrunDoor* Door);
 
-	// Opens every closed door within Radius cm of Location. Used by walking armors.
-	void OpenDoorsNear(const FVector& Location, float Radius);
+	// Adds every door that is currently closed to OutDoors.
+	void GetClosedDoors(TArray<ACatrunDoor*>& OutDoors) const;
 
 	const FCatrunGridData& GetGrid() const { return Grid; }
 	const UCatrunSoundSettings* GetSettings() const { return Settings; }

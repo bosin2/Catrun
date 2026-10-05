@@ -36,6 +36,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grid")
 	FName FloorTag = TEXT("SoundFloor");
 
+	// Furniture and other things the armor must walk around. Sound ignores them completely;
+	// only the armor path keeps its distance (see ArmorClearance).
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Grid")
+	FName ObstacleTag = TEXT("SoundObstacle");
+
 	// ---- Sound budget (cm of travel distance) --------------------------------
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Budget", meta = (ClampMin = "0.0"))
 	float LargeBudget = 500.f;
