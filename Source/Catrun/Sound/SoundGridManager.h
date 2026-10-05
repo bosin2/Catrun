@@ -2,38 +2,47 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Grid/CatrunGridData.h"
 #include "SoundTypes.h"
 #include "SoundGridManager.generated.h"
 
-class UCatrunSoundSettings;
 class ACatrunDoor;
-class UInstancedStaticMeshComponent;
-class UMaterialInstanceDynamic;
+class UCatrunSoundSettings;
+class USoundWaveVisual;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnCatrunSoundEmitted, const FCatrunSoundEvent&, Event, float, Budget);
 
-// Result of the latest sound propagation. Plain struct: read by the visualizer every frame.
-struct FSoundField
+// A sound that is on its way to a listener. It is delivered when the wave reaches the listener.
+USTRUCT()
+struct FPendingSound
 {
-	// Travel cost from the source to each cell. MAX_flt means "not reached".
-	TArray<float> Dist;
-	FCatrunSoundEvent Event;
-	float Budget = 0.f;
-	int32 SourceCell = INDEX_NONE;
-	double EmitTime = 0.0;
+	GENERATED_BODY()
 
-	bool IsValid() const { return SourceCell != INDEX_NONE; }
+	UPROPERTY()
+	TWeakObjectPtr<AActor> Listener;
+
+	UPROPERTY()
+	FCatrunSoundEvent Event;
+
+	// Sound budget left at the listener (always > 0).
+	UPROPERTY()
+	float RemainingBudget = 0.f;
+
+	// World time at which the wave reaches the listener.
+	double ArrivalTime = 0.0;
 };
 
 /**
- * Grid based sound propagation (design doc 3.1 / 3.2 / 12.1).
+ * The sound system of a level. Place exactly one in the level and assign DA_SoundSettings.
  *
- * The level floor is sampled into square cells. Neighbouring cells are connected unless a
- * wall (actor tagged with Settings->WallTag) stands between them, so sound follows open
- * paths (doors, arches, cat-holes) and is stopped by walls. Propagation is a Dijkstra
- * search limited by the budget of the sound size.
+ * It owns the baked grid and does four things:
+ *  1. Bakes the grid from the level geometry (BuildGrid).
+ *  2. Spreads a sound over the grid (EmitSound) and draws the wave (USoundWaveVisual).
+ *  3. Tells every listener that can hear the sound, at the moment the wave reaches it.
+ *  4. Keeps track of doors: closed doors block sound, armors open them.
  *
- * Put exactly one of these in the level and assign a UCatrunSoundSettings asset.
+ * The heavy parts live in separate files: FCatrunGridData (grid), CatrunSoundPropagation
+ * (spreading), USoundWaveVisual (drawing), CatrunArmorPath (armor walking).
  */
 UCLASS()
 class CATRUN_API ASoundGridManager : public AActor
@@ -43,111 +52,79 @@ class CATRUN_API ASoundGridManager : public AActor
 public:
 	ASoundGridManager();
 
-	// Finds the manager placed in the world (nullptr if none).
+	// The manager placed in the level, or nullptr.
 	UFUNCTION(BlueprintPure, Category = "Sound", meta = (WorldContext = "WorldContextObject"))
 	static ASoundGridManager* Get(const UObject* WorldContextObject);
 
-	// Samples the level floor and walls into the grid. Run again after moving walls/floors.
+	// Builds the grid from the level floors and walls. Run it again after moving walls/floors.
 	UFUNCTION(CallInEditor, BlueprintCallable, Category = "Sound")
 	void BuildGrid();
 
-	// Makes a sound. Fills the propagation field and notifies every listener that can hear it.
+	// Makes a sound. Calculates where it reaches and starts the wave. Listeners are told
+	// when the wave arrives at them, not instantly.
 	UFUNCTION(BlueprintCallable, Category = "Sound")
 	bool EmitSound(const FCatrunSoundEvent& Event);
 
-	// Budget left at a world location for the latest sound. <= 0 means the sound did not reach it.
+	// Sound budget left at a location for the latest sound (<= 0 = not reached).
 	UFUNCTION(BlueprintPure, Category = "Sound")
 	float GetRemainingBudgetAt(const FVector& WorldLocation) const;
 
 	UFUNCTION(BlueprintPure, Category = "Sound")
-	bool HasGrid() const { return GridWidth > 0 && GridHeight > 0; }
+	bool HasGrid() const { return Grid.IsValid(); }
 
-	// Called by ACatrunDoor when a door opens or closes.
+	// Called by ACatrunDoor when it opens or closes.
 	void NotifyDoorStateChanged(ACatrunDoor* Door);
 
-	// Query helpers used by the visualizer and debug drawing.
-	const FSoundField& GetLastField() const { return LastField; }
-	FVector CellToWorld(int32 CellIndex) const;
-	int32 WorldToCell(const FVector& WorldLocation) const;
-	float GetCellSize() const;
-	float GetFloorZ() const { return FloorZ; }
-	int32 GetGridWidth() const { return GridWidth; }
-	int32 GetGridHeight() const { return GridHeight; }
-	bool IsCellWalkable(int32 CellIndex) const { return CellFlags.IsValidIndex(CellIndex) && CellFlags[CellIndex] != 0; }
+	// Opens every closed door within Radius cm of Location. Used by walking armors.
+	void OpenDoorsNear(const FVector& Location, float Radius);
 
+	const FCatrunGridData& GetGrid() const { return Grid; }
 	const UCatrunSoundSettings* GetSettings() const { return Settings; }
 
 	UPROPERTY(BlueprintAssignable, Category = "Sound")
 	FOnCatrunSoundEmitted OnSoundEmitted;
 
-	// Draw walkable cells and blocked cell edges in the viewport while the game runs.
+	// Draw the grid (floor cells and wall edges) in the viewport. For checking the bake.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debug")
 	bool bDebugDrawGrid = false;
+
+	// Add a bell component to the player's pawn automatically, so the player blueprint
+	// does not have to be edited.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
+	bool bAutoAttachBell = true;
 
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
 	virtual bool ShouldTickIfViewportsOnly() const override { return bDebugDrawGrid; }
 
-	// Settings asset (DA_SoundSettings). A default object with default values is used when empty.
+	// Settings asset (DA_SoundSettings). Default values are used when empty.
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sound")
 	TObjectPtr<UCatrunSoundSettings> Settings;
 
 private:
-	static constexpr int32 NumDirs = 8;
-
-	bool IsEdgeOpen(int32 CellIndex, int32 Dir) const;
-	bool IsCellBlocked(int32 CellIndex) const;
-	int32 FindNearestWalkableCell(const FVector& WorldLocation, int32 MaxRing) const;
-	void RunDijkstra(int32 SourceCell, float Budget, TArray<float>& OutDist) const;
 	void RefreshDoorGates();
+	void DeliverPendingSounds();
+	void AttachBellToPlayer();
 	void DebugDrawGrid() const;
-	void CreateVisual();
-	void UpdateVisual();
 
-	// One flat quad per walkable cell. Opacity is driven per instance (custom data 0).
+	// The baked grid, saved with the level.
+	UPROPERTY()
+	FCatrunGridData Grid;
+
+	UPROPERTY(VisibleAnywhere, Category = "Sound")
+	TObjectPtr<USoundWaveVisual> WaveVisual;
+
 	UPROPERTY(Transient)
-	TObjectPtr<UInstancedStaticMeshComponent> VisualISM;
+	TArray<FPendingSound> PendingSounds;
 
-	UPROPERTY(Transient)
-	TObjectPtr<UMaterialInstanceDynamic> VisualMID;
+	// Path length from the latest sound to every cell (CatrunSoundPropagation::Unreached = not reached).
+	TArray<float> LastDistance;
+	float LastBudget = 0.f;
 
-	// Cell index -> instance index (INDEX_NONE for non-walkable cells).
-	TArray<int32> CellToInstance;
-	bool bVisualActive = false;
-
-	// ---- Baked grid (serialized with the level) ----
-	UPROPERTY()
-	FVector GridOrigin = FVector::ZeroVector;
-
-	UPROPERTY()
-	float BakedCellSize = 25.f;
-
-	UPROPERTY()
-	float FloorZ = 0.f;
-
-	UPROPERTY()
-	int32 GridWidth = 0;
-
-	UPROPERTY()
-	int32 GridHeight = 0;
-
-	// 1 = floor cell that is not inside a wall.
-	UPROPERTY()
-	TArray<uint8> CellFlags;
-
-	// Travel cost multiplier per cell (floor material).
-	UPROPERTY()
-	TArray<float> CellCost;
-
-	// Bit i set = the edge from this cell toward direction i is open (no wall between).
-	UPROPERTY()
-	TArray<uint8> EdgeMask;
-
-	// ---- Runtime ----
-	// Number of closed doors covering each cell. > 0 means the cell is blocked for sound.
-	TArray<uint8> GateClosedCount;
+	// Number of closed doors covering each cell. > 0 blocks sound.
+	TArray<uint8> ClosedGateCells;
 	TMap<TWeakObjectPtr<ACatrunDoor>, TArray<int32>> DoorCells;
 
-	FSoundField LastField;
+	bool bBellAttached = false;
 };
