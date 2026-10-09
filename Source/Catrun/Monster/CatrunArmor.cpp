@@ -99,8 +99,8 @@ void ACatrunArmor::BeginPlay()
 
 void ACatrunArmor::OnSoundHeard_Implementation(const FCatrunSoundEvent& Event, float RemainingBudget)
 {
-	// The cat is being carried off: nothing else matters.
-	if (Action == EArmorAction::Catching)
+	// The cat is being carried off, or this armor is following the mark: sounds do not matter.
+	if (Action == EArmorAction::Catching || bFollowingMark)
 	{
 		return;
 	}
@@ -252,6 +252,8 @@ void ACatrunArmor::SetAction(EArmorAction NewAction)
 // Decides what to do next: turn on the spot if the next corner is far off the heading, else walk.
 void ACatrunArmor::BeginLeg()
 {
+	StuckTimer = 0.f;
+	LastWalkLocation = GetActorLocation();
 	// Skip corners we are already standing on.
 	while (PathCorners.IsValidIndex(NextCorner) && FVector::Dist2D(GetActorLocation(), PathCorners[NextCorner]) <= CornerTolerance)
 	{
@@ -325,6 +327,15 @@ void ACatrunArmor::BeginOpeningDoor(ACatrunDoor* Door)
 
 void ACatrunArmor::FinishTrip()
 {
+	// Following the mark never ends by itself: wait here, the next path plan goes on.
+	if (bFollowingMark)
+	{
+		PathCorners.Reset();
+		NextCorner = 0;
+		MarkTargetCell = FIntPoint(INT32_MIN, INT32_MIN);
+		SetAction(EArmorAction::Idle);
+		return;
+	}
 	PathCorners.Reset();
 	NextCorner = 0;
 	bHasDestination = false; // arrived: from now on any sound is followed (rule 4.3)
@@ -396,9 +407,77 @@ void ACatrunArmor::Tick(float DeltaSeconds)
 	case EArmorAction::Looking:			TickLooking(DeltaSeconds);		break;
 	case EArmorAction::Catching:		TickCatching(DeltaSeconds);		break;
 	}
+	UpdateMarkFollowing(DeltaSeconds);
 	UpdateDetection();
 	DrawDebug();
 	UpdateActionLabel();
+}
+
+void ACatrunArmor::SetFollowingMark(bool bFollow)
+{
+	if (bFollowingMark == bFollow)
+	{
+		return;
+	}
+	bFollowingMark = bFollow;
+	MarkRepathTimer = 0.f;
+	MarkTargetCell = FIntPoint(INT32_MIN, INT32_MIN);
+	UE_LOG(LogCatrunSound, Log, TEXT("%s %s the marked cat."), *GetName(), bFollow ? TEXT("starts following") : TEXT("stops following"));
+	if (bFollow)
+	{
+		bHasDestination = true; // a trip is on, so the post is forgotten
+		bReturningToPost = false;
+		bRestorePostHeading = false;
+	}
+	else
+	{
+		// Keep walking to the last place the cat was; from there the usual look and return.
+		CurrentSoundSize = ECatrunSoundSize::Small;
+
+		// Already there (it waited at the end of its path while following)? Then the trip is over
+		// now: look around and go back. Without this it would stand there for ever.
+		const bool bWalkingOn = PathCorners.IsValidIndex(NextCorner) && Action != EArmorAction::Idle;
+		if (!bWalkingOn && Action != EArmorAction::Catching && Action != EArmorAction::Looking)
+		{
+			FinishTrip();
+		}
+	}
+}
+
+// While following, the way to the cat is planned again whenever the cat has moved to another grid
+// cell (the grid cell is 25 cm, so this is cheap and keeps the armor from turning on the spot).
+void ACatrunArmor::UpdateMarkFollowing(float DeltaSeconds)
+{
+	if (!bFollowingMark || Action == EArmorAction::Catching)
+	{
+		return;
+	}
+	MarkRepathTimer -= DeltaSeconds;
+	const UCatrunSoundSettings* S = SoundManager.IsValid() ? SoundManager->GetSettings() : nullptr;
+	const APawn* Cat = CatrunCat::Find(this);
+	if (!S || !Cat || MarkRepathTimer > 0.f)
+	{
+		return;
+	}
+	MarkRepathTimer = S->MarkRepathInterval;
+
+	const FIntPoint Cell(FMath::FloorToInt(Cat->GetActorLocation().X / 25.f), FMath::FloorToInt(Cat->GetActorLocation().Y / 25.f));
+	if (Cell == MarkTargetCell)
+	{
+		return;
+	}
+	// A door or a turn in progress finishes first.
+	if (Action == EArmorAction::OpeningDoor || Action == EArmorAction::Turning)
+	{
+		return;
+	}
+	Destination = Cat->GetActorLocation(); // the real position: this is what the mark allows
+	if (PlanPath(Destination))
+	{
+		MarkTargetCell = Cell;
+		bHasDestination = true;
+		BeginLeg();
+	}
 }
 
 void ACatrunArmor::UpdateDetection()
@@ -427,7 +506,7 @@ void ACatrunArmor::UpdateDetection()
 	Detection->Update(0.f, 180.f);
 
 	APawn* Cat = CatrunCat::Find(this);
-	const bool bSees = Cat && !CatrunCat::IsHiding(Cat) && Detection->CanSee(Cat->GetActorLocation(), S->CatSightRadius);
+	const bool bSees = Cat && !CatrunCat::IsSafeFromCatch(Cat) && Detection->CanSee(Cat->GetActorLocation(), S->CatSightRadius);
 
 	// While the cat is inside the circle the "!" stays on. (Show keeps it visible for a short
 	// time, so renewing it every frame holds it until the cat leaves.)
@@ -657,6 +736,24 @@ void ACatrunArmor::TickWalking(float DeltaSeconds)
 	const FVector ToCorner = PathCorners[NextCorner] - GetActorLocation();
 	FaceAxisToward(ToCorner, DeltaSeconds);
 	AddMovementInput(ToCorner.GetSafeNormal2D(), 1.f);
+
+	// Stuck? The body may be wider than the free space in front of furniture or a hideout, so the
+	// last corner can be out of reach. Waiting there for ever would block the armor, so after a
+	// short while it counts as arrived (the usual look around and walk back follows).
+	const float Moved = FVector::Dist2D(GetActorLocation(), LastWalkLocation);
+	LastWalkLocation = GetActorLocation();
+	const bool bBarelyMoving = ActionTime > 0.3f && Moved < 0.05f * DeltaSeconds * 100.f;
+	StuckTimer = bBarelyMoving ? StuckTimer + DeltaSeconds : 0.f;
+	if (StuckTimer >= StuckTime)
+	{
+		const float ToEnd = FVector::Dist2D(GetActorLocation(), PathCorners.Last());
+		if (ToEnd <= StuckArrivalDistance || StuckTimer >= StuckTime * 4.f)
+		{
+			UE_LOG(LogCatrunSound, Log, TEXT("%s is stuck %.0f cm from the end of its path: counts as arrived."), *GetName(), ToEnd);
+			StuckTimer = 0.f;
+			FinishTrip();
+		}
+	}
 }
 
 void ACatrunArmor::TickTurning(float DeltaSeconds)

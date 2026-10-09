@@ -76,9 +76,18 @@ public:
 	TObjectPtr<UMaterialInterface> WaveMaterial;
 
 	// Size (cm) of one pixel of the distance picture the wave is drawn from.
-	// 5 gives a smooth ring. Larger values are cheaper but blockier.
+	// 1 = one pixel per square centimetre: the edge of the wave is perfectly smooth. Only the part
+	// of the picture around the wave is updated, so this stays cheap.
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Visual", meta = (ClampMin = "1.0"))
-	float VisualTexelSize = 5.f;
+	float VisualTexelSize = 1.f;
+
+	// One sound shows this many rings, one right after the other.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Visual", meta = (ClampMin = "1", ClampMax = "6"))
+	int32 WaveCount = 3;
+
+	// Seconds between the rings of one sound (they travel at the same speed, so this sets the gap).
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Visual", meta = (ClampMin = "0.01"))
+	float WaveInterval = 0.12f;
 
 	// Thickness (cm) of the visible ring behind the wave front.
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Visual", meta = (ClampMin = "1.0"))
@@ -260,6 +269,54 @@ public:
 	// The fade in from black after the restart takes this long (seconds).
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Armor Catch", meta = (ClampMin = "0.1"))
 	float RestartFadeInTime = 1.f;
+
+	// ---- Footsteps -----------------------------------------------------------
+	// Sneaking (Ctrl) makes no sound. Walking makes a small sound, running (Shift) a medium one;
+	// the bell is the loudest. The sound is made every few moments while the cat moves.
+
+	// The cat counts as moving when it is faster than this (cm/s).
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Footsteps", meta = (ClampMin = "0.0"))
+	float FootstepMinSpeed = 20.f;
+
+	// Seconds between two walking sounds.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Footsteps", meta = (ClampMin = "0.1"))
+	float WalkStepInterval = 0.5f;
+
+	// Seconds between two running sounds.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Footsteps", meta = (ClampMin = "0.1"))
+	float RunStepInterval = 0.3f;
+
+	// ---- Candle mark (design doc 4.5) ------------------------------------------
+	// Provisional: the rules are to be discussed with the team, so keep everything here.
+
+	// The armor that follows the mark plans its way to the cat this often (seconds).
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Mark", meta = (ClampMin = "0.1"))
+	float MarkRepathInterval = 0.4f;
+
+	// Another armor takes over the following only when it is closer than this fraction of the
+	// distance of the armor that follows now (0.8 = 20% closer).
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Mark", meta = (ClampMin = "0.1", ClampMax = "1.0"))
+	float MarkSwitchRatio = 0.8f;
+
+	// The red orb above the cat: its material, size (1 = 100 cm), height above the cat (cm),
+	// and the glow it gives.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Mark")
+	TObjectPtr<UMaterialInterface> MarkMaterial;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Mark", meta = (ClampMin = "0.01"))
+	float MarkOrbScale = 0.15f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Mark")
+	float MarkHeight = 80.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Mark")
+	FLinearColor MarkLightColor = FLinearColor(1.f, 0.05f, 0.05f, 1.f);
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Mark", meta = (ClampMin = "0.0"))
+	float MarkLightIntensity = 800.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Mark", meta = (ClampMin = "10.0"))
+	float MarkLightRadius = 250.f;
 
 	float GetBudget(ECatrunSoundSize Size) const
 	{

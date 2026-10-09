@@ -18,4 +18,8 @@ namespace CatrunCat
 	// This reads the "IsHidden" variable of the cat's own interaction component (read only,
 	// the cat's blueprint is never edited).
 	CATRUN_API bool IsHiding(const APawn* Cat);
+
+	// True while the armors may not catch the cat: it is hiding, or it is playing the animation
+	// of getting into a hideout.
+	CATRUN_API bool IsSafeFromCatch(const APawn* Cat);
 }

@@ -7,11 +7,11 @@ using namespace CatrunGrid;
 namespace
 {
 	// Entry of the priority queue: always process the closest unfinished cell first.
-	struct FHeapNode
+	struct FSoundSpreadNode
 	{
 		float Distance;
 		int32 Cell;
-		bool operator<(const FHeapNode& Other) const { return Distance < Other.Distance; }
+		bool operator<(const FSoundSpreadNode& Other) const { return Distance < Other.Distance; }
 	};
 }
 
@@ -21,14 +21,14 @@ int32 CatrunSoundPropagation::Run(const FCatrunGridData& Grid, const TArray<uint
 	OutDistance.Init(Unreached, Grid.NumCells());
 	OutDistance[SourceCell] = 0.f;
 
-	TArray<FHeapNode> Heap;
-	Heap.HeapPush(FHeapNode{ 0.f, SourceCell }, TLess<FHeapNode>());
+	TArray<FSoundSpreadNode> Heap;
+	Heap.HeapPush(FSoundSpreadNode{ 0.f, SourceCell }, TLess<FSoundSpreadNode>());
 	int32 NumReached = 0;
 
 	while (!Heap.IsEmpty())
 	{
-		FHeapNode Node;
-		Heap.HeapPop(Node, TLess<FHeapNode>(), EAllowShrinking::No);
+		FSoundSpreadNode Node;
+		Heap.HeapPop(Node, TLess<FSoundSpreadNode>(), EAllowShrinking::No);
 
 		// The same cell can be queued several times; skip entries that are already outdated.
 		if (Node.Distance > OutDistance[Node.Cell])
@@ -57,7 +57,7 @@ int32 CatrunSoundPropagation::Run(const FCatrunGridData& Grid, const TArray<uint
 			if (NewDistance <= Budget && NewDistance < OutDistance[Next])
 			{
 				OutDistance[Next] = NewDistance;
-				Heap.HeapPush(FHeapNode{ NewDistance, Next }, TLess<FHeapNode>());
+				Heap.HeapPush(FSoundSpreadNode{ NewDistance, Next }, TLess<FSoundSpreadNode>());
 			}
 		}
 	}

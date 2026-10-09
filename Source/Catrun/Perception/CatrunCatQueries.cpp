@@ -1,5 +1,6 @@
 #include "CatrunCatQueries.h"
 
+#include "CatrunCatStateComponent.h"
 #include "GameFramework/Pawn.h"
 #include "Kismet/GameplayStatics.h"
 #include "UObject/UnrealType.h"
@@ -29,4 +30,14 @@ bool CatrunCat::IsHiding(const APawn* Cat)
 		}
 	}
 	return false;
+}
+
+bool CatrunCat::IsSafeFromCatch(const APawn* Cat)
+{
+	if (!Cat)
+	{
+		return false;
+	}
+	const UCatrunCatStateComponent* State = Cat->FindComponentByClass<UCatrunCatStateComponent>();
+	return IsHiding(Cat) || (State && State->IsEnteringHideout());
 }

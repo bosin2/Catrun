@@ -18,11 +18,11 @@ namespace
 	int32 DirectionOf(int32 State) { return State % StatesPerCell; }
 
 	// Entry of the priority queue: the state with the lowest "cost so far + estimate to goal" first.
-	struct FHeapNode
+	struct FPathSearchNode
 	{
 		float EstimatedTotal;
 		int32 State;
-		bool operator<(const FHeapNode& Other) const { return EstimatedTotal < Other.EstimatedTotal; }
+		bool operator<(const FPathSearchNode& Other) const { return EstimatedTotal < Other.EstimatedTotal; }
 	};
 
 	// Estimated remaining cost: Manhattan distance to the goal. Never too high, so A* stays exact.
@@ -64,16 +64,16 @@ bool CatrunArmorPath::FindPath(const FCatrunGridData& Grid, const FVector& Start
 	CostSoFar.Init(MAX_flt, NumStates);
 	CameFrom.Init(INDEX_NONE, NumStates);
 
-	TArray<FHeapNode> Heap;
+	TArray<FPathSearchNode> Heap;
 	const int32 StartState = StateOf(StartCell, NoDirection);
 	CostSoFar[StartState] = 0.f;
-	Heap.HeapPush(FHeapNode{ EstimateToGoal(Grid, StartCell, GoalCell), StartState }, TLess<FHeapNode>());
+	Heap.HeapPush(FPathSearchNode{ EstimateToGoal(Grid, StartCell, GoalCell), StartState }, TLess<FPathSearchNode>());
 
 	int32 FinalState = INDEX_NONE;
 	while (!Heap.IsEmpty())
 	{
-		FHeapNode Node;
-		Heap.HeapPop(Node, TLess<FHeapNode>(), EAllowShrinking::No);
+		FPathSearchNode Node;
+		Heap.HeapPop(Node, TLess<FPathSearchNode>(), EAllowShrinking::No);
 
 		const int32 Cell = CellOf(Node.State);
 		const int32 ArrivedFrom = DirectionOf(Node.State);
@@ -105,7 +105,7 @@ bool CatrunArmorPath::FindPath(const FCatrunGridData& Grid, const FVector& Start
 			{
 				CostSoFar[NextState] = NewCost;
 				CameFrom[NextState] = Node.State;
-				Heap.HeapPush(FHeapNode{ NewCost + EstimateToGoal(Grid, Next, GoalCell), NextState }, TLess<FHeapNode>());
+				Heap.HeapPush(FPathSearchNode{ NewCost + EstimateToGoal(Grid, Next, GoalCell), NextState }, TLess<FPathSearchNode>());
 			}
 		}
 	}

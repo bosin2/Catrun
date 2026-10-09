@@ -1,6 +1,7 @@
 #include "CatrunCandle.h"
 
 #include "Catrun.h"
+#include "CatrunMarkSubsystem.h"
 #include "Perception/AlertMarkComponent.h"
 #include "Perception/CatrunCatQueries.h"
 #include "Perception/VisionFanComponent.h"
@@ -133,6 +134,14 @@ void ACatrunCandle::StartTracking(APawn& Cat, const UCatrunSoundSettings& S)
 	{
 		PlayAnimation(SpotReactAnim, false);
 		ReactTimeLeft = SpotReactAnim->GetPlayLength();
+	}
+	// A fully spotted cat is marked (not in the tutorial: its candle has no penalties).
+	if (bPenaltiesEnabled)
+	{
+		if (UCatrunMarkSubsystem* Marks = UCatrunMarkSubsystem::Get(this))
+		{
+			Marks->ApplyMark(Cat);
+		}
 	}
 	OnCatSpotted.Broadcast(this, &Cat);
 }

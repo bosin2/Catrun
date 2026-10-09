@@ -4,18 +4,22 @@
 #include "CatrunSoundSettings.h"
 #include "SoundPropagation.h"
 #include "Grid/CatrunGridData.h"
+#include "Async/ParallelFor.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/StaticMesh.h"
 #include "Engine/Texture2D.h"
 #include "Engine/World.h"
 #include "Materials/MaterialInstanceDynamic.h"
-#include "Math/Float16Color.h"
+#include "Math/Float16.h"
 
 namespace
 {
 	// Picture value meaning "the sound never gets here". The material draws nothing there.
 	// Must stay below the largest 16-bit float (65504) and above 60000 (see M_SoundWave).
 	constexpr float UnreachedPixel = 65000.f;
+
+	// The picture may not be larger than this in either direction (graphics card limit).
+	constexpr int32 MaxTextureSize = 8192;
 
 	// Distance (cm) at a floor position, interpolated between the four nearest cell centres.
 	// Returns UnreachedPixel when the cell under the position is not reached by the sound.
@@ -77,20 +81,39 @@ void USoundWaveVisual::Initialize(const FCatrunGridData& Grid, const UCatrunSoun
 		return;
 	}
 
-	// The picture covers the grid area. One pixel = VisualTexelSize cm.
-	const float Texel = FMath::Max(Settings->VisualTexelSize, 1.f);
+	// The picture covers the grid area. One pixel = Texel cm of floor (VisualTexelSize, made larger
+	// only when the map is so big that the picture would be too large for the graphics card).
+	const float LongestSide = FMath::Max(Grid.Width, Grid.Height) * Grid.CellSize;
+	Texel = FMath::Max(FMath::Max(Settings->VisualTexelSize, 0.1f), LongestSide / MaxTextureSize);
 	TextureWidth = FMath::CeilToInt(Grid.Width * Grid.CellSize / Texel);
 	TextureHeight = FMath::CeilToInt(Grid.Height * Grid.CellSize / Texel);
 	const float AreaWidth = TextureWidth * Texel;
 	const float AreaHeight = TextureHeight * Texel;
 
-	// 16-bit float picture: precise enough for distances in cm, half the size of 32-bit.
-	DistanceTexture = UTexture2D::CreateTransient(TextureWidth, TextureHeight, PF_FloatRGBA);
+	// 16-bit float picture with one channel: precise enough for distances in cm, and small
+	// (2 bytes per pixel) even at one pixel per square centimetre.
+	DistanceTexture = UTexture2D::CreateTransient(TextureWidth, TextureHeight, PF_R16F);
 	DistanceTexture->Filter = TF_Nearest; // values are already smoothed in FillTexture
 	DistanceTexture->AddressX = TA_Clamp;
 	DistanceTexture->AddressY = TA_Clamp;
 	DistanceTexture->SRGB = false;
 	DistanceTexture->NeverStream = true;
+
+	// Start with "no sound anywhere".
+	{
+		FTexture2DMipMap& Mip = DistanceTexture->GetPlatformData()->Mips[0];
+		FFloat16* Pixels = static_cast<FFloat16*>(Mip.BulkData.Lock(LOCK_READ_WRITE));
+		const FFloat16 Nothing(UnreachedPixel);
+		const int32 Width = TextureWidth;
+		ParallelFor(TextureHeight, [Pixels, Nothing, Width](int32 Y)
+		{
+			for (int32 X = 0; X < Width; ++X)
+			{
+				Pixels[Y * Width + X] = Nothing;
+			}
+		});
+		Mip.BulkData.Unlock();
+	}
 	DistanceTexture->UpdateResource();
 
 	// One flat plane laid over the whole map.
@@ -112,6 +135,8 @@ void USoundWaveVisual::Initialize(const FCatrunGridData& Grid, const UCatrunSoun
 	Material->SetScalarParameterValue(TEXT("RingWidth"), Settings->RingWidth);
 	Material->SetScalarParameterValue(TEXT("Feather"), Settings->RingFeather);
 	Material->SetScalarParameterValue(TEXT("EdgeFade"), Settings->EdgeFade);
+	Material->SetScalarParameterValue(TEXT("RingCount"), static_cast<float>(Settings->WaveCount));
+	Material->SetScalarParameterValue(TEXT("RingGap"), Settings->WaveInterval * Settings->SoundSpeed);
 	Plane->SetMaterial(0, Material);
 
 	SetPlaneVisible(false);
@@ -125,9 +150,21 @@ void USoundWaveVisual::SetPlaneVisible(bool bVisible)
 	}
 }
 
+// How long the rings need to travel: the last ring starts (Count - 1) gaps after the first.
+float USoundWaveVisual::GetTravelDuration() const
+{
+	const float TailLength = Settings->RingWidth + (Settings->WaveCount - 1) * Settings->WaveInterval * Settings->SoundSpeed;
+	return (Budget + TailLength) / Settings->SoundSpeed;
+}
+
 void USoundWaveVisual::Show(const FCatrunGridData& Grid, const TArray<float>& Distance, float InBudget, double InStartTime)
 {
 	if (!Material || !DistanceTexture)
+	{
+		return;
+	}
+	// Quiet sounds (footsteps) must not wipe out a louder wave that is still travelling.
+	if (bActive && InBudget < Budget && (InStartTime - StartTime) < GetTravelDuration())
 	{
 		return;
 	}
@@ -142,27 +179,66 @@ void USoundWaveVisual::Show(const FCatrunGridData& Grid, const TArray<float>& Di
 	SetPlaneVisible(true);
 }
 
+// Writes the distances into the picture. Only the part around the sound is written (plus the part
+// the previous sound wrote, which has to be cleared), so the picture can be as fine as one pixel
+// per square centimetre. The rows are filled on several threads.
 void USoundWaveVisual::FillTexture(const FCatrunGridData& Grid, const TArray<float>& Distance)
 {
-	const float Texel = FMath::Max(Settings->VisualTexelSize, 1.f);
-
-	FTexture2DMipMap& Mip = DistanceTexture->GetPlatformData()->Mips[0];
-	FFloat16Color* Pixels = static_cast<FFloat16Color*>(Mip.BulkData.Lock(LOCK_READ_WRITE));
-	for (int32 Y = 0; Y < TextureHeight; ++Y)
+	// The cells the sound reaches.
+	int32 MinCellX = MAX_int32, MinCellY = MAX_int32, MaxCellX = -1, MaxCellY = -1;
+	for (int32 CellY = 0; CellY < Grid.Height; ++CellY)
 	{
-		for (int32 X = 0; X < TextureWidth; ++X)
+		for (int32 CellX = 0; CellX < Grid.Width; ++CellX)
 		{
-			// World position of the middle of this pixel.
-			const float WorldX = Grid.Origin.X + (X + 0.5f) * Texel;
-			const float WorldY = Grid.Origin.Y + (Y + 0.5f) * Texel;
-
-			FFloat16Color& Pixel = Pixels[Y * TextureWidth + X];
-			Pixel = FFloat16Color();
-			Pixel.R = SampleDistance(Grid, Distance, WorldX, WorldY);
+			if (Distance[Grid.CellIndex(CellX, CellY)] != CatrunSoundPropagation::Unreached)
+			{
+				MinCellX = FMath::Min(MinCellX, CellX);
+				MaxCellX = FMath::Max(MaxCellX, CellX);
+				MinCellY = FMath::Min(MinCellY, CellY);
+				MaxCellY = FMath::Max(MaxCellY, CellY);
+			}
 		}
 	}
+	if (MaxCellX < 0)
+	{
+		return;
+	}
+
+	// The same area in pixels, one cell wider on every side.
+	const FIntRect NewRect(
+		FMath::Max(0, FMath::FloorToInt((MinCellX - 1) * Grid.CellSize / Texel)),
+		FMath::Max(0, FMath::FloorToInt((MinCellY - 1) * Grid.CellSize / Texel)),
+		FMath::Min(TextureWidth, FMath::CeilToInt((MaxCellX + 2) * Grid.CellSize / Texel)),
+		FMath::Min(TextureHeight, FMath::CeilToInt((MaxCellY + 2) * Grid.CellSize / Texel)));
+	FIntRect Rect = NewRect;
+	if (bHasWrittenRect)
+	{
+		Rect.Min.X = FMath::Min(Rect.Min.X, WrittenRect.Min.X);
+		Rect.Min.Y = FMath::Min(Rect.Min.Y, WrittenRect.Min.Y);
+		Rect.Max.X = FMath::Max(Rect.Max.X, WrittenRect.Max.X);
+		Rect.Max.Y = FMath::Max(Rect.Max.Y, WrittenRect.Max.Y);
+	}
+
+	FTexture2DMipMap& Mip = DistanceTexture->GetPlatformData()->Mips[0];
+	FFloat16* Pixels = static_cast<FFloat16*>(Mip.BulkData.Lock(LOCK_READ_WRITE));
+	const int32 Width = TextureWidth;
+	const float PixelSize = Texel;
+	ParallelFor(Rect.Height(), [&](int32 Row)
+	{
+		const int32 Y = Rect.Min.Y + Row;
+		for (int32 X = Rect.Min.X; X < Rect.Max.X; ++X)
+		{
+			// World position of the middle of this pixel.
+			const float WorldX = Grid.Origin.X + (X + 0.5f) * PixelSize;
+			const float WorldY = Grid.Origin.Y + (Y + 0.5f) * PixelSize;
+			Pixels[Y * Width + X] = FFloat16(SampleDistance(Grid, Distance, WorldX, WorldY));
+		}
+	});
 	Mip.BulkData.Unlock();
 	DistanceTexture->UpdateResource();
+
+	WrittenRect = NewRect;
+	bHasWrittenRect = true;
 }
 
 void USoundWaveVisual::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -175,11 +251,12 @@ void USoundWaveVisual::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 
 	const float Elapsed = static_cast<float>(GetWorld()->GetTimeSeconds() - StartTime);
 
-	// The ring front moves at sound speed. It is done when the back of the ring passed the budget.
+	// The first ring front moves at sound speed; the others follow it at a fixed gap. It is done
+	// when the back of the last ring passed the budget.
 	const float Radius = Elapsed * Settings->SoundSpeed;
-	const float TravelDuration = (Budget + Settings->RingWidth) / Settings->SoundSpeed;
+	const float TravelDuration = GetTravelDuration();
 
-	// After the ring has finished, hold for a moment and fade out.
+	// After the rings have finished, hold for a moment and fade out.
 	const float TimeAfterTravel = Elapsed - TravelDuration - Settings->HoldDuration;
 	const float Fade = TimeAfterTravel <= 0.f ? 1.f : 1.f - FMath::Clamp(TimeAfterTravel / FMath::Max(Settings->FadeDuration, 0.01f), 0.f, 1.f);
 

@@ -2,6 +2,7 @@
 
 #include "Catrun.h"
 #include "CatrunBellComponent.h"
+#include "Perception/CatrunCatStateComponent.h"
 #include "CatrunDoor.h"
 #include "CatrunSoundSettings.h"
 #include "SoundPropagation.h"
@@ -101,14 +102,21 @@ void ASoundGridManager::AttachBellToPlayer()
 		return;
 	}
 	bBellAttached = true;
-	if (Pawn->FindComponentByClass<UCatrunBellComponent>())
+	if (!Pawn->FindComponentByClass<UCatrunBellComponent>())
 	{
-		return; // already has one
+		UCatrunBellComponent* Bell = NewObject<UCatrunBellComponent>(Pawn, TEXT("BellComponent"));
+		Pawn->AddInstanceComponent(Bell);
+		Bell->RegisterComponent();
+		UE_LOG(LogCatrunSound, Log, TEXT("Bell component added to %s."), *Pawn->GetName());
 	}
-	UCatrunBellComponent* Bell = NewObject<UCatrunBellComponent>(Pawn, TEXT("BellComponent"));
-	Pawn->AddInstanceComponent(Bell);
-	Bell->RegisterComponent();
-	UE_LOG(LogCatrunSound, Log, TEXT("Bell component added to %s."), *Pawn->GetName());
+	// Footsteps and hideout entry (the cat's own blueprints are only read, never changed).
+	if (!Pawn->FindComponentByClass<UCatrunCatStateComponent>())
+	{
+		UCatrunCatStateComponent* State = NewObject<UCatrunCatStateComponent>(Pawn, TEXT("CatStateComponent"));
+		Pawn->AddInstanceComponent(State);
+		State->RegisterComponent();
+		UE_LOG(LogCatrunSound, Log, TEXT("Cat state component added to %s."), *Pawn->GetName());
+	}
 }
 
 // ---------------------------------------------------------------------------
@@ -194,9 +202,12 @@ bool ASoundGridManager::EmitSound(const FCatrunSoundEvent& Event)
 	const int32 NumReached = CatrunSoundPropagation::Run(Grid, ClosedGateCells, SourceCell, LastBudget, LastDistance);
 	UE_LOG(LogCatrunSound, Log, TEXT("EmitSound: size=%d budget=%.0f reached %d cells."), static_cast<int32>(Event.Size), LastBudget, NumReached);
 
-	// 3) Draw the wave.
+	// 3) Draw the wave. The picture needs distances a little beyond the budget, so the end of the
+	// wave fades out smoothly instead of being cut along the 25 cm cells.
+	const float PictureBudget = LastBudget + Grid.CellSize * 2.f;
+	CatrunSoundPropagation::Run(Grid, ClosedGateCells, SourceCell, PictureBudget, PictureDistance);
 	const double Now = World->GetTimeSeconds();
-	WaveVisual->Show(Grid, LastDistance, LastBudget, Now);
+	WaveVisual->Show(Grid, PictureDistance, LastBudget, Now);
 
 	// 4) Schedule the moment each listener hears it: when the wave reaches them.
 	for (TActorIterator<AActor> It(World); It; ++It)

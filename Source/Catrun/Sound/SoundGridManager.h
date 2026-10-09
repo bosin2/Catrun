@@ -129,6 +129,7 @@ private:
 
 	// Path length from the latest sound to every cell (CatrunSoundPropagation::Unreached = not reached).
 	TArray<float> LastDistance;
+	TArray<float> PictureDistance; // like LastDistance, but reaches a little further (for the picture)
 	float LastBudget = 0.f;
 
 	// Number of closed doors covering each cell. > 0 blocks sound.

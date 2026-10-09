@@ -65,6 +65,12 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Armor")
 	bool HasDestination() const { return bHasDestination; }
 
+	// Called by the mark system (UCatrunMarkSubsystem). While following, this armor knows where
+	// the cat really is and keeps coming for it; it ignores sounds.
+	void SetFollowingMark(bool bFollow);
+	bool IsFollowingMark() const { return bFollowingMark; }
+	bool IsCatching() const { return Action == EArmorAction::Catching; }
+
 	// ---- Movement ----
 	// Running speed while heading to a sound (cm/s). Must exceed the cat's running speed.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Armor")
@@ -77,6 +83,16 @@ public:
 	// A corner of the path counts as reached when the armor is this close (cm).
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Armor")
 	float CornerTolerance = 10.f;
+
+	// The armor is "stuck" when it hardly moves while walking for this long (seconds), for example
+	// when furniture or a hideout stands in the way of the last step of the path.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Armor", meta = (ClampMin = "0.1"))
+	float StuckTime = 0.6f;
+
+	// A stuck armor counts as arrived when it is this close to the end of its path (cm).
+	// (It cannot enter hideouts, so waiting in front of one is as far as it gets.)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Armor", meta = (ClampMin = "0.0"))
+	float StuckArrivalDistance = 100.f;
 
 	// After looking around at the sound, go back to the place where the armor started
 	// (its post) and face the original direction.
@@ -250,6 +266,16 @@ private:
 	// touches it is caught.
 	void UpdateDetection();
 	bool bSeeingCat = false;
+
+	// ---- Following the candle mark ----
+	void UpdateMarkFollowing(float DeltaSeconds);
+	bool bFollowingMark = false;
+
+	// Stuck detection while walking (see TickWalking).
+	float StuckTimer = 0.f;
+	FVector LastWalkLocation = FVector::ZeroVector;
+	float MarkRepathTimer = 0.f;
+	FIntPoint MarkTargetCell = FIntPoint(INT32_MIN, INT32_MIN);	// where the cat was at the last path plan
 
 	// ---- Catch ----
 	// Moves the camera in front of the armor, plays the pick-up animation, fades to black and
