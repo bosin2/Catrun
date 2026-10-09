@@ -8,6 +8,8 @@
 class ACatrunDoor;
 class ASoundGridManager;
 class UAnimationAsset;
+class UCatrunAlertMarkComponent;
+class UCatrunVisionFanComponent;
 class UTextRenderComponent;
 
 // What the armor is doing right now. Only one action at a time.
@@ -155,6 +157,25 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Armor|Animation")
 	TObjectPtr<UAnimationAsset> ArrivalLookAnim;
 
+	// ---- Detection (design doc 4.2, as changed by the designer) ----
+	// The armor has no view cone. It notices the cat inside a small circle around itself (radius
+	// ArmorDetectRadius in the sound settings). Walls, tall furniture and closed doors block it.
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Armor|Detection")
+	TObjectPtr<UCatrunVisionFanComponent> Detection;
+
+	// The "!" above the armor when it notices the cat.
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Armor|Detection")
+	TObjectPtr<UCatrunAlertMarkComponent> AlertMark;
+
+	// Draw the detection circle of this armor on the floor (debug only). The level's sound system
+	// has a switch (bDebugShowArmorDetection) that shows the circles of all armors at once.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Armor|Detection")
+	bool bShowDetectionDisplay = false;
+
+	// True while the cat is inside the detection circle.
+	UFUNCTION(BlueprintPure, Category = "Armor|Detection")
+	bool IsSeeingCat() const { return bSeeingCat; }
+
 	// Show the current action above the armor and draw its path and destination.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debug")
 	bool bDebugDrawPath = true;
@@ -218,6 +239,12 @@ private:
 
 	void DrawDebug() const;
 	void UpdateActionLabel();
+
+	// Looks for the cat inside the detection circle and reacts when it comes into it.
+	void UpdateDetection();
+	bool bSeeingCat = false;
+	bool bDetectionConfigured = false;
+	bool bDetectionDisplayShown = true;	// the display starts visible until the first update decides
 
 	TWeakObjectPtr<ASoundGridManager> SoundManager;
 	TWeakObjectPtr<ACatrunDoor> DoorBeingOpened;

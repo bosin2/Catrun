@@ -1,6 +1,9 @@
 #include "CatrunArmor.h"
 
 #include "Catrun.h"
+#include "Perception/AlertMarkComponent.h"
+#include "Perception/CatrunCatQueries.h"
+#include "Perception/VisionFanComponent.h"
 #include "Pathfinding/ArmorPathfinder.h"
 #include "Sound/CatrunDoor.h"
 #include "Sound/CatrunSoundSettings.h"
@@ -63,6 +66,12 @@ ACatrunArmor::ACatrunArmor()
 	ActionLabel->SetWorldSize(34.f);
 	ActionLabel->SetTextRenderColor(FColor::Yellow);
 	ActionLabel->SetCastShadow(false);
+
+	Detection = CreateDefaultSubobject<UCatrunVisionFanComponent>(TEXT("Detection"));
+
+	AlertMark = CreateDefaultSubobject<UCatrunAlertMarkComponent>(TEXT("AlertMark"));
+	AlertMark->SetupAttachment(RootComponent);
+	AlertMark->SetRelativeLocation(FVector(0.f, 0.f, 190.f)); // just above the head
 }
 
 void ACatrunArmor::BeginPlay()
@@ -370,8 +379,52 @@ void ACatrunArmor::Tick(float DeltaSeconds)
 	case EArmorAction::OpeningDoor:		TickOpeningDoor(DeltaSeconds);	break;
 	case EArmorAction::Looking:			TickLooking(DeltaSeconds);		break;
 	}
+	UpdateDetection();
 	DrawDebug();
 	UpdateActionLabel();
+}
+
+void ACatrunArmor::UpdateDetection()
+{
+	const UCatrunSoundSettings* S = SoundManager.IsValid() ? SoundManager->GetSettings() : nullptr;
+	if (!S)
+	{
+		return;
+	}
+	// Size and look of the circle come from the settings asset (read once, when it is available).
+	if (!bDetectionConfigured)
+	{
+		Detection->Configure(S->ArmorDetectRadius, S->ArmorDetectRayCount, S->ArmorDetectColor);
+		bDetectionConfigured = true;
+	}
+
+	// The circle is only drawn for debugging: by the level's switch or by this armor's own switch.
+	const bool bShowCircle = bShowDetectionDisplay || (SoundManager.IsValid() && SoundManager->bDebugShowArmorDetection);
+	if (bShowCircle != bDetectionDisplayShown)
+	{
+		Detection->SetDisplayVisible(bShowCircle);
+		bDetectionDisplayShown = bShowCircle;
+	}
+
+	// The circle is centred on the armor. 180 degrees to each side = the whole circle.
+	Detection->Update(0.f, 180.f);
+
+	APawn* Cat = CatrunCat::Find(this);
+	const bool bSees = Cat && !CatrunCat::IsHiding(Cat) && Detection->CanSee(Cat->GetActorLocation(), S->CatSightRadius);
+
+	// Notice the cat the moment it enters the circle. What the armor does next (chase, catch)
+	// is added in the next step.
+	if (bSees && !bSeeingCat)
+	{
+		UE_LOG(LogCatrunSound, Log, TEXT("%s noticed the cat."), *GetName());
+	}
+	// While the cat is inside the circle the "!" stays on. (Show keeps it visible for a short
+	// time, so renewing it every frame holds it until the cat leaves.)
+	if (bSees)
+	{
+		AlertMark->Show(0.2f);
+	}
+	bSeeingCat = bSees;
 }
 
 // Shows the action name above the head and turns the text toward the camera.

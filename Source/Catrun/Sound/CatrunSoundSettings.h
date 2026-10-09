@@ -121,6 +121,87 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Armor", meta = (ClampMin = "0.0"))
 	float ArmorDoorOpenDistance = 120.f;
 
+	// ---- Sight: shared by candles and armors --------------------------------
+	// Material of the floor display of a view area (M_VisionFan).
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sight")
+	TObjectPtr<UMaterialInterface> VisionMaterial;
+
+	// Height (cm above the floor) of the rays that look for walls. Things lower than this do not
+	// block the view (chairs, benches); taller things do (shelves, fireplaces, closed doors).
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sight", meta = (ClampMin = "1.0"))
+	float VisionTraceHeight = 100.f;
+
+	// Size (cm) of the cat for sight: a cat counts as seen when its edge is inside the view.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sight", meta = (ClampMin = "0.0"))
+	float CatSightRadius = 15.f;
+
+	// How long (seconds) the "!" stays above a monster that has noticed the cat.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sight", meta = (ClampMin = "0.0"))
+	float AlertDuration = 1.5f;
+
+	// Floor display: opacity, softness of the wall edge (cm) and how much it fades with distance (0..1).
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sight", meta = (ClampMin = "0.0", ClampMax = "1.0"))
+	float VisionOpacity = 0.35f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sight", meta = (ClampMin = "0.0"))
+	float VisionEdgeSoftness = 20.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sight", meta = (ClampMin = "0.0", ClampMax = "1.0"))
+	float VisionRangeFade = 0.5f;
+
+	// ---- Candle (fixed direction, sweeping view) ------------------------------
+	// How far (cm) the candle sees.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Candle", meta = (ClampMin = "10.0"))
+	float CandleRange = 500.f;
+
+	// Total angle (degrees) the candle can look over. It is centred on the direction the candle
+	// actor faces in the level.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Candle", meta = (ClampMin = "1.0", ClampMax = "360.0"))
+	float CandleTotalAngle = 70.f;
+
+	// Width (degrees) of the real view cone. It sweeps back and forth inside the total angle.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Candle", meta = (ClampMin = "1.0", ClampMax = "360.0"))
+	float CandleConeAngle = 30.f;
+
+	// How fast the cone sweeps (degrees per second) and how long it waits at each end (seconds).
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Candle", meta = (ClampMin = "0.0"))
+	float CandleSweepSpeed = 20.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Candle", meta = (ClampMin = "0.0"))
+	float CandleSweepEndPause = 0.6f;
+
+	// Number of rays that make up the cone. More = smoother edges next to walls.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Candle", meta = (ClampMin = "4"))
+	int32 CandleRayCount = 48;
+
+	// Color of the view cone while patrolling, and while it has spotted the cat (red).
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Candle")
+	FLinearColor CandleSightColor = FLinearColor(1.f, 0.35f, 0.1f, 1.f);
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Candle")
+	FLinearColor CandleAlertSightColor = FLinearColor(1.f, 0.02f, 0.02f, 1.f);
+
+	// After spotting the cat the view follows it. This is how fast the cone turns (degrees per
+	// second). The cone never leaves the total angle, so a cat far outside it is lost.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Candle", meta = (ClampMin = "1.0"))
+	float CandleTrackSpeed = 120.f;
+
+	// The candle gives up and goes back to patrolling when the cat has been out of its view for
+	// this long (seconds). 0 = at once. A little delay avoids flicker at the edge of the cone.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Candle", meta = (ClampMin = "0.0"))
+	float CandleLoseSightDelay = 0.3f;
+
+	// ---- Armor detection (a small circle around the armor) ---------------------
+	// Radius (cm) of the circle in which the armor notices the cat.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Armor", meta = (ClampMin = "10.0"))
+	float ArmorDetectRadius = 100.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Armor", meta = (ClampMin = "8"))
+	int32 ArmorDetectRayCount = 72;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Armor")
+	FLinearColor ArmorDetectColor = FLinearColor(0.3f, 0.6f, 1.f, 1.f);
+
 	float GetBudget(ECatrunSoundSize Size) const
 	{
 		switch (Size)

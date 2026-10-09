@@ -88,6 +88,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debug")
 	bool bDebugDrawGrid = false;
 
+	// Debug: draw the detection circle of every armor on the floor. Off in the real game; the
+	// armor's detection circle is not shown to the player.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debug")
+	bool bDebugShowArmorDetection = false;
+
 	// Add a bell component to the player's pawn automatically, so the player blueprint
 	// does not have to be edited.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
