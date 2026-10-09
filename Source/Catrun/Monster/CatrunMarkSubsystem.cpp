@@ -89,6 +89,11 @@ void UCatrunMarkSubsystem::UpdateFollowingArmor(const APawn& Cat)
 	{
 		return;
 	}
+	// Levels like the tutorial: the mark does not call any armor.
+	if (!Manager->bMarkAttractsArmors)
+	{
+		return;
+	}
 
 	ACatrunArmor* Closest = nullptr;
 	float ClosestDistance = TNumericLimits<float>::Max();

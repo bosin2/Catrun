@@ -97,6 +97,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debug")
 	bool bDebugShowArmorLabel = false;
 
+	// Does the candle mark call an armor to the marked cat? Switch it off in the tutorial: the mark
+	// is still put on the cat and shown, but no armor comes for it.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
+	bool bMarkAttractsArmors = true;
+
 	// Add a bell component to the player's pawn automatically, so the player blueprint
 	// does not have to be edited.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
