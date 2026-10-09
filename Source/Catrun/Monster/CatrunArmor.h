@@ -9,6 +9,7 @@ class ACatrunDoor;
 class ASoundGridManager;
 class UAnimationAsset;
 class UCatrunAlertMarkComponent;
+class UCatrunSoundSettings;
 class UCatrunVisionFanComponent;
 class UTextRenderComponent;
 
@@ -21,7 +22,8 @@ enum class EArmorAction : uint8
 	Walking		UMETA(DisplayName = "Running along the path"),
 	Turning		UMETA(DisplayName = "Turning 90 degrees"),
 	OpeningDoor	UMETA(DisplayName = "Opening a door"),
-	Looking		UMETA(DisplayName = "Looking around")
+	Looking		UMETA(DisplayName = "Looking around"),
+	Catching	UMETA(DisplayName = "Picking up the cat")
 };
 
 /**
@@ -157,6 +159,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Armor|Animation")
 	TObjectPtr<UAnimationAsset> ArrivalLookAnim;
 
+	// Played once when the armor catches the cat (it lifts the cat). The level restarts after it.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Armor|Animation")
+	TObjectPtr<UAnimationAsset> PickupAnim;
+
 	// ---- Detection (design doc 4.2, as changed by the designer) ----
 	// The armor has no view cone. It notices the cat inside a small circle around itself (radius
 	// ArmorDetectRadius in the sound settings). Walls, tall furniture and closed doors block it.
@@ -240,9 +246,32 @@ private:
 	void DrawDebug() const;
 	void UpdateActionLabel();
 
-	// Looks for the cat inside the detection circle and reacts when it comes into it.
+	// Looks for the cat inside the detection circle. The circle is also the catch area: a cat that
+	// touches it is caught.
 	void UpdateDetection();
 	bool bSeeingCat = false;
+
+	// ---- Catch ----
+	// Moves the camera in front of the armor, plays the pick-up animation, fades to black and
+	// starts the level again.
+	void StartCatch(APawn& Cat);
+	void TickCatching(float DeltaSeconds);
+	void SetUpCatchCamera(APawn& Cat, const UCatrunSoundSettings& S);
+	void UpdateGrab(float DeltaSeconds, const UCatrunSoundSettings& S);
+	FVector GetHandsMiddle() const;
+
+	TWeakObjectPtr<APawn> CaughtCat;
+
+	float CatchTime = 0.f;			// seconds since the catch started
+	float PickupStartTime = 0.f;	// when the pick-up animation starts (after the camera has arrived)
+	float FadeStartTime = 0.f;		// when the fade to black starts
+	float RestartTime = 0.f;		// when the level is started again
+	bool bPickupStarted = false;
+	bool bFadeStarted = false;
+	bool bRestartRequested = false;
+	bool bGrabbed = false;			// the cat is in the armor's hands
+	float GrabTime = 0.f;			// seconds since the cat was grabbed
+	FVector GrabStartLocation = FVector::ZeroVector;	// where the cat was when it was grabbed
 	bool bDetectionConfigured = false;
 	bool bDetectionDisplayShown = true;	// the display starts visible until the first update decides
 

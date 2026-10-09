@@ -93,6 +93,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debug")
 	bool bDebugShowArmorDetection = false;
 
+	// Debug: show the current action as a text above every armor ("Walking", "Turning", ...).
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debug")
+	bool bDebugShowArmorLabel = false;
+
 	// Add a bell component to the player's pawn automatically, so the player blueprint
 	// does not have to be edited.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")

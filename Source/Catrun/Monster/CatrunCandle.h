@@ -121,6 +121,8 @@ private:
 
 	bool bTracking = false;
 	float LoseSightTimer = 0.f;	// seconds the cat has been out of the cone while tracking
+	bool bCatInView = false;	// the cat was inside the cone at the last check
+	float LastTurnDirection = 0.f;	// which way the cone last turned while following the cat (+1 / -1)
 
 	float AutoBodyYaw = 0.f;	// body turn that puts the eyes on the cone (from AlignBodyToEyes)
 	bool bEyesAligned = false;

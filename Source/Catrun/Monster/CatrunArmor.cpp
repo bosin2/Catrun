@@ -4,18 +4,24 @@
 #include "Perception/AlertMarkComponent.h"
 #include "Perception/CatrunCatQueries.h"
 #include "Perception/VisionFanComponent.h"
+#include "CatrunRestartSubsystem.h"
 #include "Pathfinding/ArmorPathfinder.h"
 #include "Sound/CatrunDoor.h"
 #include "Sound/CatrunSoundSettings.h"
 #include "Sound/SoundGridManager.h"
 #include "AIController.h"
 #include "Animation/AnimationAsset.h"
+#include "Camera/CameraActor.h"
+#include "Camera/CameraComponent.h"
 #include "Camera/PlayerCameraManager.h"
 #include "Components/BoxComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/TextRenderComponent.h"
 #include "DrawDebugHelpers.h"
+#include "Engine/World.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/PawnMovementComponent.h"
+#include "GameFramework/PlayerController.h"
 #include "Kismet/GameplayStatics.h"
 
 namespace
@@ -71,7 +77,7 @@ ACatrunArmor::ACatrunArmor()
 
 	AlertMark = CreateDefaultSubobject<UCatrunAlertMarkComponent>(TEXT("AlertMark"));
 	AlertMark->SetupAttachment(RootComponent);
-	AlertMark->SetRelativeLocation(FVector(0.f, 0.f, 190.f)); // just above the head
+	AlertMark->SetRelativeLocation(FVector(0.f, 0.f, 150.f)); // where the action text is
 }
 
 void ACatrunArmor::BeginPlay()
@@ -93,6 +99,12 @@ void ACatrunArmor::BeginPlay()
 
 void ACatrunArmor::OnSoundHeard_Implementation(const FCatrunSoundEvent& Event, float RemainingBudget)
 {
+	// The cat is being carried off: nothing else matters.
+	if (Action == EArmorAction::Catching)
+	{
+		return;
+	}
+
 	// Rule 4.3: an armor on its way ignores sounds that are not louder than the one it follows.
 	const bool bNotLouder = static_cast<uint8>(Event.Size) <= static_cast<uint8>(CurrentSoundSize);
 	if (bHasDestination && bNotLouder)
@@ -229,6 +241,10 @@ void ACatrunArmor::SetAction(EArmorAction NewAction)
 	case EArmorAction::Looking:
 		PlayAnimation(ArrivalLookAnim, false);
 		ActionDuration = AnimationLength(ArrivalLookAnim);
+		break;
+	case EArmorAction::Catching:
+		// Stands still until the camera has arrived; TickCatching starts the pick-up animation.
+		PlayAnimation(IdleAnim, true);
 		break;
 	}
 }
@@ -378,6 +394,7 @@ void ACatrunArmor::Tick(float DeltaSeconds)
 	case EArmorAction::Turning:			TickTurning(DeltaSeconds);		break;
 	case EArmorAction::OpeningDoor:		TickOpeningDoor(DeltaSeconds);	break;
 	case EArmorAction::Looking:			TickLooking(DeltaSeconds);		break;
+	case EArmorAction::Catching:		TickCatching(DeltaSeconds);		break;
 	}
 	UpdateDetection();
 	DrawDebug();
@@ -412,26 +429,194 @@ void ACatrunArmor::UpdateDetection()
 	APawn* Cat = CatrunCat::Find(this);
 	const bool bSees = Cat && !CatrunCat::IsHiding(Cat) && Detection->CanSee(Cat->GetActorLocation(), S->CatSightRadius);
 
-	// Notice the cat the moment it enters the circle. What the armor does next (chase, catch)
-	// is added in the next step.
-	if (bSees && !bSeeingCat)
-	{
-		UE_LOG(LogCatrunSound, Log, TEXT("%s noticed the cat."), *GetName());
-	}
 	// While the cat is inside the circle the "!" stays on. (Show keeps it visible for a short
 	// time, so renewing it every frame holds it until the cat leaves.)
 	if (bSees)
 	{
 		AlertMark->Show(0.2f);
 	}
+
+	// The circle is the catch area: the cat is caught the moment it touches it.
+	if (bSees && Action != EArmorAction::Catching)
+	{
+		UE_LOG(LogCatrunSound, Log, TEXT("%s noticed the cat."), *GetName());
+		StartCatch(*Cat);
+	}
 	bSeeingCat = bSees;
+}
+
+void ACatrunArmor::StartCatch(APawn& Cat)
+{
+	UCatrunRestartSubsystem* Restart = UCatrunRestartSubsystem::Get(this);
+	const UCatrunSoundSettings* S = SoundManager.IsValid() ? SoundManager->GetSettings() : nullptr;
+	if (!Restart || !S || !Restart->TryBeginCatch())
+	{
+		return; // another armor is already carrying the cat off
+	}
+
+	CaughtCat = &Cat;
+	bHasDestination = false;
+	bReturningToPost = false;
+	PathCorners.Reset();
+	NextCorner = 0;
+
+	// Face the cat and freeze the player while the armor lifts it.
+	const FVector ToCat = (Cat.GetActorLocation() - GetActorLocation()).GetSafeNormal2D();
+	SetActorRotation(FRotator(0.f, SnapYaw(ToCat.Rotation().Yaw), 0.f));
+	if (UPawnMovementComponent* Movement = Cat.GetMovementComponent())
+	{
+		Movement->StopMovementImmediately();
+	}
+	if (APlayerController* PlayerController = Cast<APlayerController>(Cat.GetController()))
+	{
+		PlayerController->SetIgnoreMoveInput(true);
+		PlayerController->SetIgnoreLookInput(true);
+	}
+	SetUpCatchCamera(Cat, *S);
+
+	// Timeline: the camera moves first, then the animation plays and the screen fades out so that
+	// it is black when the animation ends, then the level starts again.
+	const float PickupLength = AnimationLength(PickupAnim);
+	const float FadeTime = S->CatchFadeOutTime;
+	CatchTime = 0.f;
+	PickupStartTime = S->CatchCameraBlendTime;
+	FadeStartTime = PickupStartTime + FMath::Max(0.f, PickupLength - FadeTime);
+	RestartTime = FadeStartTime + FadeTime + S->CatchBlackHoldTime;
+	bPickupStarted = false;
+	bFadeStarted = false;
+	bRestartRequested = false;
+	bGrabbed = false;
+	GrabTime = 0.f;
+
+	SetAction(EArmorAction::Catching); // idle until the camera has arrived
+	UE_LOG(LogCatrunSound, Log, TEXT("%s caught the cat. The level restarts in %.1f seconds."), *GetName(), RestartTime);
+}
+
+// The camera cuts to a spot in front of the armor (a little to the side so the cat is not in the
+// way of the armor), looking at the armor. The player's own camera is not changed.
+void ACatrunArmor::SetUpCatchCamera(APawn& Cat, const UCatrunSoundSettings& S)
+{
+	APlayerController* PlayerController = Cast<APlayerController>(Cat.GetController());
+	if (!PlayerController)
+	{
+		return;
+	}
+	FVector LookAt = GetActorLocation() + GetActorForwardVector() * 30.f + FVector(0.f, 0.f, S.CatchLookAtHeight);
+	FVector CameraLocation = GetActorLocation() + GetActorForwardVector() * S.CatchCameraDistance
+		+ GetActorRightVector() * S.CatchCameraSideOffset + FVector(0.f, 0.f, S.CatchCameraHeight);
+	// Lower the whole picture a little so that floor shows below the feet.
+	LookAt.Z -= S.CatchCameraLowering;
+	CameraLocation.Z -= S.CatchCameraLowering;
+
+	// A wall behind the camera spot: move the camera in front of the wall.
+	FHitResult Hit;
+	FCollisionQueryParams Params(SCENE_QUERY_STAT(CatchCamera), false, this);
+	Params.AddIgnoredActor(&Cat);
+	if (GetWorld()->LineTraceSingleByChannel(Hit, LookAt, CameraLocation, ECC_Visibility, Params))
+	{
+		CameraLocation = Hit.Location + (LookAt - CameraLocation).GetSafeNormal() * 30.f;
+	}
+
+	// A normal perspective camera (the player's camera may be a different kind, which is why it
+	// is not reused), without black bars or cropping.
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	ACameraActor* Camera = GetWorld()->SpawnActor<ACameraActor>(CameraLocation, (LookAt - CameraLocation).Rotation(), SpawnParams);
+	if (Camera)
+	{
+		Camera->GetCameraComponent()->bConstrainAspectRatio = false;
+		PlayerController->SetViewTarget(Camera);
+	}
+}
+
+FVector ACatrunArmor::GetHandsMiddle() const
+{
+	USkeletalMeshComponent* Skin = GetMesh();
+	return (Skin->GetBoneLocation(TEXT("hand_l"), EBoneSpaces::WorldSpace) + Skin->GetBoneLocation(TEXT("hand_r"), EBoneSpaces::WorldSpace)) * 0.5f;
+}
+
+// The cat is picked up when the hands reach it, then it is held between the hands and faces the
+// same way as the armor.
+void ACatrunArmor::UpdateGrab(float DeltaSeconds, const UCatrunSoundSettings& S)
+{
+	APawn* Cat = CaughtCat.Get();
+	if (!Cat)
+	{
+		return;
+	}
+	const float PickupTime = CatchTime - PickupStartTime;
+	const FVector Hands = GetHandsMiddle();
+
+	if (!bGrabbed)
+	{
+		const bool bHandsReached = FVector::Dist(Hands, Cat->GetActorLocation()) <= S.CatchGrabDistance;
+		if (!bHandsReached && PickupTime < S.CatchGrabLatestTime)
+		{
+			return;
+		}
+		bGrabbed = true;
+		GrabTime = 0.f;
+		GrabStartLocation = Cat->GetActorLocation();
+		UE_LOG(LogCatrunSound, Log, TEXT("%s grabs the cat %.2f seconds into the pick-up animation (%s)."),
+			*GetName(), PickupTime, bHandsReached ? TEXT("hands reached it") : TEXT("time limit"));
+
+		// The cat is carried: no walking, no pushing the armor.
+		if (ACharacter* CatCharacter = Cast<ACharacter>(Cat))
+		{
+			CatCharacter->GetCharacterMovement()->DisableMovement();
+		}
+		Cat->SetActorEnableCollision(false);
+	}
+
+	// Blend from where the cat stood into the hands, then follow the hands.
+	GrabTime += DeltaSeconds;
+	const float Alpha = S.CatchGrabBlendTime > 0.f ? FMath::Clamp(GrabTime / S.CatchGrabBlendTime, 0.f, 1.f) : 1.f;
+	const FVector HoldLocation = Hands + GetActorTransform().TransformVectorNoScale(S.CatchHoldOffset);
+	Cat->SetActorLocation(FMath::Lerp(GrabStartLocation, HoldLocation, FMath::InterpEaseInOut(0.f, 1.f, Alpha, 2.f)));
+	Cat->SetActorRotation(FRotator(0.f, GetActorRotation().Yaw, 0.f));
+}
+
+void ACatrunArmor::TickCatching(float DeltaSeconds)
+{
+	const UCatrunSoundSettings* S = SoundManager.IsValid() ? SoundManager->GetSettings() : nullptr;
+	UCatrunRestartSubsystem* Restart = UCatrunRestartSubsystem::Get(this);
+	if (!S || !Restart || bRestartRequested)
+	{
+		return;
+	}
+	CatchTime += DeltaSeconds;
+
+	if (!bPickupStarted && CatchTime >= PickupStartTime)
+	{
+		bPickupStarted = true;
+		PlayAnimation(PickupAnim, false);
+	}
+	if (bPickupStarted)
+	{
+		UpdateGrab(DeltaSeconds, *S);
+	}
+	if (!bFadeStarted && CatchTime >= FadeStartTime)
+	{
+		bFadeStarted = true;
+		Restart->FadeOut(CaughtCat.Get(), S->CatchFadeOutTime);
+	}
+	if (CatchTime >= RestartTime)
+	{
+		bRestartRequested = true;
+		// Temporary failure handling: start the current level again. The cat is spawned at its
+		// start place and the screen fades in. Keeping the awakening and the zone checkpoints
+		// comes with the failure system (design doc 8).
+		Restart->RestartLevel(S->RestartFadeInTime);
+	}
 }
 
 // Shows the action name above the head and turns the text toward the camera.
 void ACatrunArmor::UpdateActionLabel()
 {
-	ActionLabel->SetVisibility(bDebugDrawPath);
-	if (!bDebugDrawPath)
+	// Shown only when the level's debug switch asks for it (not part of the real game).
+	const bool bShowLabel = SoundManager.IsValid() && SoundManager->bDebugShowArmorLabel;
+	ActionLabel->SetVisibility(bShowLabel);
+	if (!bShowLabel)
 	{
 		return;
 	}

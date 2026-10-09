@@ -192,15 +192,74 @@ public:
 	float CandleLoseSightDelay = 0.3f;
 
 	// ---- Armor detection (a small circle around the armor) ---------------------
-	// Radius (cm) of the circle in which the armor notices the cat.
+	// Radius (cm) of the circle around the armor. The cat is caught when it touches this circle.
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Armor", meta = (ClampMin = "10.0"))
-	float ArmorDetectRadius = 100.f;
+	float ArmorDetectRadius = 60.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Armor", meta = (ClampMin = "8"))
 	int32 ArmorDetectRayCount = 72;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Armor")
 	FLinearColor ArmorDetectColor = FLinearColor(0.3f, 0.6f, 1.f, 1.f);
+
+	// ---- Armor catch (what happens when the cat touches the circle) -------------
+	// The cat is caught the moment it touches the detection circle. Then the camera moves in front
+	// of the armor, the armor lifts the cat, the screen fades to black and the level starts again.
+
+	// The camera cuts to the front of the armor at once. The armor waits this long (seconds)
+	// before the pick-up animation starts.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Armor Catch", meta = (ClampMin = "0.0"))
+	float CatchCameraBlendTime = 0.5f;
+
+	// Where the camera ends up, measured from the armor: distance in front (cm), to the right (cm),
+	// and height above the floor (cm).
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Armor Catch", meta = (ClampMin = "50.0"))
+	float CatchCameraDistance = 450.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Armor Catch")
+	float CatchCameraSideOffset = 100.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Armor Catch")
+	float CatchCameraHeight = 220.f;
+
+	// Height (cm) of the point the camera looks at, above the armor's feet.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Armor Catch")
+	float CatchLookAtHeight = 90.f;
+
+	// The final camera (and the point it looks at) is moved this far down (cm), so that some of
+	// the floor below the armor's feet is visible.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Armor Catch", meta = (ClampMin = "0.0"))
+	float CatchCameraLowering = 35.f;
+
+	// The armor picks the cat up when its hands are this close to the cat (cm). If the hands never
+	// get that close, the cat is picked up after CatchGrabLatestTime anyway.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Armor Catch", meta = (ClampMin = "1.0"))
+	float CatchGrabDistance = 35.f;
+
+	// Latest moment (seconds after the pick-up animation starts) at which the cat is grabbed.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Armor Catch", meta = (ClampMin = "0.0"))
+	float CatchGrabLatestTime = 3.f;
+
+	// The cat moves from where it stands into the hands this fast (seconds).
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Armor Catch", meta = (ClampMin = "0.0"))
+	float CatchGrabBlendTime = 0.3f;
+
+	// Where the cat is held, measured from the middle between the armor's two hands (cm, in the
+	// armor's own directions: forward, right, up).
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Armor Catch")
+	FVector CatchHoldOffset = FVector(0.f, 0.f, -10.f);
+
+	// The fade to black takes this long (seconds) and ends together with the pick-up animation.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Armor Catch", meta = (ClampMin = "0.1"))
+	float CatchFadeOutTime = 1.f;
+
+	// The screen stays black this long (seconds) before the level starts again.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Armor Catch", meta = (ClampMin = "0.0"))
+	float CatchBlackHoldTime = 0.3f;
+
+	// The fade in from black after the restart takes this long (seconds).
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Armor Catch", meta = (ClampMin = "0.1"))
+	float RestartFadeInTime = 1.f;
 
 	float GetBudget(ECatrunSoundSize Size) const
 	{

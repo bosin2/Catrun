@@ -111,14 +111,20 @@ void ACatrunCandle::TrackCat(float DeltaSeconds, const APawn& Cat, const UCatrun
 	const float CatAngle = FMath::RadiansToDegrees(FMath::Atan2(ToCat.Y, ToCat.X));
 	const float WantedOffset = FMath::Clamp(FMath::FindDeltaAngleDegrees(GetActorRotation().Yaw, CatAngle), -MaxOffset, MaxOffset);
 
+	const float OldOffset = SweepOffset;
 	SweepOffset = FMath::FixedTurn(SweepOffset, WantedOffset, S.CandleTrackSpeed * DeltaSeconds);
 	PauseLeft = 0.f;
+	if (!FMath::IsNearlyEqual(OldOffset, SweepOffset))
+	{
+		LastTurnDirection = FMath::Sign(SweepOffset - OldOffset);
+	}
 }
 
 void ACatrunCandle::StartTracking(APawn& Cat, const UCatrunSoundSettings& S)
 {
 	bTracking = true;
 	LoseSightTimer = 0.f;
+	LastTurnDirection = 0.f;
 	UE_LOG(LogCatrunSound, Log, TEXT("%s spotted the cat."), *GetName());
 
 	Sight->SetColor(S.CandleAlertSightColor); // orange -> red
@@ -136,12 +142,21 @@ void ACatrunCandle::StopTracking(const UCatrunSoundSettings& S)
 	bTracking = false;
 	LoseSightTimer = 0.f;
 	UE_LOG(LogCatrunSound, Log, TEXT("%s lost the cat and goes back to patrol."), *GetName());
-	Sight->SetColor(S.CandleSightColor); // red -> orange; the sweep goes on from where the cone is
+	Sight->SetColor(S.CandleSightColor); // red -> orange
+
+	// The search starts from where the cone last saw the cat (SweepOffset is kept as it is), and
+	// goes on the way the cat was last heading.
+	if (LastTurnDirection != 0.f)
+	{
+		SweepDirection = LastTurnDirection;
+		PauseLeft = 0.f;
+	}
 }
 
 void ACatrunCandle::CheckForCat(float DeltaSeconds, APawn* Cat, const UCatrunSoundSettings& S)
 {
 	const bool bSees = Cat && !CatrunCat::IsHiding(Cat) && Sight->CanSee(Cat->GetActorLocation(), S.CatSightRadius);
+	bCatInView = bSees;
 
 	if (bSees)
 	{
@@ -187,11 +202,16 @@ void ACatrunCandle::Tick(float DeltaSeconds)
 		bEyesAligned = true;
 	}
 
-	// Move the cone: follow the cat while tracking, otherwise sweep.
+	// Move the cone: follow the cat only while the cone really sees it. When the cat has left the
+	// view the cone stays where it last saw the cat (the candle does not know where it went) until
+	// the candle gives up; then the sweep starts again from that place.
 	APawn* Cat = CatrunCat::Find(this);
-	if (bTracking && Cat)
+	if (bTracking)
 	{
-		TrackCat(DeltaSeconds, *Cat, *S);
+		if (Cat && bCatInView)
+		{
+			TrackCat(DeltaSeconds, *Cat, *S);
+		}
 	}
 	else
 	{
