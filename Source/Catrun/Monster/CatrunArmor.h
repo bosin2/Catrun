@@ -83,9 +83,43 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Armor")
 	float TurnThreshold = 45.f;
 
-	// The door leaf starts to open this far (0..1) into the open-door animation.
+	// The door leaf starts to open this far (0..1) into the open-door animation
+	// (frame where the hand takes hold of the door / total frames).
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Armor", meta = (ClampMin = "0.0", ClampMax = "1.0"))
-	float DoorOpenMoment = 0.5f;
+	float DoorOpenMoment = 0.306f;
+
+	// The door follows the armor's hand while it holds the door (exact sync with the animation).
+	// Off = the door turns on its own timer (OpenDuration on the door).
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Armor")
+	bool bDoorFollowsHand = true;
+
+	// The hand lets go of the door this far (0..1) into the open-door animation
+	// (frame 144 of 180).
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Armor", meta = (ClampMin = "0.0", ClampMax = "1.0"))
+	float DoorReleaseMoment = 0.8f;
+
+	// Bone of the hand that holds the door. Empty = the hand closest to the door is used.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Armor")
+	FName DoorGripBone;
+
+	// The open-door animation turns the armor's body by this many degrees by itself (like the
+	// turn animations do). Positive = to its right (clockwise seen from above), negative = left.
+	// When the animation ends, the armor actor takes the same turn at once, so that the pose and
+	// the actor direction agree. This is the turn AFTER mirroring (see bMirrorDoorAnimation).
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Armor")
+	float DoorOpenAnimTurnDegrees = -90.f;
+
+	// Flip the armor's body left-to-right while the open-door animation plays. The animation was
+	// made for a door that swings clockwise; the doors here swing counter-clockwise, so the
+	// whole animation is mirrored (its turn becomes a left turn). Switch off to play it as made.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Armor")
+	bool bMirrorDoorAnimation = true;
+
+	// The open-door animation walks the body forward without moving the armor actor. This bone
+	// is measured at the start and the end of the animation, and the actor is moved by the
+	// difference, so the armor continues from where its body ended up (no jump back).
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Armor")
+	FName DoorAnimTrackedBone = TEXT("pelvis");
 
 	// ---- Animations (all optional; an empty slot just keeps the previous pose) ----
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Armor|Animation")
@@ -154,6 +188,13 @@ private:
 	void TickOpeningDoor(float DeltaSeconds);
 	void TickLooking(float DeltaSeconds);
 
+	// Lets the hand take hold of the door (see bDoorFollowsHand).
+	void StartOpeningDoor(ACatrunDoor& Door);
+
+	// Starts and ends the open-door animation: mirror the body, measure how far the body walks.
+	void BeginDoorAnimation();
+	void EndDoorAnimation();
+
 	// Called when the armor should aim for the next corner: turns first if the heading is far off.
 	void BeginLeg();
 	// Starts the turn animation(s) for a heading change. A turn animation turns exactly 90 degrees,
@@ -185,6 +226,14 @@ private:
 	float ActionTime = 0.f;		// seconds since the current action started
 	float ActionDuration = 0.f;	// how long the current action lasts (0 = until finished by logic)
 	bool bDoorTriggered = false;
+
+	bool bDoorHandDriven = false;	// the door is following the hand
+	bool bDoorReleased = false;		// the hand has let go
+	FName DoorGripBoneInUse;
+
+	// Body position at the start of the open-door animation, and the mesh scale to restore after it.
+	FVector DoorAnimStartBoneLocation = FVector::ZeroVector;
+	FVector MeshBaseScale = FVector::OneVector;
 
 	// Opening a door has three steps: walk to the spot in front of it, face it, play the animation.
 	enum class EDoorStep : uint8 { Approach, Facing, Animation };

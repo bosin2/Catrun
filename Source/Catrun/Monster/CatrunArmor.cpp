@@ -70,6 +70,7 @@ void ACatrunArmor::BeginPlay()
 	Super::BeginPlay();
 	ApplyMoveSpeed();
 	SoundManager = ASoundGridManager::Get(this);
+	MeshBaseScale = GetMesh()->GetRelativeScale3D();
 	// The post is the starting place; its direction is rounded to one of the four directions.
 	PostLocation = GetActorLocation();
 	PostRotation = FRotator(0.f, SnapYaw(GetActorRotation().Yaw), 0.f);
@@ -279,6 +280,8 @@ void ACatrunArmor::BeginOpeningDoor(ACatrunDoor* Door)
 {
 	DoorBeingOpened = Door;
 	bDoorTriggered = false;
+	bDoorHandDriven = false;
+	bDoorReleased = false;
 
 	// Stand straight in front of the door, on the side the armor comes from, and face it.
 	const FVector Center = Door->GetDoorwayCenter();
@@ -485,25 +488,112 @@ void ACatrunArmor::TickOpeningDoor(float DeltaSeconds)
 			return;
 		}
 		DoorStep = EDoorStep::Animation;
-		ActionTime = 0.f;
-		ActionDuration = AnimationLength(DoorOpenAnim);
-		PlayAnimation(DoorOpenAnim, false);
+		BeginDoorAnimation();
 	}
 
-	// Step 3: the leaf opens part-way through the animation, when the hand reaches it.
+	// Step 3a: the hand takes hold of the door part-way through the animation.
 	if (!bDoorTriggered && ActionTime >= ActionDuration * DoorOpenMoment)
 	{
-		Door->SetOpen(true);
+		StartOpeningDoor(*Door);
 		bDoorTriggered = true;
 	}
+
+	// Step 3b: while the hand holds the door, the door follows the hand (always in sync).
+	if (bDoorHandDriven && !bDoorReleased)
+	{
+		Door->DriveWithPoint(GetMesh()->GetBoneLocation(DoorGripBoneInUse, EBoneSpaces::WorldSpace));
+		if (ActionTime >= ActionDuration * DoorReleaseMoment)
+		{
+			Door->EndHandOpen(); // the hand lets go, the door finishes opening by itself
+			bDoorReleased = true;
+		}
+	}
+
 	if (ActionTime >= ActionDuration)
 	{
 		if (!bDoorTriggered)
 		{
-			Door->SetOpen(true);
+			StartOpeningDoor(*Door);
 		}
+		if (bDoorHandDriven && !bDoorReleased)
+		{
+			Door->EndHandOpen();
+		}
+		// The animation ended with the body walked forward and turned. The actor takes both now
+		// (in one step, so nothing jumps back).
+		EndDoorAnimation();
+		SetActorRotation(FRotator(0.f, SnapYaw(GetActorRotation().Yaw + DoorOpenAnimTurnDegrees), 0.f));
+
+		// The body has moved through the doorway, so the old path (which still leads to the spot in
+		// front of the door) is out of date: plan it again from here.
+		PlanPath(bReturningToPost ? PostLocation : Destination);
 		BeginLeg();
 	}
+}
+
+// Opens the door, either following the hand (exact sync) or by a timer.
+void ACatrunArmor::StartOpeningDoor(ACatrunDoor& Door)
+{
+	if (!bDoorFollowsHand)
+	{
+		Door.OpenFrom(GetActorLocation());
+		return;
+	}
+
+	// Which hand holds the door? The one closest to the door leaf at this moment (the mirroring
+	// swaps the sides, so decide by looking). A bone name set in DoorGripBone overrides this.
+	if (!DoorGripBone.IsNone())
+	{
+		DoorGripBoneInUse = DoorGripBone;
+	}
+	else
+	{
+		const FBox Leaf = Door.GetLeafBounds();
+		const float LeftDistance = Leaf.ComputeSquaredDistanceToPoint(GetMesh()->GetBoneLocation(TEXT("hand_l"), EBoneSpaces::WorldSpace));
+		const float RightDistance = Leaf.ComputeSquaredDistanceToPoint(GetMesh()->GetBoneLocation(TEXT("hand_r"), EBoneSpaces::WorldSpace));
+		DoorGripBoneInUse = LeftDistance <= RightDistance ? FName(TEXT("hand_l")) : FName(TEXT("hand_r"));
+	}
+	UE_LOG(LogCatrunSound, Log, TEXT("%s opens a door with %s."), *GetName(), *DoorGripBoneInUse.ToString());
+
+	Door.BeginHandOpen(GetActorLocation());
+	bDoorHandDriven = true;
+	bDoorReleased = false;
+}
+
+void ACatrunArmor::BeginDoorAnimation()
+{
+	ActionTime = 0.f;
+	ActionDuration = AnimationLength(DoorOpenAnim);
+
+	// The animation is made for a door that swings the other way: mirror the body left-to-right.
+	if (bMirrorDoorAnimation)
+	{
+		GetMesh()->SetRelativeScale3D(FVector(-MeshBaseScale.X, MeshBaseScale.Y, MeshBaseScale.Z));
+	}
+	PlayAnimation(DoorOpenAnim, false);
+
+	// Evaluate the first frame right now so that the body position at the start can be measured.
+	GetMesh()->TickAnimation(0.f, false);
+	GetMesh()->RefreshBoneTransforms();
+	DoorAnimStartBoneLocation = GetMesh()->GetBoneLocation(DoorAnimTrackedBone, EBoneSpaces::WorldSpace);
+}
+
+void ACatrunArmor::EndDoorAnimation()
+{
+	// How far did the body walk during the animation (flat)? Move the actor by that much.
+	FVector Walked = GetMesh()->GetBoneLocation(DoorAnimTrackedBone, EBoneSpaces::WorldSpace) - DoorAnimStartBoneLocation;
+	Walked.Z = 0.f;
+	if (Walked.Size() > 400.f)
+	{
+		Walked = FVector::ZeroVector; // a bone that does not exist gives nonsense: ignore it
+	}
+
+	if (bMirrorDoorAnimation)
+	{
+		GetMesh()->SetRelativeScale3D(MeshBaseScale);
+	}
+	AddActorWorldOffset(Walked, /*bSweep*/ false, nullptr, ETeleportType::TeleportPhysics);
+	UE_LOG(LogCatrunSound, Log, TEXT("%s open-door animation moved the body %.0f cm."), *GetName(), Walked.Size());
 }
 
 // A closed door counts only if the path really goes through its doorway soon. A door the armor
