@@ -24,3 +24,4 @@ Content/Collections/
 *.key
 Thumbs.db
 .DS_Store
+/Config/UserEngine.ini
