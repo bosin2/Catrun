@@ -8,6 +8,9 @@
 class ACatrunDoor;
 class ASoundGridManager;
 class UAnimationAsset;
+class UCatrunAlertMarkComponent;
+class UCatrunSoundSettings;
+class UCatrunVisionFanComponent;
 class UTextRenderComponent;
 
 // What the armor is doing right now. Only one action at a time.
@@ -19,7 +22,8 @@ enum class EArmorAction : uint8
 	Walking		UMETA(DisplayName = "Running along the path"),
 	Turning		UMETA(DisplayName = "Turning 90 degrees"),
 	OpeningDoor	UMETA(DisplayName = "Opening a door"),
-	Looking		UMETA(DisplayName = "Looking around")
+	Looking		UMETA(DisplayName = "Looking around"),
+	Catching	UMETA(DisplayName = "Picking up the cat")
 };
 
 /**
@@ -61,6 +65,12 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Armor")
 	bool HasDestination() const { return bHasDestination; }
 
+	// Called by the mark system (UCatrunMarkSubsystem). While following, this armor knows where
+	// the cat really is and keeps coming for it; it ignores sounds.
+	void SetFollowingMark(bool bFollow);
+	bool IsFollowingMark() const { return bFollowingMark; }
+	bool IsCatching() const { return Action == EArmorAction::Catching; }
+
 	// ---- Movement ----
 	// Running speed while heading to a sound (cm/s). Must exceed the cat's running speed.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Armor")
@@ -74,6 +84,16 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Armor")
 	float CornerTolerance = 10.f;
 
+	// The armor is "stuck" when it hardly moves while walking for this long (seconds), for example
+	// when furniture or a hideout stands in the way of the last step of the path.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Armor", meta = (ClampMin = "0.1"))
+	float StuckTime = 0.6f;
+
+	// A stuck armor counts as arrived when it is this close to the end of its path (cm).
+	// (It cannot enter hideouts, so waiting in front of one is as far as it gets.)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Armor", meta = (ClampMin = "0.0"))
+	float StuckArrivalDistance = 100.f;
+
 	// After looking around at the sound, go back to the place where the armor started
 	// (its post) and face the original direction.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Armor")
@@ -83,9 +103,43 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Armor")
 	float TurnThreshold = 45.f;
 
-	// The door leaf starts to open this far (0..1) into the open-door animation.
+	// The door leaf starts to open this far (0..1) into the open-door animation
+	// (frame where the hand takes hold of the door / total frames).
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Armor", meta = (ClampMin = "0.0", ClampMax = "1.0"))
-	float DoorOpenMoment = 0.5f;
+	float DoorOpenMoment = 0.306f;
+
+	// The door follows the armor's hand while it holds the door (exact sync with the animation).
+	// Off = the door turns on its own timer (OpenDuration on the door).
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Armor")
+	bool bDoorFollowsHand = true;
+
+	// The hand lets go of the door this far (0..1) into the open-door animation
+	// (frame 144 of 180).
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Armor", meta = (ClampMin = "0.0", ClampMax = "1.0"))
+	float DoorReleaseMoment = 0.8f;
+
+	// Bone of the hand that holds the door. Empty = the hand closest to the door is used.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Armor")
+	FName DoorGripBone;
+
+	// The open-door animation turns the armor's body by this many degrees by itself (like the
+	// turn animations do). Positive = to its right (clockwise seen from above), negative = left.
+	// When the animation ends, the armor actor takes the same turn at once, so that the pose and
+	// the actor direction agree. This is the turn AFTER mirroring (see bMirrorDoorAnimation).
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Armor")
+	float DoorOpenAnimTurnDegrees = -90.f;
+
+	// Flip the armor's body left-to-right while the open-door animation plays. The animation was
+	// made for a door that swings clockwise; the doors here swing counter-clockwise, so the
+	// whole animation is mirrored (its turn becomes a left turn). Switch off to play it as made.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Armor")
+	bool bMirrorDoorAnimation = true;
+
+	// The open-door animation walks the body forward without moving the armor actor. This bone
+	// is measured at the start and the end of the animation, and the actor is moved by the
+	// difference, so the armor continues from where its body ended up (no jump back).
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Armor")
+	FName DoorAnimTrackedBone = TEXT("pelvis");
 
 	// ---- Animations (all optional; an empty slot just keeps the previous pose) ----
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Armor|Animation")
@@ -121,6 +175,29 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Armor|Animation")
 	TObjectPtr<UAnimationAsset> ArrivalLookAnim;
 
+	// Played once when the armor catches the cat (it lifts the cat). The level restarts after it.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Armor|Animation")
+	TObjectPtr<UAnimationAsset> PickupAnim;
+
+	// ---- Detection (design doc 4.2, as changed by the designer) ----
+	// The armor has no view cone. It notices the cat inside a small circle around itself (radius
+	// ArmorDetectRadius in the sound settings). Walls, tall furniture and closed doors block it.
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Armor|Detection")
+	TObjectPtr<UCatrunVisionFanComponent> Detection;
+
+	// The "!" above the armor when it notices the cat.
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Armor|Detection")
+	TObjectPtr<UCatrunAlertMarkComponent> AlertMark;
+
+	// Draw the detection circle of this armor on the floor (debug only). The level's sound system
+	// has a switch (bDebugShowArmorDetection) that shows the circles of all armors at once.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Armor|Detection")
+	bool bShowDetectionDisplay = false;
+
+	// True while the cat is inside the detection circle.
+	UFUNCTION(BlueprintPure, Category = "Armor|Detection")
+	bool IsSeeingCat() const { return bSeeingCat; }
+
 	// Show the current action above the armor and draw its path and destination.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debug")
 	bool bDebugDrawPath = true;
@@ -154,6 +231,13 @@ private:
 	void TickOpeningDoor(float DeltaSeconds);
 	void TickLooking(float DeltaSeconds);
 
+	// Lets the hand take hold of the door (see bDoorFollowsHand).
+	void StartOpeningDoor(ACatrunDoor& Door);
+
+	// Starts and ends the open-door animation: mirror the body, measure how far the body walks.
+	void BeginDoorAnimation();
+	void EndDoorAnimation();
+
 	// Called when the armor should aim for the next corner: turns first if the heading is far off.
 	void BeginLeg();
 	// Starts the turn animation(s) for a heading change. A turn animation turns exactly 90 degrees,
@@ -178,6 +262,45 @@ private:
 	void DrawDebug() const;
 	void UpdateActionLabel();
 
+	// Looks for the cat inside the detection circle. The circle is also the catch area: a cat that
+	// touches it is caught.
+	void UpdateDetection();
+	bool bSeeingCat = false;
+
+	// ---- Following the candle mark ----
+	void UpdateMarkFollowing(float DeltaSeconds);
+	bool bFollowingMark = false;
+
+	// Stuck detection while walking (see TickWalking).
+	float StuckTimer = 0.f;
+	FVector LastWalkLocation = FVector::ZeroVector;
+	float MarkRepathTimer = 0.f;
+	FIntPoint MarkTargetCell = FIntPoint(INT32_MIN, INT32_MIN);	// where the cat was at the last path plan
+
+	// ---- Catch ----
+	// Moves the camera in front of the armor, plays the pick-up animation, fades to black and
+	// starts the level again.
+	void StartCatch(APawn& Cat);
+	void TickCatching(float DeltaSeconds);
+	void SetUpCatchCamera(APawn& Cat, const UCatrunSoundSettings& S);
+	void UpdateGrab(float DeltaSeconds, const UCatrunSoundSettings& S);
+	FVector GetHandsMiddle() const;
+
+	TWeakObjectPtr<APawn> CaughtCat;
+
+	float CatchTime = 0.f;			// seconds since the catch started
+	float PickupStartTime = 0.f;	// when the pick-up animation starts (after the camera has arrived)
+	float FadeStartTime = 0.f;		// when the fade to black starts
+	float RestartTime = 0.f;		// when the level is started again
+	bool bPickupStarted = false;
+	bool bFadeStarted = false;
+	bool bRestartRequested = false;
+	bool bGrabbed = false;			// the cat is in the armor's hands
+	float GrabTime = 0.f;			// seconds since the cat was grabbed
+	FVector GrabStartLocation = FVector::ZeroVector;	// where the cat was when it was grabbed
+	bool bDetectionConfigured = false;
+	bool bDetectionDisplayShown = true;	// the display starts visible until the first update decides
+
 	TWeakObjectPtr<ASoundGridManager> SoundManager;
 	TWeakObjectPtr<ACatrunDoor> DoorBeingOpened;
 
@@ -185,6 +308,14 @@ private:
 	float ActionTime = 0.f;		// seconds since the current action started
 	float ActionDuration = 0.f;	// how long the current action lasts (0 = until finished by logic)
 	bool bDoorTriggered = false;
+
+	bool bDoorHandDriven = false;	// the door is following the hand
+	bool bDoorReleased = false;		// the hand has let go
+	FName DoorGripBoneInUse;
+
+	// Body position at the start of the open-door animation, and the mesh scale to restore after it.
+	FVector DoorAnimStartBoneLocation = FVector::ZeroVector;
+	FVector MeshBaseScale = FVector::OneVector;
 
 	// Opening a door has three steps: walk to the spot in front of it, face it, play the animation.
 	enum class EDoorStep : uint8 { Approach, Facing, Animation };

@@ -3,6 +3,7 @@
 #include "SoundGridManager.h"
 #include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Engine/StaticMesh.h"
 
 ACatrunDoor::ACatrunDoor()
 {
@@ -38,6 +39,14 @@ FVector ACatrunDoor::GetDoorNormal() const
 void ACatrunDoor::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// Remember how the leaf was placed (hinge on the left) and how wide it is.
+	ClosedScale = DoorMesh->GetRelativeScale3D();
+	if (const UStaticMesh* Mesh = DoorMesh->GetStaticMesh())
+	{
+		LeafWidth = Mesh->GetBounds().BoxExtent.X * 2.f * FMath::Abs(ClosedScale.X);
+	}
+
 	bIsOpen = bStartOpen;
 	SnapToState();
 	OnDoorStateChanged(bIsOpen);
@@ -47,10 +56,81 @@ void ACatrunDoor::BeginPlay()
 	}
 }
 
+void ACatrunDoor::SetHingeOnRight(bool bOnRight)
+{
+	// Mirror the leaf around the middle of the doorway: same closed look, hinge on the other edge.
+	DoorMesh->SetRelativeLocation(FVector(bOnRight ? LeafWidth : 0.f, 0.f, 0.f));
+	DoorMesh->SetRelativeScale3D(FVector(bOnRight ? -ClosedScale.X : ClosedScale.X, ClosedScale.Y, ClosedScale.Z));
+}
+
 void ACatrunDoor::SnapToState()
 {
 	DoorMesh->SetRelativeRotation(FRotator(0.f, bIsOpen ? OpenYaw : 0.f, 0.f));
 	DoorMesh->SetCollisionEnabled(bIsOpen ? ECollisionEnabled::NoCollision : ECollisionEnabled::QueryAndPhysics);
+}
+
+void ACatrunDoor::OpenFrom(const FVector& OpenerLocation)
+{
+	if (bIsOpen)
+	{
+		return;
+	}
+	// The opener stands on one side of the doorway looking at it. The hinge goes to the
+	// opener's LEFT hand side; the actor origin is the placed leaf's left edge (class comment).
+	const FVector ToOpener = OpenerLocation - GetDoorwayCenter();
+	const FVector Normal = GetDoorNormal(); // points out of the leaf, along the actor's +Y
+	const float Side = FVector::DotProduct(ToOpener, Normal);
+
+	// Seen from the +Y side the original hinge (x = 0, the actor's left edge) is already on the
+	// LEFT of someone facing the door. From the -Y side it is on their right, so the hinge
+	// moves to the other edge.
+	SetHingeOnRight(Side < 0.f);
+	SetOpen(true);
+}
+
+FBox ACatrunDoor::GetLeafBounds() const
+{
+	return DoorMesh->Bounds.GetBox();
+}
+
+void ACatrunDoor::BeginHandOpen(const FVector& OpenerLocation)
+{
+	if (bIsOpen)
+	{
+		return;
+	}
+	OpenFrom(OpenerLocation); // places the hinge, unblocks the doorway, starts the timed opening
+	SetActorTickEnabled(false); // ...but the hand moves the leaf, not the timer
+	bHandDriven = true;
+	bHandReferenceSet = false;
+	HandProgress = 0.f;
+}
+
+void ACatrunDoor::DriveWithPoint(const FVector& PointWorld)
+{
+	if (!bHandDriven)
+	{
+		return;
+	}
+	// Direction (degrees, same sense as yaw) from the hinge to the hand.
+	const FVector Hinge = DoorMesh->GetComponentLocation();
+	const float Angle = FMath::RadiansToDegrees(FMath::Atan2(PointWorld.Y - Hinge.Y, PointWorld.X - Hinge.X));
+	if (!bHandReferenceSet)
+	{
+		HandReferenceAngle = Angle; // the leaf is still closed at this moment
+		bHandReferenceSet = true;
+		return;
+	}
+	// How far the hand has swung around the hinge since it took hold = how far the leaf turned.
+	const float Swung = FMath::FindDeltaAngleDegrees(HandReferenceAngle, Angle);
+	HandProgress = FMath::Max(HandProgress, FMath::Clamp(Swung / OpenYaw, 0.f, 1.f));
+	DoorMesh->SetRelativeRotation(FRotator(0.f, OpenYaw * HandProgress, 0.f));
+}
+
+void ACatrunDoor::EndHandOpen()
+{
+	bHandDriven = false;
+	SetActorTickEnabled(true); // the tick turns the leaf the rest of the way
 }
 
 void ACatrunDoor::SetOpen(bool bNewOpen)

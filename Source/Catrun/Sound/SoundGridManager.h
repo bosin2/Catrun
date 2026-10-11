@@ -88,6 +88,20 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debug")
 	bool bDebugDrawGrid = false;
 
+	// Debug: draw the detection circle of every armor on the floor. Off in the real game; the
+	// armor's detection circle is not shown to the player.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debug")
+	bool bDebugShowArmorDetection = false;
+
+	// Debug: show the current action as a text above every armor ("Walking", "Turning", ...).
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debug")
+	bool bDebugShowArmorLabel = false;
+
+	// Does the candle mark call an armor to the marked cat? Switch it off in the tutorial: the mark
+	// is still put on the cat and shown, but no armor comes for it.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
+	bool bMarkAttractsArmors = true;
+
 	// Add a bell component to the player's pawn automatically, so the player blueprint
 	// does not have to be edited.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
@@ -120,6 +134,7 @@ private:
 
 	// Path length from the latest sound to every cell (CatrunSoundPropagation::Unreached = not reached).
 	TArray<float> LastDistance;
+	TArray<float> PictureDistance; // like LastDistance, but reaches a little further (for the picture)
 	float LastBudget = 0.f;
 
 	// Number of closed doors covering each cell. > 0 blocks sound.
