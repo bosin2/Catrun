@@ -207,8 +207,16 @@ bool ASoundGridManager::EmitSound(const FCatrunSoundEvent& Event)
 	const float PictureBudget = LastBudget + Grid.CellSize * 2.f;
 	CatrunSoundPropagation::Run(Grid, ClosedGateCells, SourceCell, PictureBudget, PictureDistance);
 	const double Now = World->GetTimeSeconds();
-	WaveVisual->Show(Grid, PictureDistance, LastBudget, Now);
+	//기존 발걸음소리 이벤트를 제외하고 시각화하는 블록으로 감쌈 
+	const bool bUseNewCatVisual =
+		Event.Source == ECatrunSoundSource::Cat &&
+		(Event.Kind == ECatrunSoundKind::Footstep ||
+			Event.Kind == ECatrunSoundKind::Bell);
 
+	if (!bUseNewCatVisual)
+	{
+		WaveVisual->Show(Grid, PictureDistance, LastBudget, Now);
+	}
 	// 4) Schedule the moment each listener hears it: when the wave reaches them.
 	for (TActorIterator<AActor> It(World); It; ++It)
 	{

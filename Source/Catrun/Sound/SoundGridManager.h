@@ -79,6 +79,13 @@ public:
 	void GetClosedDoors(TArray<ACatrunDoor*>& OutDoors) const;
 
 	const FCatrunGridData& GetGrid() const { return Grid; }
+	// 최신 소리의 그림용 거리와 원래 소리 예산을 읽는다.
+	// 끝부분을 부드럽게 그리기 위한 여유 영역도 포함되어 있다.
+	const TArray<float>& GetLatestVisualDistances(float& OutBudget) const
+	{
+		OutBudget = LastBudget;
+		return PictureDistance;
+	}
 	const UCatrunSoundSettings* GetSettings() const { return Settings; }
 
 	UPROPERTY(BlueprintAssignable, Category = "Sound")
