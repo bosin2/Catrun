@@ -16,7 +16,7 @@ class UTexture2D;
  *
  * How it works, in short:
  *  1. When a sound is made, the distance field (path length from the source to every cell)
- *     is copied into a small picture (texture). One pixel = VisualTexelSize cm of floor.
+ *     is copied into a picture (texture). One pixel = VisualTexelSize cm of floor (1 cm).
  *  2. One flat plane covers the whole map and uses the picture in its material (M_SoundWave).
  *  3. Every frame only one number changes: the radius of the ring. The graphics card draws
  *     the ring wherever "distance in the picture" is close to that radius.
@@ -40,8 +40,12 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 private:
-	// Copies the distance field into the picture, one pixel per VisualTexelSize cm.
+	// Copies the distance field into the picture, one pixel per Texel cm. Only the part around
+	// the sound is written.
 	void FillTexture(const FCatrunGridData& Grid, const TArray<float>& Distance);
+
+	// Seconds from the start of a sound until its last ring has passed the budget.
+	float GetTravelDuration() const;
 
 	// Shows or hides the plane.
 	void SetPlaneVisible(bool bVisible);
@@ -60,6 +64,11 @@ private:
 
 	int32 TextureWidth = 0;
 	int32 TextureHeight = 0;
+	float Texel = 1.f;	// cm of floor per pixel
+
+	// The part of the picture the last sound wrote (it has to be cleared by the next one).
+	FIntRect WrittenRect;
+	bool bHasWrittenRect = false;
 
 	bool bActive = false;
 	double StartTime = 0.0;

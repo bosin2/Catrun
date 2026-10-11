@@ -1,18 +1,27 @@
 #include "CatrunArmor.h"
 
 #include "Catrun.h"
+#include "Perception/AlertMarkComponent.h"
+#include "Perception/CatrunCatQueries.h"
+#include "Perception/VisionFanComponent.h"
+#include "CatrunRestartSubsystem.h"
 #include "Pathfinding/ArmorPathfinder.h"
 #include "Sound/CatrunDoor.h"
 #include "Sound/CatrunSoundSettings.h"
 #include "Sound/SoundGridManager.h"
 #include "AIController.h"
 #include "Animation/AnimationAsset.h"
+#include "Camera/CameraActor.h"
+#include "Camera/CameraComponent.h"
 #include "Camera/PlayerCameraManager.h"
 #include "Components/BoxComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/TextRenderComponent.h"
 #include "DrawDebugHelpers.h"
+#include "Engine/World.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/PawnMovementComponent.h"
+#include "GameFramework/PlayerController.h"
 #include "Kismet/GameplayStatics.h"
 
 namespace
@@ -63,6 +72,12 @@ ACatrunArmor::ACatrunArmor()
 	ActionLabel->SetWorldSize(34.f);
 	ActionLabel->SetTextRenderColor(FColor::Yellow);
 	ActionLabel->SetCastShadow(false);
+
+	Detection = CreateDefaultSubobject<UCatrunVisionFanComponent>(TEXT("Detection"));
+
+	AlertMark = CreateDefaultSubobject<UCatrunAlertMarkComponent>(TEXT("AlertMark"));
+	AlertMark->SetupAttachment(RootComponent);
+	AlertMark->SetRelativeLocation(FVector(0.f, 0.f, 150.f)); // where the action text is
 }
 
 void ACatrunArmor::BeginPlay()
@@ -70,6 +85,7 @@ void ACatrunArmor::BeginPlay()
 	Super::BeginPlay();
 	ApplyMoveSpeed();
 	SoundManager = ASoundGridManager::Get(this);
+	MeshBaseScale = GetMesh()->GetRelativeScale3D();
 	// The post is the starting place; its direction is rounded to one of the four directions.
 	PostLocation = GetActorLocation();
 	PostRotation = FRotator(0.f, SnapYaw(GetActorRotation().Yaw), 0.f);
@@ -83,6 +99,12 @@ void ACatrunArmor::BeginPlay()
 
 void ACatrunArmor::OnSoundHeard_Implementation(const FCatrunSoundEvent& Event, float RemainingBudget)
 {
+	// The cat is being carried off, or this armor is following the mark: sounds do not matter.
+	if (Action == EArmorAction::Catching || bFollowingMark)
+	{
+		return;
+	}
+
 	// Rule 4.3: an armor on its way ignores sounds that are not louder than the one it follows.
 	const bool bNotLouder = static_cast<uint8>(Event.Size) <= static_cast<uint8>(CurrentSoundSize);
 	if (bHasDestination && bNotLouder)
@@ -220,12 +242,18 @@ void ACatrunArmor::SetAction(EArmorAction NewAction)
 		PlayAnimation(ArrivalLookAnim, false);
 		ActionDuration = AnimationLength(ArrivalLookAnim);
 		break;
+	case EArmorAction::Catching:
+		// Stands still until the camera has arrived; TickCatching starts the pick-up animation.
+		PlayAnimation(IdleAnim, true);
+		break;
 	}
 }
 
 // Decides what to do next: turn on the spot if the next corner is far off the heading, else walk.
 void ACatrunArmor::BeginLeg()
 {
+	StuckTimer = 0.f;
+	LastWalkLocation = GetActorLocation();
 	// Skip corners we are already standing on.
 	while (PathCorners.IsValidIndex(NextCorner) && FVector::Dist2D(GetActorLocation(), PathCorners[NextCorner]) <= CornerTolerance)
 	{
@@ -279,6 +307,8 @@ void ACatrunArmor::BeginOpeningDoor(ACatrunDoor* Door)
 {
 	DoorBeingOpened = Door;
 	bDoorTriggered = false;
+	bDoorHandDriven = false;
+	bDoorReleased = false;
 
 	// Stand straight in front of the door, on the side the armor comes from, and face it.
 	const FVector Center = Door->GetDoorwayCenter();
@@ -297,6 +327,15 @@ void ACatrunArmor::BeginOpeningDoor(ACatrunDoor* Door)
 
 void ACatrunArmor::FinishTrip()
 {
+	// Following the mark never ends by itself: wait here, the next path plan goes on.
+	if (bFollowingMark)
+	{
+		PathCorners.Reset();
+		NextCorner = 0;
+		MarkTargetCell = FIntPoint(INT32_MIN, INT32_MIN);
+		SetAction(EArmorAction::Idle);
+		return;
+	}
 	PathCorners.Reset();
 	NextCorner = 0;
 	bHasDestination = false; // arrived: from now on any sound is followed (rule 4.3)
@@ -366,16 +405,297 @@ void ACatrunArmor::Tick(float DeltaSeconds)
 	case EArmorAction::Turning:			TickTurning(DeltaSeconds);		break;
 	case EArmorAction::OpeningDoor:		TickOpeningDoor(DeltaSeconds);	break;
 	case EArmorAction::Looking:			TickLooking(DeltaSeconds);		break;
+	case EArmorAction::Catching:		TickCatching(DeltaSeconds);		break;
 	}
+	UpdateMarkFollowing(DeltaSeconds);
+	UpdateDetection();
 	DrawDebug();
 	UpdateActionLabel();
+}
+
+void ACatrunArmor::SetFollowingMark(bool bFollow)
+{
+	if (bFollowingMark == bFollow)
+	{
+		return;
+	}
+	bFollowingMark = bFollow;
+	MarkRepathTimer = 0.f;
+	MarkTargetCell = FIntPoint(INT32_MIN, INT32_MIN);
+	UE_LOG(LogCatrunSound, Log, TEXT("%s %s the marked cat."), *GetName(), bFollow ? TEXT("starts following") : TEXT("stops following"));
+	if (bFollow)
+	{
+		bHasDestination = true; // a trip is on, so the post is forgotten
+		bReturningToPost = false;
+		bRestorePostHeading = false;
+	}
+	else
+	{
+		// Keep walking to the last place the cat was; from there the usual look and return.
+		CurrentSoundSize = ECatrunSoundSize::Small;
+
+		// Already there (it waited at the end of its path while following)? Then the trip is over
+		// now: look around and go back. Without this it would stand there for ever.
+		const bool bWalkingOn = PathCorners.IsValidIndex(NextCorner) && Action != EArmorAction::Idle;
+		if (!bWalkingOn && Action != EArmorAction::Catching && Action != EArmorAction::Looking)
+		{
+			FinishTrip();
+		}
+	}
+}
+
+// While following, the way to the cat is planned again whenever the cat has moved to another grid
+// cell (the grid cell is 25 cm, so this is cheap and keeps the armor from turning on the spot).
+void ACatrunArmor::UpdateMarkFollowing(float DeltaSeconds)
+{
+	if (!bFollowingMark || Action == EArmorAction::Catching)
+	{
+		return;
+	}
+	MarkRepathTimer -= DeltaSeconds;
+	const UCatrunSoundSettings* S = SoundManager.IsValid() ? SoundManager->GetSettings() : nullptr;
+	const APawn* Cat = CatrunCat::Find(this);
+	if (!S || !Cat || MarkRepathTimer > 0.f)
+	{
+		return;
+	}
+	MarkRepathTimer = S->MarkRepathInterval;
+
+	const FIntPoint Cell(FMath::FloorToInt(Cat->GetActorLocation().X / 25.f), FMath::FloorToInt(Cat->GetActorLocation().Y / 25.f));
+	if (Cell == MarkTargetCell)
+	{
+		return;
+	}
+	// A door or a turn in progress finishes first.
+	if (Action == EArmorAction::OpeningDoor || Action == EArmorAction::Turning)
+	{
+		return;
+	}
+	Destination = Cat->GetActorLocation(); // the real position: this is what the mark allows
+	if (PlanPath(Destination))
+	{
+		MarkTargetCell = Cell;
+		bHasDestination = true;
+		BeginLeg();
+	}
+}
+
+void ACatrunArmor::UpdateDetection()
+{
+	const UCatrunSoundSettings* S = SoundManager.IsValid() ? SoundManager->GetSettings() : nullptr;
+	if (!S)
+	{
+		return;
+	}
+	// Size and look of the circle come from the settings asset (read once, when it is available).
+	if (!bDetectionConfigured)
+	{
+		Detection->Configure(S->ArmorDetectRadius, S->ArmorDetectRayCount, S->ArmorDetectColor);
+		bDetectionConfigured = true;
+	}
+
+	// The circle is only drawn for debugging: by the level's switch or by this armor's own switch.
+	const bool bShowCircle = bShowDetectionDisplay || (SoundManager.IsValid() && SoundManager->bDebugShowArmorDetection);
+	if (bShowCircle != bDetectionDisplayShown)
+	{
+		Detection->SetDisplayVisible(bShowCircle);
+		bDetectionDisplayShown = bShowCircle;
+	}
+
+	// The circle is centred on the armor. 180 degrees to each side = the whole circle.
+	Detection->Update(0.f, 180.f);
+
+	APawn* Cat = CatrunCat::Find(this);
+	const bool bSees = Cat && !CatrunCat::IsSafeFromCatch(Cat) && Detection->CanSee(Cat->GetActorLocation(), S->CatSightRadius);
+
+	// While the cat is inside the circle the "!" stays on. (Show keeps it visible for a short
+	// time, so renewing it every frame holds it until the cat leaves.)
+	if (bSees)
+	{
+		AlertMark->Show(0.2f);
+	}
+
+	// The circle is the catch area: the cat is caught the moment it touches it.
+	if (bSees && Action != EArmorAction::Catching)
+	{
+		UE_LOG(LogCatrunSound, Log, TEXT("%s noticed the cat."), *GetName());
+		StartCatch(*Cat);
+	}
+	bSeeingCat = bSees;
+}
+
+void ACatrunArmor::StartCatch(APawn& Cat)
+{
+	UCatrunRestartSubsystem* Restart = UCatrunRestartSubsystem::Get(this);
+	const UCatrunSoundSettings* S = SoundManager.IsValid() ? SoundManager->GetSettings() : nullptr;
+	if (!Restart || !S || !Restart->TryBeginCatch())
+	{
+		return; // another armor is already carrying the cat off
+	}
+
+	CaughtCat = &Cat;
+	bHasDestination = false;
+	bReturningToPost = false;
+	PathCorners.Reset();
+	NextCorner = 0;
+
+	// Face the cat and freeze the player while the armor lifts it.
+	const FVector ToCat = (Cat.GetActorLocation() - GetActorLocation()).GetSafeNormal2D();
+	SetActorRotation(FRotator(0.f, SnapYaw(ToCat.Rotation().Yaw), 0.f));
+	if (UPawnMovementComponent* Movement = Cat.GetMovementComponent())
+	{
+		Movement->StopMovementImmediately();
+	}
+	if (APlayerController* PlayerController = Cast<APlayerController>(Cat.GetController()))
+	{
+		PlayerController->SetIgnoreMoveInput(true);
+		PlayerController->SetIgnoreLookInput(true);
+	}
+	SetUpCatchCamera(Cat, *S);
+
+	// Timeline: the camera moves first, then the animation plays and the screen fades out so that
+	// it is black when the animation ends, then the level starts again.
+	const float PickupLength = AnimationLength(PickupAnim);
+	const float FadeTime = S->CatchFadeOutTime;
+	CatchTime = 0.f;
+	PickupStartTime = S->CatchCameraBlendTime;
+	FadeStartTime = PickupStartTime + FMath::Max(0.f, PickupLength - FadeTime);
+	RestartTime = FadeStartTime + FadeTime + S->CatchBlackHoldTime;
+	bPickupStarted = false;
+	bFadeStarted = false;
+	bRestartRequested = false;
+	bGrabbed = false;
+	GrabTime = 0.f;
+
+	SetAction(EArmorAction::Catching); // idle until the camera has arrived
+	UE_LOG(LogCatrunSound, Log, TEXT("%s caught the cat. The level restarts in %.1f seconds."), *GetName(), RestartTime);
+}
+
+// The camera cuts to a spot in front of the armor (a little to the side so the cat is not in the
+// way of the armor), looking at the armor. The player's own camera is not changed.
+void ACatrunArmor::SetUpCatchCamera(APawn& Cat, const UCatrunSoundSettings& S)
+{
+	APlayerController* PlayerController = Cast<APlayerController>(Cat.GetController());
+	if (!PlayerController)
+	{
+		return;
+	}
+	FVector LookAt = GetActorLocation() + GetActorForwardVector() * 30.f + FVector(0.f, 0.f, S.CatchLookAtHeight);
+	FVector CameraLocation = GetActorLocation() + GetActorForwardVector() * S.CatchCameraDistance
+		+ GetActorRightVector() * S.CatchCameraSideOffset + FVector(0.f, 0.f, S.CatchCameraHeight);
+	// Lower the whole picture a little so that floor shows below the feet.
+	LookAt.Z -= S.CatchCameraLowering;
+	CameraLocation.Z -= S.CatchCameraLowering;
+
+	// A wall behind the camera spot: move the camera in front of the wall.
+	FHitResult Hit;
+	FCollisionQueryParams Params(SCENE_QUERY_STAT(CatchCamera), false, this);
+	Params.AddIgnoredActor(&Cat);
+	if (GetWorld()->LineTraceSingleByChannel(Hit, LookAt, CameraLocation, ECC_Visibility, Params))
+	{
+		CameraLocation = Hit.Location + (LookAt - CameraLocation).GetSafeNormal() * 30.f;
+	}
+
+	// A normal perspective camera (the player's camera may be a different kind, which is why it
+	// is not reused), without black bars or cropping.
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	ACameraActor* Camera = GetWorld()->SpawnActor<ACameraActor>(CameraLocation, (LookAt - CameraLocation).Rotation(), SpawnParams);
+	if (Camera)
+	{
+		Camera->GetCameraComponent()->bConstrainAspectRatio = false;
+		PlayerController->SetViewTarget(Camera);
+	}
+}
+
+FVector ACatrunArmor::GetHandsMiddle() const
+{
+	USkeletalMeshComponent* Skin = GetMesh();
+	return (Skin->GetBoneLocation(TEXT("hand_l"), EBoneSpaces::WorldSpace) + Skin->GetBoneLocation(TEXT("hand_r"), EBoneSpaces::WorldSpace)) * 0.5f;
+}
+
+// The cat is picked up when the hands reach it, then it is held between the hands and faces the
+// same way as the armor.
+void ACatrunArmor::UpdateGrab(float DeltaSeconds, const UCatrunSoundSettings& S)
+{
+	APawn* Cat = CaughtCat.Get();
+	if (!Cat)
+	{
+		return;
+	}
+	const float PickupTime = CatchTime - PickupStartTime;
+	const FVector Hands = GetHandsMiddle();
+
+	if (!bGrabbed)
+	{
+		const bool bHandsReached = FVector::Dist(Hands, Cat->GetActorLocation()) <= S.CatchGrabDistance;
+		if (!bHandsReached && PickupTime < S.CatchGrabLatestTime)
+		{
+			return;
+		}
+		bGrabbed = true;
+		GrabTime = 0.f;
+		GrabStartLocation = Cat->GetActorLocation();
+		UE_LOG(LogCatrunSound, Log, TEXT("%s grabs the cat %.2f seconds into the pick-up animation (%s)."),
+			*GetName(), PickupTime, bHandsReached ? TEXT("hands reached it") : TEXT("time limit"));
+
+		// The cat is carried: no walking, no pushing the armor.
+		if (ACharacter* CatCharacter = Cast<ACharacter>(Cat))
+		{
+			CatCharacter->GetCharacterMovement()->DisableMovement();
+		}
+		Cat->SetActorEnableCollision(false);
+	}
+
+	// Blend from where the cat stood into the hands, then follow the hands.
+	GrabTime += DeltaSeconds;
+	const float Alpha = S.CatchGrabBlendTime > 0.f ? FMath::Clamp(GrabTime / S.CatchGrabBlendTime, 0.f, 1.f) : 1.f;
+	const FVector HoldLocation = Hands + GetActorTransform().TransformVectorNoScale(S.CatchHoldOffset);
+	Cat->SetActorLocation(FMath::Lerp(GrabStartLocation, HoldLocation, FMath::InterpEaseInOut(0.f, 1.f, Alpha, 2.f)));
+	Cat->SetActorRotation(FRotator(0.f, GetActorRotation().Yaw, 0.f));
+}
+
+void ACatrunArmor::TickCatching(float DeltaSeconds)
+{
+	const UCatrunSoundSettings* S = SoundManager.IsValid() ? SoundManager->GetSettings() : nullptr;
+	UCatrunRestartSubsystem* Restart = UCatrunRestartSubsystem::Get(this);
+	if (!S || !Restart || bRestartRequested)
+	{
+		return;
+	}
+	CatchTime += DeltaSeconds;
+
+	if (!bPickupStarted && CatchTime >= PickupStartTime)
+	{
+		bPickupStarted = true;
+		PlayAnimation(PickupAnim, false);
+	}
+	if (bPickupStarted)
+	{
+		UpdateGrab(DeltaSeconds, *S);
+	}
+	if (!bFadeStarted && CatchTime >= FadeStartTime)
+	{
+		bFadeStarted = true;
+		Restart->FadeOut(CaughtCat.Get(), S->CatchFadeOutTime);
+	}
+	if (CatchTime >= RestartTime)
+	{
+		bRestartRequested = true;
+		// Temporary failure handling: start the current level again. The cat is spawned at its
+		// start place and the screen fades in. Keeping the awakening and the zone checkpoints
+		// comes with the failure system (design doc 8).
+		Restart->RestartLevel(S->RestartFadeInTime);
+	}
 }
 
 // Shows the action name above the head and turns the text toward the camera.
 void ACatrunArmor::UpdateActionLabel()
 {
-	ActionLabel->SetVisibility(bDebugDrawPath);
-	if (!bDebugDrawPath)
+	// Shown only when the level's debug switch asks for it (not part of the real game).
+	const bool bShowLabel = SoundManager.IsValid() && SoundManager->bDebugShowArmorLabel;
+	ActionLabel->SetVisibility(bShowLabel);
+	if (!bShowLabel)
 	{
 		return;
 	}
@@ -416,6 +736,24 @@ void ACatrunArmor::TickWalking(float DeltaSeconds)
 	const FVector ToCorner = PathCorners[NextCorner] - GetActorLocation();
 	FaceAxisToward(ToCorner, DeltaSeconds);
 	AddMovementInput(ToCorner.GetSafeNormal2D(), 1.f);
+
+	// Stuck? The body may be wider than the free space in front of furniture or a hideout, so the
+	// last corner can be out of reach. Waiting there for ever would block the armor, so after a
+	// short while it counts as arrived (the usual look around and walk back follows).
+	const float Moved = FVector::Dist2D(GetActorLocation(), LastWalkLocation);
+	LastWalkLocation = GetActorLocation();
+	const bool bBarelyMoving = ActionTime > 0.3f && Moved < 0.05f * DeltaSeconds * 100.f;
+	StuckTimer = bBarelyMoving ? StuckTimer + DeltaSeconds : 0.f;
+	if (StuckTimer >= StuckTime)
+	{
+		const float ToEnd = FVector::Dist2D(GetActorLocation(), PathCorners.Last());
+		if (ToEnd <= StuckArrivalDistance || StuckTimer >= StuckTime * 4.f)
+		{
+			UE_LOG(LogCatrunSound, Log, TEXT("%s is stuck %.0f cm from the end of its path: counts as arrived."), *GetName(), ToEnd);
+			StuckTimer = 0.f;
+			FinishTrip();
+		}
+	}
 }
 
 void ACatrunArmor::TickTurning(float DeltaSeconds)
@@ -485,25 +823,112 @@ void ACatrunArmor::TickOpeningDoor(float DeltaSeconds)
 			return;
 		}
 		DoorStep = EDoorStep::Animation;
-		ActionTime = 0.f;
-		ActionDuration = AnimationLength(DoorOpenAnim);
-		PlayAnimation(DoorOpenAnim, false);
+		BeginDoorAnimation();
 	}
 
-	// Step 3: the leaf opens part-way through the animation, when the hand reaches it.
+	// Step 3a: the hand takes hold of the door part-way through the animation.
 	if (!bDoorTriggered && ActionTime >= ActionDuration * DoorOpenMoment)
 	{
-		Door->SetOpen(true);
+		StartOpeningDoor(*Door);
 		bDoorTriggered = true;
 	}
+
+	// Step 3b: while the hand holds the door, the door follows the hand (always in sync).
+	if (bDoorHandDriven && !bDoorReleased)
+	{
+		Door->DriveWithPoint(GetMesh()->GetBoneLocation(DoorGripBoneInUse, EBoneSpaces::WorldSpace));
+		if (ActionTime >= ActionDuration * DoorReleaseMoment)
+		{
+			Door->EndHandOpen(); // the hand lets go, the door finishes opening by itself
+			bDoorReleased = true;
+		}
+	}
+
 	if (ActionTime >= ActionDuration)
 	{
 		if (!bDoorTriggered)
 		{
-			Door->SetOpen(true);
+			StartOpeningDoor(*Door);
 		}
+		if (bDoorHandDriven && !bDoorReleased)
+		{
+			Door->EndHandOpen();
+		}
+		// The animation ended with the body walked forward and turned. The actor takes both now
+		// (in one step, so nothing jumps back).
+		EndDoorAnimation();
+		SetActorRotation(FRotator(0.f, SnapYaw(GetActorRotation().Yaw + DoorOpenAnimTurnDegrees), 0.f));
+
+		// The body has moved through the doorway, so the old path (which still leads to the spot in
+		// front of the door) is out of date: plan it again from here.
+		PlanPath(bReturningToPost ? PostLocation : Destination);
 		BeginLeg();
 	}
+}
+
+// Opens the door, either following the hand (exact sync) or by a timer.
+void ACatrunArmor::StartOpeningDoor(ACatrunDoor& Door)
+{
+	if (!bDoorFollowsHand)
+	{
+		Door.OpenFrom(GetActorLocation());
+		return;
+	}
+
+	// Which hand holds the door? The one closest to the door leaf at this moment (the mirroring
+	// swaps the sides, so decide by looking). A bone name set in DoorGripBone overrides this.
+	if (!DoorGripBone.IsNone())
+	{
+		DoorGripBoneInUse = DoorGripBone;
+	}
+	else
+	{
+		const FBox Leaf = Door.GetLeafBounds();
+		const float LeftDistance = Leaf.ComputeSquaredDistanceToPoint(GetMesh()->GetBoneLocation(TEXT("hand_l"), EBoneSpaces::WorldSpace));
+		const float RightDistance = Leaf.ComputeSquaredDistanceToPoint(GetMesh()->GetBoneLocation(TEXT("hand_r"), EBoneSpaces::WorldSpace));
+		DoorGripBoneInUse = LeftDistance <= RightDistance ? FName(TEXT("hand_l")) : FName(TEXT("hand_r"));
+	}
+	UE_LOG(LogCatrunSound, Log, TEXT("%s opens a door with %s."), *GetName(), *DoorGripBoneInUse.ToString());
+
+	Door.BeginHandOpen(GetActorLocation());
+	bDoorHandDriven = true;
+	bDoorReleased = false;
+}
+
+void ACatrunArmor::BeginDoorAnimation()
+{
+	ActionTime = 0.f;
+	ActionDuration = AnimationLength(DoorOpenAnim);
+
+	// The animation is made for a door that swings the other way: mirror the body left-to-right.
+	if (bMirrorDoorAnimation)
+	{
+		GetMesh()->SetRelativeScale3D(FVector(-MeshBaseScale.X, MeshBaseScale.Y, MeshBaseScale.Z));
+	}
+	PlayAnimation(DoorOpenAnim, false);
+
+	// Evaluate the first frame right now so that the body position at the start can be measured.
+	GetMesh()->TickAnimation(0.f, false);
+	GetMesh()->RefreshBoneTransforms();
+	DoorAnimStartBoneLocation = GetMesh()->GetBoneLocation(DoorAnimTrackedBone, EBoneSpaces::WorldSpace);
+}
+
+void ACatrunArmor::EndDoorAnimation()
+{
+	// How far did the body walk during the animation (flat)? Move the actor by that much.
+	FVector Walked = GetMesh()->GetBoneLocation(DoorAnimTrackedBone, EBoneSpaces::WorldSpace) - DoorAnimStartBoneLocation;
+	Walked.Z = 0.f;
+	if (Walked.Size() > 400.f)
+	{
+		Walked = FVector::ZeroVector; // a bone that does not exist gives nonsense: ignore it
+	}
+
+	if (bMirrorDoorAnimation)
+	{
+		GetMesh()->SetRelativeScale3D(MeshBaseScale);
+	}
+	AddActorWorldOffset(Walked, /*bSweep*/ false, nullptr, ETeleportType::TeleportPhysics);
+	UE_LOG(LogCatrunSound, Log, TEXT("%s open-door animation moved the body %.0f cm."), *GetName(), Walked.Size());
 }
 
 // A closed door counts only if the path really goes through its doorway soon. A door the armor
