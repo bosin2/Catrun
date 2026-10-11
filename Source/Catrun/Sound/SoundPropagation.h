@@ -17,7 +17,8 @@ namespace CatrunSoundPropagation
 	constexpr float Unreached = MAX_flt;
 
 	/**
-	 * Dijkstra search from SourceCell.
+	 * Fast Marching 방식의 전파 계산. 열린 대각선 경로와 연속 거리 보정을
+	 * 함께 사용하여 격자 방향 편향을 줄인다.
 	 *
 	 * @param Grid            The baked grid.
 	 * @param ClosedGateCells One entry per cell, non-zero where a closed door blocks sound.
