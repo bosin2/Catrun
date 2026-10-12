@@ -6,6 +6,7 @@
 #include "CatrunArmor.generated.h"
 
 class ACatrunDoor;
+class ACatrunPatrolPoint;
 class ASoundGridManager;
 class UAnimationAsset;
 class UCatrunAlertMarkComponent;
@@ -98,6 +99,18 @@ public:
 	// (its post) and face the original direction.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Armor")
 	bool bReturnToPost = true;
+
+	// ---- Patrol ----
+	// Patrol route, in walking order (set per armor in the level; empty = the armor stays at its
+	// post). The armor walks point to point, waits at each (ArmorPatrolPause), and goes back and
+	// forth along the route (or around it, see bPatrolLoop). A sound interrupts the patrol; after
+	// checking it the armor walks on toward the point it was heading to.
+	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "Armor|Patrol")
+	TArray<TObjectPtr<ACatrunPatrolPoint>> PatrolPoints;
+
+	// Off = back and forth (A-B-C-B-A...). On = around (A-B-C-A...).
+	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "Armor|Patrol")
+	bool bPatrolLoop = false;
 
 	// A heading change larger than this (degrees) is done with a turn animation.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Armor")
@@ -258,6 +271,18 @@ private:
 	// Plans the way back to the post. Falls back to standing still when it is not needed or possible.
 	void StartReturnToPost();
 	void TickIdle(float DeltaSeconds);
+
+	// ---- Patrol ----
+	bool HasPatrol() const;
+	// Arrived at the patrol point PatrolIndex: choose the next one and wait here for a while.
+	void OnPatrolPointReached();
+	// Walks to the patrol point PatrolIndex (waits and tries again when no path can be planned).
+	void BeginPatrolLeg();
+
+	int32 PatrolIndex = 0;			// the patrol point the armor is heading to (or waiting at, then the next)
+	int32 PatrolStep = 1;			// +1 / -1 along the route
+	bool bPatrolWaiting = false;	// standing still between two patrol points
+	float PatrolWaitLeft = 0.f;
 
 	void DrawDebug() const;
 	void UpdateActionLabel();

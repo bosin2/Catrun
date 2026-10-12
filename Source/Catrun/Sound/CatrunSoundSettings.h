@@ -136,6 +136,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Armor", meta = (ClampMin = "0.0"))
 	float ArmorTurnPenalty = 100.f;
 
+	// Patrol: how long (seconds) an armor waits at each patrol point before it walks on.
+	// (A single point can override this with its own PauseSeconds.) The patrol walks at the
+	// armor's WalkSpeed.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Armor", meta = (ClampMin = "0.0"))
+	float ArmorPatrolPause = 1.5f;
+
 	// An armor this close (cm) to a closed door opens it.
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Armor", meta = (ClampMin = "0.0"))
 	float ArmorDoorOpenDistance = 120.f;
