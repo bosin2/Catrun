@@ -119,20 +119,36 @@ void ACatrunArmor::OnSoundHeard_Implementation(const FCatrunSoundEvent& Event, f
 		*GetName(), (int32)Event.Size, RemainingBudget, PathCorners.Num());
 
 	// A sound beats everything: stop returning to the post and go to the sound.
-	const bool bWasStandingStill = !bHasDestination;
+	// The reaction animation (a slow start) only plays for an armor that stands still at its post,
+	// and never for the cat's footsteps. An armor that was lured away (looking around at the end
+	// of a trip, or walking back to its post) is already alert: it goes straight to the new sound.
+	const bool bAtPost = FVector::Dist2D(GetActorLocation(), PostLocation) <= 50.f;
+	const bool bStandingAtPost = Action == EArmorAction::Idle && !bHasDestination && bAtPost;
+	const bool bPlayReaction = bStandingAtPost && Event.Kind != ECatrunSoundKind::Footstep;
 	bHasDestination = true;
 	bReturningToPost = false;
 	bRestorePostHeading = false;
 
-	if (bWasStandingStill)
+	if (bPlayReaction)
 	{
 		SetAction(EArmorAction::Reacting); // react first, then walk
 	}
-	else if (Action == EArmorAction::Walking)
+	else if (Action == EArmorAction::Walking || Action == EArmorAction::Idle || Action == EArmorAction::Looking)
 	{
-		BeginLeg(); // already walking: simply aim for the new path
+		BeginLeg(); // aim for the new path at once (this also ends a look-around)
 	}
-	// Other actions (reacting, turning, opening a door) finish first and then use the new path.
+	else if (Action == EArmorAction::Turning)
+	{
+		// A turn animation on the way back to the post is cut short: the body takes the part of the
+		// turn that was already shown, then turns smoothly toward the new path while it runs
+		// (FaceAxisToward in TickWalking), with no turn animation.
+		const float Done = ActionDuration > 0.f ? FMath::Clamp(ActionTime / ActionDuration, 0.f, 1.f) : 1.f;
+		const float Step = (bTurningRight ? 90.f : -90.f) * Done;
+		SetActorRotation(FRotator(0.f, GetActorRotation().Yaw + Step, 0.f));
+		TurnsRemaining = 0;
+		BeginLeg();
+	}
+	// Other actions (reacting, opening a door) finish first and then use the new path.
 }
 
 bool ACatrunArmor::PlanPath(const FVector& NewDestination)
@@ -497,7 +513,25 @@ void ACatrunArmor::UpdateDetection()
 		bDetectionDisplayShown = bShowCircle;
 	}
 
-	// The circle is centred on the armor. 180 degrees to each side = the whole circle.
+	// The circle is centred on the armor. While the open-door animation plays, the body walks away
+	// from the actor (the actor only catches up when the animation ends), so the circle follows
+	// the body bone instead.
+	bool bFollowBody = false;
+	if (Action == EArmorAction::OpeningDoor && DoorStep == EDoorStep::Animation && GetMesh() &&
+		GetMesh()->GetBoneIndex(DoorAnimTrackedBone) != INDEX_NONE)
+	{
+		const FVector Body = GetMesh()->GetBoneLocation(DoorAnimTrackedBone, EBoneSpaces::WorldSpace);
+		if (FVector::Dist2D(Body, GetActorLocation()) <= 400.f) // same sanity limit as EndDoorAnimation
+		{
+			Detection->SetOriginOverride(Body);
+			bFollowBody = true;
+		}
+	}
+	if (!bFollowBody)
+	{
+		Detection->ClearOriginOverride();
+	}
+	// 180 degrees to each side = the whole circle.
 	Detection->Update(0.f, 180.f);
 
 	APawn* Cat = CatrunCat::Find(this);

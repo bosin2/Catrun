@@ -84,8 +84,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Visual", meta = (ClampMin = "0.1"))
 	float RippleBellWidthScale = 1.6f;
 
-	// The bell shows this many rings, one right after the other. Walking and running show one.
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Visual", meta = (ClampMin = "1", ClampMax = "6"))
+	// The bell shows this many rings, one right after the other (at most 3: that is how many the
+	// burst blueprint can spawn). Walking and running show one.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Visual", meta = (ClampMin = "1", ClampMax = "3"))
 	int32 RippleBurstCount = 3;
 
 	// Seconds between the rings of the bell.

@@ -42,6 +42,11 @@ public:
 	// test use the edge of the point's body instead of its centre.
 	bool CanSee(const FVector& WorldPoint, float PointRadius = 0.f) const;
 
+	// The fan is centred on the owner. While an animation moves the body away from the actor (for
+	// example the open-door animation), the owner can centre the fan on a point that follows the body.
+	void SetOriginOverride(const FVector& WorldPoint);
+	void ClearOriginOverride();
+
 	// Shows or hides the floor display. The sight itself keeps working while hidden.
 	void SetDisplayVisible(bool bVisible);
 
@@ -49,6 +54,8 @@ public:
 	void SetColor(const FLinearColor& NewColor);
 
 private:
+	FVector GetOrigin() const;
+
 	// Waits until the sound system of the level is ready, then builds the floor display.
 	bool EnsureReady();
 
@@ -56,6 +63,9 @@ private:
 	float TraceRay(const FVector& Start, const FVector& Direction) const;
 
 	void WriteTexture();
+
+	bool bOriginOverridden = false;
+	FVector OriginOverride = FVector::ZeroVector;
 
 	UPROPERTY(Transient)
 	TObjectPtr<const UCatrunSoundSettings> Settings;

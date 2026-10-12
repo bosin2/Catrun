@@ -120,7 +120,7 @@ void UCatrunVisionFanComponent::Update(float CenterAngleDegrees, float HalfAngle
 	CenterAngle = CenterAngleDegrees;
 	HalfAngle = FMath::Clamp(HalfAngleDegrees, 1.f, 180.f);
 
-	const FVector Origin = GetOwner()->GetActorLocation();
+	const FVector Origin = GetOrigin();
 	const FVector Start(Origin.X, Origin.Y, FloorZ + Settings->VisionTraceHeight);
 
 	// Ray i points to the middle of the i-th slice of the fan.
@@ -160,7 +160,7 @@ bool UCatrunVisionFanComponent::CanSee(const FVector& WorldPoint, float PointRad
 	{
 		return false;
 	}
-	const FVector Origin = GetOwner()->GetActorLocation();
+	const FVector Origin = GetOrigin();
 	const FVector2D ToPoint(WorldPoint.X - Origin.X, WorldPoint.Y - Origin.Y);
 	const float Distance = ToPoint.Size();
 	const float NearEdge = Distance - PointRadius; // distance to the closest part of the body
@@ -197,6 +197,22 @@ void UCatrunVisionFanComponent::SetColor(const FLinearColor& NewColor)
 	{
 		Material->SetVectorParameterValue(TEXT("Color"), FLinearColor(Color.R, Color.G, Color.B, 1.f));
 	}
+}
+
+FVector UCatrunVisionFanComponent::GetOrigin() const
+{
+	return bOriginOverridden ? OriginOverride : GetOwner()->GetActorLocation();
+}
+
+void UCatrunVisionFanComponent::SetOriginOverride(const FVector& WorldPoint)
+{
+	bOriginOverridden = true;
+	OriginOverride = WorldPoint;
+}
+
+void UCatrunVisionFanComponent::ClearOriginOverride()
+{
+	bOriginOverridden = false;
 }
 
 void UCatrunVisionFanComponent::SetDisplayVisible(bool bVisible)
