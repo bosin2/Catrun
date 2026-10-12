@@ -71,49 +71,58 @@ public:
 	float BellCooldown = 5.f;
 
 	// ---- Wave visualization --------------------------------------------------
-	// Material with the parameters of M_SoundWave. Assign M_SoundWave here.
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Visual")
-	TObjectPtr<UMaterialInterface> WaveMaterial;
+	// The wave is drawn by the ripple blueprints in /Game/Systems/Sound/Ripple. They read every
+	// number below from this asset, so the look of the wave is tuned in one place.
 
-	// Size (cm) of one pixel of the distance picture the wave is drawn from.
-	// 1 = one pixel per square centimetre: the edge of the wave is perfectly smooth. Only the part
-	// of the picture around the wave is updated, so this stays cheap.
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Visual", meta = (ClampMin = "1.0"))
-	float VisualTexelSize = 1.f;
+	// Ring thickness multiplier per sound. Walking = 1 is the reference.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Visual", meta = (ClampMin = "0.1"))
+	float RippleWalkWidthScale = 1.f;
 
-	// One sound shows this many rings, one right after the other.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Visual", meta = (ClampMin = "0.1"))
+	float RippleRunWidthScale = 1.3f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Visual", meta = (ClampMin = "0.1"))
+	float RippleBellWidthScale = 1.6f;
+
+	// The bell shows this many rings, one right after the other. Walking and running show one.
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Visual", meta = (ClampMin = "1", ClampMax = "6"))
-	int32 WaveCount = 3;
+	int32 RippleBurstCount = 3;
 
-	// Seconds between the rings of one sound (they travel at the same speed, so this sets the gap).
+	// Seconds between the rings of the bell.
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Visual", meta = (ClampMin = "0.01"))
-	float WaveInterval = 0.12f;
+	float RippleBurstInterval = 0.3f;
 
-	// Thickness (cm) of the visible ring behind the wave front.
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Visual", meta = (ClampMin = "1.0"))
-	float RingWidth = 60.f;
-
-	// Softness (cm) of the leading edge of the ring.
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Visual", meta = (ClampMin = "0.0"))
-	float RingFeather = 8.f;
-
-	// Seconds the finished ring stays before it fades out.
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Visual", meta = (ClampMin = "0.0"))
-	float HoldDuration = 0.0f;
-
-	// Seconds the ring needs to fade out after it reached its full size.
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Visual", meta = (ClampMin = "0.0"))
-	float FadeDuration = 0.4f;
-
-	// Colour of the wave. The alpha channel (A) is the transparency: 0 = invisible, 1 = solid.
+	// Look of the ripple. The ripple blueprints copy these into the wave material
+	// (M_CatrunRipple) every time a ripple appears.
+	// Colour of the wave line and its glow (only R, G, B are used).
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Visual")
-	FLinearColor SoundColor = FLinearColor(1.f, 0.75f, 0.15f, 0.45f);
+	FLinearColor RippleColor = FLinearColor(1.f, 1.f, 1.f, 1.f);
 
-	// How much fainter the ring is at the far end of the budget (0 = same, 1 = invisible).
+	// Brightness of the glow around the line.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Visual", meta = (ClampMin = "0.0"))
+	float RippleGlowStrength = 5.f;
+
+	// Overall opacity of the ripple.
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Visual", meta = (ClampMin = "0.0", ClampMax = "1.0"))
-	float EdgeFade = 0.6f;
+	float RippleOpacity = 0.6f;
 
-	// Height above the floor where the wave is drawn (avoids flickering with the floor).
+	// How strong the small waving of the line is (0 = a straight, steady line).
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Visual", meta = (ClampMin = "0.0"))
+	float RippleWaveAmount = 0.5f;
+
+	// Half the thickness (cm) of the line itself, and of the glow around it. Multiplied by the
+	// width scale of the sound (walk, run, bell).
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Visual", meta = (ClampMin = "0.1"))
+	float RippleLineHalfWidth = 1.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Visual", meta = (ClampMin = "0.1"))
+	float RippleGlowHalfWidth = 3.5f;
+
+	// Height (cm) above the floor where the ripple is drawn.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Visual")
+	float RippleHeight = 1.8f;
+
+	// Height above the floor where the sight areas (candle, armor) are drawn (avoids flickering with the floor).
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Visual")
 	float VisualHeight = 3.f;
 

@@ -105,13 +105,8 @@ void ACatrunArmor::OnSoundHeard_Implementation(const FCatrunSoundEvent& Event, f
 		return;
 	}
 
-	// Rule 4.3: an armor on its way ignores sounds that are not louder than the one it follows.
-	const bool bNotLouder = static_cast<uint8>(Event.Size) <= static_cast<uint8>(CurrentSoundSize);
-	if (bHasDestination && bNotLouder)
-	{
-		UE_LOG(LogCatrunSound, Log, TEXT("%s ignores a sound (size %d is not louder than %d)."), *GetName(), (int32)Event.Size, (int32)CurrentSoundSize);
-		return;
-	}
+	// Design change: every sound counts. The newest sound replaces the one the armor follows,
+	// whatever its size, and the path is planned again from where the armor stands now.
 
 	// The destination is where the sound was made (a snapshot), never the cat's live position.
 	if (!PlanPath(Event.Location))

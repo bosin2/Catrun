@@ -8,7 +8,6 @@
 
 class ACatrunDoor;
 class UCatrunSoundSettings;
-class USoundWaveVisual;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnCatrunSoundEmitted, const FCatrunSoundEvent&, Event, float, Budget);
 
@@ -37,12 +36,12 @@ struct FPendingSound
  *
  * It owns the baked grid and does four things:
  *  1. Bakes the grid from the level geometry (BuildGrid).
- *  2. Spreads a sound over the grid (EmitSound) and draws the wave (USoundWaveVisual).
+ *  2. Spreads a sound over the grid (EmitSound) and announces it (OnSoundEmitted; the ripple blueprints draw the wave).
  *  3. Tells every listener that can hear the sound, at the moment the wave reaches it.
  *  4. Keeps track of doors: closed doors block sound, armors open them.
  *
  * The heavy parts live in separate files: FCatrunGridData (grid), CatrunSoundPropagation
- * (spreading), USoundWaveVisual (drawing), CatrunArmorPath (armor walking).
+ * (spreading), CatrunArmorPath (armor walking).
  */
 UCLASS()
 class CATRUN_API ASoundGridManager : public AActor
@@ -79,6 +78,11 @@ public:
 	void GetClosedDoors(TArray<ACatrunDoor*>& OutDoors) const;
 
 	const FCatrunGridData& GetGrid() const { return Grid; }
+
+	// Height (world Z, cm) of the floor the grid was built on. The ripple is drawn at this height.
+	UFUNCTION(BlueprintPure, Category = "Sound")
+	float GetFloorZ() const { return Grid.Origin.Z; }
+
 	// 최신 소리의 그림용 거리와 원래 소리 예산을 읽는다.
 	// 끝부분을 부드럽게 그리기 위한 여유 영역도 포함되어 있다.
 	const TArray<float>& GetLatestVisualDistances(float& OutBudget) const
@@ -132,9 +136,6 @@ private:
 	// The baked grid, saved with the level.
 	UPROPERTY()
 	FCatrunGridData Grid;
-
-	UPROPERTY(VisibleAnywhere, Category = "Sound")
-	TObjectPtr<USoundWaveVisual> WaveVisual;
 
 	UPROPERTY(Transient)
 	TArray<FPendingSound> PendingSounds;

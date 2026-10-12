@@ -6,7 +6,6 @@
 #include "CatrunDoor.h"
 #include "CatrunSoundSettings.h"
 #include "SoundPropagation.h"
-#include "SoundWaveVisual.h"
 #include "Components/BoxComponent.h"
 #include "DrawDebugHelpers.h"
 #include "EngineUtils.h"
@@ -21,7 +20,6 @@ ASoundGridManager::ASoundGridManager()
 	PrimaryActorTick.bCanEverTick = true;
 
 	SetRootComponent(CreateDefaultSubobject<USceneComponent>(TEXT("Root")));
-	WaveVisual = CreateDefaultSubobject<USoundWaveVisual>(TEXT("WaveVisual"));
 }
 
 ASoundGridManager* ASoundGridManager::Get(const UObject* WorldContextObject)
@@ -56,7 +54,6 @@ void ASoundGridManager::BeginPlay()
 		BuildGrid();
 	}
 	RefreshDoorGates();
-	WaveVisual->Initialize(Grid, *Settings);
 }
 
 void ASoundGridManager::Tick(float DeltaSeconds)
@@ -202,21 +199,13 @@ bool ASoundGridManager::EmitSound(const FCatrunSoundEvent& Event)
 	const int32 NumReached = CatrunSoundPropagation::Run(Grid, ClosedGateCells, SourceCell, LastBudget, LastDistance);
 	UE_LOG(LogCatrunSound, Log, TEXT("EmitSound: size=%d budget=%.0f reached %d cells."), static_cast<int32>(Event.Size), LastBudget, NumReached);
 
-	// 3) Draw the wave. The picture needs distances a little beyond the budget, so the end of the
-	// wave fades out smoothly instead of being cut along the 25 cm cells.
+	// 3) The wave is drawn by the ripple blueprints. They copy this picture of the spread in
+	// OnSoundEmitted. It needs distances a little beyond the budget, so the end of the wave fades
+	// out smoothly instead of being cut along the 25 cm cells.
 	const float PictureBudget = LastBudget + Grid.CellSize * 2.f;
 	CatrunSoundPropagation::Run(Grid, ClosedGateCells, SourceCell, PictureBudget, PictureDistance);
 	const double Now = World->GetTimeSeconds();
-	//기존 발걸음소리 이벤트를 제외하고 시각화하는 블록으로 감쌈 
-	const bool bUseNewCatVisual =
-		Event.Source == ECatrunSoundSource::Cat &&
-		(Event.Kind == ECatrunSoundKind::Footstep ||
-			Event.Kind == ECatrunSoundKind::Bell);
 
-	if (!bUseNewCatVisual)
-	{
-		WaveVisual->Show(Grid, PictureDistance, LastBudget, Now);
-	}
 	// 4) Schedule the moment each listener hears it: when the wave reaches them.
 	for (TActorIterator<AActor> It(World); It; ++It)
 	{
