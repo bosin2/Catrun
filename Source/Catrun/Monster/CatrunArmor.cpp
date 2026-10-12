@@ -124,6 +124,8 @@ void ACatrunArmor::OnSoundHeard_Implementation(const FCatrunSoundEvent& Event, f
 		return;
 	}
 	CurrentSoundSize = Event.Size;
+	RunCause = Event.Kind == ECatrunSoundKind::Bell ? ERunCause::Bell : ERunCause::Noise;
+	ApplyMoveSpeed(); // a new sound may change the speed in the middle of a run
 	Destination = Event.Location;
 	UE_LOG(LogCatrunSound, Log, TEXT("%s heard a sound (size %d, remaining %.0f), path has %d corners."),
 		*GetName(), (int32)Event.Size, RemainingBudget, PathCorners.Num());
@@ -217,7 +219,17 @@ UAnimationAsset* ACatrunArmor::MoveAnimation() const
 
 void ACatrunArmor::ApplyMoveSpeed()
 {
-	GetCharacterMovement()->MaxWalkSpeed = bReturningToPost ? WalkSpeed : ChaseSpeed;
+	float RunSpeed = ChaseSpeed;
+	if (const UCatrunSoundSettings* S = SoundManager.IsValid() ? SoundManager->GetSettings() : nullptr)
+	{
+		switch (RunCause)
+		{
+		case ERunCause::Mark:	RunSpeed = S->ArmorRunSpeedMark;	break;
+		case ERunCause::Bell:	RunSpeed = S->ArmorRunSpeedBell;	break;
+		case ERunCause::Noise:	RunSpeed = S->ArmorRunSpeedNoise;	break;
+		}
+	}
+	GetCharacterMovement()->MaxWalkSpeed = bReturningToPost ? WalkSpeed : RunSpeed;
 }
 
 void ACatrunArmor::SetAction(EArmorAction NewAction)
@@ -553,6 +565,8 @@ void ACatrunArmor::SetFollowingMark(bool bFollow)
 	UE_LOG(LogCatrunSound, Log, TEXT("%s %s the marked cat."), *GetName(), bFollow ? TEXT("starts following") : TEXT("stops following"));
 	if (bFollow)
 	{
+		RunCause = ERunCause::Mark;
+		ApplyMoveSpeed();
 		bHasDestination = true; // a trip is on, so the post is forgotten
 		bReturningToPost = false;
 		bPatrolWaiting = false;

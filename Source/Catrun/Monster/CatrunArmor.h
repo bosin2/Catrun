@@ -73,7 +73,8 @@ public:
 	bool IsCatching() const { return Action == EArmorAction::Catching; }
 
 	// ---- Movement ----
-	// Running speed while heading to a sound (cm/s). Must exceed the cat's running speed.
+	// Only used when the level has no sound settings. The real running speeds are in
+	// DA_SoundSettings ("Armor Speed": ArmorRunSpeedMark / Bell / Noise).
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Armor")
 	float ChaseSpeed = 300.f;
 
@@ -367,5 +368,9 @@ private:
 
 	bool bHasDestination = false;
 	ECatrunSoundSize CurrentSoundSize = ECatrunSoundSize::Small;
+
+	// What the armor is running for: decides the running speed (see ArmorRunSpeed* in the settings).
+	enum class ERunCause : uint8 { Noise, Bell, Mark };
+	ERunCause RunCause = ERunCause::Noise;
 	FVector Destination = FVector::ZeroVector;
 };

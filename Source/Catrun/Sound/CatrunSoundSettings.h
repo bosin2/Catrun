@@ -145,6 +145,20 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Armor", meta = (ClampMin = "0.0"))
 	float ArmorTurnPenalty = 100.f;
 
+	// Running speed (cm/s) of an armor on its way to a cause. Three speeds, from the cause:
+	//  - Mark: chasing the cat that carries the candle mark (the fastest, the original run speed)
+	//  - Bell: running to the sound of the cat's bell
+	//  - Noise: running to a nearby sound (footsteps and the like)
+	// The cat's running speed should stay below Mark so a marked cat cannot outrun the armor.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Armor Speed", meta = (ClampMin = "0.0"))
+	float ArmorRunSpeedMark = 300.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Armor Speed", meta = (ClampMin = "0.0"))
+	float ArmorRunSpeedBell = 250.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Armor Speed", meta = (ClampMin = "0.0"))
+	float ArmorRunSpeedNoise = 200.f;
+
 	// Patrol: how long (seconds) an armor waits at each patrol point before it walks on.
 	// (A single point can override this with its own PauseSeconds.) The patrol walks at the
 	// armor's WalkSpeed.
