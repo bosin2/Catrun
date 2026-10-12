@@ -38,6 +38,13 @@ const UCatrunSoundSettings* ACatrunCandle::GetSettings()
 	return CachedManager.IsValid() ? CachedManager->GetSettings() : nullptr;
 }
 
+// Distance behind the candle where the cone's point sits: there the cone is as wide as the body.
+float ACatrunCandle::GetConeBackOffset(const UCatrunSoundSettings& S) const
+{
+	const float HalfAngleTan = FMath::Tan(FMath::DegreesToRadians(FMath::Clamp(S.CandleConeAngle * 0.5f, 1.f, 89.f)));
+	return S.CandleBodyWidth * 0.5f / HalfAngleTan;
+}
+
 void ACatrunCandle::BeginPlay()
 {
 	Super::BeginPlay();
@@ -164,7 +171,11 @@ void ACatrunCandle::StopTracking(const UCatrunSoundSettings& S)
 
 void ACatrunCandle::CheckForCat(float DeltaSeconds, APawn* Cat, const UCatrunSoundSettings& S)
 {
-	const bool bSees = Cat && !CatrunCat::IsHiding(Cat) && Sight->CanSee(Cat->GetActorLocation(), S.CatSightRadius);
+	// Touching the candle counts like being seen: it reacts, looks toward the cat as far as it can,
+	// and marks it. (The body has no collision, so touching is a distance check.)
+	const bool bCatVisible = Cat && !CatrunCat::IsHiding(Cat);
+	const bool bTouching = bCatVisible && FVector::Dist2D(Cat->GetActorLocation(), GetActorLocation()) <= S.CandleTouchRadius;
+	const bool bSees = bTouching || (bCatVisible && Sight->CanSee(Cat->GetActorLocation(), S.CatSightRadius));
 	bCatInView = bSees;
 
 	if (bSees)
@@ -198,7 +209,8 @@ void ACatrunCandle::Tick(float DeltaSeconds)
 	if (!bSightConfigured)
 	{
 		// The sight numbers come from the settings asset of the level (read once).
-		Sight->Configure(S->CandleRange, S->CandleRayCount, S->CandleSightColor);
+		// The cone's point sits behind the body, so the range is extended to keep CandleRange in front of it.
+		Sight->Configure(S->CandleRange + GetConeBackOffset(*S), S->CandleRayCount, S->CandleSightColor);
 		Sight->SetDisplayVisible(bShowSightDisplay);
 		bSightConfigured = true;
 	}
@@ -229,6 +241,13 @@ void ACatrunCandle::Tick(float DeltaSeconds)
 
 	// The cone and the body (eyes) turn together.
 	const float ConeCenter = GetActorRotation().Yaw + SweepOffset;
+	// The cone's point sits behind the body and the part of the cone behind the body is cut off, so
+	// the view starts at the body (and a wall behind the candle does not matter).
+	const float ConeCenterRad = FMath::DegreesToRadians(ConeCenter);
+	const FVector Forward(FMath::Cos(ConeCenterRad), FMath::Sin(ConeCenterRad), 0.f);
+	const float BackOffset = GetConeBackOffset(*S);
+	Sight->SetNearClip(BackOffset);
+	Sight->SetOriginOverride(GetActorLocation() - Forward * BackOffset);
 	Sight->Update(ConeCenter, S->CandleConeAngle * 0.5f);
 	Body->SetWorldRotation(FRotator(0.f, ConeCenter + AutoBodyYaw + BodyYawOffset, 0.f));
 

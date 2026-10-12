@@ -5,6 +5,9 @@
 #include "InputCoreTypes.h"
 #include "CatrunBellComponent.generated.h"
 
+class UInputAction;
+class UInputMappingContext;
+
 /**
  * Turns the cat's bell into a sound the monsters can hear.
  *
@@ -60,6 +63,25 @@ private:
 
 	// Emits the Large "Minion" bell sound at the cat's position.
 	bool EmitBellSound();
+
+	// No-bell zones (the cat hole): while the cat is inside one, the bell key is taken over by a
+	// context of our own that does nothing but show the notice. The cat's blueprint then never
+	// receives the bell input, so there is no bell animation, sound or wave either.
+	void UpdateBellBlock();
+	void BuildBlockContext();
+
+	UFUNCTION()
+	void HandleBlockedBellPressed();
+
+	UPROPERTY(Transient)
+	TObjectPtr<UInputMappingContext> BlockContext;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UInputAction> BlockAction;
+
+	bool bBlockContextBuilt = false;
+	bool bBlockActive = false;
+	bool bBlockBound = false;
 
 	TWeakObjectPtr<UActorComponent> CatActions;
 	bool bListeningToCatActions = false;

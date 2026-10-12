@@ -98,6 +98,9 @@ private:
 	const UCatrunSoundSettings* GetSettings();
 	TWeakObjectPtr<ASoundGridManager> CachedManager;
 
+	// How far behind the candle the point of the view cone is (cm), from CandleBodyWidth.
+	float GetConeBackOffset(const UCatrunSoundSettings& Settings) const;
+
 	// Patrol: moves the cone one step along its back-and-forth path.
 	void UpdateSweep(float DeltaSeconds, const UCatrunSoundSettings& Settings);
 

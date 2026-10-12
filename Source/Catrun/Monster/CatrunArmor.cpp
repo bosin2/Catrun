@@ -4,6 +4,7 @@
 #include "Perception/AlertMarkComponent.h"
 #include "Perception/CatrunCatQueries.h"
 #include "Perception/VisionFanComponent.h"
+#include "CatrunPatrolPoint.h"
 #include "CatrunRestartSubsystem.h"
 #include "Pathfinding/ArmorPathfinder.h"
 #include "Sound/CatrunDoor.h"
@@ -91,6 +92,15 @@ void ACatrunArmor::BeginPlay()
 	PostRotation = FRotator(0.f, SnapYaw(GetActorRotation().Yaw), 0.f);
 	SetActorRotation(PostRotation);
 	SetAction(EArmorAction::Idle);
+
+	// With a patrol route the armor sets off at once toward the first point (as soon as the
+	// sound grid is ready, see TickIdle).
+	if (HasPatrol())
+	{
+		PatrolIndex = 0;
+		bPatrolWaiting = true;
+		PatrolWaitLeft = 0.f;
+	}
 }
 
 // ---------------------------------------------------------------------------
@@ -114,25 +124,44 @@ void ACatrunArmor::OnSoundHeard_Implementation(const FCatrunSoundEvent& Event, f
 		return;
 	}
 	CurrentSoundSize = Event.Size;
+	RunCause = Event.Kind == ECatrunSoundKind::Bell ? ERunCause::Bell : ERunCause::Noise;
+	ApplyMoveSpeed(); // a new sound may change the speed in the middle of a run
 	Destination = Event.Location;
 	UE_LOG(LogCatrunSound, Log, TEXT("%s heard a sound (size %d, remaining %.0f), path has %d corners."),
 		*GetName(), (int32)Event.Size, RemainingBudget, PathCorners.Num());
 
 	// A sound beats everything: stop returning to the post and go to the sound.
-	const bool bWasStandingStill = !bHasDestination;
+	// The reaction animation (a slow start) only plays for an armor that stands still at its post,
+	// and never for the cat's footsteps. An armor that was lured away (looking around at the end
+	// of a trip, or walking back to its post) is already alert: it goes straight to the new sound.
+	const bool bAtPost = FVector::Dist2D(GetActorLocation(), PostLocation) <= 50.f;
+	const bool bStandingAtPost = Action == EArmorAction::Idle && !bHasDestination && (bAtPost || bPatrolWaiting);
+	const bool bPlayReaction = bStandingAtPost && Event.Kind != ECatrunSoundKind::Footstep;
 	bHasDestination = true;
 	bReturningToPost = false;
 	bRestorePostHeading = false;
+	bPatrolWaiting = false; // the patrol is interrupted; FinishTrip/StartReturnToPost resume it
 
-	if (bWasStandingStill)
+	if (bPlayReaction)
 	{
 		SetAction(EArmorAction::Reacting); // react first, then walk
 	}
-	else if (Action == EArmorAction::Walking)
+	else if (Action == EArmorAction::Walking || Action == EArmorAction::Idle || Action == EArmorAction::Looking)
 	{
-		BeginLeg(); // already walking: simply aim for the new path
+		BeginLeg(); // aim for the new path at once (this also ends a look-around)
 	}
-	// Other actions (reacting, turning, opening a door) finish first and then use the new path.
+	else if (Action == EArmorAction::Turning)
+	{
+		// A turn animation on the way back to the post is cut short: the body takes the part of the
+		// turn that was already shown, then turns smoothly toward the new path while it runs
+		// (FaceAxisToward in TickWalking), with no turn animation.
+		const float Done = ActionDuration > 0.f ? FMath::Clamp(ActionTime / ActionDuration, 0.f, 1.f) : 1.f;
+		const float Step = (bTurningRight ? 90.f : -90.f) * Done;
+		SetActorRotation(FRotator(0.f, GetActorRotation().Yaw + Step, 0.f));
+		TurnsRemaining = 0;
+		BeginLeg();
+	}
+	// Other actions (reacting, opening a door) finish first and then use the new path.
 }
 
 bool ACatrunArmor::PlanPath(const FVector& NewDestination)
@@ -190,7 +219,17 @@ UAnimationAsset* ACatrunArmor::MoveAnimation() const
 
 void ACatrunArmor::ApplyMoveSpeed()
 {
-	GetCharacterMovement()->MaxWalkSpeed = bReturningToPost ? WalkSpeed : ChaseSpeed;
+	float RunSpeed = ChaseSpeed;
+	if (const UCatrunSoundSettings* S = SoundManager.IsValid() ? SoundManager->GetSettings() : nullptr)
+	{
+		switch (RunCause)
+		{
+		case ERunCause::Mark:	RunSpeed = S->ArmorRunSpeedMark;	break;
+		case ERunCause::Bell:	RunSpeed = S->ArmorRunSpeedBell;	break;
+		case ERunCause::Noise:	RunSpeed = S->ArmorRunSpeedNoise;	break;
+		}
+	}
+	GetCharacterMovement()->MaxWalkSpeed = bReturningToPost ? WalkSpeed : RunSpeed;
 }
 
 void ACatrunArmor::SetAction(EArmorAction NewAction)
@@ -335,6 +374,14 @@ void ACatrunArmor::FinishTrip()
 	NextCorner = 0;
 	bHasDestination = false; // arrived: from now on any sound is followed (rule 4.3)
 
+	if (bReturningToPost && HasPatrol())
+	{
+		bReturningToPost = false;
+		UE_LOG(LogCatrunSound, Log, TEXT("%s reached patrol point %d."), *GetName(), PatrolIndex);
+		OnPatrolPointReached();
+		return;
+	}
+
 	if (bReturningToPost)
 	{
 		// Back at the post: stand there and turn to the original direction.
@@ -358,6 +405,12 @@ void ACatrunArmor::FinishTrip()
 
 void ACatrunArmor::StartReturnToPost()
 {
+	// With a patrol route "back to the post" means: walk on toward the patrol point it was heading to.
+	if (HasPatrol())
+	{
+		BeginPatrolLeg();
+		return;
+	}
 	const bool bFarFromPost = FVector::Dist2D(GetActorLocation(), PostLocation) > 50.f;
 	if (bReturnToPost && bFarFromPost && PlanPath(PostLocation))
 	{
@@ -369,9 +422,101 @@ void ACatrunArmor::StartReturnToPost()
 	SetAction(EArmorAction::Idle);
 }
 
+// ---------------------------------------------------------------------------
+// Patrol
+// ---------------------------------------------------------------------------
+
+bool ACatrunArmor::HasPatrol() const
+{
+	for (const ACatrunPatrolPoint* Point : PatrolPoints)
+	{
+		if (Point)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+void ACatrunArmor::OnPatrolPointReached()
+{
+	const ACatrunPatrolPoint* Point = PatrolPoints.IsValidIndex(PatrolIndex) ? PatrolPoints[PatrolIndex].Get() : nullptr;
+	const UCatrunSoundSettings* S = SoundManager.IsValid() ? SoundManager->GetSettings() : nullptr;
+	const float DefaultPause = S ? S->ArmorPatrolPause : 1.5f;
+	PatrolWaitLeft = (Point && Point->PauseSeconds >= 0.f) ? Point->PauseSeconds : DefaultPause;
+
+	// The next point of the route (empty slots are skipped).
+	const int32 Count = PatrolPoints.Num();
+	for (int32 Tries = 0; Tries < Count; ++Tries)
+	{
+		if (bPatrolLoop)
+		{
+			PatrolIndex = (PatrolIndex + 1) % Count;
+		}
+		else
+		{
+			int32 Next = PatrolIndex + PatrolStep;
+			if (Next < 0 || Next >= Count)
+			{
+				PatrolStep = -PatrolStep;
+				Next = PatrolIndex + PatrolStep;
+			}
+			PatrolIndex = FMath::Clamp(Next, 0, Count - 1);
+		}
+		if (PatrolPoints[PatrolIndex])
+		{
+			break;
+		}
+	}
+
+	bPatrolWaiting = true;
+	bRestorePostHeading = false;
+	SetAction(EArmorAction::Idle);
+}
+
+void ACatrunArmor::BeginPatrolLeg()
+{
+	const ACatrunPatrolPoint* Point = PatrolPoints.IsValidIndex(PatrolIndex) ? PatrolPoints[PatrolIndex].Get() : nullptr;
+	if (!Point)
+	{
+		bPatrolWaiting = true;
+		PatrolWaitLeft = 0.5f;
+		SetAction(EArmorAction::Idle);
+		return;
+	}
+
+	const FVector Target = Point->GetActorLocation();
+	bRestorePostHeading = false;
+	if (FVector::Dist2D(GetActorLocation(), Target) <= 50.f)
+	{
+		OnPatrolPointReached(); // already standing at it
+		return;
+	}
+	if (!PlanPath(Target))
+	{
+		bPatrolWaiting = true; // no path yet (the sound grid may not be ready): try again soon
+		PatrolWaitLeft = 0.5f;
+		SetAction(EArmorAction::Idle);
+		return;
+	}
+	bPatrolWaiting = false;
+	bHasDestination = false; // a patrol walk is no sound trip: a new sound is accepted at once
+	bReturningToPost = true; // walking speed and walk animation
+	BeginLeg();
+}
+
 // While standing at the post, slowly turn back to the direction the armor started with.
 void ACatrunArmor::TickIdle(float DeltaSeconds)
 {
+	if (bPatrolWaiting)
+	{
+		PatrolWaitLeft -= DeltaSeconds;
+		if (PatrolWaitLeft <= 0.f && !bHasDestination && !bFollowingMark)
+		{
+			BeginPatrolLeg();
+		}
+		return;
+	}
 	if (!bRestorePostHeading)
 	{
 		return;
@@ -420,8 +565,11 @@ void ACatrunArmor::SetFollowingMark(bool bFollow)
 	UE_LOG(LogCatrunSound, Log, TEXT("%s %s the marked cat."), *GetName(), bFollow ? TEXT("starts following") : TEXT("stops following"));
 	if (bFollow)
 	{
+		RunCause = ERunCause::Mark;
+		ApplyMoveSpeed();
 		bHasDestination = true; // a trip is on, so the post is forgotten
 		bReturningToPost = false;
+		bPatrolWaiting = false;
 		bRestorePostHeading = false;
 	}
 	else
@@ -497,7 +645,25 @@ void ACatrunArmor::UpdateDetection()
 		bDetectionDisplayShown = bShowCircle;
 	}
 
-	// The circle is centred on the armor. 180 degrees to each side = the whole circle.
+	// The circle is centred on the armor. While the open-door animation plays, the body walks away
+	// from the actor (the actor only catches up when the animation ends), so the circle follows
+	// the body bone instead.
+	bool bFollowBody = false;
+	if (Action == EArmorAction::OpeningDoor && DoorStep == EDoorStep::Animation && GetMesh() &&
+		GetMesh()->GetBoneIndex(DoorAnimTrackedBone) != INDEX_NONE)
+	{
+		const FVector Body = GetMesh()->GetBoneLocation(DoorAnimTrackedBone, EBoneSpaces::WorldSpace);
+		if (FVector::Dist2D(Body, GetActorLocation()) <= 400.f) // same sanity limit as EndDoorAnimation
+		{
+			Detection->SetOriginOverride(Body);
+			bFollowBody = true;
+		}
+	}
+	if (!bFollowBody)
+	{
+		Detection->ClearOriginOverride();
+	}
+	// 180 degrees to each side = the whole circle.
 	Detection->Update(0.f, 180.f);
 
 	APawn* Cat = CatrunCat::Find(this);
@@ -531,6 +697,7 @@ void ACatrunArmor::StartCatch(APawn& Cat)
 	CaughtCat = &Cat;
 	bHasDestination = false;
 	bReturningToPost = false;
+	bPatrolWaiting = false;
 	PathCorners.Reset();
 	NextCorner = 0;
 

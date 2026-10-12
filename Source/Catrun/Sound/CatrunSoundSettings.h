@@ -70,6 +70,15 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Bell", meta = (ClampMin = "0.0"))
 	float BellCooldown = 5.f;
 
+	// Shown on screen when the bell is pressed where it is forbidden (inside a CatrunNoBellZone,
+	// for example the cat hole). The bell then makes no sound for the monsters.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Bell")
+	FText BellBlockedNotice = NSLOCTEXT("Catrun", "BellBlockedNotice", "You cannot ring the bell here.");
+
+	// How long (seconds) a notice stays on screen.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Bell", meta = (ClampMin = "0.1"))
+	float NoticeDuration = 2.f;
+
 	// ---- Wave visualization --------------------------------------------------
 	// The wave is drawn by the ripple blueprints in /Game/Systems/Sound/Ripple. They read every
 	// number below from this asset, so the look of the wave is tuned in one place.
@@ -84,8 +93,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Visual", meta = (ClampMin = "0.1"))
 	float RippleBellWidthScale = 1.6f;
 
-	// The bell shows this many rings, one right after the other. Walking and running show one.
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Visual", meta = (ClampMin = "1", ClampMax = "6"))
+	// The bell shows this many rings, one right after the other (at most 3: that is how many the
+	// burst blueprint can spawn). Walking and running show one.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Visual", meta = (ClampMin = "1", ClampMax = "3"))
 	int32 RippleBurstCount = 3;
 
 	// Seconds between the rings of the bell.
@@ -135,6 +145,26 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Armor", meta = (ClampMin = "0.0"))
 	float ArmorTurnPenalty = 100.f;
 
+	// Running speed (cm/s) of an armor on its way to a cause. Three speeds, from the cause:
+	//  - Mark: chasing the cat that carries the candle mark (the fastest, the original run speed)
+	//  - Bell: running to the sound of the cat's bell
+	//  - Noise: running to a nearby sound (footsteps and the like)
+	// The cat's running speed should stay below Mark so a marked cat cannot outrun the armor.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Armor Speed", meta = (ClampMin = "0.0"))
+	float ArmorRunSpeedMark = 300.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Armor Speed", meta = (ClampMin = "0.0"))
+	float ArmorRunSpeedBell = 250.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Armor Speed", meta = (ClampMin = "0.0"))
+	float ArmorRunSpeedNoise = 200.f;
+
+	// Patrol: how long (seconds) an armor waits at each patrol point before it walks on.
+	// (A single point can override this with its own PauseSeconds.) The patrol walks at the
+	// armor's WalkSpeed.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Armor", meta = (ClampMin = "0.0"))
+	float ArmorPatrolPause = 1.5f;
+
 	// An armor this close (cm) to a closed door opens it.
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Armor", meta = (ClampMin = "0.0"))
 	float ArmorDoorOpenDistance = 120.f;
@@ -183,7 +213,18 @@ public:
 
 	// How fast the cone sweeps (degrees per second) and how long it waits at each end (seconds).
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Candle", meta = (ClampMin = "0.0"))
-	float CandleSweepSpeed = 20.f;
+	float CandleSweepSpeed = 10.f;
+
+	// Width (cm) of the candle's body. The view cone starts at the body: its point is moved back
+	// behind the candle so that the cone is exactly this wide where the body is. 0 = the cone
+	// starts at the middle of the candle (old look).
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Candle", meta = (ClampMin = "0.0"))
+	float CandleBodyWidth = 30.f;
+
+	// The cat touches the candle when it comes this close (cm, measured from the candle's middle).
+	// Touching makes the candle spot the cat at once, even from outside its view cone.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Candle", meta = (ClampMin = "0.0"))
+	float CandleTouchRadius = 45.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Candle", meta = (ClampMin = "0.0"))
 	float CandleSweepEndPause = 0.6f;
