@@ -63,8 +63,9 @@ void UCatrunMarkSubsystem::Tick(float DeltaTime)
 	{
 		return;
 	}
-	// The only way to lose the mark: hide.
-	if (CatrunCat::IsHiding(Cat))
+	// The only way to lose the mark: hide. Getting into a hideout counts from the first moment
+	// of the get-in animation.
+	if (CatrunCat::IsSafeFromCatch(Cat))
 	{
 		ClearMark(TEXT("the cat is in a hideout"));
 		return;

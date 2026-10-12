@@ -1,6 +1,8 @@
 #include "CatrunBellComponent.h"
 
 #include "Catrun.h"
+#include "CatrunNoBellZone.h"
+#include "CatrunNotice.h"
 #include "CatrunSoundSettings.h"
 #include "SoundGridManager.h"
 #include "Engine/World.h"
@@ -123,6 +125,20 @@ bool UCatrunBellComponent::EmitBellSound()
 	ASoundGridManager* Manager = ASoundGridManager::Get(this);
 	if (!Manager || !GetOwner())
 	{
+		return false;
+	}
+
+	// Forbidden places (the cat hole): no bell sound for the monsters, and the player is told why.
+	if (ACatrunNoBellZone::IsBellForbidden(*GetOwner()))
+	{
+		if (UCatrunNoticeSubsystem* Notice = UCatrunNoticeSubsystem::Get(this))
+		{
+			if (const UCatrunSoundSettings* Settings = Manager->GetSettings())
+			{
+				Notice->ShowNotice(Settings->BellBlockedNotice, Settings->NoticeDuration);
+			}
+		}
+		UE_LOG(LogCatrunSound, Log, TEXT("The bell is forbidden here, no sound for the monsters."));
 		return false;
 	}
 

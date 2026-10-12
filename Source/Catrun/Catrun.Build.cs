@@ -17,7 +17,10 @@ public class Catrun : ModuleRules
 			"InputCore",
 			"AIModule",
 			"NavigationSystem",
-			"GameplayTasks"
+			"GameplayTasks",
+			"UMG",
+			"Slate",
+			"SlateCore"
 		});
 	}
 }

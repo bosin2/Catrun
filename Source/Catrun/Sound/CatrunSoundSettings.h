@@ -70,6 +70,15 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Bell", meta = (ClampMin = "0.0"))
 	float BellCooldown = 5.f;
 
+	// Shown on screen when the bell is pressed where it is forbidden (inside a CatrunNoBellZone,
+	// for example the cat hole). The bell then makes no sound for the monsters.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Bell")
+	FText BellBlockedNotice = NSLOCTEXT("Catrun", "BellBlockedNotice", "You cannot ring the bell here.");
+
+	// How long (seconds) a notice stays on screen.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Bell", meta = (ClampMin = "0.1"))
+	float NoticeDuration = 2.f;
+
 	// ---- Wave visualization --------------------------------------------------
 	// The wave is drawn by the ripple blueprints in /Game/Systems/Sound/Ripple. They read every
 	// number below from this asset, so the look of the wave is tuned in one place.
