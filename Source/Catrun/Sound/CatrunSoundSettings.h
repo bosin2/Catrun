@@ -184,7 +184,18 @@ public:
 
 	// How fast the cone sweeps (degrees per second) and how long it waits at each end (seconds).
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Candle", meta = (ClampMin = "0.0"))
-	float CandleSweepSpeed = 20.f;
+	float CandleSweepSpeed = 10.f;
+
+	// Width (cm) of the candle's body. The view cone starts at the body: its point is moved back
+	// behind the candle so that the cone is exactly this wide where the body is. 0 = the cone
+	// starts at the middle of the candle (old look).
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Candle", meta = (ClampMin = "0.0"))
+	float CandleBodyWidth = 30.f;
+
+	// The cat touches the candle when it comes this close (cm, measured from the candle's middle).
+	// Touching makes the candle spot the cat at once, even from outside its view cone.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Candle", meta = (ClampMin = "0.0"))
+	float CandleTouchRadius = 45.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Candle", meta = (ClampMin = "0.0"))
 	float CandleSweepEndPause = 0.6f;

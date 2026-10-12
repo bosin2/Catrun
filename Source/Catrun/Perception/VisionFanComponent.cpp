@@ -86,12 +86,22 @@ bool UCatrunVisionFanComponent::EnsureReady()
 	return true;
 }
 
-float UCatrunVisionFanComponent::TraceRay(const FVector& Start, const FVector& Direction) const
+float UCatrunVisionFanComponent::GetFreeDistance(const FVector& From, const FVector& Direction, float MaxDistance) const
+{
+	if (!bReady || !Settings)
+	{
+		return MaxDistance;
+	}
+	const FVector Start(From.X, From.Y, FloorZ + Settings->VisionTraceHeight);
+	return TraceRay(Start, Direction, MaxDistance);
+}
+
+float UCatrunVisionFanComponent::TraceRay(const FVector& Start, const FVector& Direction, float MaxDistance) const
 {
 	const UWorld* World = GetWorld();
 	FCollisionQueryParams Params(SCENE_QUERY_STAT(CatrunVisionRay), /*bTraceComplex*/ true, GetOwner());
 	TArray<FHitResult> Hits;
-	World->LineTraceMultiByObjectType(Hits, Start, Start + Direction * Range, FCollisionObjectQueryParams(ECC_WorldStatic), Params);
+	World->LineTraceMultiByObjectType(Hits, Start, Start + Direction * MaxDistance, FCollisionObjectQueryParams(ECC_WorldStatic), Params);
 
 	for (const FHitResult& Hit : Hits)
 	{
@@ -108,7 +118,7 @@ float UCatrunVisionFanComponent::TraceRay(const FVector& Start, const FVector& D
 			return Hit.Distance;
 		}
 	}
-	return Range;
+	return MaxDistance;
 }
 
 void UCatrunVisionFanComponent::Update(float CenterAngleDegrees, float HalfAngleDegrees)
@@ -128,14 +138,16 @@ void UCatrunVisionFanComponent::Update(float CenterAngleDegrees, float HalfAngle
 	for (int32 i = 0; i < RayCount; ++i)
 	{
 		const float AngleRad = FMath::DegreesToRadians(CenterAngle - HalfAngle + (i + 0.5f) * Slice);
-		RayDistances[i] = TraceRay(Start, FVector(FMath::Cos(AngleRad), FMath::Sin(AngleRad), 0.f));
+		// The first NearClip cm of every ray are skipped (not traced, not drawn).
+		const FVector Direction(FMath::Cos(AngleRad), FMath::Sin(AngleRad), 0.f);
+		RayDistances[i] = NearClip + TraceRay(Start + Direction * NearClip, Direction, FMath::Max(Range - NearClip, 1.f));
 	}
 
 	if (Plane && Material)
 	{
 		WriteTexture();
 		Plane->SetWorldLocation(FVector(Origin.X, Origin.Y, FloorZ + Settings->VisualHeight));
-		Material->SetVectorParameterValue(TEXT("Center"), FLinearColor(Origin.X, Origin.Y, 0.f, 0.f));
+		Material->SetVectorParameterValue(TEXT("Center"), FLinearColor(Origin.X, Origin.Y, NearClip, 0.f)); // z = near clip, see M_VisionFan
 		Material->SetScalarParameterValue(TEXT("CenterAngle"), CenterAngle);
 		Material->SetScalarParameterValue(TEXT("HalfAngle"), HalfAngle);
 	}
@@ -164,7 +176,7 @@ bool UCatrunVisionFanComponent::CanSee(const FVector& WorldPoint, float PointRad
 	const FVector2D ToPoint(WorldPoint.X - Origin.X, WorldPoint.Y - Origin.Y);
 	const float Distance = ToPoint.Size();
 	const float NearEdge = Distance - PointRadius; // distance to the closest part of the body
-	if (NearEdge > Range)
+	if (NearEdge > Range || Distance < NearClip)
 	{
 		return false;
 	}
