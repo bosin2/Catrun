@@ -1,0 +1,12 @@
+* text=auto
+*.ini text eol=crlf
+*.uproject text eol=lf
+*.md text eol=lf
+*.uasset binary
+*.umap binary
+*.ubulk binary
+*.uexp binary
+*.fbx binary
+*.png binary
+*.jpg binary
+*.wav binary
