@@ -1,4 +1,5 @@
 #include "CatrunBellComponent.h"
+#include "Interaction/CatrunPuzzleSuspension.h"
 
 #include "Catrun.h"
 #include "CatrunNoBellZone.h"
@@ -133,8 +134,8 @@ bool UCatrunBellComponent::TryRing()
 
 bool UCatrunBellComponent::EmitBellSound()
 {
-	ASoundGridManager* Manager = ASoundGridManager::Get(this);
-	if (!Manager || !GetOwner())
+	if (UCatrunPuzzleSuspension::IsSuspended(this)) return false;
+	if (!GetOwner())
 	{
 		return false;
 	}
@@ -142,16 +143,12 @@ bool UCatrunBellComponent::EmitBellSound()
 	// Forbidden places (the cat hole): no bell sound for the monsters, and the player is told why.
 	if (ACatrunNoBellZone::IsBellForbidden(*GetOwner()))
 	{
-		if (UCatrunNoticeSubsystem* Notice = UCatrunNoticeSubsystem::Get(this))
-		{
-			if (const UCatrunSoundSettings* Settings = Manager->GetSettings())
-			{
-				Notice->ShowNotice(Settings->BellBlockedNotice, Settings->NoticeDuration);
-			}
-		}
+		HandleBlockedBellPressed();
 		UE_LOG(LogCatrunSound, Log, TEXT("The bell is forbidden here, no sound for the monsters."));
 		return false;
 	}
+	ASoundGridManager* Manager = ASoundGridManager::Get(this);
+	if (!Manager) return false;
 
 	FCatrunSoundEvent Event;
 	Event.Source = ECatrunSoundSource::Cat;
@@ -210,7 +207,7 @@ void UCatrunBellComponent::UpdateBellBlock()
 		return;
 	}
 
-	const bool bForbidden = ACatrunNoBellZone::IsBellForbidden(*Pawn);
+	const bool bForbidden = ACatrunNoBellZone::IsBellForbidden(*Pawn) || UCatrunPuzzleSuspension::IsSuspended(this);
 	if (bForbidden == bBlockActive)
 	{
 		return;
@@ -246,13 +243,8 @@ void UCatrunBellComponent::UpdateBellBlock()
 
 void UCatrunBellComponent::HandleBlockedBellPressed()
 {
+	if (UCatrunPuzzleSuspension::IsSuspended(this)) return;
 	const ASoundGridManager* Manager = ASoundGridManager::Get(this);
 	const UCatrunSoundSettings* Settings = Manager ? Manager->GetSettings() : nullptr;
-	if (UCatrunNoticeSubsystem* Notice = UCatrunNoticeSubsystem::Get(this))
-	{
-		if (Settings)
-		{
-			Notice->ShowNotice(Settings->BellBlockedNotice, Settings->NoticeDuration);
-		}
-	}
+	UCatrunNoticeLibrary::ShowBellDenied(this, Settings ? Settings->NoticeDuration : 2.f);
 }

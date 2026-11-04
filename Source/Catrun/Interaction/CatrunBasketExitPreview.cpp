@@ -27,7 +27,10 @@ void UCatrunBasketExitPreview::HidePath()
 
 void UCatrunBasketExitPreview::ShowPath(const FVector& Start, const FVector& End, const FCatrunBasketPreviewStyle& Style)
 {
-	if (bHasPath && LastStart.Equals(Start, .1) && LastEnd.Equals(End, .1)) return;
+	if (bHasPath && LastStart.Equals(Start, .1) && LastEnd.Equals(End, .1)
+		&& LastStyle.ArcHeight == Style.ArcHeight && LastStyle.DashOpacity == Style.DashOpacity
+		&& LastStyle.CircleOpacity == Style.CircleOpacity && LastStyle.CircleRadius == Style.CircleRadius
+		&& LastStyle.LineWidth == Style.LineWidth && LastStyle.Color == Style.Color) return;
 	TArray<FTransform> Transforms;
 	Transforms.Reserve(48);
 	auto Segment = [&](const FVector& A, const FVector& B)
@@ -64,6 +67,7 @@ void UCatrunBasketExitPreview::ShowPath(const FVector& Start, const FVector& End
 	if (MID) MID->SetVectorParameterValue(TEXT("GuideColor"), Style.Color);
 	MarkRenderStateDirty();
 	SetVisibility(true);
+	LastStyle = Style;
 	LastStart = Start;
 	LastEnd = End;
 	bHasPath = true;

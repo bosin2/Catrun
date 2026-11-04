@@ -33,5 +33,6 @@ public:
 private:
 	FVector LastStart = FVector::ZeroVector;
 	FVector LastEnd = FVector::ZeroVector;
+	FCatrunBasketPreviewStyle LastStyle;
 	bool bHasPath = false;
 };

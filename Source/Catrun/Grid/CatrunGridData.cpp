@@ -82,6 +82,7 @@ int32 FCatrunGridData::FindNearestCell(const FVector& WorldLocation, int32 MaxRi
 
 bool FCatrunGridData::Bake(UWorld& World, const UCatrunSoundSettings& Settings)
 {
+	PuzzleClearance.Reset();
 	// 1) Collect the floors. Each floor is a world-space box plus its sound cost multiplier.
 	TArray<TPair<FBox, float>> Floors;
 	FBox AllFloors(ForceInit);

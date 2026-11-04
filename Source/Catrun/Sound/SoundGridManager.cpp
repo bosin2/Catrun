@@ -4,6 +4,7 @@
 #include "CatrunBellComponent.h"
 #include "Perception/CatrunCatStateComponent.h"
 #include "CatrunDoor.h"
+#include "Interaction/CatrunStatuePuzzle.h"
 #include "CatrunSoundSettings.h"
 #include "SoundPropagation.h"
 #include "Components/BoxComponent.h"
@@ -33,6 +34,38 @@ ASoundGridManager* ASoundGridManager::Get(const UObject* WorldContextObject)
 		}
 	}
 	return nullptr;
+}
+
+const FCatrunGridData& ASoundGridManager::GetGrid() const
+{
+	RefreshPuzzleObstacles();
+	return Grid;
+}
+
+void ASoundGridManager::RefreshPuzzleObstacles() const
+{
+	if (!bPuzzleObstaclesDirty || !Grid.IsValid() || !GetWorld()) return;
+	bPuzzleObstaclesDirty = false;
+	TArray<FBox> Boxes;
+	for (TActorIterator<ACatrunStatuePuzzle> It(GetWorld()); It; ++It) It->GetObstacleBounds(Boxes);
+	if (Boxes.IsEmpty())
+	{
+		Grid.PuzzleClearance.Reset();
+		return;
+	}
+	Grid.PuzzleClearance.Init(MAX_flt,Grid.NumCells());
+	for (int32 Cell=0; Cell<Grid.NumCells(); ++Cell)
+	{
+		const FVector Center = Grid.CellCenter(Cell);
+		for (const FBox& Box : Boxes)
+		{
+			// Keep a rising gate closed to routing until the full 2m armor can pass.
+			if (!Box.IsValid || Box.Min.Z > Grid.Origin.Z+210 || Box.Max.Z < Grid.Origin.Z+10) continue;
+			const double DX = FMath::Max3(Box.Min.X-Center.X,0.,Center.X-Box.Max.X);
+			const double DY = FMath::Max3(Box.Min.Y-Center.Y,0.,Center.Y-Box.Max.Y);
+			Grid.PuzzleClearance[Cell] = FMath::Min(Grid.PuzzleClearance[Cell],static_cast<float>(FMath::Sqrt(DX*DX+DY*DY)));
+		}
+	}
 }
 
 // ---------------------------------------------------------------------------
@@ -84,6 +117,7 @@ void ASoundGridManager::BuildGrid()
 	}
 	if (Grid.Bake(*World, *Settings))
 	{
+		InvalidatePuzzleObstacles();
 		LastDistance.Reset();
 		RefreshDoorGates();
 		Modify();
@@ -185,6 +219,7 @@ bool ASoundGridManager::EmitSound(const FCatrunSoundEvent& Event)
 	{
 		return false;
 	}
+	RefreshPuzzleObstacles();
 
 	// 1) Where does the sound start? Use the closest floor cell to the given location.
 	const int32 SourceCell = Grid.FindNearestCell(Event.Location, 3, [this](int32 Cell) { return Grid.IsWalkable(Cell); });

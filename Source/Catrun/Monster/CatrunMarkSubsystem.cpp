@@ -1,4 +1,5 @@
 #include "CatrunMarkSubsystem.h"
+#include "Interaction/CatrunPuzzleSuspension.h"
 
 #include "Catrun.h"
 #include "CatrunArmor.h"
@@ -30,6 +31,7 @@ TStatId UCatrunMarkSubsystem::GetStatId() const
 
 void UCatrunMarkSubsystem::ApplyMark(APawn& Cat)
 {
+	if (UCatrunPuzzleSuspension::IsSuspended(this)) return;
 	if (bMarked)
 	{
 		return;
@@ -58,6 +60,7 @@ void UCatrunMarkSubsystem::ClearMark(const TCHAR* Reason)
 
 void UCatrunMarkSubsystem::Tick(float DeltaTime)
 {
+	if (UCatrunPuzzleSuspension::IsSuspended(this)) return;
 	APawn* Cat = CatrunCat::Find(this);
 	if (!Cat)
 	{
@@ -84,13 +87,14 @@ void UCatrunMarkSubsystem::Tick(float DeltaTime)
 // takes over only when it is clearly closer (MarkSwitchRatio).
 void UCatrunMarkSubsystem::UpdateFollowingArmor(const APawn& Cat)
 {
+	if (UCatrunPuzzleSuspension::IsSuspended(this)) return;
 	const ASoundGridManager* Manager = ASoundGridManager::Get(this);
 	const UCatrunSoundSettings* S = Manager ? Manager->GetSettings() : nullptr;
 	if (!S)
 	{
 		return;
 	}
-	// Levels like the tutorial: the mark does not call any armor.
+	// A level may explicitly disable mark pursuit for a separate demonstration.
 	if (!Manager->bMarkAttractsArmors)
 	{
 		return;
@@ -101,7 +105,7 @@ void UCatrunMarkSubsystem::UpdateFollowingArmor(const APawn& Cat)
 	for (TActorIterator<ACatrunArmor> It(GetWorld()); It; ++It)
 	{
 		const float Distance = FVector::Dist2D(It->GetActorLocation(), Cat.GetActorLocation());
-		if (Distance < ClosestDistance)
+		if (Distance <= S->MarkCallRadius && Distance < ClosestDistance)
 		{
 			Closest = *It;
 			ClosestDistance = Distance;
@@ -112,7 +116,8 @@ void UCatrunMarkSubsystem::UpdateFollowingArmor(const APawn& Cat)
 	if (Current)
 	{
 		const float CurrentDistance = FVector::Dist2D(Current->GetActorLocation(), Cat.GetActorLocation());
-		if (Closest == Current || ClosestDistance >= CurrentDistance * S->MarkSwitchRatio)
+		if (CurrentDistance <= S->MarkCallRadius &&
+			(Closest == Current || (Closest && ClosestDistance >= CurrentDistance * S->MarkSwitchRatio)))
 		{
 			return; // keep the one that is following
 		}

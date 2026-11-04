@@ -84,6 +84,9 @@ struct CATRUN_API FCatrunGridData
 	UPROPERTY()
 	float WallProbeLength = 0.f;
 
+	// Runtime puzzle geometry is separate from the baked walls so moving a statue leaves no ghost wall.
+	TArray<float> PuzzleClearance;
+
 	// ---- Queries ------------------------------------------------------------
 
 	bool IsValid() const { return Width > 0 && Height > 0; }
@@ -99,7 +102,8 @@ struct CATRUN_API FCatrunGridData
 	// Cell that contains a world location, or INDEX_NONE when outside the grid.
 	int32 WorldToCell(const FVector& WorldLocation) const;
 
-	bool IsWalkable(int32 Cell) const { return Walkable.IsValidIndex(Cell) && Walkable[Cell] != 0; }
+	bool IsWalkable(int32 Cell) const { return Walkable.IsValidIndex(Cell) && Walkable[Cell] != 0
+		&& (!PuzzleClearance.IsValidIndex(Cell) || PuzzleClearance[Cell] > CellSize * .5f); }
 	bool IsEdgeOpen(int32 Cell, int32 Dir) const { return EdgeMask.IsValidIndex(Cell) && (EdgeMask[Cell] & (1 << Dir)) != 0; }
 
 	// The cell next to Cell in direction Dir, or INDEX_NONE when that leaves the grid.

@@ -39,6 +39,7 @@ public:
 	virtual TStatId GetStatId() const override;
 
 private:
+	friend class FCatrunPuzzleSuspensionTest;
 	void CreateVisual(APawn& Cat);
 	void DestroyVisual();
 	void UpdateVisual();

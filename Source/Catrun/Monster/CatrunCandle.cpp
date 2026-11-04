@@ -1,4 +1,7 @@
 #include "CatrunCandle.h"
+#include "Interaction/CatrunPuzzleSuspension.h"
+#include "CatrunPerceptionPolicy.h"
+#include "Components/CapsuleComponent.h"
 
 #include "Catrun.h"
 #include "CatrunMarkSubsystem.h"
@@ -16,6 +19,13 @@ ACatrunCandle::ACatrunCandle()
 	PrimaryActorTick.bCanEverTick = true;
 
 	SetRootComponent(CreateDefaultSubobject<USceneComponent>(TEXT("Root")));
+
+	BlockingCapsule = CreateDefaultSubobject<UCapsuleComponent>(TEXT("BlockingCapsule"));
+	BlockingCapsule->SetupAttachment(GetRootComponent());
+	BlockingCapsule->InitCapsuleSize(22.f, 60.f);
+	BlockingCapsule->SetRelativeLocation(FVector(0, 0, 60));
+	BlockingCapsule->SetCollisionProfileName(TEXT("Pawn"));
+	BlockingCapsule->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
 
 	Body = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Body"));
 	Body->SetupAttachment(GetRootComponent());
@@ -130,6 +140,7 @@ void ACatrunCandle::TrackCat(float DeltaSeconds, const APawn& Cat, const UCatrun
 
 void ACatrunCandle::StartTracking(APawn& Cat, const UCatrunSoundSettings& S)
 {
+	if (UCatrunPuzzleSuspension::IsSuspended(this)) return;
 	bTracking = true;
 	LoseSightTimer = 0.f;
 	LastTurnDirection = 0.f;
@@ -141,14 +152,6 @@ void ACatrunCandle::StartTracking(APawn& Cat, const UCatrunSoundSettings& S)
 	{
 		PlayAnimation(SpotReactAnim, false);
 		ReactTimeLeft = SpotReactAnim->GetPlayLength();
-	}
-	// A fully spotted cat is marked (not in the tutorial: its candle has no penalties).
-	if (bPenaltiesEnabled)
-	{
-		if (UCatrunMarkSubsystem* Marks = UCatrunMarkSubsystem::Get(this))
-		{
-			Marks->ApplyMark(Cat);
-		}
 	}
 	OnCatSpotted.Broadcast(this, &Cat);
 }
@@ -171,16 +174,25 @@ void ACatrunCandle::StopTracking(const UCatrunSoundSettings& S)
 
 void ACatrunCandle::CheckForCat(float DeltaSeconds, APawn* Cat, const UCatrunSoundSettings& S)
 {
+	if (UCatrunPuzzleSuspension::IsSuspended(this)) return;
 	// Touching the candle counts like being seen: it reacts, looks toward the cat as far as it can,
-	// and marks it. (The body has no collision, so touching is a distance check.)
-	const bool bCatVisible = Cat && !CatrunCat::IsHiding(Cat);
+	// and marks it, but proximity never bypasses a wall.
+	const bool bCatVisible = Cat && !CatrunCat::IsSafeFromCatch(Cat);
 	const bool bTouching = bCatVisible && FVector::Dist2D(Cat->GetActorLocation(), GetActorLocation()) <= S.CandleTouchRadius;
-	const bool bSees = bTouching || (bCatVisible && Sight->CanSee(Cat->GetActorLocation(), S.CatSightRadius));
+	const bool bSees = bCatVisible && (bTouching || Sight->CanSee(Cat->GetActorLocation(), S.CatSightRadius))
+		&& CatrunPerception::HasDirectSight(*this, *Cat, S.VisionTraceHeight);
 	bCatInView = bSees;
 
 	if (bSees)
 	{
 		LoseSightTimer = 0.f;
+		// Tracking has a grace period; a cleared mark must not grant immunity when
+		// the cat reappears before that period expires. ApplyMark is idempotent.
+		if (bPenaltiesEnabled)
+		{
+			if (UCatrunMarkSubsystem* Marks = UCatrunMarkSubsystem::Get(this))
+				Marks->ApplyMark(*Cat);
+		}
 		if (!bTracking)
 		{
 			StartTracking(*Cat, S); // seeing the cat is enough: spotted at once
@@ -199,6 +211,7 @@ void ACatrunCandle::CheckForCat(float DeltaSeconds, APawn* Cat, const UCatrunSou
 
 void ACatrunCandle::Tick(float DeltaSeconds)
 {
+	if (UCatrunPuzzleSuspension::IsSuspended(this)) return;
 	Super::Tick(DeltaSeconds);
 
 	const UCatrunSoundSettings* S = GetSettings();

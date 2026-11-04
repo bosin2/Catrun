@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "CatrunBasketExitPreview.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "CatrunBasketInteractionComponent.generated.h"
 
 class ACharacter;
@@ -30,6 +31,17 @@ public:
 	/** F 입력: 접근 가능한 가장 가까운 바구니에 들어가거나, 선택한 방향으로 탈출한다. */
 	UFUNCTION(BlueprintCallable, Category="Basket")
 	void TryInteract();
+
+	/** Acquire the temporary bell before BP plays its editable clip. Native owns both deadlines. */
+	UFUNCTION(BlueprintCallable, Category="Bell")
+	bool BeginBellAction(float EmitDelay = .566667f, float Duration = 2.8f);
+	/** Capture calls this before taking its snapshot. Does not change collision or input locks. */
+	void CancelBellAction();
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Bell") bool bBellActive = false;
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Bell") int32 BellSessionId = 0;
+
+	// Tests the complete transit capsule, ignoring only this basket and its external body.
+	bool IsExitPathClear(const FVector& Origin, const FVector& Destination) const;
 
 	// 기존 몬스터·소리 컴포넌트가 리플렉션으로 읽는 이름이므로 변경하지 않는다.
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category="Cat Interaction")
@@ -69,11 +81,23 @@ public:
 	FVector ExitWorldLocation = FVector::ZeroVector;
 
 protected:
+	/** Simple BP presentation hook forwards to the existing OnBellRung dispatcher. */
+	UFUNCTION(BlueprintImplementableEvent, Category="Bell") void BellEmissionReady();
 	/** BP의 짧은 연결을 통해 기존 OnHiddenChanged 디스패처로 상태 변경을 전달한다. */
 	UFUNCTION(BlueprintImplementableEvent, Category="Basket", meta=(DisplayName="Basket Hidden State Changed"))
 	void BasketHiddenStateChanged();
 
 private:
+	friend class FCatrunBellCaptureTest;
+	void EmitBellAction(int32 ExpectedSession);
+	void FinishBellAction(int32 ExpectedSession);
+	FTimerHandle BellEmitTimer, BellFinishTimer;
+	UPROPERTY(Transient) TSubclassOf<UAnimInstance> BellSavedAnimClass;
+	UPROPERTY(Transient) FSingleAnimationPlayData BellSavedAnimation;
+	EAnimationMode::Type BellSavedAnimMode = EAnimationMode::AnimationBlueprint;
+	uint8 BellSavedMovementMode = 1, BellSavedCustomMode = 0;
+	bool bBellEmitted = false;
+	friend class FCatrunBasketRestoreTest;
 	void FindAndEnterBasket();
 	bool TestEntry(ACatrunHideBasket* Basket, FVector& OutLocation) const;
 	void EnterBasket(ACatrunHideBasket* Basket, const FVector& Location);
@@ -91,6 +115,9 @@ private:
 	UPROPERTY(Transient)
 	TSubclassOf<UAnimInstance> SavedAnimClass;
 
+	UPROPERTY(Transient)
+	FSingleAnimationPlayData SavedAnimation;
+	EAnimationMode::Type SavedAnimMode = EAnimationMode::AnimationBlueprint;
 	FTimerHandle AnimationTimer;
 	FTransform SavedEntryTransform;
 	FVector FloorLocation = FVector::ZeroVector;

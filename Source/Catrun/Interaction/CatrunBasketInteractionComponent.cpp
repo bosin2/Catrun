@@ -1,7 +1,15 @@
 #include "CatrunBasketInteractionComponent.h"
+#include "CatrunPuzzleSuspension.h"
 #include "BasketExitMath.h"
+#include "Perception/CatrunSafeRestore.h"
 #include "CatrunHideBasket.h"
+#include "CatrunPuzzleReset.h"
+#include "Sound/CatrunNoBellZone.h"
+#include "Sound/CatrunNotice.h"
+#include "LevelFlow/CatrunLevelFlow.h"
 #include "Animation/AnimInstance.h"
+#include "Animation/AnimSingleNodeInstance.h"
+#include "Monster/CatrunRestartSubsystem.h"
 #include "Animation/AnimSequenceBase.h"
 #include "Camera/PlayerCameraManager.h"
 #include "Components/CapsuleComponent.h"
@@ -34,19 +42,102 @@ void UCatrunBasketInteractionComponent::BeginPlay()
 
 void UCatrunBasketInteractionComponent::EndPlay(const EEndPlayReason::Type Reason)
 {
+	CancelBellAction();
+	if (BasketPhase != ECatrunBasketPhase::Outside && IsValid(CatOwner) && !CatOwner->IsActorBeingDestroyed()) AbortBasket();
 	if (GetWorld()) GetWorld()->GetTimerManager().ClearTimer(AnimationTimer);
 	if (IsValid(ActiveBasket)) ActiveBasket->Release(GetOwner());
 	if (ExitPreview) ExitPreview->DestroyComponent();
 	Super::EndPlay(Reason);
 }
 
+bool UCatrunBasketInteractionComponent::BeginBellAction(float EmitDelay, float Duration)
+{
+	if (!IsValid(CatOwner) || !GetWorld() || GetWorld()->bIsTearingDown || Busy || IsHidden || bBellActive
+		|| BasketPhase != ECatrunBasketPhase::Outside || !CatOwner->GetCharacterMovement()->IsMovingOnGround()
+		|| UCatrunPuzzleSuspension::IsSuspended(this)) return false;
+	if (const auto* Restart = UCatrunRestartSubsystem::Get(this); Restart && Restart->IsCatching()) return false;
+	if (const auto* Flow = UCatrunLevelFlowSubsystem::Get(this); Flow && (Flow->IsTransitioning() || Flow->IsStageComplete())) return false;
+	if (ACatrunNoBellZone::IsBellForbidden(*CatOwner)) { UCatrunNoticeLibrary::ShowBellDenied(this,2.f); return false; }
+	auto* Mesh = CatOwner->GetMesh();
+	auto* Move = CatOwner->GetCharacterMovement();
+	BellSavedMovementMode = Move->MovementMode;
+	BellSavedCustomMode = Move->CustomMovementMode;
+	BellSavedAnimMode = Mesh->GetAnimationMode();
+	BellSavedAnimClass = Mesh->GetAnimClass();
+	BellSavedAnimation = Mesh->AnimationData;
+	if (auto* Single = Mesh->GetSingleNodeInstance())
+	{
+		BellSavedAnimation.AnimToPlay = Single->GetCurrentAsset();
+		BellSavedAnimation.SavedPosition = Single->GetCurrentTime();
+		BellSavedAnimation.SavedPlayRate = Single->GetPlayRate();
+		BellSavedAnimation.bSavedLooping = Single->IsLooping();
+		BellSavedAnimation.bSavedPlaying = Single->IsPlaying();
+	}
+	Busy = bBellActive = true;
+	bBellEmitted = false;
+	const int32 Session = ++BellSessionId;
+	Move->StopMovementImmediately();
+	Move->DisableMovement();
+	// Weak, session-bound callbacks never read a later action's token. Clear only these handles.
+	const float End = FMath::Clamp(Duration,.02f,30.f);
+	GetWorld()->GetTimerManager().SetTimer(BellEmitTimer,FTimerDelegate::CreateWeakLambda(this,[this,Session]{EmitBellAction(Session);}),FMath::Clamp(EmitDelay,.001f,End-.001f),false);
+	GetWorld()->GetTimerManager().SetTimer(BellFinishTimer,FTimerDelegate::CreateWeakLambda(this,[this,Session]{FinishBellAction(Session);}),End,false);
+	return true;
+}
+
+void UCatrunBasketInteractionComponent::EmitBellAction(int32 ExpectedSession)
+{
+	if (!bBellActive || bBellEmitted || ExpectedSession != BellSessionId) return;
+	bBellEmitted = true;
+	// The sound component rechecks no-bell zones at the actual emission position.
+	if (!UCatrunPuzzleSuspension::IsSuspended(this)) BellEmissionReady();
+}
+
+void UCatrunBasketInteractionComponent::FinishBellAction(int32 ExpectedSession)
+{
+	if (bBellActive && ExpectedSession == BellSessionId) CancelBellAction();
+}
+
+void UCatrunBasketInteractionComponent::CancelBellAction()
+{
+	if (!bBellActive) return;
+	bBellActive = false;
+	++BellSessionId; // invalidate before restoring animation, which can invoke callbacks
+	if (GetWorld())
+	{
+		GetWorld()->GetTimerManager().ClearTimer(BellEmitTimer);
+		GetWorld()->GetTimerManager().ClearTimer(BellFinishTimer);
+	}
+	if (IsValid(CatOwner) && !CatOwner->IsActorBeingDestroyed())
+	{
+		auto* Mesh = CatOwner->GetMesh();
+		Mesh->SetAnimInstanceClass(BellSavedAnimClass);
+		Mesh->AnimationData = BellSavedAnimation;
+		Mesh->SetAnimationMode(BellSavedAnimMode,true);
+		if (BellSavedAnimMode == EAnimationMode::AnimationSingleNode)
+		{
+			Mesh->PlayAnimation(BellSavedAnimation.AnimToPlay,BellSavedAnimation.bSavedLooping);
+			Mesh->SetPosition(BellSavedAnimation.SavedPosition,false);
+			Mesh->SetPlayRate(BellSavedAnimation.SavedPlayRate);
+			if (!BellSavedAnimation.bSavedPlaying) Mesh->Stop();
+		}
+		CatOwner->GetCharacterMovement()->SetMovementMode(static_cast<EMovementMode>(BellSavedMovementMode),BellSavedCustomMode);
+	}
+	Busy = false;
+}
+
 void UCatrunBasketInteractionComponent::TryInteract()
 {
+	if (UCatrunPuzzleSuspension::IsSuspended(this)) return;
 	if (!IsValid(CatOwner) || Busy) return;
+	if (const auto* Restart = UCatrunRestartSubsystem::Get(this); Restart && Restart->IsCatching()) return;
 	if (BasketPhase == ECatrunBasketPhase::Hidden)
 		ExitBasket();
 	else if (BasketPhase == ECatrunBasketPhase::Outside && CatOwner->GetCharacterMovement()->IsMovingOnGround())
-		FindAndEnterBasket();
+	{
+		if (auto* Recovery = ACatrunPuzzleReset::FindNearby(CatOwner)) Recovery->TryUse(CatOwner);
+		else FindAndEnterBasket();
+	}
 }
 
 void UCatrunBasketInteractionComponent::FindAndEnterBasket()
@@ -102,6 +193,16 @@ void UCatrunBasketInteractionComponent::EnterBasket(ACatrunHideBasket* Basket, c
 	UCharacterMovementComponent* Movement = CatOwner->GetCharacterMovement();
 	SavedEntryTransform = CatOwner->GetActorTransform();
 	SavedAnimClass = Mesh->GetAnimClass();
+	SavedAnimMode = Mesh->GetAnimationMode();
+	SavedAnimation = Mesh->AnimationData;
+	if (auto* Single = Mesh->GetSingleNodeInstance())
+	{
+		SavedAnimation.AnimToPlay = Single->GetCurrentAsset();
+		SavedAnimation.SavedPosition = Single->GetCurrentTime();
+		SavedAnimation.SavedPlayRate = Single->GetPlayRate();
+		SavedAnimation.bSavedLooping = Single->IsLooping();
+		SavedAnimation.bSavedPlaying = Single->IsPlaying();
+	}
 	SavedMovementMode = Movement->MovementMode;
 	SavedCustomMovementMode = Movement->CustomMovementMode;
 	bSavedCollision = CatOwner->GetActorEnableCollision();
@@ -153,6 +254,7 @@ void UCatrunBasketInteractionComponent::FinishEnter()
 
 void UCatrunBasketInteractionComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* Tick)
 {
+	if (UCatrunPuzzleSuspension::IsSuspended(this)) return;
 	Super::TickComponent(DeltaTime, TickType, Tick);
 	if (!IsValid(CatOwner) || !IsValid(ActiveBasket)) { AbortBasket(); return; }
 	if (BasketPhase == ECatrunBasketPhase::Hidden)
@@ -196,8 +298,26 @@ void UCatrunBasketInteractionComponent::UpdateExitCandidate(bool bForce)
 	FloorLocation = Floor.ImpactPoint;
 	const UCapsuleComponent* Capsule = CatOwner->GetCapsuleComponent();
 	ExitWorldLocation = FloorLocation+FVector(0,0,Capsule->GetScaledCapsuleHalfHeight()+2.);
-	CanExit = !GetWorld()->OverlapBlockingTestByChannel(ExitWorldLocation, FQuat::Identity, ObstacleChannel,
-		FCollisionShape::MakeCapsule(Capsule->GetScaledCapsuleRadius(), Capsule->GetScaledCapsuleHalfHeight()), Params);
+	CanExit = IsExitPathClear(Origin, ExitWorldLocation);
+}
+
+bool UCatrunBasketInteractionComponent::IsExitPathClear(const FVector& Origin, const FVector& Destination) const
+{
+	if (!IsValid(CatOwner) || !GetWorld()) return false;
+	const auto* Capsule = CatOwner->GetCapsuleComponent();
+	FCollisionQueryParams Params(SCENE_QUERY_STAT(BasketExitTransit), false, CatOwner);
+	if (IsValid(ActiveBasket))
+	{
+		Params.AddIgnoredActor(ActiveBasket);
+		if (IsValid(ActiveBasket->ExternalBody)) Params.AddIgnoredActor(ActiveBasket->ExternalBody);
+	}
+	const auto Shape = FCollisionShape::MakeCapsule(Capsule->GetScaledCapsuleRadius(), Capsule->GetScaledCapsuleHalfHeight());
+	const FCollisionResponseParams Responses(Capsule->GetCollisionResponseToChannels());
+	FHitResult Hit;
+	// HiddenPoint can be authored on the floor; traverse with the capsule at landing height.
+	const FVector Start(Origin.X, Origin.Y, Destination.Z);
+	return !GetWorld()->OverlapBlockingTestByChannel(Destination, FQuat::Identity, ECC_Pawn, Shape, Params, Responses)
+		&& !GetWorld()->SweepSingleByChannel(Hit, Start, Destination, FQuat::Identity, ECC_Pawn, Shape, Params, Responses);
 }
 
 void UCatrunBasketInteractionComponent::UpdatePreview()
@@ -235,19 +355,45 @@ void UCatrunBasketInteractionComponent::ExitBasket()
 void UCatrunBasketInteractionComponent::RestoreCharacter()
 {
 	if (!IsValid(CatOwner)) return;
-	if (SavedAnimClass) CatOwner->GetMesh()->SetAnimInstanceClass(SavedAnimClass);
+	auto* Mesh = CatOwner->GetMesh();
+	Mesh->SetAnimInstanceClass(SavedAnimClass);
+	Mesh->AnimationData = SavedAnimation;
+	Mesh->SetAnimationMode(SavedAnimMode, true);
+	if (SavedAnimMode == EAnimationMode::AnimationSingleNode)
+	{
+		Mesh->PlayAnimation(SavedAnimation.AnimToPlay, SavedAnimation.bSavedLooping);
+		Mesh->SetPosition(SavedAnimation.SavedPosition, false);
+		Mesh->SetPlayRate(SavedAnimation.SavedPlayRate);
+		if (!SavedAnimation.bSavedPlaying) Mesh->Stop();
+	}
 	CatOwner->GetMesh()->SetVisibility(bSavedMeshVisible, true);
-	CatOwner->SetActorEnableCollision(bSavedCollision);
+	const bool bPlacedSafely = CatrunRestore::PlaceForCollision(*CatOwner, CatOwner->GetActorTransform(), bSavedCollision);
+	CatOwner->SetActorEnableCollision(bSavedCollision && bPlacedSafely);
 	CatOwner->bUseControllerRotationYaw = bSavedControllerYaw;
 	UCharacterMovementComponent* Movement = CatOwner->GetCharacterMovement();
 	Movement->bOrientRotationToMovement = bSavedOrientToMovement;
 	Movement->bUseControllerDesiredRotation = bSavedControllerDesiredRotation;
-	Movement->SetMovementMode(EMovementMode(SavedMovementMode), SavedCustomMovementMode);
+	Movement->SetMovementMode(bPlacedSafely ? EMovementMode(SavedMovementMode) : MOVE_None, SavedCustomMovementMode);
 }
 
 void UCatrunBasketInteractionComponent::FinishExit()
 {
 	if (BasketPhase != ECatrunBasketPhase::Exiting) return;
+	if (!IsValid(CatOwner) || !IsValid(ActiveBasket)) { AbortBasket(); return; }
+	if (!IsExitPathClear(ActiveBasket->GetHiddenLocation(), CatOwner->GetActorLocation()))
+	{
+		// An actor entered the path during the exit animation. Stay hidden; never enable collision inside it.
+		CatOwner->SetActorLocation(ActiveBasket->GetHiddenLocation(), false, nullptr, ETeleportType::TeleportPhysics);
+		CatOwner->GetMesh()->SetVisibility(false, true);
+		BasketPhase = ECatrunBasketPhase::Hidden;
+		Busy = false;
+		IsHidden = true;
+		ActiveBasket->ClothIdle();
+		UpdateExitCandidate(true);
+		UpdatePreview();
+		BasketHiddenStateChanged();
+		return;
+	}
 	RestoreCharacter();
 	if (IsValid(ActiveBasket)) ActiveBasket->Release(GetOwner());
 	ActiveBasket = nullptr;
@@ -264,7 +410,7 @@ void UCatrunBasketInteractionComponent::AbortBasket()
 	GetWorld()->GetTimerManager().ClearTimer(AnimationTimer);
 	if (BasketPhase != ECatrunBasketPhase::Outside && IsValid(CatOwner))
 	{
-		CatOwner->SetActorTransform(SavedEntryTransform, false, nullptr, ETeleportType::TeleportPhysics);
+		CatrunRestore::PlaceForCollision(*CatOwner, SavedEntryTransform, bSavedCollision);
 		RestoreCharacter();
 	}
 	if (IsValid(ActiveBasket)) ActiveBasket->Release(GetOwner());

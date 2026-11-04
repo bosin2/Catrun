@@ -22,6 +22,8 @@ class CATRUN_API UCatrunCatStateComponent : public UActorComponent
 public:
 	UCatrunCatStateComponent();
 
+	virtual void BeginPlay() override;
+
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	// True from the start of the "get into a hideout" animation until the cat is hidden.

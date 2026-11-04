@@ -338,6 +338,10 @@ public:
 
 	// ---- Candle mark (design doc 4.5) ------------------------------------------
 	// Provisional: the rules are to be discussed with the team, so keep everything here.
+	// Straight-line horizontal call radius. Walls/closed doors do not block the mark;
+	// the armor still follows a navigable path and opens doors on the way.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Mark", meta = (ClampMin = "0.0", Units = "cm"))
+	float MarkCallRadius = 1500.f;
 
 	// The armor that follows the mark plans its way to the cat this often (seconds).
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Mark", meta = (ClampMin = "0.1"))

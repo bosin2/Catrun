@@ -22,6 +22,7 @@ TSharedRef<SWidget> UCatrunNoticeWidget::RebuildWidget()
 		TextBlock->SetShadowOffset(FVector2D(2.f, 2.f));
 		TextBlock->SetShadowColorAndOpacity(FLinearColor(0.f, 0.f, 0.f, 0.8f));
 		TextBlock->SetJustification(ETextJustify::Center);
+		TextBlock->SetText(PendingText);
 
 		if (UCanvasPanelSlot* TextSlot = Root->AddChildToCanvas(TextBlock))
 		{
@@ -35,10 +36,17 @@ TSharedRef<SWidget> UCatrunNoticeWidget::RebuildWidget()
 
 void UCatrunNoticeWidget::SetNoticeText(const FText& Text)
 {
+	PendingText = Text;
 	if (TextBlock)
 	{
 		TextBlock->SetText(Text);
 	}
+}
+
+void UCatrunNoticeWidget::SetScreenAnchor(FVector2D Anchor)
+{
+	if (TextBlock)
+		if (auto* TextSlot = Cast<UCanvasPanelSlot>(TextBlock->Slot)) TextSlot->SetAnchors(FAnchors(Anchor.X, Anchor.Y));
 }
 
 UCatrunNoticeSubsystem* UCatrunNoticeSubsystem::Get(const UObject* WorldContextObject)
@@ -51,6 +59,29 @@ bool UCatrunNoticeSubsystem::ShouldCreateSubsystem(UObject* Outer) const
 {
 	const UWorld* World = Cast<UWorld>(Outer);
 	return World && World->IsGameWorld();
+}
+
+void UCatrunNoticeSubsystem::Deinitialize()
+{
+	if (GetWorld()) GetWorld()->GetTimerManager().ClearTimer(HideTimer);
+	if (Widget) Widget->RemoveFromParent();
+	Widget = nullptr;
+	Super::Deinitialize();
+}
+
+FText UCatrunNoticeSubsystem::BellDeniedText()
+{
+	return NSLOCTEXT("Catrun", "BellDeniedExact", "방울을 울릴수없습니다");
+}
+
+void UCatrunNoticeLibrary::ShowBottomNotice(const UObject* Context, const FText& Text, float Duration)
+{
+	if (auto* Notice = UCatrunNoticeSubsystem::Get(Context)) Notice->ShowNotice(Text, Duration);
+}
+
+void UCatrunNoticeLibrary::ShowBellDenied(const UObject* Context, float Duration)
+{
+	ShowBottomNotice(Context, UCatrunNoticeSubsystem::BellDeniedText(), Duration);
 }
 
 void UCatrunNoticeSubsystem::ShowNotice(const FText& Text, float Duration)

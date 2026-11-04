@@ -77,7 +77,8 @@ public:
 	// Adds every door that is currently closed to OutDoors.
 	void GetClosedDoors(TArray<ACatrunDoor*>& OutDoors) const;
 
-	const FCatrunGridData& GetGrid() const { return Grid; }
+	const FCatrunGridData& GetGrid() const;
+	void InvalidatePuzzleObstacles() { bPuzzleObstaclesDirty = true; }
 
 	// Height (world Z, cm) of the floor the grid was built on. The ripple is drawn at this height.
 	UFUNCTION(BlueprintPure, Category = "Sound")
@@ -108,8 +109,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debug")
 	bool bDebugShowArmorLabel = false;
 
-	// Does the candle mark call an armor to the marked cat? Switch it off in the tutorial: the mark
-	// is still put on the cat and shown, but no armor comes for it.
+	// Does the candle mark call an armor to the marked cat? Enabled in the playable tutorial.
+	// Separate demonstration maps may disable pursuit while keeping the mark visible.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
 	bool bMarkAttractsArmors = true;
 
@@ -128,6 +129,8 @@ protected:
 	TObjectPtr<UCatrunSoundSettings> Settings;
 
 private:
+	void RefreshPuzzleObstacles() const;
+	mutable bool bPuzzleObstaclesDirty = true;
 	void RefreshDoorGates();
 	void DeliverPendingSounds();
 	void AttachBellToPlayer();
@@ -135,7 +138,7 @@ private:
 
 	// The baked grid, saved with the level.
 	UPROPERTY()
-	FCatrunGridData Grid;
+	mutable FCatrunGridData Grid;
 
 	UPROPERTY(Transient)
 	TArray<FPendingSound> PendingSounds;

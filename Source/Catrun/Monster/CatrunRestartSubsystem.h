@@ -8,8 +8,8 @@
  * Handles the failure restart when an armor catches the cat: fades the screen to black, starts the
  * level again and fades back in. One exists per game world.
  *
- * The level is opened again, so a new world (and a new subsystem) is created. The "fade in
- * after the restart" request is therefore kept in a static variable that survives the level change.
+ * The game-instance flow session carries a single-use restart/fade request across level reloads.
+ * It cannot leak into another PIE instance or a fresh game.
  */
 UCLASS()
 class CATRUN_API UCatrunRestartSubsystem : public UWorldSubsystem
@@ -21,6 +21,13 @@ public:
 
 	// The first armor to catch the cat gets true. Others get false, so only one catch plays.
 	bool TryBeginCatch();
+	bool IsCatching() const { return bCatching; }
+	// Only the component that successfully acquired TryBeginCatch may release it.
+	void CancelCatch() { bCatching = false; }
+
+	// Recovery for an impossible safe placement. Queued after temporary-action cleanup.
+	bool ScheduleRecoveryRestart(float FadeInDuration = .5f);
+	bool HasRecoveryRestartPending() const { return bRecoveryScheduled; }
 
 	// Fades the screen of the cat's player to black (and keeps it black).
 	void FadeOut(APawn* Cat, float Duration);
@@ -32,5 +39,8 @@ public:
 	virtual void OnWorldBeginPlay(UWorld& InWorld) override;
 
 private:
+	bool CanRecoverWorld() const;
+	bool bRecoveryScheduled = false;
+	FTimerHandle RecoveryTimer;
 	bool bCatching = false;
 };

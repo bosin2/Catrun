@@ -4,6 +4,7 @@
 #include "GameFramework/Actor.h"
 #include "CatrunCandle.generated.h"
 
+class UCapsuleComponent;
 class ASoundGridManager;
 class UAnimationAsset;
 class UCatrunAlertMarkComponent;
@@ -76,6 +77,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Candle")
 	bool bShowSightDisplay = true;
 
+	// Attached to the original root: changing collision never shifts the authored mesh/origin.
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Candle|Collision")
+	TObjectPtr<UCapsuleComponent> BlockingCapsule;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Candle")
 	TObjectPtr<USkeletalMeshComponent> Body;
 
@@ -93,6 +98,7 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
+	friend class FCatrunPuzzleSuspensionTest;
 	// The settings of the level's sound system (found once, then remembered). nullptr until the
 	// sound system exists.
 	const UCatrunSoundSettings* GetSettings();

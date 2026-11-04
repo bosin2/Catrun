@@ -25,3 +25,7 @@ Content/Collections/
 Thumbs.db
 .DS_Store
 /Config/UserEngine.ini
+
+# Generated Python caches
+__pycache__/
+*.py[cod]

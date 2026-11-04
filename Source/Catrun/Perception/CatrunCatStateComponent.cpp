@@ -1,4 +1,6 @@
 #include "CatrunCatStateComponent.h"
+#include "Components/CapsuleComponent.h"
+#include "GameFramework/Character.h"
 
 #include "Catrun.h"
 #include "Sound/CatrunSoundSettings.h"
@@ -9,6 +11,16 @@
 UCatrunCatStateComponent::UCatrunCatStateComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
+}
+
+void UCatrunCatStateComponent::BeginPlay()
+{
+	Super::BeginPlay();
+	if (auto* Cat = Cast<ACharacter>(GetOwner()))
+	{
+		Cat->GetCapsuleComponent()->SetCollisionObjectType(ECC_Pawn);
+		Cat->GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
+	}
 }
 
 UActorComponent* UCatrunCatStateComponent::FindCatActions() const

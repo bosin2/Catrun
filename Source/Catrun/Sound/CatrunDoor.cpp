@@ -1,4 +1,5 @@
 #include "CatrunDoor.h"
+#include "Interaction/CatrunPuzzleSuspension.h"
 
 #include "SoundGridManager.h"
 #include "Components/BoxComponent.h"
@@ -108,6 +109,7 @@ void ACatrunDoor::BeginHandOpen(const FVector& OpenerLocation)
 
 void ACatrunDoor::DriveWithPoint(const FVector& PointWorld)
 {
+	if (UCatrunPuzzleSuspension::IsSuspended(this)) return;
 	if (!bHandDriven)
 	{
 		return;
@@ -154,6 +156,7 @@ void ACatrunDoor::SetOpen(bool bNewOpen)
 
 void ACatrunDoor::Tick(float DeltaSeconds)
 {
+	if (UCatrunPuzzleSuspension::IsSuspended(this)) return;
 	Super::Tick(DeltaSeconds);
 
 	// Turn the leaf toward the target angle at a constant speed.

@@ -5,6 +5,7 @@
 #include "Sound/SoundTypes.h"
 #include "CatrunArmor.generated.h"
 
+class UCatrunCapturePresentationComponent;
 class ACatrunDoor;
 class ACatrunPatrolPoint;
 class ASoundGridManager;
@@ -41,9 +42,8 @@ enum class EArmorAction : uint8
  *
  * The path comes from CatrunArmorPath (A* on the sound grid, up/down/left/right only), so a
  * path is a list of corners. Each action plays its own animation; the animations are plain
- * animation assets, set per armor blueprint (no animation blueprint needed yet).
- *
- * Not included yet: patrol, search points, vision, catching the cat.
+ * animation assets with optional Blueprint presentation requests. Patrol, near perception,
+ * candle mark pursuit and capture use the same action state.
  */
 UCLASS()
 class CATRUN_API ACatrunArmor : public ACharacter, public ICatrunSoundListener
@@ -67,11 +67,25 @@ public:
 	bool HasDestination() const { return bHasDestination; }
 
 	// Called by the mark system (UCatrunMarkSubsystem). While following, this armor knows where
-	// the cat really is and keeps coming for it; it ignores sounds.
+	// the cat really is; a sound investigation temporarily takes priority.
 	void SetFollowingMark(bool bFollow);
 	bool IsFollowingMark() const { return bFollowingMark; }
 	bool IsCatching() const { return Action == EArmorAction::Catching; }
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Armor|Capture")
+	TObjectPtr<UCatrunCapturePresentationComponent> CapturePresentation;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Armor|Animation", meta=(ClampMin="0.1"))
+	float TurnPlayRate = 5.f;
+
+	// BP/AnimBP can play presentation without replacing native state/path safety.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Armor|Animation")
+	bool bUseBlueprintAnimation = false;
+	UFUNCTION(BlueprintImplementableEvent, Category="Armor|Animation")
+	void AnimationRequested(UAnimationAsset* Animation, bool bLoop, float PlayRate);
+
+	bool IsInvestigatingSound() const { return bInvestigatingSound; }
+	FVector GetInvestigationLocation() const { return Destination; }
 	// ---- Movement ----
 	// Only used when the level has no sound settings. The real running speeds are in
 	// DA_SoundSettings ("Armor Speed": ArmorRunSpeedMark / Bell / Noise).
@@ -214,7 +228,9 @@ public:
 
 	// Show the current action above the armor and draw its path and destination.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debug")
-	bool bDebugDrawPath = true;
+	bool bDebugDrawPath = false;
+	/** Effective opt-in, including the process-wide catrun.DebugArmorPaths console switch. */
+	UFUNCTION(BlueprintPure, Category="Debug") bool IsPathDebugEnabled() const;
 
 	// Text above the head that shows the current action (a world text, so it needs no HUD).
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Debug")
@@ -224,6 +240,9 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
+	friend class FCatrunPuzzleSuspensionTest;
+	friend class FCatrunSoundPriorityTest;
+	friend class FCatrunCaptureInitialSetupTest;
 	// ---- Path ----
 	// Asks the pathfinder for a path to NewDestination. Returns false when there is none.
 	bool PlanPath(const FVector& NewDestination);
@@ -231,7 +250,7 @@ private:
 	// ---- Actions ----
 	// Switches to a new action and plays its animation. Looping animations repeat, others play once.
 	void SetAction(EArmorAction NewAction);
-	void PlayAnimation(UAnimationAsset* Anim, bool bLoop);
+	void PlayAnimation(UAnimationAsset* Anim, bool bLoop, float Rate = 1.f);
 
 	// Moving animation and speed of the current trip: running to a sound, or walking back to the post.
 	UAnimationAsset* MoveAnimation() const;
@@ -296,6 +315,7 @@ private:
 	// ---- Following the candle mark ----
 	void UpdateMarkFollowing(float DeltaSeconds);
 	bool bFollowingMark = false;
+	bool bInvestigatingSound = false;
 
 	// Stuck detection while walking (see TickWalking).
 	float StuckTimer = 0.f;
@@ -308,22 +328,6 @@ private:
 	// starts the level again.
 	void StartCatch(APawn& Cat);
 	void TickCatching(float DeltaSeconds);
-	void SetUpCatchCamera(APawn& Cat, const UCatrunSoundSettings& S);
-	void UpdateGrab(float DeltaSeconds, const UCatrunSoundSettings& S);
-	FVector GetHandsMiddle() const;
-
-	TWeakObjectPtr<APawn> CaughtCat;
-
-	float CatchTime = 0.f;			// seconds since the catch started
-	float PickupStartTime = 0.f;	// when the pick-up animation starts (after the camera has arrived)
-	float FadeStartTime = 0.f;		// when the fade to black starts
-	float RestartTime = 0.f;		// when the level is started again
-	bool bPickupStarted = false;
-	bool bFadeStarted = false;
-	bool bRestartRequested = false;
-	bool bGrabbed = false;			// the cat is in the armor's hands
-	float GrabTime = 0.f;			// seconds since the cat was grabbed
-	FVector GrabStartLocation = FVector::ZeroVector;	// where the cat was when it was grabbed
 	bool bDetectionConfigured = false;
 	bool bDetectionDisplayShown = true;	// the display starts visible until the first update decides
 

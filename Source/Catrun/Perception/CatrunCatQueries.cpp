@@ -1,4 +1,5 @@
 #include "CatrunCatQueries.h"
+#include "Interaction/CatrunBasketInteractionComponent.h"
 
 #include "CatrunCatStateComponent.h"
 #include "GameFramework/Pawn.h"
@@ -16,6 +17,8 @@ bool CatrunCat::IsHiding(const APawn* Cat)
 	{
 		return false;
 	}
+	if (const auto* Basket = Cat->FindComponentByClass<UCatrunBasketInteractionComponent>())
+		return Basket->BasketPhase != ECatrunBasketPhase::Outside;
 	// The interaction blueprint class is not known to C++, so find its component by class name.
 	for (const UActorComponent* Component : Cat->GetComponents())
 	{
