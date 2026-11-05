@@ -18,6 +18,29 @@ UCatrunPuzzleRevealComponent::UCatrunPuzzleRevealComponent()
 	PrimaryComponentTick.bCanEverTick = true;
 	PrimaryComponentTick.bStartWithTickEnabled = false;
 }
+float UCatrunPuzzleRevealComponent::ResolvePresentationOrthoWidth(float AuthoredWidth) const
+{
+	return bPreserveSessionFraming ? GameplayView.OrthoWidth : AuthoredWidth;
+}
+void UCatrunPuzzleRevealComponent::ApplyGameplayFraming()
+{
+	if (!bPreserveSessionFraming || !Camera.IsValid()) return;
+	auto* View = Camera->GetCameraComponent();
+	View->ProjectionMode = GameplayView.ProjectionMode;
+	View->FieldOfView = GameplayView.FOV;
+	View->OrthoWidth = GameplayView.OrthoWidth;
+	View->AspectRatio = GameplayView.AspectRatio;
+	View->bConstrainAspectRatio = GameplayView.bConstrainAspectRatio;
+	View->bOverrideAspectRatioAxisConstraint = GameplayView.AspectRatioAxisConstraint.IsSet();
+	if (GameplayView.AspectRatioAxisConstraint.IsSet()) View->AspectRatioAxisConstraint = GameplayView.AspectRatioAxisConstraint.GetValue();
+	View->bAutoCalculateOrthoPlanes = GameplayView.bAutoCalculateOrthoPlanes;
+	View->AutoPlaneShift = GameplayView.AutoPlaneShift;
+	View->bUpdateOrthoPlanes = GameplayView.bUpdateOrthoPlanes;
+	View->bUseCameraHeightAsViewTarget = GameplayView.bUseCameraHeightAsViewTarget;
+	View->OrthoNearClipPlane = GameplayView.OrthoNearClipPlane;
+	View->OrthoFarClipPlane = GameplayView.OrthoFarClipPlane;
+	Camera->SetActorRotation(CameraStartRotation);
+}
 bool UCatrunPuzzleRevealComponent::ShouldAbort() const
 {
 	const UWorld* World = GetWorld();
@@ -41,6 +64,7 @@ bool UCatrunPuzzleRevealComponent::BeginReveal(FName Id, AActor* Gate, const FBo
 	PuzzleId = Id;
 	++SessionId;
 	Elapsed = PhaseElapsed = 0;
+	bPreserveSessionFraming = bPreserveGameplayFraming;
 	PC->SetIgnoreMoveInput(true);
 	PC->SetIgnoreLookInput(true);
 	bOwnInput = true;
@@ -57,33 +81,44 @@ bool UCatrunPuzzleRevealComponent::BeginReveal(FName Id, AActor* Gate, const FBo
 	}
 	if (PC->PlayerCameraManager)
 	{
-		CameraStart = PC->PlayerCameraManager->GetCameraLocation();
-		CameraStartRotation = PC->PlayerCameraManager->GetCameraRotation();
+		GameplayView = PC->PlayerCameraManager->GetCameraCacheView();
+		CameraStart = GameplayView.Location;
+		CameraStartRotation = GameplayView.Rotation;
 		CameraEnd = CameraStart;
 		CameraEndRotation = CameraStartRotation;
 		const FVector Focus = Bounds.GetCenter();
 		FCollisionQueryParams Params(SCENE_QUERY_STAT(PuzzleReveal), false, Gate);
 		Params.AddIgnoredActor(PC->GetPawn());
 		const auto Probe = FCollisionShape::MakeSphere(10.f);
+		const FVector Forward = CameraStartRotation.Vector();
+		// Keep the gate at the same camera-space depth as the original player focus.
+		// In perspective this preserves its scale; in ortho OrthoWidth preserves scale.
+		const float FocusDepth = FMath::Max(100.f, float(FVector::DotProduct(PC->GetPawn()->GetActorLocation() - CameraStart, Forward)));
 		for (float Sign : {1.f, -1.f})
 		{
-			const FVector Candidate = Focus + FVector(GateCameraOffset.X, GateCameraOffset.Y * Sign, GateCameraOffset.Z);
+			const FVector Candidate = bPreserveSessionFraming ? Focus - Forward * FocusDepth
+				: Focus + FVector(GateCameraOffset.X, GateCameraOffset.Y * Sign, GateCameraOffset.Z);
 			FHitResult Hit;
 			if (!GetWorld()->OverlapBlockingTestByChannel(Candidate, FQuat::Identity, ECC_Camera, Probe, Params)
 				&& !GetWorld()->SweepSingleByChannel(Hit, CameraStart, Candidate, FQuat::Identity, ECC_Camera, Probe, Params)
 				&& !GetWorld()->LineTraceTestByChannel(Candidate, Focus, ECC_Visibility, Params))
 			{
-				CameraEnd = Candidate; CameraEndRotation = (Focus-Candidate).Rotation(); break;
+				CameraEnd = Candidate;
+				CameraEndRotation = bPreserveSessionFraming ? CameraStartRotation : (Focus-Candidate).Rotation();
+				break;
 			}
+			if (bPreserveSessionFraming) break; // A blocked calm pan never switches to a different angle.
 		}
 		FActorSpawnParameters Spawn;
 		Spawn.Owner = GetOwner();
 		Spawn.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 		Camera = GetWorld()->SpawnActor<ACameraActor>(CameraStart, CameraStartRotation, Spawn);
-		if (Camera.IsValid()) { Camera->GetCameraComponent()->bConstrainAspectRatio = false; PC->SetViewTarget(Camera.Get()); }
+		if (Camera.IsValid()) { Camera->GetCameraComponent()->bConstrainAspectRatio = false; ApplyGameplayFraming(); PC->SetViewTarget(Camera.Get()); }
 	}
 	SetComponentTickEnabled(true);
-	return SetPhase(ECatrunPuzzleRevealPhase::ToGate);
+	const bool bStarted = SetPhase(ECatrunPuzzleRevealPhase::ToGate);
+	ApplyGameplayFraming(); // BP may copy static camera settings while attaching its art.
+	return bStarted;
 }
 bool UCatrunPuzzleRevealComponent::SetPhase(ECatrunPuzzleRevealPhase Next)
 {
@@ -103,7 +138,12 @@ void UCatrunPuzzleRevealComponent::NotifyCameraAtGate(int32 ExpectedSession)
 }
 void UCatrunPuzzleRevealComponent::GateOpened(FName Id)
 {
-	if (PuzzleId == Id && Phase == ECatrunPuzzleRevealPhase::Opening) SetPhase(ECatrunPuzzleRevealPhase::Returning);
+	if (PuzzleId == Id && Phase == ECatrunPuzzleRevealPhase::Opening)
+	{
+		// A newly obstructed outbound path may stop before the planned endpoint.
+		if (Camera.IsValid()) { CameraEnd = Camera->GetActorLocation(); CameraEndRotation = Camera->GetActorRotation(); }
+		SetPhase(ECatrunPuzzleRevealPhase::Returning);
+	}
 }
 void UCatrunPuzzleRevealComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* Function)
 {
@@ -115,6 +155,7 @@ void UCatrunPuzzleRevealComponent::TickComponent(float DeltaTime, ELevelTick Tic
 		|| Elapsed >= FMath::Clamp(MaximumLockTime, 1.f, 15.f)
 		|| (Camera.IsValid() && Player->GetViewTarget() != Camera.Get())) { Cleanup(); return; }
 	const int32 ExpectedSession = SessionId;
+	ApplyGameplayFraming();
 	if (Phase == ECatrunPuzzleRevealPhase::ToGate || Phase == ECatrunPuzzleRevealPhase::Returning)
 	{
 		const bool bReturn = Phase == ECatrunPuzzleRevealPhase::Returning;
@@ -128,7 +169,8 @@ void UCatrunPuzzleRevealComponent::TickComponent(float DeltaTime, ELevelTick Tic
 			FHitResult Hit;
 			if (!GetWorld()->SweepSingleByChannel(Hit, Camera->GetActorLocation(), Wanted, FQuat::Identity, ECC_Camera, FCollisionShape::MakeSphere(10.f), Params))
 				Camera->SetActorLocation(Wanted);
-			Camera->SetActorRotation(FMath::Lerp(bReturn ? CameraEndRotation : CameraStartRotation, bReturn ? CameraStartRotation : CameraEndRotation, Alpha));
+			Camera->SetActorRotation(bPreserveSessionFraming ? CameraStartRotation
+				: FMath::Lerp(bReturn ? CameraEndRotation : CameraStartRotation, bReturn ? CameraStartRotation : CameraEndRotation, Alpha));
 		}
 		if (Alpha >= 1.f)
 		{
@@ -157,6 +199,7 @@ void UCatrunPuzzleRevealComponent::Cleanup()
 	Camera.Reset(); Player.Reset(); PreviousView.Reset(); TargetGate.Reset();
 	SetComponentTickEnabled(false);
 	SetPhase(ECatrunPuzzleRevealPhase::Inactive);
+	bPreserveSessionFraming = false;
 }
 void UCatrunPuzzleRevealComponent::EndPlay(const EEndPlayReason::Type Reason)
 {

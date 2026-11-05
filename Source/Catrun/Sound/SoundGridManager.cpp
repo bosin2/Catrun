@@ -1,4 +1,5 @@
 #include "SoundGridManager.h"
+#include "Interaction/CatrunPuzzleSuspension.h"
 
 #include "Catrun.h"
 #include "CatrunBellComponent.h"
@@ -13,8 +14,36 @@
 #include "Engine/World.h"
 #include "GameFramework/Pawn.h"
 #include "Kismet/GameplayStatics.h"
+#include "Serialization/JsonWriter.h"
+#include "Policies/CondensedJsonPrintPolicy.h"
 
 using namespace CatrunGrid;
+
+FString ASoundGridManager::ExportBakedGridSnapshot() const
+{
+	FString Output;
+	const auto Writer = TJsonWriterFactory<TCHAR, TCondensedJsonPrintPolicy<TCHAR>>::Create(&Output);
+	Writer->WriteObjectStart();
+	Writer->WriteArrayStart(TEXT("Origin"));
+	Writer->WriteValue(Grid.Origin.X); Writer->WriteValue(Grid.Origin.Y); Writer->WriteValue(Grid.Origin.Z);
+	Writer->WriteArrayEnd();
+	Writer->WriteValue(TEXT("CellSize"), Grid.CellSize);
+	Writer->WriteValue(TEXT("Width"), Grid.Width);
+	Writer->WriteValue(TEXT("Height"), Grid.Height);
+	auto Array = [&Writer](const TCHAR* Name, const auto& Values)
+	{
+		Writer->WriteArrayStart(Name);
+		for (const auto Value : Values) Writer->WriteValue(static_cast<double>(Value));
+		Writer->WriteArrayEnd();
+	};
+	Array(TEXT("Walkable"), Grid.Walkable);
+	Array(TEXT("CostMultiplier"), Grid.CostMultiplier);
+	Array(TEXT("EdgeMask"), Grid.EdgeMask);
+	Array(TEXT("WallDistance"), Grid.WallDistance);
+	Writer->WriteValue(TEXT("WallProbeLength"), Grid.WallProbeLength);
+	Writer->WriteObjectEnd(); Writer->Close();
+	return Output;
+}
 
 ASoundGridManager::ASoundGridManager()
 {
@@ -93,6 +122,8 @@ void ASoundGridManager::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
+	DeliveryBudget = 32;
+	if (!UCatrunPuzzleSuspension::IsSuspended(this)) ListenerClock += FMath::Max(0.f, DeltaSeconds);
 	DeliverPendingSounds();
 	if (bAutoAttachBell && !bBellAttached)
 	{
@@ -230,7 +261,9 @@ bool ASoundGridManager::EmitSound(const FCatrunSoundEvent& Event)
 	}
 
 	// 2) Spread the sound over the grid.
-	LastBudget = Settings->GetBudget(Event.Size);
+	const bool bPlayerBell = Event.Source == ECatrunSoundSource::Cat && Event.Kind == ECatrunSoundKind::Bell;
+	LastBudget = bPlayerBell && FMath::IsFinite(PlayerBellBudgetOverride) && PlayerBellBudgetOverride > 0.f
+		? PlayerBellBudgetOverride : Settings->GetBudget(Event.Size);
 	const int32 NumReached = CatrunSoundPropagation::Run(Grid, ClosedGateCells, SourceCell, LastBudget, LastDistance);
 	UE_LOG(LogCatrunSound, Log, TEXT("EmitSound: size=%d budget=%.0f reached %d cells."), static_cast<int32>(Event.Size), LastBudget, NumReached);
 
@@ -239,7 +272,7 @@ bool ASoundGridManager::EmitSound(const FCatrunSoundEvent& Event)
 	// out smoothly instead of being cut along the 25 cm cells.
 	const float PictureBudget = LastBudget + Grid.CellSize * 2.f;
 	CatrunSoundPropagation::Run(Grid, ClosedGateCells, SourceCell, PictureBudget, PictureDistance);
-	const double Now = World->GetTimeSeconds();
+	const double Now = ListenerClock;
 
 	// 4) Schedule the moment each listener hears it: when the wave reaches them.
 	for (TActorIterator<AActor> It(World); It; ++It)
@@ -258,7 +291,7 @@ bool ASoundGridManager::EmitSound(const FCatrunSoundEvent& Event)
 		Pending.Listener = Actor;
 		Pending.Event = Event;
 		Pending.RemainingBudget = Remaining;
-		Pending.ArrivalTime = Now + (LastBudget - Remaining) / Settings->SoundSpeed; // travelled distance / speed
+		Pending.ArrivalTime = Now + (LastBudget - Remaining) / FMath::Max(1.f, Settings->SoundSpeed); // travelled distance / speed
 		PendingSounds.Add(Pending);
 	}
 	DeliverPendingSounds(); // listeners standing at the source hear it right away
@@ -270,23 +303,21 @@ bool ASoundGridManager::EmitSound(const FCatrunSoundEvent& Event)
 // Tells listeners about sounds whose wave has arrived.
 void ASoundGridManager::DeliverPendingSounds()
 {
-	if (PendingSounds.IsEmpty())
+	if (bDeliveringSounds || UCatrunPuzzleSuspension::IsSuspended(this)) return;
+	TGuardValue<bool> Guard(bDeliveringSounds, true);
+	// Callback may append events or acquire suspension. Remove only the selected snapshot before calling it.
+	while (DeliveryBudget > 0 && !UCatrunPuzzleSuspension::IsSuspended(this))
 	{
-		return;
-	}
-	const double Now = GetWorld()->GetTimeSeconds();
-	for (int32 i = PendingSounds.Num() - 1; i >= 0; --i)
-	{
-		if (PendingSounds[i].ArrivalTime > Now)
-		{
-			continue;
-		}
-		const FPendingSound Pending = PendingSounds[i];
-		PendingSounds.RemoveAtSwap(i);
+		PendingSounds.RemoveAll([](const FPendingSound& Entry) { return !Entry.Listener.IsValid(); });
+		int32 Next = INDEX_NONE;
+		for (int32 Index=0; Index<PendingSounds.Num(); ++Index)
+			if (PendingSounds[Index].ArrivalTime <= ListenerClock && (Next == INDEX_NONE || PendingSounds[Index].ArrivalTime < PendingSounds[Next].ArrivalTime)) Next = Index;
+		if (Next == INDEX_NONE) break;
+		const FPendingSound Pending = PendingSounds[Next];
+		PendingSounds.RemoveAt(Next); // stable insertion ordering for equal arrival times
+		--DeliveryBudget;
 		if (AActor* Listener = Pending.Listener.Get())
-		{
 			ICatrunSoundListener::Execute_OnSoundHeard(Listener, Pending.Event, Pending.RemainingBudget);
-		}
 	}
 }
 

@@ -1,6 +1,7 @@
 #pragma once
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Camera/CameraTypes.h"
 #include "CatrunPuzzleRevealComponent.generated.h"
 
 class ACameraActor;
@@ -10,7 +11,7 @@ UENUM(BlueprintType)
 enum class ECatrunPuzzleRevealPhase : uint8 { Inactive, ToGate, Opening, Returning };
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FCatrunPuzzleRevealEvent, FName, PuzzleId, ECatrunPuzzleRevealPhase, Phase, int32, SessionId);
 
-/** Bounded native fallback. BP owns bars/dust/rumble and may tune the owned camera. */
+/** Bounded native camera owner. BP owns bars/dust and optional legacy magnification. */
 UCLASS(ClassGroup=(Catrun), meta=(BlueprintSpawnableComponent))
 class CATRUN_API UCatrunPuzzleRevealComponent : public UActorComponent
 {
@@ -24,11 +25,15 @@ public:
 	/** Ignore stale callbacks. Native timeout always remains active. */
 	UFUNCTION(BlueprintCallable, Category="Puzzle|Reveal") void NotifyCameraAtGate(int32 ExpectedSession);
 	UFUNCTION(BlueprintPure, Category="Puzzle|Reveal") ACameraActor* GetRevealCamera() const { return Camera.Get(); }
+	/** Presentation must resolve its zoom endpoints through this bridge. */
+	UFUNCTION(BlueprintPure, Category="Puzzle|Reveal") float ResolvePresentationOrthoWidth(float AuthoredWidth) const;
 	UPROPERTY(BlueprintAssignable, Category="Puzzle|Reveal") FCatrunPuzzleRevealEvent OnPhaseChanged;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Puzzle|Reveal") ECatrunPuzzleRevealPhase Phase = ECatrunPuzzleRevealPhase::Inactive;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Puzzle|Reveal") FName PuzzleId;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Puzzle|Reveal") int32 SessionId = 0;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Puzzle|Reveal") bool bEnabled = true;
+	/** Translate the gameplay view to the gate without turning or changing magnification. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Puzzle|Reveal") bool bPreserveGameplayFraming = true;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Puzzle|Reveal", meta=(ClampMin="0")) float CameraTravelTime = .65f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Puzzle|Reveal", meta=(ClampMin="0")) float CameraReturnTime = .6f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Puzzle|Reveal", meta=(ClampMin="1", ClampMax="15")) float MaximumLockTime = 8.f;
@@ -39,6 +44,7 @@ private:
 	friend class FStatueRevealTest;
 	bool SetPhase(ECatrunPuzzleRevealPhase Next);
 	bool ShouldAbort() const;
+	void ApplyGameplayFraming();
 	void Cleanup();
 	TWeakObjectPtr<APlayerController> Player;
 	TWeakObjectPtr<AActor> PreviousView;
@@ -49,6 +55,8 @@ private:
 	FRotator CameraStartRotation = FRotator::ZeroRotator;
 	FVector CameraEnd = FVector::ZeroVector;
 	FRotator CameraEndRotation = FRotator::ZeroRotator;
+	FMinimalViewInfo GameplayView;
+	bool bPreserveSessionFraming = false;
 	float Elapsed = 0.f;
 	float PhaseElapsed = 0.f;
 	bool bOwnInput = false;

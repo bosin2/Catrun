@@ -2,12 +2,21 @@
 #include "Misc/AutomationTest.h"
 #include "CoreGlobals.h"
 #include "Animation/AnimationAsset.h"
+#include "Animation/AnimSequence.h"
+#include "Animation/AnimSingleNodeInstance.h"
+#include "Animation/AnimInstance.h"
+#include "Animation/AnimMontage.h"
+#include "Engine/SkeletalMesh.h"
+#include "Monster/CatrunPatrolPoint.h"
+#include "Sound/CatrunDoor.h"
+#include "Perception/VisionFanComponent.h"
 #include "Materials/MaterialInterface.h"
 #include "Monster/CatrunArmor.h"
 #include "Monster/CatrunCandle.h"
 #include "Monster/CatrunCapturePresentationComponent.h"
 #include "Monster/Tests/CatrunCaptureCallbackProbe.h"
 #include "Perception/CatrunSafeRestore.h"
+#include "Perception/CatrunGroundSupport.h"
 #include "Monster/CatrunPerceptionPolicy.h"
 #include "Monster/CatrunRestartSubsystem.h"
 #include "Monster/CatrunMarkSubsystem.h"
@@ -111,8 +120,15 @@ bool FCatrunSoundPriorityTest::RunTest(const FString&)
 	TestTrue(TEXT("Fast turn duration honors editable playback rate"), FMath::IsNearlyEqual(Armor->ActionDuration, Armor->TurnRightAnim->GetPlayLength()/Armor->TurnPlayRate));
 	Armor->ActionTime = Armor->ActionDuration*.5f; Armor->TickTurning(.01f);
 	TestTrue(TEXT("Actor rotation does not double the authored body turn"), FMath::IsNearlyZero(Armor->GetActorRotation().Yaw));
+	const auto* EndpointSequence=CastChecked<UAnimSequence>(Armor->TurnRightAnim.Get());
+	const FQuat EndpointRoot=EndpointSequence->ExtractRootMotionFromRange(0.,EndpointSequence->GetPlayLength(),FAnimExtractContext(EndpointSequence->GetPlayLength(),true)).GetRotation();
+	const FQuat ExpectedEndpoint=(Armor->TurnStartActorRotation*Armor->TurnMeshBasis*EndpointRoot*Armor->TurnMeshBasis.Inverse()).GetNormalized();
 	Armor->ActionTime = Armor->ActionDuration; Armor->TickTurning(.01f);
-	TestTrue(TEXT("Quarter-turn actor commit happens once at animation end"), FMath::IsNearlyEqual(Armor->GetActorRotation().Yaw, 90.f));
+	AddInfo(FString::Printf(TEXT("Turn endpoint actual yaw %.9f extracted yaw %.9f"),Armor->GetActorRotation().Yaw,ExpectedEndpoint.Rotator().Yaw));
+	TestTrue(TEXT("Quarter-turn actor commit matches actual extracted endpoint"),Armor->GetActorQuat().Equals(ExpectedEndpoint,1.e-5f));
+	// Root extraction measured 90.072517548 in Task2Fix1Task3Tests01. Sanity-check near a quarter,
+	// while the strict quaternion assertion above governs correctness against the actual asset.
+	TestTrue(TEXT("Authored extracted quarter stays within one tenth degree of axis"),FMath::Abs(FMath::FindDeltaAngleDegrees(Armor->GetActorRotation().Yaw,90.f)) < .1f);
 	Armor->bSeeingCat = true; Sound.Location = FVector(100,100,90);
 	Armor->OnSoundHeard_Implementation(Sound, 100.f);
 	TestFalse(TEXT("Near detection dominates sound"), Armor->GetInvestigationLocation().Equals(Sound.Location));
@@ -199,6 +215,8 @@ bool FCatrunCaptureGrabHeadingTest::RunTest(const FString&)
 		F.Cat->SetActorRotation(FRotator(0.f, StartYaw + 15.f, 0.f));
 		if (!Capture->BeginCapture(F.Cat, F.Settings)) return false;
 		Capture->TickComponent(.01f, LEVELTICK_All, nullptr);
+		// Framing now aligns to the cat. This test isolates notify-time carry heading.
+		Armor->SetActorRotation(FRotator(0.f, TargetYaw, 0.f));
 		// The grab pose can differ from acquisition; use the actual notify-time heading.
 		F.Cat->SetActorRotation(FRotator(0.f, StartYaw, 0.f));
 		return Capture->NotifyGrab(Capture->SessionId);
@@ -232,6 +250,33 @@ bool FCatrunCaptureGrabHeadingTest::RunTest(const FString&)
 	return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunBasketEntryHeightTest, "Catrun.PrototypeAI.BasketEntryHeightKeepsCapsuleUpright", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FCatrunBasketEntryHeightTest::RunTest(const FString&)
+{
+	for (double EntryZ : {-90.,90.})
+	{
+		FPrototypeWorld F;
+		auto* Actions=NewObject<UCatrunBasketInteractionComponent>(F.Cat); Actions->RegisterComponent(); Actions->CatOwner=F.Cat;
+		auto* Basket=F.Spawn<ACatrunHideBasket>(FVector::ZeroVector);
+		const FTransform Original(FRotator(0,37,0),FVector(-80,0,EntryZ));
+		F.Cat->SetActorTransform(Original); F.Cat->GetCharacterMovement()->SetMovementMode(MOVE_Flying);
+		Actions->EnterAnimation=nullptr; Actions->ExitAnimation=nullptr;
+		TestTrue(TEXT("Entry height regression has a real horizontal and vertical offset"),
+			FMath::Abs((Basket->GetHiddenLocation()-Original.GetLocation()).Rotation().Pitch)>45.);
+		Actions->EnterBasket(Basket,Original.GetLocation());
+		TestTrue(TEXT("Ascending and descending entry headings keep the actual capsule upright"),
+			F.Cat->GetCapsuleComponent()->GetUpVector().Equals(FVector::UpVector,.001));
+		TestTrue(TEXT("Entry still faces the actual horizontal basket direction"),FMath::IsNearlyZero(F.Cat->GetActorRotation().Yaw,.001));
+		Actions->FinishEnter();
+		TestTrue(TEXT("Elevated hidden anchor does not change capsule orientation"),F.Cat->GetCapsuleComponent()->GetUpVector().Equals(FVector::UpVector,.001));
+		Actions->AbortBasket();
+		TestTrue(TEXT("Abort restores exact original location and heading"),F.Cat->GetActorTransform().Equals(Original,.001));
+		TestTrue(TEXT("Height-only entry correction preserves restored collision and movement"),
+			F.Cat->GetActorEnableCollision() && F.Cat->GetCharacterMovement()->MovementMode==MOVE_Flying);
+	}
+	return true;
+}
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunBasketRestoreTest, "Catrun.PrototypeAI.BasketTransitLateBlockerAndRestore", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 bool FCatrunBasketRestoreTest::RunTest(const FString&)
 {
@@ -250,7 +295,14 @@ bool FCatrunBasketRestoreTest::RunTest(const FString&)
 	F.Cat->GetMesh()->SetAnimationMode(EAnimationMode::AnimationSingleNode);
 	F.Cat->GetCharacterMovement()->SetMovementMode(MOVE_Flying);
 	Actions->EnterAnimation = nullptr; Actions->ExitAnimation = nullptr;
-	Actions->EnterBasket(Basket, Origin); Actions->FinishEnter();
+	F.Cat->SetActorRotation(FRotator(0,37,0));
+	const FQuat EntryRotation=F.Cat->GetActorQuat();
+	TestTrue(TEXT("Regression fixture has a vertical hidden-anchor offset"),FMath::IsNearlyEqual(FMath::Abs(Basket->GetHiddenLocation().Z-Origin.Z),90.));
+	Actions->EnterBasket(Basket, Origin);
+	TestTrue(TEXT("Vertical entry retains yaw and never tips the gameplay capsule"),
+		F.Cat->GetCapsuleComponent()->GetUpVector().Equals(FVector::UpVector,.001) && F.Cat->GetActorQuat().Equals(EntryRotation,.001));
+	Actions->FinishEnter();
+	TestTrue(TEXT("Hidden phase retains upright support-query capsule"),F.Cat->GetCapsuleComponent()->GetUpVector().Equals(FVector::UpVector,.001));
 	Actions->BasketPhase = ECatrunBasketPhase::Exiting; Actions->Busy = true;
 	F.Cat->SetActorLocation(Destination);
 	Blocker = F.Box(Destination, FVector(25,25,40));
@@ -259,11 +311,34 @@ bool FCatrunBasketRestoreTest::RunTest(const FString&)
 	TestFalse(TEXT("Late blocker never restores overlapping collision"), F.Cat->GetActorEnableCollision());
 	// A second late blocker occupies the saved entry while the component is removed.
 	F.Box(FVector(0,0,48), FVector(1000,1000,10));
-	F.Spawn<ACatrunArmor>(Actions->SavedEntryTransform.GetLocation());
+	auto* EntryOccupant=F.Spawn<ACatrunArmor>(Actions->SavedEntryTransform.GetLocation());
+	// Record the real fallback geometry, rather than treating a collision-disabled pawn
+	// as proof that the full capsule can be restored at the fixture's assumed height.
+	const auto* Capsule=F.Cat->GetCapsuleComponent();
+	TestEqual(TEXT("Restore fixture uses its intended capsule radius"),Capsule->GetScaledCapsuleRadius(),20.f);
+	TestEqual(TEXT("Restore fixture uses its intended capsule halfheight"),Capsule->GetScaledCapsuleHalfHeight(),30.f);
+	const float Step=FMath::Max(20.f,Capsule->GetScaledCapsuleRadius()*2.f+4.f);
+	for (int32 Ring=1;Ring<=3 && Step*Ring<=150.f;++Ring)
+	{
+		const FVector Reference=Actions->SavedEntryTransform.GetLocation()+FVector(Step*Ring,0,0);
+		FCollisionQueryParams Params(SCENE_QUERY_STAT(BasketRestoreFixtureSupport),false,F.Cat);
+		FHitResult Hit; FVector Center;
+		const bool bSupport=CatrunGround::FindSupport(*Capsule,Reference+FVector(0,0,Capsule->GetScaledCapsuleHalfHeight()),
+			20.f,Capsule->GetScaledCapsuleHalfHeight()+22.f,Params,Hit,Center);
+		FTransform Candidate=Actions->SavedEntryTransform; Candidate.SetLocation(Center);
+		FHitResult TransitHit; Params.AddIgnoredActor(EntryOccupant);
+		const bool bTransitBlocked=F.World->SweepSingleByChannel(TransitHit,Actions->SavedEntryTransform.GetLocation(),Center,
+			Candidate.GetRotation(),ECC_Pawn,Capsule->GetCollisionShape(),Params,FCollisionResponseParams(Capsule->GetCollisionResponseToChannels()));
+		AddInfo(FString::Printf(TEXT("Restore ring=%d reference=%s support=%d center=%s floor=%s penetrating=%d normal=%s impact=%s endpointClear=%d transitBlocker=%s"),
+			Ring,*Reference.ToString(),bSupport,*Center.ToString(),*GetNameSafe(Hit.GetActor()),Hit.bStartPenetrating,
+			*Hit.ImpactNormal.ToString(),*Hit.ImpactPoint.ToString(),bSupport && CatrunRestore::IsPlacementClear(*F.Cat,Candidate),
+			bTransitBlocked ? *GetNameSafe(TransitHit.GetActor()) : TEXT("none")));
+	}
 	Actions->EndPlay(EEndPlayReason::Destroyed);
 	TestFalse(TEXT("Blocked basket origin selects a different restoration position"), F.Cat->GetActorLocation().Equals(Actions->SavedEntryTransform.GetLocation()));
 	TestTrue(TEXT("Basket EndPlay fallback has no capsule encroachment"), CatrunRestore::IsPlacementClear(*F.Cat, F.Cat->GetActorTransform()));
 	TestTrue(TEXT("Component removal restores surviving cat collision"), F.Cat->GetActorEnableCollision());
+	TestTrue(TEXT("Safe fallback restores the exact pre-entry facing"),F.Cat->GetActorQuat().Equals(EntryRotation,.001));
 	TestEqual(TEXT("Component removal restores movement"), F.Cat->GetCharacterMovement()->MovementMode, TEnumAsByte<EMovementMode>(MOVE_Flying));
 	TestEqual(TEXT("Component removal restores animation mode even without class"), F.Cat->GetMesh()->GetAnimationMode(), EAnimationMode::AnimationSingleNode);
 	return true;
@@ -341,10 +416,12 @@ bool FCatrunCaptureInitialSetupTest::RunTest(const FString&)
 	TestEqual(TEXT("Actual armor start invokes initial Framing listener"), Probe->Calls, 1);
 	TestFalse(TEXT("Initial setup rejects synchronous abort-and-retry"), Probe->bReplacementAccepted);
 	TestFalse(TEXT("No active capture escapes the armor's action transition"), Capture->IsCapturing());
-	TestEqual(TEXT("Aborted setup leaves prior Walking action intact"), Armor->GetAction(), EArmorAction::Walking);
+	TestEqual(TEXT("Framing callback sees stable prepared Catching action"), Armor->GetAction(), EArmorAction::Catching);
 	TestFalse(TEXT("Aborted setup releases restart acquisition"), F.World->GetSubsystem<UCatrunRestartSubsystem>()->IsCatching());
 	TestFalse(TEXT("Aborted setup releases input lock"), F.PC->IsMoveInputIgnored());
-	TestTrue(TEXT("Walking path remains available after canceled setup"), Armor->HasDestination() && Armor->PathCorners.Num() == 1);
+	TestTrue(TEXT("Aborted prepared setup has no half-restored walking path"), !Armor->HasDestination() && Armor->PathCorners.IsEmpty());
+	Armor->TickCatching(.01f);
+	TestFalse(TEXT("Canceled framing exits Catching on the next owner tick"), Armor->IsCatching());
 
 	const int32 AbortedSession = Capture->SessionId;
 	Armor->StartCatch(*F.Cat); // Listener is disarmed; outer setup has now fully returned.
@@ -520,6 +597,315 @@ bool FCatrunArmorDebugTest::RunTest(const FString&)
 	Armor->bDebugDrawPath=false;
 	TestFalse(TEXT("Per-actor disable is honored"),Armor->IsPathDebugEnabled());
 	Switch->Set(0,ECVF_SetByCode);
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunCandlePatrolSafetyTest,"Catrun.PrototypeAI.CandlePatrolUsesOffsetCapsuleAndFloor",EAutomationTestFlags::EditorContext|EAutomationTestFlags::EngineFilter)
+bool FCatrunCandlePatrolSafetyTest::RunTest(const FString&)
+{
+	FPrototypeWorld F;
+	F.Cat->SetActorLocation(FVector(-1000,-1000,90));
+	auto* Floor = F.Box(FVector(300,100,-12),FVector(600,500,10)); // top -2, capsule bottom 0
+	auto* Candle = F.Spawn<ACatrunCandle>(FVector::ZeroVector);
+	Candle->BlockingCapsule->SetRelativeLocation(FVector(0,80,60));
+	Candle->BlockingCapsule->SetRelativeScale3D(FVector(1.5f,1.f,1.f));
+	Candle->PatrolRelativePoints = {FVector(300,0,0)};
+	Candle->PatrolSpeed = 100.f;
+	Candle->ResetPatrol();
+	Candle->UpdatePatrol(1.f);
+	TestTrue(TEXT("Default-disabled route remains stationary"), Candle->GetActorLocation().IsNearlyZero());
+	Candle->bPatrolEnabled = true;
+	// Real WorldDynamic trigger above the floor overlaps Pawn but cannot support its capsule.
+	auto* Trigger = F.Box(FVector(100,80,6),FVector(200,100,2));
+	auto* TriggerShape = CastChecked<UBoxComponent>(Trigger->GetRootComponent());
+	TriggerShape->SetCollisionObjectType(ECC_WorldDynamic);
+	TriggerShape->SetCollisionResponseToChannel(ECC_Pawn,ECR_Overlap);
+	Candle->UpdatePatrol(.1f);
+	TestTrue(TEXT("Nonblocking trigger does not conceal supporting solid floor"),Candle->GetActorLocation().X > 5.f);
+	Candle->SetActorLocation(FVector::ZeroVector); Candle->ResetPatrol();
+	auto* Blocker = F.Box(FVector(70,80,60),FVector(5,15,50));
+	Candle->UpdatePatrol(1.f);
+	TestTrue(TEXT("Offset capsule stops before obstruction actor-centered query would miss"), Candle->GetActorLocation().X < 50.f);
+	TestTrue(TEXT("Authoring attachment offset is unchanged"), Candle->BlockingCapsule->GetRelativeLocation().Equals(FVector(0,80,60)));
+	const FVector BlockedAt = Candle->GetActorLocation();
+	Candle->UpdatePatrol(1.f);
+	TestTrue(TEXT("Blocked patrol retains position and waypoint"), Candle->GetActorLocation().Equals(BlockedAt) && Candle->PatrolIndex == 0);
+	Blocker->Destroy(); Candle->UpdatePatrol(.2f);
+	TestTrue(TEXT("Removal safely resumes the original destination"), Candle->GetActorLocation().X > BlockedAt.X);
+	Candle->bTracking = true;
+	Candle->PatrolWaitLeft = .8f;
+	const FVector TrackingAt = Candle->GetActorLocation();
+	Candle->UpdatePatrol(.5f);
+	TestTrue(TEXT("Tracking freezes route and pause countdown"), Candle->GetActorLocation().Equals(TrackingAt) && FMath::IsNearlyEqual(Candle->PatrolWaitLeft,.8f));
+	Candle->bTracking = false;
+	auto* Guard = F.World->GetSubsystem<UCatrunPuzzleSuspension>(); Guard->Acquire(Candle);
+	Candle->UpdatePatrol(10.f);
+	TestTrue(TEXT("Puzzle reveal also preserves route wait"), FMath::IsNearlyEqual(Candle->PatrolWaitLeft,.8f)); Guard->Release(Candle);
+	Candle->SetActorLocation(FVector::ZeroVector); Candle->ResetPatrol();
+	Floor->Destroy();
+	F.Box(FVector(-60,80,-12),FVector(90,100,10)); // floor ends x30
+	F.Box(FVector(270,80,-12),FVector(70,100,10)); // resumes x200; target itself is supported
+	Candle->UpdatePatrol(5.f);
+	TestTrue(TEXT("Large delta cannot bridge a floor gap to a supported endpoint"), Candle->GetActorLocation().X < 40.f);
+	Candle->ResetPatrol();
+	TestTrue(TEXT("New patrol lifecycle resets route and timers"), Candle->PatrolIndex == 0 && Candle->PatrolStep == 1 && Candle->PatrolWaitLeft == 0.f);
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunSuspendedSoundDeliveryTest,"Catrun.PrototypeAI.SuspendedSoundPreservesDelayAndStableBoundedDrain",EAutomationTestFlags::EditorContext|EAutomationTestFlags::EngineFilter)
+bool FCatrunSuspendedSoundDeliveryTest::RunTest(const FString&)
+{
+	FPrototypeWorld F;
+	auto* Listener = F.Spawn<ACatrunSoundDeliveryProbe>(FVector(112.5,12.5,90));
+	F.Settings->SoundSpeed = 100.f;
+	FCatrunSoundEvent Event; Event.Location = FVector(12.5,12.5,0);
+	TestTrue(TEXT("Actual grid emission schedules the listener"), F.Manager->EmitSound(Event));
+	if (!TestEqual(TEXT("One live listener queued"),F.Manager->PendingSounds.Num(),1)) return false;
+	const double Arrival = F.Manager->PendingSounds[0].ArrivalTime;
+	const float Strength = F.Manager->PendingSounds[0].RemainingBudget;
+	TestTrue(TEXT("Propagation has nonzero travel delay"), Arrival > .1);
+	F.Manager->Tick(float(Arrival*.3));
+	auto* Guard = F.World->GetSubsystem<UCatrunPuzzleSuspension>(); Guard->Acquire(Listener);
+	const double Frozen = F.Manager->ListenerClock;
+	F.Manager->Tick(20.f);
+	TestTrue(TEXT("Reveal freezes logical arrival clock before deliveries"), F.Manager->ListenerClock == Frozen && Listener->Received.IsEmpty());
+	TestTrue(TEXT("Emission during reveal is retained too"),F.Manager->EmitSound(Event));
+	Guard->Release(Listener);
+	const float Remaining = float(Arrival-Frozen);
+	F.Manager->Tick(Remaining-.01f);
+	TestTrue(TEXT("Original remaining delay survives long reveal"),Listener->Received.IsEmpty());
+	F.Manager->Tick(.02f);
+	TestEqual(TEXT("Original event delivered once at preserved deadline"),Listener->Received.Num(),1);
+	TestTrue(TEXT("Saved propagation strength is unchanged"),FMath::IsNearlyEqual(Listener->Budgets[0],Strength));
+	F.Manager->Tick(float(Arrival));
+	TestEqual(TEXT("Event emitted during reveal keeps its own full delay"),Listener->Received.Num(),2);
+	// Due-at-acquire plus 40 equal arrivals prove queue order and retained bounded remainder.
+	Listener->SetActorLocation(Event.Location);
+	Guard->Acquire(Listener);
+	for (int32 Index=0; Index<40; ++Index) { Event.Location.Z = float(Index); F.Manager->EmitSound(Event); }
+	TestEqual(TEXT("Due sounds remain queued during suspension"),F.Manager->PendingSounds.Num(),40);
+	Guard->Release(Listener); F.Manager->Tick(0.f);
+	TestEqual(TEXT("At most 32 callbacks in a manager tick"),Listener->Received.Num(),34);
+	TestEqual(TEXT("Excess notifications are retained"),F.Manager->PendingSounds.Num(),8);
+	for (int32 Index=0; Index<32; ++Index) TestEqual(TEXT("Equal-arrival callbacks retain insertion order"),Listener->Received[Index+2].Location.Z,double(Index));
+	F.Manager->Tick(0.f); TestEqual(TEXT("Retained remainder drains next tick"),Listener->Received.Num(),42);
+	// Reentrant emission plus acquiring reveal must not invalidate the drain or lose the appended sound.
+	bool bFirst = true;
+	Listener->OnDelivery = [&] { if (bFirst) { bFirst=false; Guard->Acquire(Listener); F.Manager->EmitSound(Event); } };
+	F.Manager->EmitSound(Event);
+	TestEqual(TEXT("Callback reentrancy leaves appended event pending"),F.Manager->PendingSounds.Num(),1);
+	Guard->Release(Listener); F.Manager->Tick(0.f);
+	TestEqual(TEXT("Reentrant event eventually delivered exactly once"),Listener->Received.Num(),44);
+	Guard->Acquire(Listener); F.Manager->EmitSound(Event); Guard->Release(Listener); Listener->Destroy(); F.Manager->Tick(0.f);
+	TestTrue(TEXT("Destroyed listener is safely removed"),F.Manager->PendingSounds.IsEmpty());
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunDynamicSightCoverageTest,"Catrun.PrototypeAI.DynamicSightMatchesFanAndIgnoresPawnBodies",EAutomationTestFlags::EditorContext|EAutomationTestFlags::EngineFilter)
+bool FCatrunDynamicSightCoverageTest::RunTest(const FString&)
+{
+	FPrototypeWorld F;
+	auto* Candle = F.Spawn<ACatrunCandle>(FVector(-200,0,60));
+	Candle->bAutoAlignEyes=false; Candle->bPenaltiesEnabled=false;
+	Candle->Tick(.01f); // configure actual fan from actual manager
+	auto* PawnBody = F.Spawn<ACatrunArmor>(FVector(-100,0,90));
+	auto* Gate = F.Box(FVector(-50,0,100),FVector(5,100,100));
+	auto* Shape = CastChecked<UBoxComponent>(Gate->GetRootComponent()); Shape->SetCollisionObjectType(ECC_WorldDynamic);
+	TestFalse(TEXT("Movable untagged gate blocks direct LOS behind a Pawn"),CatrunPerception::HasDirectSight(*Candle,*F.Cat,F.Settings->VisionTraceHeight));
+	TestTrue(TEXT("Same gate clips visual fan behind a Pawn"),Candle->Sight->GetFreeDistance(Candle->GetActorLocation(),FVector::ForwardVector,300.f)<200.f);
+	Gate->SetActorLocation(FVector(-50,500,100));
+	TestTrue(TEXT("Moving gate away clears direct LOS"),CatrunPerception::HasDirectSight(*Candle,*F.Cat,F.Settings->VisionTraceHeight));
+	TestTrue(TEXT("Armor Pawn body does not cut fan holes"),FMath::IsNearlyEqual(Candle->Sight->GetFreeDistance(Candle->GetActorLocation(),FVector::ForwardVector,300.f),300.f));
+	auto* OtherCandle=F.Spawn<ACatrunCandle>(FVector(-50,0,0));
+	TestTrue(TEXT("Candle AActor Pawn capsule is also intentionally excluded"),CatrunPerception::HasDirectSight(*Candle,*F.Cat,F.Settings->VisionTraceHeight));
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunArmorTravelSafetyTest,"Catrun.PrototypeAI.DoorReplansActivePatrolAndSweepsHandoff",EAutomationTestFlags::EditorContext|EAutomationTestFlags::EngineFilter)
+bool FCatrunArmorTravelSafetyTest::RunTest(const FString&)
+{
+	FPrototypeWorld F;
+	auto* Armor = F.Spawn<ACatrunArmor>(FVector(300,300,90)); Armor->DispatchBeginPlay();
+	auto* Point = F.Spawn<ACatrunPatrolPoint>(FVector(900,300,90)); Armor->PatrolPoints.Add(Point);
+	Armor->BeginPatrolLeg();
+	FVector Target;
+	TestTrue(TEXT("Patrol intent resolves current waypoint"),Armor->TryGetActiveTravelDestination(Target) && Target.Equals(Point->GetActorLocation()));
+	Armor->ReplanAfterDoor();
+	TestTrue(TEXT("Actual post-door path ends at patrol instead of spawn"),!Armor->PathCorners.IsEmpty() && FVector::Dist2D(Armor->PathCorners.Last(),Point->GetActorLocation())<40.f);
+	Armor->Action=EArmorAction::OpeningDoor;
+	FCatrunSoundEvent Sound; Sound.Location=FVector(700,700,90); Armor->OnSoundHeard_Implementation(Sound,100.f);
+	TestTrue(TEXT("Sound while opening replaces active travel intent"),Armor->TryGetActiveTravelDestination(Target) && Target.Equals(Sound.Location));
+	Armor->ReplanAfterDoor();
+	TestTrue(TEXT("Replan follows new sound snapshot"),!Armor->PathCorners.IsEmpty() && FVector::Dist2D(Armor->PathCorners.Last(),Sound.Location)<40.f);
+	// Missing tracked bone resolves component location; its synthetic start makes a real 200cm desired handoff.
+	Armor->DoorAnimTrackedBone=TEXT("MissingTestBone");
+	Armor->DoorAnimStartBoneLocation=Armor->GetMesh()->GetBoneLocation(Armor->DoorAnimTrackedBone)-FVector(200,0,0);
+	Armor->GetMesh()->SetRelativeScale3D(FVector(-1,1,1)); Armor->MeshBaseScale=FVector::OneVector;
+	F.Box(Armor->GetActorLocation()+FVector(100,0,0),FVector(10,80,100));
+	const FVector Before=Armor->GetActorLocation(); Armor->EndDoorAnimation();
+	TestTrue(TEXT("Swept capsule cannot cross late handoff blocker"),Armor->GetActorLocation().X<Before.X+100.f);
+	TestTrue(TEXT("Blocked handoff restores mirror state"),Armor->GetMesh()->GetRelativeScale3D().Equals(FVector::OneVector));
+	Armor->Action=EArmorAction::Walking;
+	TestTrue(TEXT("Another capture can acquire shared guard"),F.World->GetSubsystem<UCatrunRestartSubsystem>()->TryBeginCatch());
+	Armor->StartCatch(*F.Cat);
+	TestEqual(TEXT("Refused acquisition preserves prior owner action"),Armor->GetAction(),EArmorAction::Walking);
+	F.World->GetSubsystem<UCatrunRestartSubsystem>()->CancelCatch();
+	auto* Door=F.Spawn<ACatrunDoor>(FVector(1000,1000,0));
+	Door->BeginHandOpen(Armor->GetActorLocation());
+	Armor->DoorBeingOpened=Door; Armor->bDoorHandDriven=true; Armor->bDoorReleased=false;
+	Armor->Action=EArmorAction::OpeningDoor; Armor->DoorStep=ACatrunArmor::EDoorStep::Animation;
+	Armor->DoorAnimStartBoneLocation=Armor->GetMesh()->GetBoneLocation(Armor->DoorAnimTrackedBone)-FVector(200,0,0);
+	Armor->GetMesh()->SetRelativeScale3D(FVector(-1,1,1));
+	TestTrue(TEXT("Capture acquires during blocked door presentation"),Armor->CapturePresentation->BeginCapture(F.Cat,F.Settings));
+	TestTrue(TEXT("Capture preparation releases door, mirror, and hand ownership"),!Armor->DoorBeingOpened.IsValid() && !Armor->bDoorHandDriven && Armor->bDoorReleased && Armor->GetMesh()->GetRelativeScale3D().Equals(FVector::OneVector));
+	TestTrue(TEXT("Released door timer can finish independently"),Door->IsActorTickEnabled());
+	Armor->CapturePresentation->AbortCapture(); Armor->TickCatching(.01f);
+	TestFalse(TEXT("Canceled door capture cannot strand armor Catching"),Armor->IsCatching());
+	TestTrue(TEXT("Abort does not restore old mirrored door snapshot"),Armor->GetMesh()->GetRelativeScale3D().Equals(FVector::OneVector));
+
+	// Reproduce real post-door path failure and mark expiry, including replacement paths that fail too.
+	// Modes: live-mark control, return disabled, already at post, failed return, failed patrol.
+	for (int32 Mode=0; Mode<5; ++Mode)
+	{
+		FPrototypeWorld Retry;
+		auto* Guard=Retry.Spawn<ACatrunArmor>(FVector(300,300,90)); Guard->DispatchBeginPlay();
+		if (Mode!=2) Guard->SetActorLocation(FVector(500,300,90));
+		Retry.Cat->SetActorLocation(FVector(900,300,90));
+		if (Mode==1) Guard->bReturnToPost=false;
+		ACatrunPatrolPoint* Replacement=nullptr;
+		if (Mode==4)
+		{
+			Replacement=Retry.Spawn<ACatrunPatrolPoint>(FVector(500,900,90));
+			Guard->PatrolPoints.Add(Replacement);
+		}
+		Guard->SetFollowingMark(true); Guard->UpdateMarkFollowing(.1f);
+		TestTrue(TEXT("Fixture first establishes a real mark path"),!Guard->PathCorners.IsEmpty());
+		const FVector ExpiringTarget=Guard->Destination;
+		auto& Grid=const_cast<FCatrunGridData&>(Retry.Manager->GetGrid());
+		Grid.Walkable.Init(0,Grid.NumCells());
+		Guard->Action=EArmorAction::OpeningDoor; Guard->ReplanAfterDoor();
+		TestTrue(TEXT("Unwalkable grid causes actual post-door failure and bounded retry"),Guard->bAwaitingDoorReplan && Guard->PathCorners.IsEmpty() && Guard->GetAction()==EArmorAction::Idle);
+		if (Mode==0)
+		{
+			Grid.Walkable.Init(1,Grid.NumCells()); Guard->TickIdle(.6f);
+			TestTrue(TEXT("A still-active mark retains and resumes its legitimate door retry"),!Guard->bAwaitingDoorReplan && Guard->GetAction()==EArmorAction::Walking && !Guard->PathCorners.IsEmpty() && FVector::Dist2D(Guard->PathCorners.Last(),ExpiringTarget)<40.f);
+			Guard->SetFollowingMark(false);
+			TestTrue(TEXT("Mark loss preserves an already valid last-known-position walking path"),Guard->GetAction()==EArmorAction::Walking && !Guard->PathCorners.IsEmpty());
+			continue;
+		}
+		Guard->SetFollowingMark(false); // no current corner: FinishTrip has explicitly ended the old trip
+		TestFalse(TEXT("An ended mark trip cannot retain door retry ownership"),Guard->bAwaitingDoorReplan);
+		if (Replacement)
+			TestTrue(TEXT("Failed replacement patrol owns its ordinary wait"),Guard->bPatrolWaiting && Guard->TravelIntent==ACatrunArmor::ETravelIntent::Patrol);
+		else
+			TestTrue(TEXT("Idle or failed-return branch has no old travel intent"),Guard->TravelIntent==ACatrunArmor::ETravelIntent::None);
+		Grid.Walkable.Init(1,Grid.NumCells()); Guard->TickIdle(.6f);
+		if (Replacement)
+			TestTrue(TEXT("Restored grid resumes replacement patrol instead of expired mark"),Guard->GetAction()==EArmorAction::Walking && !Guard->PathCorners.IsEmpty() && FVector::Dist2D(Guard->PathCorners.Last(),Replacement->GetActorLocation())<40.f && FVector::Dist2D(Guard->PathCorners.Last(),ExpiringTarget)>100.f);
+		else
+			TestTrue(TEXT("Making old mark reachable cannot resurrect an ended idle trip"),Guard->GetAction()==EArmorAction::Idle && Guard->PathCorners.IsEmpty() && !Guard->bAwaitingDoorReplan);
+	}
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunTurnCurveHandoffTest,"Catrun.PrototypeAI.AuthoredTurnCurveHandoffIsNonlinearAndOnceOnly",EAutomationTestFlags::EditorContext|EAutomationTestFlags::EngineFilter)
+bool FCatrunTurnCurveHandoffTest::RunTest(const FString&)
+{
+	FPrototypeWorld F;
+	auto* Armor=F.Spawn<ACatrunArmor>(FVector(500,500,90));
+	Armor->TurnRightAnim=LoadObject<UAnimationAsset>(nullptr,TEXT("/Game/Characters/LivingArmor/Final/Animations/AN_LivingArmor_TurnRight90.AN_LivingArmor_TurnRight90"));
+	Armor->TurnLeftAnim=LoadObject<UAnimationAsset>(nullptr,TEXT("/Game/Characters/LivingArmor/Final/Animations/AN_LivingArmor_TurnLeft90.AN_LivingArmor_TurnLeft90"));
+	for (bool bRight : {false,true})
+	{
+		const auto* Sequence=Cast<UAnimSequence>(bRight ? Armor->TurnRightAnim.Get() : Armor->TurnLeftAnim.Get());
+		if (!TestNotNull(TEXT("Actual authored turn sequence exists"),Sequence)) return false;
+		for (float Fraction : {.1f,.25f,.5f,.75f,.9f})
+		{
+			Armor->SetActorRotation(FRotator(0,170,0));
+			Armor->GetMesh()->SetRelativeRotation(FRotator(0,-90,0));
+			Armor->BeginTurn(bRight ? 90.f : -90.f);
+			const float Time=Sequence->GetPlayLength()*Fraction;
+			// This fixture has no mesh. Use explicit missing-player clock fallback, still sample compressed curve.
+			Armor->ActionTime=Time/(Armor->TurnPlayRate*Sequence->RateScale);
+			const FQuat Root=Sequence->ExtractRootMotionFromRange(0.,Time,FAnimExtractContext(Time,true)).GetRotation();
+			const FQuat Expected=FRotator(0,170,0).Quaternion()*FRotator(0,-90,0).Quaternion()*Root*FRotator(0,-90,0).Quaternion().Inverse();
+			Armor->CommitTurn(false);
+			TestTrue(TEXT("Interrupted heading matches actual compressed root curve and mesh basis"),Armor->GetActorQuat().Equals(Expected,1.e-3f));
+			const FQuat Once=Armor->GetActorQuat(); Armor->CommitTurn(false);
+			TestTrue(TEXT("Repeated interruption never applies accumulated root twice"),Armor->GetActorQuat().Equals(Once));
+			if (Fraction==.25f) TestTrue(TEXT("Early clip root is measurably nonlinear"),FMath::Abs(FMath::Abs(Root.Rotator().Yaw)-22.5f)>5.f);
+		}
+	}
+	// Verify playback position wins over native ActionTime for BOTH real native and BP players.
+	auto* MeshAsset=LoadObject<USkeletalMesh>(nullptr,TEXT("/Game/Characters/LivingArmor/Final/Meshes/SK_LivingArmor_Final.SK_LivingArmor_Final"));
+	if (!TestNotNull(TEXT("Actual armor mesh exists for playback test"),MeshAsset)) return false;
+	Armor->GetMesh()->SetSkeletalMesh(MeshAsset);
+	for (bool bBlueprint : {false,true})
+	{
+		Armor->bUseBlueprintAnimation=bBlueprint;
+		Armor->SetActorRotation(FRotator::ZeroRotator);
+		if (bBlueprint) Armor->GetMesh()->SetAnimInstanceClass(UAnimInstance::StaticClass());
+		Armor->BeginTurn(90.f);
+		auto* Sequence=CastChecked<UAnimSequence>(Armor->TurnRightAnim.Get());
+		const float ActualTime=Sequence->GetPlayLength()*.25f;
+		if (bBlueprint)
+		{
+			auto* Instance=Armor->GetMesh()->GetAnimInstance();
+			if (!TestNotNull(TEXT("Actual animation instance initialized"),Instance)) return false;
+			auto* Montage=Instance->PlaySlotAnimationAsDynamicMontage(Sequence,TEXT("DefaultSlot"),0.f,0.f,Armor->TurnPlayRate);
+			if (!TestNotNull(TEXT("Actual dynamic montage initialized"),Montage)) return false;
+			Instance->Montage_SetPosition(Montage,ActualTime);
+		}
+		else Armor->GetMesh()->SetPosition(ActualTime,false);
+		Armor->ActionTime=Armor->ActionDuration*.9f; // deliberately disagrees with actual quarter-position
+		float ReadTime=-1.f;
+		TestTrue(TEXT("Matching playback time is available"),Armor->GetTurnPlaybackTime(ReadTime));
+		TestTrue(TEXT("Native/single and dynamic montage yield actual sequence position"),FMath::IsNearlyEqual(ReadTime,ActualTime,.001f));
+		Armor->CommitTurn(false);
+		TestTrue(TEXT("Handoff uses actual nonlinear early root, not later native timer"),FMath::IsNearlyEqual(Armor->GetActorRotation().Yaw,7.447f,.25f));
+	}
+	Armor->bUseBlueprintAnimation=false;
+	Armor->SetActorRotation(FRotator::ZeroRotator); Armor->BeginTurn(180.f);
+	const auto* ChainSequence=CastChecked<UAnimSequence>(Armor->TurnRightAnim.Get());
+	const FQuat ChainRoot=ChainSequence->ExtractRootMotionFromRange(0.,ChainSequence->GetPlayLength(),FAnimExtractContext(ChainSequence->GetPlayLength(),true)).GetRotation();
+	const FQuat ChainBasis=Armor->TurnMeshBasis;
+	const FQuat QuarterDelta=(ChainBasis*ChainRoot*ChainBasis.Inverse()).GetNormalized();
+	Armor->ActionTime=Armor->ActionDuration; Armor->TickTurning(.01f);
+	AddInfo(FString::Printf(TEXT("Chain first yaw %.9f remaining %d committed %d basis yaw %.9f duration %.9f"),Armor->GetActorRotation().Yaw,Armor->TurnsRemaining,Armor->bTurnCommitted,Armor->TurnStartActorRotation.Rotator().Yaw,Armor->ActionDuration));
+	TestTrue(TEXT("First 180 chain handoff is one quarter turn"),FMath::IsNearlyEqual(Armor->GetActorRotation().Yaw,90.f,.1f));
+	TestTrue(TEXT("Second quarter starts with fresh basis and commit guard"),Armor->TurnsRemaining==1 && !Armor->bTurnCommitted && Armor->TurnStartActorRotation.Equals(QuarterDelta,1.e-5f));
+	Armor->ActionTime=Armor->ActionDuration; Armor->TickTurning(.01f);
+	AddInfo(FString::Printf(TEXT("Chain second yaw %.9f remaining %d committed %d action %d expected yaw %.9f actual quaternion %s expected quaternion %s"),Armor->GetActorRotation().Yaw,Armor->TurnsRemaining,Armor->bTurnCommitted,int32(Armor->Action),(QuarterDelta*QuarterDelta).Rotator().Yaw,*Armor->GetActorQuat().ToString(),*(QuarterDelta*QuarterDelta).ToString()));
+	TestTrue(TEXT("Second handoff equals two actual compressed endpoint deltas"),Armor->GetActorQuat().Equals((QuarterDelta*QuarterDelta).GetNormalized(),1.e-5f));
+	// Two measured extracted deltas accumulate ~.145 degrees; retain a small .2-degree axis sanity bound.
+	TestTrue(TEXT("Two authored extracted quarters remain within two tenths degree of half-turn"),FMath::Abs(FMath::FindDeltaAngleDegrees(Armor->GetActorRotation().Yaw,180.f))<.2f);
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunCaptureFramingYawTest,"Catrun.PrototypeAI.CaptureFramingSmoothShortestYawAndCancel",EAutomationTestFlags::EditorContext|EAutomationTestFlags::EngineFilter)
+bool FCatrunCaptureFramingYawTest::RunTest(const FString&)
+{
+	FPrototypeWorld F;
+	auto* Armor=F.Spawn<ACatrunArmor>(FVector(300,0,90));
+	Armor->SetActorRotation(FRotator(0,179,0));
+	auto* Capture=Armor->CapturePresentation.Get(); Capture->bUseBlueprintPresentation=true;
+	F.Settings->CatchCameraBlendTime=1.f;
+	TestTrue(TEXT("Capture acquired"),Capture->BeginCapture(F.Cat,F.Settings));
+	TestTrue(TEXT("Acquisition does not snap yaw"),FMath::IsNearlyEqual(Armor->GetActorRotation().Yaw,179.f));
+	Capture->TickComponent(.5f,LEVELTICK_All,nullptr);
+	TestTrue(TEXT("Framing crosses wrap via shortest half degree"),FMath::IsNearlyEqual(FMath::FindDeltaAngleDegrees(179.f,Armor->GetActorRotation().Yaw),.5f,.01f));
+	Capture->AbortCapture();
+	TestFalse(TEXT("Cancel releases capture"),Capture->IsCapturing());
+	Armor->Tick(.01f);
+	TestFalse(TEXT("Cancel owner leaves prepared catching action"),Armor->IsCatching());
+	Capture->BeginCapture(F.Cat,F.Settings); Capture->TickComponent(1.f,LEVELTICK_All,nullptr);
+	TestEqual(TEXT("Pickup still begins at original framing deadline"),Capture->Phase,ECatrunCapturePhase::Pickup);
+	TestTrue(TEXT("Exact target yaw reached before pickup"),FMath::Abs(FMath::FindDeltaAngleDegrees(Armor->GetActorRotation().Yaw,180.f))<.01f);
+	Capture->AbortCapture();
+	F.Settings->CatchCameraBlendTime=0.f;
+	Armor->SetActorRotation(FRotator(0,90,0)); Capture->BeginCapture(F.Cat,F.Settings); Capture->TickComponent(0.f,LEVELTICK_All,nullptr);
+	TestTrue(TEXT("Explicit zero framing reaches target immediately"),Capture->Phase==ECatrunCapturePhase::Pickup && FMath::Abs(FMath::FindDeltaAngleDegrees(Armor->GetActorRotation().Yaw,180.f))<.01f);
+	Capture->AbortCapture();
 	return true;
 }
 #endif

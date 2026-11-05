@@ -6,7 +6,11 @@
 #include "CatrunBellComponent.generated.h"
 
 class UInputAction;
+class UEnhancedInputComponent;
+class UEnhancedInputLocalPlayerSubsystem;
 class UInputMappingContext;
+class UCatrunSoundSettings;
+class UWidgetComponent;
 
 /**
  * Turns the cat's bell into a sound the monsters can hear.
@@ -30,15 +34,16 @@ public:
 	UCatrunBellComponent();
 
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	// Makes the bell sound at the cat's position. Fails during the cooldown (key mode only).
 	UFUNCTION(BlueprintCallable, Category = "Bell")
 	bool TryRing();
 
-	// Fallback bell key, only used when the cat has no BP_CatActions component.
+	// Legacy serialized field retained for asset compatibility. Runtime fallback uses the effective Bell settings key.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bell")
-	FKey FallbackBellKey = EKeys::Q;
+	FKey FallbackBellKey = EKeys::SpaceBar;
 
 	// Set false to mute the bell from code (key mode only).
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bell")
@@ -63,6 +68,16 @@ private:
 
 	// Emits the Large "Minion" bell sound at the cat's position.
 	bool EmitBellSound();
+	void ShowBellIndicator(const UCatrunSoundSettings& Settings);
+	void UpdateBellIndicator(float DeltaTime);
+	void HideBellIndicator();
+	bool ShouldSuppressBellIndicator() const;
+
+	UPROPERTY(Transient)
+	TObjectPtr<UWidgetComponent> BellIndicator;
+
+	float BellIndicatorRemaining = 0.f;
+	float BellIndicatorFadeDuration = 0.f;
 
 	// No-bell zones (the cat hole): while the cat is inside one, the bell key is taken over by a
 	// context of our own that does nothing but show the notice. The cat's blueprint then never
@@ -79,9 +94,13 @@ private:
 	UPROPERTY(Transient)
 	TObjectPtr<UInputAction> BlockAction;
 
+	FKey CachedBlockBellKey;
+	TWeakObjectPtr<UEnhancedInputLocalPlayerSubsystem> BlockInputSubsystem;
+	TWeakObjectPtr<UEnhancedInputComponent> BlockInputComponent;
+	uint32 BlockBindingHandle = 0;
 	bool bBlockContextBuilt = false;
 	bool bBlockActive = false;
-	bool bBlockBound = false;
+	FDelegateHandle BindingsChangedHandle;
 
 	TWeakObjectPtr<UActorComponent> CatActions;
 	bool bListeningToCatActions = false;

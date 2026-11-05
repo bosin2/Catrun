@@ -98,6 +98,12 @@ private:
 	uint8 BellSavedMovementMode = 1, BellSavedCustomMode = 0;
 	bool bBellEmitted = false;
 	friend class FCatrunBasketRestoreTest;
+#if WITH_DEV_AUTOMATION_TESTS
+	friend class FCatrunBasketEntryHeightTest;
+#endif
+	friend class FCatrunBasketCandidateRegressionTest;
+	friend class FCatrunBasketRestoreRegressionTest;
+	friend class FCatrunBasketComplexSupportTest;
 	void FindAndEnterBasket();
 	bool TestEntry(ACatrunHideBasket* Basket, FVector& OutLocation) const;
 	void EnterBasket(ACatrunHideBasket* Basket, const FVector& Location);
@@ -105,8 +111,10 @@ private:
 	void ExitBasket();
 	void FinishExit();
 	void UpdateExitCandidate(bool bForce);
+	bool IsBasketExitPathClear(const FVector& Destination) const;
 	void UpdatePreview();
-	void RestoreCharacter();
+	// Restore state at the already validated placement; this must not search for another exit.
+	void RestoreCharacter(bool bPlacedSafely);
 	void AbortBasket();
 	float PlayCharacterAnimation(UAnimSequenceBase* Animation);
 

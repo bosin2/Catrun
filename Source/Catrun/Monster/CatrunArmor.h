@@ -76,7 +76,7 @@ public:
 	TObjectPtr<UCatrunCapturePresentationComponent> CapturePresentation;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Armor|Animation", meta=(ClampMin="0.1"))
-	float TurnPlayRate = 5.f;
+	float TurnPlayRate = 3.333333f;
 
 	// BP/AnimBP can play presentation without replacing native state/path safety.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Armor|Animation")
@@ -241,6 +241,22 @@ protected:
 
 private:
 	friend class FCatrunPuzzleSuspensionTest;
+	friend class FCatrunArmorTravelSafetyTest;
+	friend class FCatrunTurnCurveHandoffTest;
+	friend class UCatrunCapturePresentationComponent;
+	void PrepareForCapture();
+	// bReturningToPost remains a walk-speed legacy flag; target intent is explicit.
+	enum class ETravelIntent : uint8 { None, Patrol, ReturnPost, Investigation, Mark };
+	ETravelIntent TravelIntent = ETravelIntent::None;
+	bool TryGetActiveTravelDestination(FVector& OutDestination) const;
+	void ReplanAfterDoor();
+	bool bAwaitingDoorReplan = false;
+	float DoorReplanWait = 0.f;
+	void CommitTurn(bool bCompleted);
+	bool GetTurnPlaybackTime(float& OutTime) const;
+	FQuat TurnStartActorRotation = FQuat::Identity;
+	FQuat TurnMeshBasis = FQuat::Identity;
+	bool bTurnCommitted = true;
 	friend class FCatrunSoundPriorityTest;
 	friend class FCatrunCaptureInitialSetupTest;
 	// ---- Path ----

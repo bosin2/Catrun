@@ -1,4 +1,5 @@
 #include "CatrunSafeRestore.h"
+#include "CatrunGroundSupport.h"
 #include "Catrun.h"
 #include "Monster/CatrunRestartSubsystem.h"
 #include "Components/CapsuleComponent.h"
@@ -61,9 +62,10 @@ bool CatrunRestore::PlaceForCollision(APawn& Pawn, const FTransform& Desired, bo
 					const float Angle = Direction * UE_TWO_PI / 16.f;
 					FVector Location = Desired.GetLocation() + FVector(FMath::Cos(Angle)*Step*Ring, FMath::Sin(Angle)*Step*Ring, 0);
 					FHitResult Floor;
-					if (!Pawn.GetWorld()->LineTraceSingleByChannel(Floor, Location + FVector(0,0,20), Location-FVector(0,0,HalfHeight+22), ECC_Pawn, FloorParams, Responses)
-						|| Floor.ImpactNormal.Z < .65f || Cast<APawn>(Floor.GetActor())) continue;
-					Location.Z = Floor.ImpactPoint.Z + HalfHeight + 2.f;
+					FVector Supported;
+					if (!CatrunGround::FindSupport(*Capsule, Location+FVector(0,0,HalfHeight), 20.f, HalfHeight+22.f, FloorParams, Floor, Supported)
+						|| Floor.ImpactPoint.Z > Location.Z+20.f+.01f || Floor.ImpactPoint.Z < Location.Z-HalfHeight-22.f-.01f) continue;
+					Location = Supported;
 					if (FMath::Abs(Location.Z - Desired.GetLocation().Z) > 20.f) continue;
 					Candidate.SetLocation(Location);
 					if (!IsPlacementClear(Pawn, Candidate)) continue;

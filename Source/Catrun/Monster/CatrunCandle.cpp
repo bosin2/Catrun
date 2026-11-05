@@ -2,6 +2,7 @@
 #include "Interaction/CatrunPuzzleSuspension.h"
 #include "CatrunPerceptionPolicy.h"
 #include "Components/CapsuleComponent.h"
+#include "Engine/World.h"
 
 #include "Catrun.h"
 #include "CatrunMarkSubsystem.h"
@@ -58,6 +59,7 @@ float ACatrunCandle::GetConeBackOffset(const UCatrunSoundSettings& S) const
 void ACatrunCandle::BeginPlay()
 {
 	Super::BeginPlay();
+	ResetPatrol();
 	PlayAnimation(IdleAnim, true);
 	// The sight is set up in Tick, as soon as the level's sound system is ready.
 }
@@ -217,6 +219,7 @@ void ACatrunCandle::Tick(float DeltaSeconds)
 	const UCatrunSoundSettings* S = GetSettings();
 	if (!S)
 	{
+		UpdatePatrol(DeltaSeconds);
 		return;
 	}
 	if (!bSightConfigured)
@@ -265,6 +268,14 @@ void ACatrunCandle::Tick(float DeltaSeconds)
 	Body->SetWorldRotation(FRotator(0.f, ConeCenter + AutoBodyYaw + BodyYawOffset, 0.f));
 
 	CheckForCat(DeltaSeconds, Cat, *S);
+	// Check visibility before moving: a newly spotted cat freezes this very step.
+	const FVector BeforePatrol = GetActorLocation();
+	UpdatePatrol(DeltaSeconds);
+	if (!BeforePatrol.Equals(GetActorLocation()))
+	{
+		Sight->SetOriginOverride(GetActorLocation() - Forward * BackOffset);
+		Sight->Update(ConeCenter, S->CandleConeAngle * 0.5f);
+	}
 
 	// While the candle is tracking the cat the "!" stays on. (Show keeps it visible for a short
 	// time, so renewing it every frame holds it until tracking stops.)
@@ -281,5 +292,101 @@ void ACatrunCandle::Tick(float DeltaSeconds)
 		{
 			PlayAnimation(IdleAnim, true);
 		}
+	}
+}
+
+void ACatrunCandle::ResetPatrol()
+{
+	PatrolOrigin = GetActorTransform();
+	PatrolIndex = 0;
+	PatrolStep = 1;
+	PatrolWaitLeft = 0.f;
+}
+
+bool ACatrunCandle::FindPatrolFloor(const FVector& Center, float& OutFloor) const
+{
+	if (!GetWorld() || !BlockingCapsule) return false;
+	// Authored candles are upright. A tilted capsule has a different support footprint: stop safely.
+	if (FMath::Abs(BlockingCapsule->GetUpVector().Z) < .99f) return false;
+	const float Radius = BlockingCapsule->GetScaledCapsuleRadius() * .9f;
+	const float Bottom = Center.Z - BlockingCapsule->GetScaledCapsuleHalfHeight();
+	FCollisionQueryParams Params(SCENE_QUERY_STAT(CandlePatrolFloor), false, this);
+	FCollisionObjectQueryParams Objects(FCollisionObjectQueryParams::AllObjects);
+	Objects.RemoveObjectTypesToQuery(ECC_Pawn); // bodies never provide floor support
+	float Low = MAX_flt, High = -MAX_flt;
+	for (const FVector Offset : {FVector::ZeroVector, FVector(Radius,0,0), FVector(-Radius,0,0), FVector(0,Radius,0), FVector(0,-Radius,0), FVector(Radius*.7071f,Radius*.7071f,0), FVector(-Radius*.7071f,Radius*.7071f,0), FVector(Radius*.7071f,-Radius*.7071f,0), FVector(-Radius*.7071f,-Radius*.7071f,0)})
+	{
+		const FVector Start(Center.X+Offset.X, Center.Y+Offset.Y, Bottom+PatrolMaxFloorHeightChange+2.f);
+		TArray<FHitResult> Hits;
+		GetWorld()->LineTraceMultiByObjectType(Hits, Start, Start-FVector(0,0,PatrolFloorProbeDistance+PatrolMaxFloorHeightChange+2.f), Objects, Params);
+		// Object traces include overlap/ignore-only volumes. Filter those before selecting support,
+		// otherwise a trigger above a solid floor hides that floor from a single-hit object query.
+		const FHitResult* FloorHit = nullptr;
+		for (const FHitResult& Hit : Hits)
+		{
+			if (Hit.GetComponent() && Hit.GetComponent()->GetCollisionResponseToChannel(BlockingCapsule->GetCollisionObjectType()) == ECR_Block
+				&& (!FloorHit || Hit.Distance < FloorHit->Distance)) FloorHit = &Hit;
+		}
+		if (!FloorHit || FloorHit->ImpactNormal.Z < .7f) return false;
+		Low = FMath::Min(Low, float(FloorHit->ImpactPoint.Z));
+		High = FMath::Max(High, float(FloorHit->ImpactPoint.Z));
+	}
+	if (High-Low > PatrolMaxFloorHeightChange) return false;
+	OutFloor = High;
+	return true;
+}
+
+bool ACatrunCandle::TryPatrolStep(const FVector& Delta)
+{
+	if (!BlockingCapsule || !GetWorld() || !BlockingCapsule->IsQueryCollisionEnabled()) return false;
+	const FVector Start = BlockingCapsule->GetComponentLocation(), End = Start+Delta;
+	FCollisionQueryParams Params(SCENE_QUERY_STAT(CandlePatrolMove), false, this);
+	FCollisionResponseParams Responses;
+	BlockingCapsule->InitSweepCollisionParams(Params, Responses);
+	Params.AddIgnoredActor(this);
+	const auto Shape = BlockingCapsule->GetCollisionShape();
+	const auto Rotation = BlockingCapsule->GetComponentQuat();
+	FHitResult Hit;
+	if (GetWorld()->SweepSingleByChannel(Hit, Start, End, Rotation, BlockingCapsule->GetCollisionObjectType(), Shape, Params, Responses)
+		|| GetWorld()->OverlapBlockingTestByChannel(End, Rotation, BlockingCapsule->GetCollisionObjectType(), Shape, Params, Responses)) return false;
+	float FromFloor, ToFloor;
+	if (!FindPatrolFloor(Start, FromFloor) || !FindPatrolFloor(End, ToFloor)
+		|| FMath::Abs(ToFloor-FromFloor) > PatrolMaxFloorHeightChange
+		|| FMath::Abs((End.Z-ToFloor)-(Start.Z-FromFloor)) > PatrolMaxFloorHeightChange) return false;
+	// Root is deliberately a SceneComponent; the attached, scaled, offset capsule was queried above.
+	return SetActorLocation(GetActorLocation()+Delta, false, nullptr, ETeleportType::None);
+}
+
+void ACatrunCandle::UpdatePatrol(float DeltaSeconds)
+{
+	if (!bPatrolEnabled || bTracking || UCatrunPuzzleSuspension::IsSuspended(this) || DeltaSeconds <= 0.f) return;
+	if (PatrolWaitLeft > 0.f) { PatrolWaitLeft = FMath::Max(0.f, PatrolWaitLeft-DeltaSeconds); return; }
+	const bool bActors = !PatrolPoints.IsEmpty();
+	const int32 Count = bActors ? PatrolPoints.Num() : PatrolRelativePoints.Num();
+	if (!Count || !BlockingCapsule) return;
+	PatrolIndex = FMath::Clamp(PatrolIndex, 0, Count-1);
+	if (bActors && !IsValid(PatrolPoints[PatrolIndex])) return; // keep intent, never jump to a different route
+	const FVector Target = bActors ? PatrolPoints[PatrolIndex]->GetActorLocation() : PatrolOrigin.TransformPosition(PatrolRelativePoints[PatrolIndex]);
+	FVector Remaining = Target-GetActorLocation();
+	if (Remaining.Size() <= 1.f)
+	{
+		PatrolWaitLeft = FMath::Max(0.f, PatrolPauseSeconds);
+		if (bPatrolLoop) PatrolIndex = (PatrolIndex+1)%Count;
+		else if (Count > 1)
+		{
+			if (PatrolIndex+PatrolStep < 0 || PatrolIndex+PatrolStep >= Count) PatrolStep = -PatrolStep;
+			PatrolIndex += PatrolStep;
+		}
+		return;
+	}
+	// Bounded work AND distance per substep. Large frame stalls cannot bridge an unsupported gap.
+	float Travel = FMath::Min(Remaining.Size(), FMath::Max(0.f, PatrolSpeed)*DeltaSeconds);
+	const FVector Direction = Remaining.GetSafeNormal();
+	const float StepSize = FMath::Max(1.f, BlockingCapsule->GetScaledCapsuleRadius()*.25f);
+	for (int32 Step=0; Step<64 && Travel>UE_KINDA_SMALL_NUMBER; ++Step)
+	{
+		const float Distance = FMath::Min(Travel, StepSize);
+		if (!TryPatrolStep(Direction*Distance)) break;
+		Travel -= Distance;
 	}
 }

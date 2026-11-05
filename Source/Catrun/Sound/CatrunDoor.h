@@ -6,6 +6,7 @@
 
 class UBoxComponent;
 class UStaticMeshComponent;
+namespace CatrunArmorPath { struct FDoorLane; }
 
 /**
  * A door that is closed at the start. While closed it blocks sound and the cat's way.
@@ -62,6 +63,13 @@ public:
 	// Direction (flat, length 1) that points straight out of the door leaf, perpendicular to
 	// the doorway. Stand in front of the door along this line to face it head-on.
 	FVector GetDoorNormal() const;
+
+	bool GetArmorPassageLane(float CapsuleRadius, float GridCellSize, CatrunArmorPath::FDoorLane& OutLane) const;
+
+	// Allowed lateral offset of the armor's capsule center under this frame.
+	// Set from physical clearance measurements. Zero keeps ordinary grid paths.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Door|Armor", meta = (ClampMin = "0", Units = "cm"))
+	float ArmorPassageHalfWidth = 0.f;
 
 	// Implement in a Blueprint child for extra effects (sound, particles).
 	UFUNCTION(BlueprintImplementableEvent, Category = "Door")

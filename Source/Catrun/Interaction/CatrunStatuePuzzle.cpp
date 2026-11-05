@@ -1,4 +1,5 @@
 #include "CatrunStatuePuzzle.h"
+#include "Settings/CatrunInputBindings.h"
 #include "CatrunPuzzleRevealComponent.h"
 #include "CatrunPuzzleSuspension.h"
 #include "CatrunBasketInteractionComponent.h"
@@ -75,7 +76,7 @@ void ACatrunStatuePuzzle::Tick(float DeltaSeconds)
 	ACharacter* Cat = Cast<ACharacter>(UGameplayStatics::GetPlayerPawn(this, 0));
 	APlayerController* PC = Cat ? Cast<APlayerController>(Cat->GetController()) : nullptr;
 	if (IsGameplayAvailable() && !UCatrunPuzzleSuspension::IsSuspended(this) && Cat && PC && !PC->IsMoveInputIgnored()
-		&& Settings && (!Settings->bRequireInteractKey || PC->IsInputKeyDown(EKeys::F)))
+		&& Settings && (!Settings->bRequireInteractKey || PC->IsInputKeyDown(UCatrunInputBindings::GetEffectiveKey(ECatrunInputSlot::Interact))))
 		for (int32 Index=0; Index<Links.Num(); ++Index)
 			if (TryPushStatue(Index,Cat,Cat->GetLastMovementInputVector(),DeltaSeconds)) break;
 	// Friction continues on release, with real collision and no free sliding through the cat.

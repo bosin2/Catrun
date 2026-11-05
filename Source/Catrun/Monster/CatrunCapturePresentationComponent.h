@@ -70,8 +70,10 @@ private:
 	FRotator GrabRotation = FRotator::ZeroRotator;
 	FVector CameraFrom = FVector::ZeroVector;
 	FRotator CameraFromRotation = FRotator::ZeroRotator;
+	float FramingFromYaw = 0.f, FramingTargetYaw = 0.f;
 	float Elapsed = 0.f, PickupElapsed = 0.f, GrabElapsed = 0.f, FadeElapsed = 0.f, PickupDuration = 0.f;
 	uint8 MovementMode = 0, CustomMode = 0;
+	bool bAbortPreparation = false;
 	bool bBeginningCapture = false, bCleaningUp = false, bEndingPlay = false;
 	bool bCollision = true, bOwnFade = false, bOwnInputLock = false, bOwnCatch = false, bRestartIssued = false;
 };

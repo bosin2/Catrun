@@ -16,6 +16,10 @@
 #include "Sound/SoundGridManager.h"
 #include "AIController.h"
 #include "Animation/AnimationAsset.h"
+#include "Animation/AnimSequence.h"
+#include "Animation/AnimSingleNodeInstance.h"
+#include "Animation/AnimInstance.h"
+#include "Animation/AnimMontage.h"
 #include "Camera/CameraActor.h"
 #include "Camera/CameraComponent.h"
 #include "Camera/PlayerCameraManager.h"
@@ -23,6 +27,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/TextRenderComponent.h"
 #include "DrawDebugHelpers.h"
+#include "EngineUtils.h"
 #include "HAL/IConsoleManager.h"
 #include "Engine/World.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -136,6 +141,8 @@ void ACatrunArmor::OnSoundHeard_Implementation(const FCatrunSoundEvent& Event, f
 	{
 		return;
 	}
+	bAwaitingDoorReplan = false;
+	TravelIntent = ETravelIntent::Investigation;
 	bInvestigatingSound = true;
 	CurrentSoundSize = Event.Size;
 	RunCause = Event.Kind == ECatrunSoundKind::Bell ? ERunCause::Bell : ERunCause::Noise;
@@ -169,9 +176,7 @@ void ACatrunArmor::OnSoundHeard_Implementation(const FCatrunSoundEvent& Event, f
 		// A turn animation on the way back to the post is cut short: the body takes the part of the
 		// turn that was already shown, then turns smoothly toward the new path while it runs
 		// (FaceAxisToward in TickWalking), with no turn animation.
-		const float Done = ActionDuration > 0.f ? FMath::Clamp(ActionTime / ActionDuration, 0.f, 1.f) : 1.f;
-		const float Step = (bTurningRight ? 90.f : -90.f) * Done;
-		SetActorRotation(FRotator(0.f, GetActorRotation().Yaw + Step, 0.f));
+		CommitTurn(false);
 		TurnsRemaining = 0;
 		BeginLeg();
 	}
@@ -190,9 +195,17 @@ bool ACatrunArmor::PlanPath(const FVector& NewDestination)
 	CatrunArmorPath::FParams Params;
 	Params.ClearanceRadius = Settings->ArmorClearance;
 	Params.TurnPenalty = Settings->ArmorTurnPenalty;
+	const FCatrunGridData& Grid = Manager->GetGrid();
+	const float CapsuleRadius = GetCapsuleComponent()->GetScaledCapsuleRadius();
+	for (TActorIterator<ACatrunDoor> Door(GetWorld()); Door; ++Door)
+	{
+		CatrunArmorPath::FDoorLane Lane;
+		if (Door->GetArmorPassageLane(CapsuleRadius, Grid.CellSize, Lane))
+			Params.DoorLanes.Add(Lane);
+	}
 
 	TArray<FVector> Corners;
-	if (!CatrunArmorPath::FindPath(Manager->GetGrid(), GetActorLocation(), NewDestination, Params, Corners))
+	if (!CatrunArmorPath::FindPath(Grid, GetActorLocation(), NewDestination, Params, Corners))
 	{
 		UE_LOG(LogCatrunSound, Warning, TEXT("%s found no path to %s."), *GetName(), *NewDestination.ToString());
 		return false;
@@ -276,6 +289,9 @@ void ACatrunArmor::SetAction(EArmorAction NewAction)
 		break;
 	case EArmorAction::Turning:
 	{
+		TurnStartActorRotation = GetActorQuat();
+		TurnMeshBasis = GetMesh()->GetRelativeRotation().Quaternion();
+		bTurnCommitted = false;
 		UAnimationAsset* TurnAnim = bTurningRight ? TurnRightAnim : TurnLeftAnim;
 		PlayAnimation(TurnAnim, false, FMath::Max(.1f, TurnPlayRate));
 		ActionDuration = AnimationLength(TurnAnim) / FMath::Max(.1f, TurnPlayRate);
@@ -302,6 +318,7 @@ void ACatrunArmor::SetAction(EArmorAction NewAction)
 // Decides what to do next: turn on the spot if the next corner is far off the heading, else walk.
 void ACatrunArmor::BeginLeg()
 {
+	bAwaitingDoorReplan = false;
 	StuckTimer = 0.f;
 	LastWalkLocation = GetActorLocation();
 	// Skip corners we are already standing on.
@@ -377,6 +394,9 @@ void ACatrunArmor::BeginOpeningDoor(ACatrunDoor* Door)
 
 void ACatrunArmor::FinishTrip()
 {
+	// The current trip has finished. A prior failed door replan no longer owns Idle.
+	bAwaitingDoorReplan = false;
+	DoorReplanWait = 0.f;
 	// Following the mark never ends by itself: wait here, the next path plan goes on.
 	if (bFollowingMark && !bInvestigatingSound)
 	{
@@ -386,6 +406,7 @@ void ACatrunArmor::FinishTrip()
 		SetAction(EArmorAction::Idle);
 		return;
 	}
+	TravelIntent = ETravelIntent::None;
 	PathCorners.Reset();
 	NextCorner = 0;
 	bHasDestination = false; // arrived: from now on any sound is followed (rule 4.3)
@@ -421,9 +442,14 @@ void ACatrunArmor::FinishTrip()
 
 void ACatrunArmor::StartReturnToPost()
 {
+	// Select a replacement owner before planning: even a failed return must not revive the old trip.
+	bAwaitingDoorReplan = false;
+	DoorReplanWait = 0.f;
+	TravelIntent = ETravelIntent::None;
 	bInvestigatingSound = false;
 	if (bFollowingMark)
 	{
+		TravelIntent = ETravelIntent::Mark;
 		RunCause = ERunCause::Mark;
 		ApplyMoveSpeed();
 		MarkRepathTimer = 0.f;
@@ -440,6 +466,7 @@ void ACatrunArmor::StartReturnToPost()
 	const bool bFarFromPost = FVector::Dist2D(GetActorLocation(), PostLocation) > 50.f;
 	if (bReturnToPost && bFarFromPost && PlanPath(PostLocation))
 	{
+		TravelIntent = ETravelIntent::ReturnPost;
 		bReturningToPost = true;
 		BeginLeg(); // run back; this is no sound trip, so a new sound is still accepted
 		return;
@@ -502,6 +529,10 @@ void ACatrunArmor::OnPatrolPointReached()
 
 void ACatrunArmor::BeginPatrolLeg()
 {
+	// Patrol's existing wait/retry owns a missing point or failed path, not a stale door retry.
+	bAwaitingDoorReplan = false;
+	DoorReplanWait = 0.f;
+	TravelIntent = ETravelIntent::Patrol;
 	const ACatrunPatrolPoint* Point = PatrolPoints.IsValidIndex(PatrolIndex) ? PatrolPoints[PatrolIndex].Get() : nullptr;
 	if (!Point)
 	{
@@ -527,6 +558,8 @@ void ACatrunArmor::BeginPatrolLeg()
 	}
 	bPatrolWaiting = false;
 	bHasDestination = false; // a patrol walk is no sound trip: a new sound is accepted at once
+	TravelIntent = ETravelIntent::Patrol;
+	Destination = Target;
 	bReturningToPost = true; // walking speed and walk animation
 	BeginLeg();
 }
@@ -534,6 +567,12 @@ void ACatrunArmor::BeginPatrolLeg()
 // While standing at the post, slowly turn back to the direction the armor started with.
 void ACatrunArmor::TickIdle(float DeltaSeconds)
 {
+	if (bAwaitingDoorReplan)
+	{
+		DoorReplanWait -= DeltaSeconds;
+		if (DoorReplanWait <= 0.f) ReplanAfterDoor();
+		return;
+	}
 	if (bPatrolWaiting)
 	{
 		PatrolWaitLeft -= DeltaSeconds;
@@ -595,6 +634,7 @@ void ACatrunArmor::SetFollowingMark(bool bFollow)
 	if (bInvestigatingSound || Action == EArmorAction::Catching) return;
 	if (bFollow)
 	{
+		TravelIntent = ETravelIntent::Mark;
 		RunCause = ERunCause::Mark;
 		ApplyMoveSpeed();
 		bHasDestination = true; // a trip is on, so the post is forgotten
@@ -712,7 +752,10 @@ void ACatrunArmor::UpdateDetection()
 	// The circle is the catch area: the cat is caught the moment it touches it.
 	if (bSees && Action != EArmorAction::Catching)
 	{
-		UE_LOG(LogCatrunSound, Log, TEXT("%s noticed the cat."), *GetName());
+		if (!bSeeingCat)
+		{
+			UE_LOG(LogCatrunSound, Log, TEXT("%s noticed the cat."), *GetName());
+		}
 		StartCatch(*Cat);
 	}
 	bSeeingCat = bSees;
@@ -727,6 +770,10 @@ void ACatrunArmor::StartCatch(APawn& Cat)
 	{
 		return; // another armor is already carrying the cat off
 	}
+}
+
+void ACatrunArmor::PrepareForCapture()
+{
 	// Detection follows the animated body while opening a door. If it catches the cat
 	// before that animation finishes, commit the body's current position and release
 	// the hand-driven door before switching animations. Otherwise the capsule snaps
@@ -746,14 +793,16 @@ void ACatrunArmor::StartCatch(APawn& Cat)
 		bDoorReleased = true;
 	}
 
+	if (Action == EArmorAction::Turning) CommitTurn(false);
+	TurnsRemaining = 0;
+	TravelIntent = ETravelIntent::None;
+	bAwaitingDoorReplan = false;
 	bHasDestination = false;
 	bInvestigatingSound = false;
 	bReturningToPost = false;
 	bPatrolWaiting = false;
 	PathCorners.Reset();
 	NextCorner = 0;
-	const FVector ToCat = (Cat.GetActorLocation() - GetActorLocation()).GetSafeNormal2D();
-	SetActorRotation(FRotator(0.f, SnapYaw(ToCat.Rotation().Yaw), 0.f));
 	GetCharacterMovement()->StopMovementImmediately();
 	SetAction(EArmorAction::Catching);
 }
@@ -843,8 +892,7 @@ void ACatrunArmor::TickTurning(float DeltaSeconds)
 	{
 		return;
 	}
-	const float Step = bTurningRight ? 90.f : -90.f;
-	SetActorRotation(FRotator(0.f, SnapYaw(GetActorRotation().Yaw + Step), 0.f));
+	CommitTurn(true);
 
 	if (--TurnsRemaining > 0)
 	{
@@ -870,7 +918,10 @@ void ACatrunArmor::TickOpeningDoor(float DeltaSeconds)
 	ACatrunDoor* Door = DoorBeingOpened.Get();
 	if (!Door)
 	{
-		BeginLeg(); // the door is gone, carry on
+		if (DoorStep == EDoorStep::Animation) EndDoorAnimation();
+		bDoorHandDriven = false;
+		bDoorReleased = true;
+		ReplanAfterDoor(); // no mirrored or stale approach pose survives a destroyed door
 		return;
 	}
 
@@ -939,8 +990,10 @@ void ACatrunArmor::TickOpeningDoor(float DeltaSeconds)
 
 		// The body has moved through the doorway, so the old path (which still leads to the spot in
 		// front of the door) is out of date: plan it again from here.
-		PlanPath(bReturningToPost ? PostLocation : Destination);
-		BeginLeg();
+		DoorBeingOpened.Reset();
+		bDoorHandDriven = false;
+		bDoorReleased = true;
+		ReplanAfterDoor();
 	}
 }
 
@@ -975,6 +1028,7 @@ void ACatrunArmor::StartOpeningDoor(ACatrunDoor& Door)
 
 void ACatrunArmor::BeginDoorAnimation()
 {
+	GetCharacterMovement()->StopMovementImmediately();
 	ActionTime = 0.f;
 	ActionDuration = AnimationLength(DoorOpenAnim);
 
@@ -1005,7 +1059,9 @@ void ACatrunArmor::EndDoorAnimation()
 	{
 		GetMesh()->SetRelativeScale3D(MeshBaseScale);
 	}
-	AddActorWorldOffset(Walked, /*bSweep*/ false, nullptr, ETeleportType::TeleportPhysics);
+	FHitResult HandoffHit;
+	AddActorWorldOffset(Walked, true, &HandoffHit, ETeleportType::None);
+	// A late blocker keeps only achieved travel. Never bypass collision to match a presentation pose.
 	UE_LOG(LogCatrunSound, Log, TEXT("%s open-door animation moved the body %.0f cm."), *GetName(), Walked.Size());
 }
 
@@ -1086,4 +1142,84 @@ void ACatrunArmor::DrawDebug() const
 	}
 	DrawDebugSphere(GetWorld(), FVector(Destination.X, Destination.Y, GetActorLocation().Z) + Lift, 20.f, 8, FColor::Magenta, false, -1.f);
 #endif
+}
+
+
+bool ACatrunArmor::TryGetActiveTravelDestination(FVector& OutDestination) const
+{
+	switch (TravelIntent)
+	{
+	case ETravelIntent::Patrol:
+		if (!PatrolPoints.IsValidIndex(PatrolIndex) || !IsValid(PatrolPoints[PatrolIndex])) return false;
+		OutDestination = PatrolPoints[PatrolIndex]->GetActorLocation(); return true;
+	case ETravelIntent::ReturnPost: OutDestination = PostLocation; return true;
+	case ETravelIntent::Investigation:
+	case ETravelIntent::Mark: OutDestination = Destination; return true;
+	default: return false;
+	}
+}
+
+void ACatrunArmor::ReplanAfterDoor()
+{
+	FVector Target;
+	if (TryGetActiveTravelDestination(Target) && PlanPath(Target)) { bAwaitingDoorReplan = false; BeginLeg(); return; }
+	PathCorners.Reset(); NextCorner = 0;
+	// Retain travel/sound intent on temporary path failure; retry at bounded intervals, never follow stale corners.
+	bAwaitingDoorReplan = TravelIntent != ETravelIntent::None;
+	DoorReplanWait = .5f;
+	SetAction(EArmorAction::Idle);
+}
+
+bool ACatrunArmor::GetTurnPlaybackTime(float& OutTime) const
+{
+	const UAnimationAsset* Expected = bTurningRight ? TurnRightAnim.Get() : TurnLeftAnim.Get();
+	if (auto* Single = GetMesh()->GetSingleNodeInstance(); Single && Single->GetCurrentAsset() == Expected)
+	{
+		OutTime = Single->GetCurrentTime(); return true;
+	}
+	if (auto* Instance = GetMesh()->GetAnimInstance())
+	{
+		// Dynamic montage segment conversion respects start offsets, looping and segment play rate.
+		if (const UAnimMontage* Montage = Instance->GetCurrentActiveMontage())
+		{
+			const float Position = Instance->Montage_GetPosition(Montage);
+			for (const auto& Slot : Montage->SlotAnimTracks)
+			{
+				if (const FAnimSegment* Segment = Slot.AnimTrack.GetSegmentAtTime(Position); Segment && Segment->GetAnimReference() == Expected)
+				{ OutTime = Segment->ConvertTrackPosToAnimPos(Position); return true; }
+			}
+		}
+	}
+	return false;
+}
+
+void ACatrunArmor::CommitTurn(bool bCompleted)
+{
+	if (bTurnCommitted) return;
+	bTurnCommitted = true; // exactly once, including capture/sound interruption and 180-degree chains
+	const auto* Sequence = Cast<UAnimSequence>(bTurningRight ? TurnRightAnim.Get() : TurnLeftAnim.Get());
+	float SampleTime = 0.f;
+	const bool bHasPlayback = GetTurnPlaybackTime(SampleTime);
+	FQuat LocalDelta = FQuat::Identity;
+	if (Sequence)
+	{
+		if (bCompleted) SampleTime = Sequence->GetPlayLength();
+		else if (!bHasPlayback)
+		{
+			// No matching player: explicitly sample the actual curve at the native clock. Never estimate yaw linearly.
+			SampleTime = ActionTime*FMath::Max(.1f,TurnPlayRate)*Sequence->RateScale;
+			UE_LOG(LogCatrunSound, Warning, TEXT("%s turn has no matching playback; using native time for curve sample."), *GetName());
+		}
+		SampleTime = FMath::Clamp(SampleTime, 0.f, Sequence->GetPlayLength());
+		LocalDelta = Sequence->ExtractRootMotionFromRange(0.0, SampleTime, FAnimExtractContext(SampleTime, true)).GetRotation();
+	}
+	else
+	{
+		// Missing clips never synthesize a partial turn. At completion retain the documented axis fallback.
+		if (bCompleted) LocalDelta = FRotator(0.f, bTurningRight ? 90.f : -90.f, 0.f).Quaternion();
+		UE_LOG(LogCatrunSound, Warning, TEXT("%s missing turn sequence; %s fallback."), *GetName(), bCompleted ? TEXT("axis endpoint") : TEXT("retain heading"));
+	}
+	const FQuat ActorDelta = Sequence ? TurnMeshBasis*LocalDelta*TurnMeshBasis.Inverse() : LocalDelta;
+	SetActorRotation((TurnStartActorRotation*ActorDelta).GetNormalized());
+	// Authored BP dynamic montages have zero outgoing blend: next action removes the old root pose.
 }

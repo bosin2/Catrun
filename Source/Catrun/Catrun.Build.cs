@@ -24,5 +24,6 @@ public class Catrun : ModuleRules
 			"Slate",
 			"SlateCore"
 		});
+		PrivateDependencyModuleNames.Add("Json");
 	}
 }

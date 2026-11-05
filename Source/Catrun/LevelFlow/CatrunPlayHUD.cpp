@@ -1,4 +1,5 @@
 #include "CatrunPlayHUD.h"
+#include "Settings/CatrunInputBindings.h"
 #include "CatrunLevelFlow.h"
 #include "Blueprint/WidgetTree.h"
 #include "Components/Border.h"
@@ -105,13 +106,13 @@ TSharedRef<SWidget> UCatrunPlayHUD::RebuildWidget()
 		StatePanel = StateCard;
 		StatePanel->SetVisibility(ESlateVisibility::Collapsed);
 		Status = AddText(StateBox,TEXT("CatStatus"),TEXT("흔적 없음"),20,Accent);
-		AddText(StateBox,TEXT("MenuHint"),TEXT("Esc / P  메뉴"),16,Ink);
+		AddText(StateBox,TEXT("MenuHint"),TEXT("Esc  메뉴"),16,Ink);
 		UBorder* Bottom = nullptr;
 		auto* BottomBox = MakeCard(TEXT("ControlCard"),FVector2D(.5,1),FVector2D(0,-18),FVector2D(.5,1),660,Bottom);
 		ControlsPanel = Bottom;
 		ControlsPanel->SetVisibility(ESlateVisibility::Collapsed);
 		Context = AddText(BottomBox,TEXT("ContextHint"),TEXT("주변을 살펴보세요."),19,Accent);
-		AddText(BottomBox,TEXT("Controls"),TEXT("WASD 이동   ·   Ctrl 살금살금   ·   Shift 달리기   ·   Q 방울   ·   F 상호작용"),16,Ink);
+		AddText(BottomBox,TEXT("Controls"),TEXT("WASD 이동   ·   Ctrl 살금살금   ·   Shift 달리기   ·   Space 방울   ·   F 상호작용"),16,Ink);
 
 		PausePanel = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(),TEXT("PausePanel"));
 		PausePanel->SetBrushColor(FLinearColor(.01f,.015f,.025f,.94f));
@@ -144,6 +145,16 @@ void UCatrunPlayHUD::Refresh()
 	APawn* Cat = GetOwningPlayerPawn();
 	auto* Flow = UCatrunLevelFlowSubsystem::Get(this);
 	if (!Cat || !Flow || !ObjectiveTitle) return;
+ const FString InteractKey=UCatrunInputBindings::GetEffectiveKeyLabel(ECatrunInputSlot::Interact).ToString();
+ if (auto* Controls=Cast<UTextBlock>(WidgetTree->FindWidget(TEXT("Controls"))))
+  Controls->SetText(Copy(FString::Printf(TEXT("%s/%s/%s/%s 이동 · %s 살금살금 · %s 달리기 · %s 방울 · %s 상호작용"),
+   *UCatrunInputBindings::GetEffectiveKeyLabel(ECatrunInputSlot::Forward).ToString(),
+   *UCatrunInputBindings::GetEffectiveKeyLabel(ECatrunInputSlot::Back).ToString(),
+   *UCatrunInputBindings::GetEffectiveKeyLabel(ECatrunInputSlot::Left).ToString(),
+   *UCatrunInputBindings::GetEffectiveKeyLabel(ECatrunInputSlot::Right).ToString(),
+   *UCatrunInputBindings::GetEffectiveKeyLabel(ECatrunInputSlot::Sneak).ToString(),
+   *UCatrunInputBindings::GetEffectiveKeyLabel(ECatrunInputSlot::Run).ToString(),
+   *UCatrunInputBindings::GetEffectiveKeyLabel(ECatrunInputSlot::Bell).ToString(),*InteractKey)));
 	bool bDebugGuidance = false;
 #if !UE_BUILD_SHIPPING
 	bDebugGuidance = CVarDebugGuidance.GetValueOnGameThread() != 0;
@@ -170,11 +181,11 @@ void UCatrunPlayHUD::Refresh()
 	FString State = TEXT("흔적 없음");
 	if (ACatrunNoBellZone::IsBellForbidden(*Cat)) Hint=TEXT("캣홀 근처에서는 방울을 울릴 수 없어요. 통로를 벗어나세요.");
 	if (auto* Recovery = ACatrunPuzzleReset::FindNearby(Cat))
-		Hint=FString::Printf(TEXT("F  동상 %s 원위치  ·  적과 표식은 그대로 유지됩니다."), *Recovery->PuzzleId.ToString());
-	if (Marked) { State=TEXT("표식 · 바구니로"); Hint=TEXT("촛불에 발각됐어요. 바구니 가까이에서 F를 눌러 표식을 지우세요."); }
-	if (Hidden) { State=TEXT("바구니 안 · 은신"); Hint=TEXT("F  바구니에서 나오기  ·  출구 앞이 안전한지 살펴보세요."); }
+		Hint=FString::Printf(TEXT("%s  동상 %s 원위치  ·  적과 표식은 그대로 유지됩니다."), *InteractKey, *Recovery->PuzzleId.ToString());
+	if (Marked) { State=TEXT("표식 · 바구니로"); Hint=FString::Printf(TEXT("촛불에 발각됐어요. 바구니 가까이에서 %s를 눌러 표식을 지우세요."),*InteractKey); }
+	if (Hidden) { State=TEXT("바구니 안 · 은신"); Hint=FString::Printf(TEXT("%s  바구니에서 나오기  ·  출구 앞이 안전한지 살펴보세요."),*InteractKey); }
 	if (Restart && Restart->IsCatching()) { State=TEXT("붙잡혔어요"); Hint=TEXT("잠시 후 이 구간의 시작 지점에서 다시 시작합니다."); }
-	if (Flow->IsStageComplete()) { Title=TEXT("현재 구간 완료!"); Body=TEXT("스테이지 2를 통과했어요. 이곳에 머물며 자유롭게 둘러볼 수 있어요."); State=TEXT("탈출 연습 완료"); Hint=TEXT("Esc / P 메뉴에서 다시 시작하거나 시작 메뉴로 돌아갈 수 있어요."); }
+	if (Flow->IsStageComplete()) { Title=TEXT("현재 구간 완료!"); Body=TEXT("스테이지 2를 통과했어요. 이곳에 머물며 자유롭게 둘러볼 수 있어요."); State=TEXT("탈출 연습 완료"); Hint=TEXT("Esc 메뉴에서 다시 시작하거나 시작 메뉴로 돌아갈 수 있어요."); }
 	ObjectiveTitle->SetText(Copy(Title)); ObjectiveBody->SetText(Copy(Body)); Context->SetText(Copy(Hint)); Status->SetText(Copy(State));
 	Status->SetColorAndOpacity(Marked && !Hidden ? FLinearColor(1,.45f,.4f,1) : Accent);
 	// Keep the level's opening and stair cinematics readable.
@@ -215,6 +226,6 @@ void UCatrunPlayHUD::RequestRestart()
 void UCatrunPlayHUD::ReturnToMenu() { if (auto* Flow=UCatrunLevelFlowSubsystem::Get(this)) Flow->ReturnToMenu(); }
 FReply UCatrunPlayHUD::NativeOnKeyDown(const FGeometry& Geometry, const FKeyEvent& Event)
 {
-	if (bMenuOpen && (Event.GetKey()==EKeys::Escape || Event.GetKey()==EKeys::P)) { ResumePlay(); return FReply::Handled(); }
+	// Escape is owned by the shared settings subsystem in every playable map.
 	return Super::NativeOnKeyDown(Geometry,Event);
 }

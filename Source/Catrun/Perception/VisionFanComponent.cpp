@@ -1,4 +1,5 @@
 #include "VisionFanComponent.h"
+#include "Monster/CatrunPerceptionPolicy.h"
 
 #include "Catrun.h"
 #include "Sound/CatrunDoor.h"
@@ -98,27 +99,7 @@ float UCatrunVisionFanComponent::GetFreeDistance(const FVector& From, const FVec
 
 float UCatrunVisionFanComponent::TraceRay(const FVector& Start, const FVector& Direction, float MaxDistance) const
 {
-	const UWorld* World = GetWorld();
-	FCollisionQueryParams Params(SCENE_QUERY_STAT(CatrunVisionRay), /*bTraceComplex*/ true, GetOwner());
-	TArray<FHitResult> Hits;
-	World->LineTraceMultiByObjectType(Hits, Start, Start + Direction * MaxDistance, FCollisionObjectQueryParams(ECC_WorldStatic), Params);
-
-	for (const FHitResult& Hit : Hits)
-	{
-		const AActor* HitActor = Hit.GetActor();
-		if (!HitActor)
-		{
-			continue;
-		}
-		// Walls, furniture marked as obstacle, and closed doors (an open door has no collision).
-		const bool bBlocks = HitActor->ActorHasTag(Settings->WallTag) || HitActor->ActorHasTag(Settings->ObstacleTag)
-			|| HitActor->IsA<ACatrunDoor>();
-		if (bBlocks)
-		{
-			return Hit.Distance;
-		}
-	}
-	return MaxDistance;
+	return GetWorld() ? CatrunPerception::SightDistance(*GetWorld(), Start, Start+Direction*MaxDistance, GetOwner()) : MaxDistance;
 }
 
 void UCatrunVisionFanComponent::Update(float CenterAngleDegrees, float HalfAngleDegrees)

@@ -27,7 +27,7 @@ struct FPendingSound
 	UPROPERTY()
 	float RemainingBudget = 0.f;
 
-	// World time at which the wave reaches the listener.
+	// Listener clock time (frozen during puzzle suspension) at which the wave arrives.
 	double ArrivalTime = 0.0;
 };
 
@@ -58,6 +58,9 @@ public:
 	// Builds the grid from the level floors and walls. Run it again after moving walls/floors.
 	UFUNCTION(CallInEditor, BlueprintCallable, Category = "Sound")
 	void BuildGrid();
+	/** Read the nine serialized bake fields directly; never rebuilds or refreshes runtime puzzle data. */
+	UFUNCTION(CallInEditor, Category = "Sound|Debug")
+	FString ExportBakedGridSnapshot() const;
 
 	// Makes a sound. Calculates where it reaches and starts the wave. Listeners are told
 	// when the wave arrives at them, not instantly.
@@ -96,6 +99,10 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Sound")
 	FOnCatrunSoundEmitted OnSoundEmitted;
 
+	/** Travel budget for the player's bell in this level. Zero uses the sound settings asset. */
+	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, Category = "Sound|Budget", meta = (ClampMin = "0", Units = "cm"))
+	float PlayerBellBudgetOverride = 0.f;
+
 	// Draw the grid (floor cells and wall edges) in the viewport. For checking the bake.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debug")
 	bool bDebugDrawGrid = false;
@@ -129,6 +136,11 @@ protected:
 	TObjectPtr<UCatrunSoundSettings> Settings;
 
 private:
+	friend class FCatrunSuspendedSoundDeliveryTest;
+	// No TTL/coalescing: retain notifications, drain stably with a shared per-tick budget.
+	double ListenerClock = 0.0;
+	int32 DeliveryBudget = 32;
+	bool bDeliveringSounds = false;
 	void RefreshPuzzleObstacles() const;
 	mutable bool bPuzzleObstaclesDirty = true;
 	void RefreshDoorGates();

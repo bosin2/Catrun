@@ -6,6 +6,7 @@
 #include "CatrunSoundSettings.generated.h"
 
 class UMaterialInterface;
+class UUserWidget;
 
 /**
  * Every tunable value of the sound and monster-movement systems.
@@ -78,6 +79,24 @@ public:
 	// How long (seconds) a notice stays on screen.
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Bell", meta = (ClampMin = "0.1"))
 	float NoticeDuration = 2.f;
+
+	// Successful bell feedback. Zero duration disables the indicator.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Bell|Feedback", meta = (ClampMin = "0.0", ClampMax = "10.0", Units = "s"))
+	float BellIndicatorDuration = 1.2f;
+
+	// Centimeters relative to the actor root, not a mesh socket.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Bell|Feedback", meta = (Units = "cm"))
+	FVector BellIndicatorOffset = FVector(0.f, 0.f, 65.f);
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Bell|Feedback", meta = (ClampMin = "16.0", ClampMax = "256.0"))
+	float BellIndicatorSize = 56.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Bell|Feedback")
+	FLinearColor BellIndicatorColor = FLinearColor(1.f, .78f, .22f, 1.f);
+
+	// Optional Widget Blueprint; unset uses the native vector bell. Tint and fade apply to both.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Bell|Feedback")
+	TSubclassOf<UUserWidget> BellIndicatorWidgetClass;
 
 	// ---- Wave visualization --------------------------------------------------
 	// The wave is drawn by the ripple blueprints in /Game/Systems/Sound/Ripple. They read every

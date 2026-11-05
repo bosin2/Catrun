@@ -14,6 +14,17 @@
 #include "Engine/World.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/PlayerController.h"
+#include "HAL/IConsoleManager.h"
+
+namespace
+{
+#if !UE_BUILD_SHIPPING
+	TAutoConsoleVariable<int32> CVarNoArmorCapture(
+		TEXT("catrun.NoArmorCapture"), 0,
+		TEXT("Prevent new armor captures for debugging. 0: normal play, 1: prevent capture. Existing captures finish normally."),
+		ECVF_Cheat);
+#endif
+}
 
 void FCatrunCaptureMeshState::Save(USkeletalMeshComponent* Mesh)
 {
@@ -53,11 +64,15 @@ UCatrunCapturePresentationComponent::UCatrunCapturePresentationComponent()
 
 bool UCatrunCapturePresentationComponent::BeginCapture(APawn* InCat, const UCatrunSoundSettings* InSettings)
 {
+#if !UE_BUILD_SHIPPING
+	if (CVarNoArmorCapture.GetValueOnGameThread() != 0) return false;
+#endif
 	auto* OwnerArmor = Cast<ACatrunArmor>(GetOwner());
 	auto* Restart = UCatrunRestartSubsystem::Get(this);
-	if (bBeginningCapture || bCleaningUp || bEndingPlay || IsCapturing() || !IsValid(InCat) || !OwnerArmor || !InSettings || !Restart || !Restart->TryBeginCatch()) return false;
+	if (bBeginningCapture || bCleaningUp || bEndingPlay || IsCapturing() || !IsValid(InCat) || !IsValid(OwnerArmor) || !IsValid(InSettings) || !Restart || !Restart->TryBeginCatch()) return false;
 	// Cleanup may run inside Framing listeners; keep this guard until the outer setup unwinds.
 	TGuardValue<bool> BeginningGuard(bBeginningCapture, true);
+	bAbortPreparation = false;
 	bOwnCatch = true;
 	bRestartIssued = false;
 	bOwnFade = false;
@@ -68,7 +83,17 @@ bool UCatrunCapturePresentationComponent::BeginCapture(APawn* InCat, const UCatr
 	Elapsed = PickupElapsed = GrabElapsed = FadeElapsed = 0.f;
 	OriginalTransform = InCat->GetActorTransform();
 	bCollision = InCat->GetActorEnableCollision();
+	// Acquisition is already reserved; only now end door/turn presentation and snapshot stable idle.
+	OwnerArmor->PrepareForCapture();
+	if (bAbortPreparation || bEndingPlay || !IsValid(this) || !IsValid(OwnerArmor) || !IsValid(InCat) || !IsValid(InSettings))
+	{
+		Restart->CancelCatch(); bOwnCatch = false; Cat.Reset(); Armor.Reset(); Settings = nullptr;
+		return false;
+	}
 	ArmorMeshState.Save(OwnerArmor->GetMesh());
+	FramingFromYaw = OwnerArmor->GetActorRotation().Yaw;
+	const FVector ToCat = (InCat->GetActorLocation()-OwnerArmor->GetActorLocation()).GetSafeNormal2D();
+	FramingTargetYaw = ToCat.IsNearlyZero() ? FramingFromYaw : FMath::GridSnap(ToCat.Rotation().Yaw, 90.f);
 	if (auto* Character = Cast<ACharacter>(InCat))
 	{
 		// End the prior temporary action before snapshotting the stable playable state.
@@ -215,6 +240,13 @@ void UCatrunCapturePresentationComponent::TickComponent(float DeltaTime, ELevelT
 	if (!Cat.IsValid() || !Armor.IsValid() || !Settings || (Flow && (Flow->IsTransitioning() || Flow->IsStageComplete()))) { AbortCapture(); return; }
 	const int32 TickingSession = SessionId;
 	Elapsed += DeltaTime;
+	if (Phase == ECatrunCapturePhase::Framing)
+	{
+		const float Alpha = Settings->CatchCameraBlendTime > 0.f ? FMath::Clamp(Elapsed/Settings->CatchCameraBlendTime,0.f,1.f) : 1.f;
+		const float Yaw = FramingFromYaw + FMath::FindDeltaAngleDegrees(FramingFromYaw,FramingTargetYaw)*FMath::SmoothStep(0.f,1.f,Alpha);
+		Armor->SetActorRotation(FRotator(0.f, FRotator::NormalizeAxis(Yaw),0.f));
+		if (!IsCurrentSession(TickingSession, ECatrunCapturePhase::Framing)) return;
+	}
 	const ECatrunCapturePhase CameraPhase = Phase;
 	UpdateCamera(DeltaTime);
 	if (!IsCurrentSession(TickingSession, CameraPhase)) return;
@@ -309,6 +341,8 @@ void UCatrunCapturePresentationComponent::Cleanup(bool bRestoreTransform)
 
 void UCatrunCapturePresentationComponent::AbortCapture()
 {
+	// AnimationRequested during owner preparation can cancel before snapshots/phase callbacks exist.
+	if (bBeginningCapture && !IsCapturing()) { bAbortPreparation = true; return; }
 	if (IsCapturing() && !bCleaningUp) Cleanup(true);
 }
 void UCatrunCapturePresentationComponent::EndPlay(const EEndPlayReason::Type Reason)

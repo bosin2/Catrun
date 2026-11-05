@@ -1,5 +1,6 @@
 #include "CatrunDoor.h"
 #include "Interaction/CatrunPuzzleSuspension.h"
+#include "Pathfinding/ArmorPathfinder.h"
 
 #include "SoundGridManager.h"
 #include "Components/BoxComponent.h"
@@ -35,6 +36,23 @@ FVector ACatrunDoor::GetDoorNormal() const
 {
 	// The gate box is wide along its X axis and thin along its Y axis, so Y is the leaf's normal.
 	return GateBox->GetRightVector().GetSafeNormal2D();
+}
+
+bool ACatrunDoor::GetArmorPassageLane(float CapsuleRadius, float GridCellSize, CatrunArmorPath::FDoorLane& OutLane) const
+{
+	if (!FMath::IsFinite(ArmorPassageHalfWidth) || ArmorPassageHalfWidth <= 0.f) return false;
+	const FVector2D Normal(GetDoorNormal());
+	if (Normal.IsNearlyZero()) return false;
+
+	const FVector Extent = GateBox->GetScaledBoxExtent();
+	OutLane.Center = FVector2D(GetDoorwayCenter());
+	OutLane.Normal = Normal;
+	OutLane.PassageHalfWidth = FMath::Min<double>(ArmorPassageHalfWidth, Extent.X);
+	OutLane.FrameHalfWidth = Extent.X + CapsuleRadius;
+	// Start aligning a cell before the expanded gate. Frames can project past
+	// the leaf, and CharacterMovement turns shortly before a path corner.
+	OutLane.ApproachHalfDepth = Extent.Y + CapsuleRadius + GridCellSize;
+	return true;
 }
 
 void ACatrunDoor::BeginPlay()

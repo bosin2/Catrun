@@ -16,7 +16,7 @@ class ACatrunCandle;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnCandleSpottedCat, ACatrunCandle*, Candle, AActor*, Cat);
 
 /**
- * Floating candle monster: it watches over a place and spots the cat. It never moves.
+ * Floating candle monster: stationary by default, with optional per-instance patrol.
  *
  * Sight (design doc 4.1, as changed by the designer):
  *  - The candle faces ONE direction: the direction the actor faces in the level. That direction
@@ -90,6 +90,16 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Candle")
 	TObjectPtr<UCatrunAlertMarkComponent> AlertMark;
 
+	// Actor waypoints take precedence over relative points. Relative points use the BeginPlay transform.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Candle|Patrol") bool bPatrolEnabled = false;
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="Candle|Patrol") TArray<TObjectPtr<AActor>> PatrolPoints;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Candle|Patrol", meta=(MakeEditWidget=true)) TArray<FVector> PatrolRelativePoints;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Candle|Patrol", meta=(ClampMin="0")) float PatrolSpeed = 65.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Candle|Patrol", meta=(ClampMin="0")) float PatrolPauseSeconds = 1.5f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Candle|Patrol") bool bPatrolLoop = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Candle|Patrol", meta=(ClampMin="1")) float PatrolFloorProbeDistance = 200.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Candle|Patrol", meta=(ClampMin="0")) float PatrolMaxFloorHeightChange = 12.f;
+
 	// True while the candle is following the cat with its view.
 	UFUNCTION(BlueprintPure, Category = "Candle")
 	bool IsTrackingCat() const { return bTracking; }
@@ -99,6 +109,14 @@ protected:
 
 private:
 	friend class FCatrunPuzzleSuspensionTest;
+	friend class FCatrunCandlePatrolSafetyTest;
+	void ResetPatrol();
+	void UpdatePatrol(float DeltaSeconds);
+	bool TryPatrolStep(const FVector& Delta);
+	bool FindPatrolFloor(const FVector& CapsuleCenter, float& OutFloor) const;
+	FTransform PatrolOrigin;
+	int32 PatrolIndex = 0, PatrolStep = 1;
+	float PatrolWaitLeft = 0.f;
 	// The settings of the level's sound system (found once, then remembered). nullptr until the
 	// sound system exists.
 	const UCatrunSoundSettings* GetSettings();

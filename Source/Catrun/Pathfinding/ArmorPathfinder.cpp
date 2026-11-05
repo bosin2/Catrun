@@ -40,6 +40,14 @@ bool CatrunArmorPath::CanStand(const FCatrunGridData& Grid, int32 Cell, float Cl
 		&& (!Grid.PuzzleClearance.IsValidIndex(Cell) || Grid.PuzzleClearance[Cell] >= ClearanceRadius);
 }
 
+bool CatrunArmorPath::FDoorLane::Blocks(const FVector2D& Point) const
+{
+	const FVector2D FromDoor = Point - Center;
+	const double SideDistance = FMath::Abs(FVector2D::CrossProduct(FromDoor, Normal));
+	return SideDistance > PassageHalfWidth && SideDistance <= FrameHalfWidth
+		&& FMath::Abs(FVector2D::DotProduct(FromDoor, Normal)) <= ApproachHalfDepth;
+}
+
 bool CatrunArmorPath::FindPath(const FCatrunGridData& Grid, const FVector& Start, const FVector& Goal,
 	const FParams& Params, TArray<FVector>& OutCorners)
 {
@@ -51,7 +59,13 @@ bool CatrunArmorPath::FindPath(const FCatrunGridData& Grid, const FVector& Start
 
 	// Start and goal may be outside the allowed area (next to a wall); use the closest allowed cell.
 	const int32 SearchRings = FMath::CeilToInt(Params.ClearanceRadius / Grid.CellSize) + 3;
-	auto IsAllowed = [&](int32 Cell) { return CatrunArmorPath::CanStand(Grid, Cell, Params.ClearanceRadius); };
+	auto IsAllowed = [&](int32 Cell)
+	{
+		if (!CanStand(Grid, Cell, Params.ClearanceRadius)) return false;
+		if (Params.DoorLanes.IsEmpty()) return true;
+		const FVector2D Point(Grid.CellCenter(Cell));
+		return !Params.DoorLanes.ContainsByPredicate([&](const FDoorLane& Lane) { return Lane.Blocks(Point); });
+	};
 	const int32 StartCell = Grid.FindNearestCell(Start, SearchRings, IsAllowed);
 	const int32 GoalCell = Grid.FindNearestCell(Goal, SearchRings, IsAllowed);
 	if (StartCell == INDEX_NONE || GoalCell == INDEX_NONE)

@@ -18,6 +18,19 @@ struct FCatrunGridData;
  */
 namespace CatrunArmorPath
 {
+	// World-space footprint of a door frame, measured for the moving armor.
+	// Only its central lane admits the capsule while it traverses the frame.
+	struct FDoorLane
+	{
+		FVector2D Center = FVector2D::ZeroVector;
+		FVector2D Normal = FVector2D::ZeroVector;
+		double PassageHalfWidth = 0.;
+		double FrameHalfWidth = 0.;
+		double ApproachHalfDepth = 0.;
+
+		bool Blocks(const FVector2D& Point) const;
+	};
+
 	struct FParams
 	{
 		// Half the armor width in cm. Cells with less wall distance are off limits.
@@ -25,6 +38,8 @@ namespace CatrunArmorPath
 
 		// Extra cost in cm added at every 90 degree turn.
 		float TurnPenalty = 100.f;
+
+		TArray<FDoorLane> DoorLanes;
 	};
 
 	// True if the armor can stand on this cell (floor cell with enough room around it).
