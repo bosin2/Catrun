@@ -223,6 +223,7 @@ def main():
     title=text(bp,'SettingsTitle','설정',heading,36)
     properties(title.get_editor_property('slot'),size=unreal.SlateChildSize(value=1,size_rule=unreal.SlateSizeRule.FILL))
     ornament=sizebox(bp,'SettingsPawBounds',heading,width=36,height=36)
+    properties(ornament.get_editor_property('slot'),vertical_alignment=unreal.VerticalAlignment.V_ALIGN_CENTER)
     paw=add(bp,unreal.Image,'SettingsPaw',ornament)
     paw.set_brush_from_texture(AS.load_asset('/Game/Environment/UI/CatJelly'),True)
     properties(paw,color_and_opacity=GOLD)

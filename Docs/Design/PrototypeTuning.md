@@ -1,11 +1,13 @@
 # 프로토타입 조정 위치
 
-2026-11-04 작업용 안내다. Task4c 애니메이션과 Task4d 동상·문 연출 값을 반영했고, 2026-11-05 방울 성공 표시의 소스 기본값을 추가했다. C++ 기본값과 배치된 Blueprint의 덮어쓴 값은 다를 수 있으므로 최종 PIE 검증 기록을 함께 확인한다.
+2026-11-04 작업용 안내에서 시작해 방울·설정, 2026-11-11 포털·문 카메라 조정 위치를 반영했다. C++ 기본값과 배치된 Blueprint의 덮어쓴 값은 다를 수 있으므로 최종 PIE 검증 기록을 함께 확인한다.
 
 | 조정 대상 | 언리얼에서 열 위치 | 담당 값 / 역할 |
 |---|---|---|
 | 스테이지별 게임 카메라 | 프로젝트 설정 → Catrun Level Flow → Camera Profiles | Tutorial 1.0, Stage1 1.15, Stage2 1.30. 원래 직교 카메라 너비에 곱한다. 튜토리얼은 원본 유지 |
 | 게임 진행 경로 | 프로젝트 설정 → Catrun Level Flow → Stages | 메인메뉴와 플레이 가능한 맵 순서. Stage3 제외 |
+| Stage1→2 포털 구도·속도 | `/Game/Cinematics/Stage1/Portal/LS_Stage1_PortalExit` | 30fps, 총309프레임(10.3초). 걷기0–96, 살피기96–240, 점프240–285, 마무리285–309. 각 구간 끝은 다음 구간 시작이다. 카메라 Transform/FOV와 고양이 애니메이션 재생률을 Sequencer에서 함께 조정 |
+| 포털 문양·발광 | 같은 폴더 `M_Stage1PortalBlue` | 기존 UV/마스크를 보존한 Custom 노드의 분할 원호·팔각형·마름모와 색/세기를 Material Editor에서 편집. 저장/이동 연결은 `BP_Stage1PortalExit` 소유 그대로 |
 | 갑옷 회전 속도 | `/Game/Characters/LivingArmor/Blueprints/BP_LivingArmor` 클래스 기본값 | TurnPlayRate. 기본5; 기존2.5초 회전을 약0.5초에 재생 |
 | 갑옷 재생 전환 | 같은 BP → LocomotionBlendSeconds / bUseBlueprintAnimation | 0.08초. 회전·문 클립 진입/이탈은 네이티브 루트 보정을 위해 0초. Final `ABP_ArmorPresentation`의 DefaultSlot 사용 |
 | 붙잡기 애니메이션 | 같은 BP의 CapturePresentation 컴포넌트 | bUseBlueprintPresentation=true, CatPickupAnimation=`AN_BlackCat_CaughtHeld`, PickupPlayRate=1. 고양이 기존 이동 AnimBP는 그대로 복원 |
@@ -32,7 +34,7 @@
 | 동상 안착 | 같은 DA 및 Stage2/SoundTest_Stage2의 S2_StatuePuzzle → Links | SeatingOverlap=0.8, 축/높이 허용=12cm. 실제 밑면 반크기=(60,60), 최종 접근축 A:Y·B:X·C:Y. ActivationTolerance=18은 구형 설정 |
 | 문 하강 | 같은 DA 및 Links | GateTravel=양수280cm가 최소 **하강** 거리, GateSpeed=140, GateFloorClearance=4cm. 실제 문 높이246cm. 바닥 오프셋 A/B=0, C=20cm. 발판2cm 하강 |
 | 퍼즐 연결 | S2_StatuePuzzle → Links | A→Gate02, B→Gate05, C→Gate11. 기존 복구 받침대의 Puzzle 참조는 같은 네이티브 디렉터 유지 |
-| 연출 카메라 | Stage2/SoundTest_Stage2의 S2_StatuePuzzle → Reveal | PreserveGameplayFraming=true, 이동2초, 복귀1.6초, 최대잠금8초. 현재 게임 카메라 각도·투영·폭/FOV와 초점 거리감을 유지하고 평행 이동한다. 막힌 경로는 다른 역동적인 각도로 바꾸지 않는다. 네이티브가 충돌·뷰·입력 소유권을 관리 |
+| 연출 카메라 | Stage2/SoundTest_Stage2의 S2_StatuePuzzle → Reveal | PreserveGameplayFraming=true, CameraTravelTime=3초, CameraReturnTime=2.6초, MaximumLockTime=10.5초(2026-11-11). 현재 게임 카메라 각도·투영·폭/FOV와 초점 거리감을 유지하고 평행 이동한다. 막힌 경로는 다른 역동적인 각도로 바꾸지 않는다. 네이티브가 실제 직교 렌더 원점의 충돌·뷰 인계·입력 소유권을 관리 |
 | 방별 연출 조립 | `/Game/Systems/Interaction/Puzzles/Presentation/BP_StatuePresentation`; 배치 S2_StatuePresentation_A/B/C | 폭 설정3곳은 `ResolvePresentationOrthoWidth`를 사용한다. PreserveGameplayFraming 켜짐 상태에서는 CameraOffset=(350,350,1200)와 RevealOrthoWidth=650의 옛 저장값은 사용하지 않는다. 보존 모드를 끈 경우에만 구형 구도 설정으로 사용 |
 | 연출 카메라 블러 | 같은 BP → RevealPostProcess | 네이티브 임시 CameraActor 기본 후처리를 복사하고 MotionBlurAmount만 오버라이드0. 검정 바를 추가하기 전에 적용. 원래 게임 카메라·전역 그래픽 값은 변경하지 않음 |
 | 동상 눈 | 같은 BP → EyeParameter / EyeStrengthParameter / SeatedEyeColor / SeatedEyeStrength | EyesColor / EyesStrength; 정확한 안착 후 (1,0.005,0.002), 세기5. 각 동상의 기존 값을 런타임에 저장하고 해당 방 Reset에서만 복원. 몸체·룬 파라미터 보존 |

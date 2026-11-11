@@ -740,16 +740,15 @@ void ACatrunArmor::UpdateDetection()
 
 	APawn* Cat = CatrunCat::Find(this);
 	const bool bSees = Cat && !CatrunCat::IsSafeFromCatch(Cat) && Detection->CanSee(Cat->GetActorLocation(), S->CatSightRadius)
-		&& CatrunPerception::HasDirectSight(*this, *Cat, S->VisionTraceHeight);
+		&& CatrunPerception::HasDirectSight(*this, *Cat, S->VisionTraceHeight)
+		&& HasClearCapturePath(*Cat);
 
-	// While the cat is inside the circle the "!" stays on. (Show keeps it visible for a short
-	// time, so renewing it every frame holds it until the cat leaves.)
+	// Refresh the short-lived alert while the cat can be seen and reached.
 	if (bSees)
 	{
 		AlertMark->Show(0.2f);
 	}
 
-	// The circle is the catch area: the cat is caught the moment it touches it.
 	if (bSees && Action != EArmorAction::Catching)
 	{
 		if (!bSeeingCat)
@@ -759,6 +758,17 @@ void ACatrunArmor::UpdateDetection()
 		StartCatch(*Cat);
 	}
 	bSeeingCat = bSees;
+}
+
+bool ACatrunArmor::HasClearCapturePath(const APawn& Cat) const
+{
+	const auto* Character = Cast<ACharacter>(&Cat);
+	const FVector Target = Character ? Character->GetCapsuleComponent()->GetComponentLocation() : Cat.GetActorLocation();
+	FVector Start = GetCapsuleComponent()->GetComponentLocation();
+	Start.Z = Target.Z;
+
+	const float Distance = FVector::Distance(Start, Target);
+	return CatrunPerception::SightDistance(*GetWorld(), Start, Target, this, &Cat) >= Distance - KINDA_SMALL_NUMBER;
 }
 
 void ACatrunArmor::StartCatch(APawn& Cat)

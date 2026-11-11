@@ -2,6 +2,7 @@
 #include "CatrunSettingsWidget.h"
 #include "CatrunInputBindings.h"
 #include "Blueprint/UserWidget.h"
+#include "Blueprint/WidgetBlueprintLibrary.h"
 #include "Components/Widget.h"
 #include "Engine/Engine.h"
 #include "Engine/GameViewportClient.h"
@@ -18,6 +19,19 @@
 #include "Slate/SGameLayerManager.h"
 namespace
 {
+ UWidget* FindMenuSourcePanel(APlayerController* PlayerController)
+ {
+  const auto* FlowSettings=GetDefault<UCatrunLevelFlowSettings>();
+  const FString MapPackage=UWorld::RemovePIEPrefix(PlayerController->GetWorld()->GetOutermost()->GetName());
+  if (MapPackage!=FlowSettings->MainMenuMap.ToSoftObjectPath().GetLongPackageName()) return nullptr;
+  auto* MenuClass=FSoftClassPath(TEXT("/Game/UI/WBP_MainMenu.WBP_MainMenu_C")).ResolveClass();
+  TArray<UUserWidget*> MenuWidgets;
+  UWidgetBlueprintLibrary::GetAllWidgetsOfClass(PlayerController,MenuWidgets,MenuClass,true);
+  for (auto* Menu : MenuWidgets)
+   if (Menu->GetOwningPlayer()==PlayerController) return Menu;
+  return nullptr;
+ }
+
  class FCatrunSettingsInputProcessor : public IInputProcessor
  {
  public:
@@ -27,11 +41,18 @@ namespace
   TSet<FKey> SuppressedKeys;
   bool bEscapeHandled=false;
   virtual void Tick(float,FSlateApplication&,TSharedRef<ICursor>) override {}
-  virtual bool HandleKeyDownEvent(FSlateApplication&,const FKeyEvent& Event) override
+  virtual bool HandleKeyDownEvent(FSlateApplication& Slate,const FKeyEvent& Event) override
   {
    auto* Settings=Owner.Get();
    if (!Settings || !Settings->OwnsInputFocus()) return false;
+   // A fresh press proves the prior hold ended, even if its key-up occurred outside this viewport.
+   if (!Event.IsRepeat()) SuppressedKeys.Remove(Event.GetKey());
    HeldKeys.Add(Event.GetKey());
+   const auto* Widget=Settings->GetCurrentSettingsWidget();
+   if ((Slate.GetNavigationDirectionFromKey(Event)!=EUINavigation::Invalid ||
+    Slate.GetNavigationActionFromKey(Event)==EUINavigationAction::Accept) &&
+    Settings->OwnsInputFocus(Event.GetUserIndex()) && (!Widget || !Widget->IsCapturingBinding()))
+    NavigationUsers.Add(Event.GetUserIndex());
    if (Event.GetKey()==EKeys::Escape)
     {
     if (Event.IsRepeat()) return bEscapeHandled;
@@ -46,6 +67,47 @@ namespace
    HeldKeys.Remove(Event.GetKey());
    SuppressedKeys.Remove(Event.GetKey());
    return false;
+  }
+  virtual bool HandleMouseMoveEvent(FSlateApplication& Slate,const FPointerEvent& Event) override
+  {
+   if (!Event.GetCursorDelta().IsNearlyZero()) RecordPointerInput(Slate,Event);
+   return false;
+  }
+  virtual bool HandleMouseButtonDownEvent(FSlateApplication& Slate,const FPointerEvent& Event) override
+  {
+   RecordPointerInput(Slate,Event);
+   return false;
+  }
+  virtual bool HandleMouseButtonDoubleClickEvent(FSlateApplication& Slate,const FPointerEvent& Event) override
+  {
+   return HandleMouseButtonDownEvent(Slate,Event);
+  }
+  bool IsNavigationFocused(const SWidget& Widget,int32 UserIndex) const
+  {
+   return NavigationUsers.Contains(UserIndex) &&
+    (Widget.HasUserFocus(UserIndex).IsSet() || Widget.HasUserFocusedDescendants(UserIndex));
+  }
+ private:
+  TSet<int32> NavigationUsers;
+  void RecordPointerInput(FSlateApplication& Slate,const FPointerEvent& Event)
+  {
+   const int32 UserIndex=Event.GetUserIndex();
+   const auto* Settings=Owner.Get();
+   if (!Settings || !NavigationUsers.Contains(UserIndex)) return;
+   if (Settings->OwnsInputFocus(UserIndex))
+   {
+    NavigationUsers.Remove(UserIndex);
+    return;
+   }
+   // A pointer can return to this game viewport before Slate transfers user focus to it.
+   const auto* World=Settings->GetWorld();
+   const auto* Viewport=World && !World->bIsTearingDown ? World->GetGameViewport() : nullptr;
+   if (!Viewport) return;
+   const FWidgetPath Path=Slate.LocateWindowUnderMouse(Event.GetScreenSpacePosition(),Slate.GetInteractiveTopLevelWindows(),false,UserIndex);
+   const auto Layers=Viewport->GetGameLayerManager();
+   const auto View=Viewport->GetGameViewportWidget();
+   if ((Layers && Path.ContainsWidget(&Layers->AsWidget().Get())) || (View && Path.ContainsWidget(View.Get())))
+    NavigationUsers.Remove(UserIndex);
   }
  };
 }
@@ -131,6 +193,17 @@ UCatrunSettingsSubsystem* UCatrunSettingsSubsystem::Get(const UObject* Context)
  auto* World=GEngine ? GEngine->GetWorldFromContextObject(Context,EGetWorldErrorMode::ReturnNull) : nullptr;
  return World ? World->GetSubsystem<UCatrunSettingsSubsystem>() : nullptr;
 }
+bool UCatrunSettingsSubsystem::IsNavigationFocused(UWidget* Widget)
+{
+ if (!Widget || !FSlateApplication::IsInitialized()) return false;
+ const auto* Settings=Get(Widget);
+ if (!Settings || !Settings->InputProcessor) return false;
+ const auto* LocalPlayer=Widget->GetOwningLocalPlayer();
+ const auto User=LocalPlayer ? LocalPlayer->GetSlateUser() : nullptr;
+ const auto SlateWidget=Widget->GetCachedWidget();
+ return User && SlateWidget && StaticCastSharedPtr<FCatrunSettingsInputProcessor>(Settings->InputProcessor)->
+  IsNavigationFocused(*SlateWidget,User->GetUserIndex());
+}
 bool UCatrunSettingsSubsystem::ShouldCreateSubsystem(UObject* Outer) const
 {
  const auto* World=Cast<UWorld>(Outer);
@@ -141,15 +214,15 @@ void UCatrunSettingsSubsystem::OnWorldBeginPlay(UWorld& InWorld)
  Super::OnWorldBeginPlay(InWorld);
  if (FSlateApplication::IsInitialized())
  {
-  EscapeProcessor=MakeShared<FCatrunSettingsInputProcessor>(this);
-  FSlateApplication::Get().RegisterInputPreProcessor(EscapeProcessor,0);
+  InputProcessor=MakeShared<FCatrunSettingsInputProcessor>(this);
+  FSlateApplication::Get().RegisterInputPreProcessor(InputProcessor,0);
  }
 }
 void UCatrunSettingsSubsystem::Deinitialize()
 {
  CloseSettings();
- if (EscapeProcessor && FSlateApplication::IsInitialized()) FSlateApplication::Get().UnregisterInputPreProcessor(EscapeProcessor);
- EscapeProcessor.Reset();
+ if (InputProcessor && FSlateApplication::IsInitialized()) FSlateApplication::Get().UnregisterInputPreProcessor(InputProcessor);
+ InputProcessor.Reset();
  Super::Deinitialize();
 }
 TStatId UCatrunSettingsSubsystem::GetStatId() const
@@ -160,15 +233,20 @@ void UCatrunSettingsSubsystem::Tick(float)
 {
  if (CurrentSettings && (!CurrentSettings->IsInViewport() || !SettingsController.IsValid() || GetWorld()->bIsTearingDown)) CloseSettings();
 }
-bool UCatrunSettingsSubsystem::OwnsInputFocus() const
+bool UCatrunSettingsSubsystem::OwnsInputFocus(int32 SlateUserIndex) const
 {
  if (!GetWorld() || GetWorld()->bIsTearingDown) return false;
  auto* Viewport=GetWorld()->GetGameViewport();
  if (!Viewport) return false;
+ const auto HasFocus=[SlateUserIndex](const SWidget& Widget)
+ {
+  if (SlateUserIndex==INDEX_NONE) return Widget.HasAnyUserFocusOrFocusedDescendants();
+  return Widget.HasUserFocus(SlateUserIndex).IsSet() || Widget.HasUserFocusedDescendants(SlateUserIndex);
+ };
  if (auto Layers=Viewport->GetGameLayerManager())
-  if (Layers->AsWidget()->HasAnyUserFocusOrFocusedDescendants()) return true;
+  if (HasFocus(*Layers->AsWidget())) return true;
  const auto View=Viewport->GetGameViewportWidget();
- return View && View->HasAnyUserFocusOrFocusedDescendants();
+ return View && HasFocus(*View);
 }
 bool UCatrunSettingsSubsystem::HandleEscape()
 {
@@ -181,13 +259,13 @@ bool UCatrunSettingsSubsystem::HandleEscape()
  }
  auto* PC=UGameplayStatics::GetPlayerController(this,0);
  if (!PC || !PC->IsLocalController()) return false;
- return OpenSettings(PC)!=nullptr;
+ return OpenSettings(PC,FindMenuSourcePanel(PC))!=nullptr;
 }
 void UCatrunSettingsSubsystem::IgnoreHeldKeysUntilRelease()
 {
- if (EscapeProcessor)
+ if (InputProcessor)
  {
-  auto Processor=StaticCastSharedPtr<FCatrunSettingsInputProcessor>(EscapeProcessor);
+  auto Processor=StaticCastSharedPtr<FCatrunSettingsInputProcessor>(InputProcessor);
   Processor->SuppressedKeys.Append(Processor->HeldKeys);
   if (auto* PC=UGameplayStatics::GetPlayerController(this,0))
    {
@@ -202,6 +280,22 @@ void UCatrunSettingsSubsystem::IgnoreHeldKeysUntilRelease()
    }
   Processor->SuppressedKeys.Remove(EKeys::Escape);
  }
+}
+void UCatrunSettingsSubsystem::SuspendSourcePanel(UWidget* Panel)
+{
+ if (!Panel) return;
+ SettingsSourcePanel=Panel;
+ PreviousPanelVisibility=Panel->GetVisibility();
+ bPreviousPanelEnabled=Panel->GetIsEnabled();
+ Panel->SetVisibility(ESlateVisibility::Hidden);
+ Panel->SetIsEnabled(false);
+}
+void UCatrunSettingsSubsystem::RestoreSourcePanel()
+{
+ if (!SettingsSourcePanel) return;
+ SettingsSourcePanel->SetIsEnabled(bPreviousPanelEnabled);
+ SettingsSourcePanel->SetVisibility(PreviousPanelVisibility);
+ SettingsSourcePanel=nullptr;
 }
 UCatrunSettingsWidget* UCatrunSettingsSubsystem::OpenSettings(APlayerController* PlayerController,UWidget* SourcePanel)
 {
@@ -227,25 +321,26 @@ UCatrunSettingsWidget* UCatrunSettingsSubsystem::OpenSettings(APlayerController*
  {
   if (const auto User=LP->GetSlateUser()) PreviousSlateState.Capture(FSlateApplication::Get(),User->GetUserIndex());
  }
- SettingsSourcePanel=SourcePanel;
- if (SourcePanel)
- {
-  bPreviousPanelEnabled=SourcePanel->GetIsEnabled();
-  SourcePanel->SetIsEnabled(false);
- }
+ SuspendSourcePanel(SourcePanel);
  const auto* FlowSettings=GetDefault<UCatrunLevelFlowSettings>();
  const bool bGameplay=FlowSettings->FindStageIndex(GetWorld()->GetOutermost()->GetName())!=INDEX_NONE;
  bPauseOwned=bGameplay && !UGameplayStatics::IsGamePaused(this);
  if (bPauseOwned && !UGameplayStatics::SetGamePaused(this,true))
  {
   bPauseOwned=false;
-  if (SourcePanel) SourcePanel->SetIsEnabled(bPreviousPanelEnabled);
-  SettingsSourcePanel=nullptr;
+  RestoreSourcePanel();
   SettingsController.Reset();
+  SavedViewport.Reset();
+  PreviousSlateState=FCatrunSettingsSlateSnapshot();
   return nullptr;
  }
  CurrentSettings=Widget;
  Widget->AddToViewport(2000);
+ if (!Widget->IsInViewport())
+ {
+  CloseSettings();
+  return nullptr;
+ }
  PlayerController->bShowMouseCursor=true;
  // Preserve the underlying mode rather than guessing it. These are the only input-mode effects changed here.
  Viewport->SetIgnoreInput(true);
@@ -271,8 +366,7 @@ void UCatrunSettingsSubsystem::CloseSettings()
  auto* Widget=CurrentSettings.Get();
  CurrentSettings=nullptr;
  Widget->RemoveFromParent();
- if (SettingsSourcePanel) SettingsSourcePanel->SetIsEnabled(bPreviousPanelEnabled);
- SettingsSourcePanel=nullptr;
+ RestoreSourcePanel();
  if (PC)
  {
   PC->bShowMouseCursor=bPreviousCursor;
@@ -296,3 +390,114 @@ void UCatrunSettingsSubsystem::CloseSettings()
  SavedViewport.Reset();
  PreviousSlateState=FCatrunSettingsSlateSnapshot();
 }
+
+#if WITH_DEV_AUTOMATION_TESTS
+#include "Components/Border.h"
+#include "Misc/AutomationTest.h"
+#include "Misc/ScopeExit.h"
+#include "Widgets/Layout/SBox.h"
+#include "Widgets/SVirtualWindow.h"
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunSettingsNavigationFocusTest,"Catrun.Settings.NavigationFocusPresentation",
+ EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FCatrunSettingsNavigationFocusTest::RunTest(const FString&)
+{
+ if (!TestTrue(TEXT("Slate application is initialized"),FSlateApplication::IsInitialized())) return false;
+ auto& Slate=FSlateApplication::Get();
+ const auto User=Slate.FindOrCreateVirtualUser(941);
+ const uint32 UserIndex=User->GetUserIndex();
+ const auto Button=SNew(SButton);
+ const auto Row=SNew(SBox)[Button];
+ const auto Layers=SNew(SGameLayerManager)[Row];
+ const auto Window=SNew(SVirtualWindow);
+ Window->SetContent(Layers);
+ Slate.RegisterVirtualWindow(Window);
+ ON_SCOPE_EXIT
+ {
+  Slate.ClearUserFocus(UserIndex,EFocusCause::SetDirectly);
+  Slate.UnregisterVirtualWindow(Window);
+ };
+
+ const auto Init=UWorld::InitializationValues().AllowAudioPlayback(false).CreatePhysicsScene(false).CreateNavigation(false).CreateAISystem(false);
+ auto* World=UWorld::CreateWorld(EWorldType::Game,false,NAME_None,nullptr,true,ERHIFeatureLevel::Num,&Init);
+ if (!TestNotNull(TEXT("Settings test world"),World)) return false;
+ auto& Context=GEngine->CreateNewWorldContext(EWorldType::Game);
+ Context.SetCurrentWorld(World);
+ auto* Viewport=NewObject<UGameViewportClient>(GEngine);
+ Context.GameViewport=Viewport;
+ PRAGMA_DISABLE_DEPRECATION_WARNINGS
+ Viewport->SetGameLayerManager(Layers);
+ PRAGMA_ENABLE_DEPRECATION_WARNINGS
+ ON_SCOPE_EXIT
+ {
+  World->DestroyWorld(false);
+  GEngine->DestroyWorldContext(World);
+ };
+ auto* Settings=World->GetSubsystem<UCatrunSettingsSubsystem>();
+ if (!TestNotNull(TEXT("Settings subsystem"),Settings)) return false;
+ FCatrunSettingsInputProcessor Processor(Settings);
+ const FKeyEvent Tab(EKeys::Tab,FModifierKeysState(),UserIndex,false,0,0);
+ const TSet<FKey> Pressed={EKeys::LeftMouseButton};
+ const FPointerEvent Click(UserIndex,0,FVector2f(10,10),FVector2f(10,10),Pressed,EKeys::LeftMouseButton,0,FModifierKeysState());
+ const TSet<FKey> Released;
+ const FPointerEvent Move(UserIndex,0,FVector2f(20,10),FVector2f(10,10),Released,FKey(),0,FModifierKeysState());
+
+ if (!TestTrue(TEXT("Button receives genuine Slate focus"),Slate.SetUserFocus(UserIndex,Button,EFocusCause::Mouse))) return false;
+ TestFalse(TEXT("Pointer focus alone does not highlight a row"),Processor.IsNavigationFocused(*Row,UserIndex));
+ TestFalse(TEXT("The processor leaves Tab available to Slate"),Processor.HandleKeyDownEvent(Slate,Tab));
+ // Reproduce Slate moving navigation focus to the button, then receiving a click on the same path.
+ Slate.ClearUserFocus(UserIndex,EFocusCause::SetDirectly);
+ if (!TestTrue(TEXT("Navigation focuses the button"),Slate.SetUserFocus(UserIndex,Button,EFocusCause::Navigation))) return false;
+ TestTrue(TEXT("Navigation highlights both the focused button and its row"),
+  Processor.IsNavigationFocused(*Button,UserIndex) && Processor.IsNavigationFocused(*Row,UserIndex));
+ TestFalse(TEXT("The processor leaves the same-target click available to Slate"),Processor.HandleMouseButtonDownEvent(Slate,Click));
+ Slate.SetUserFocus(UserIndex,Button,EFocusCause::Mouse);
+ TestTrue(TEXT("A same-target click keeps actual Slate focus"),Slate.GetUserFocusedWidget(UserIndex)==Button);
+ TestFalse(TEXT("The same-target click clears the navigation underline"),Processor.IsNavigationFocused(*Row,UserIndex));
+ Processor.HandleKeyDownEvent(Slate,Tab);
+ TestTrue(TEXT("Keyboard navigation can highlight the existing focus again"),Processor.IsNavigationFocused(*Row,UserIndex));
+ TestFalse(TEXT("The processor leaves pointer movement available to Slate"),Processor.HandleMouseMoveEvent(Slate,Move));
+ TestFalse(TEXT("Pointer movement clears the navigation underline"),Processor.IsNavigationFocused(*Row,UserIndex));
+
+ const FKeyEvent MovementDown(EKeys::W,FModifierKeysState(),UserIndex,false,0,0);
+ const FKeyEvent MovementRepeat(EKeys::W,FModifierKeysState(),UserIndex,true,0,0);
+ Processor.HeldKeys.Add(EKeys::W);
+ Processor.SuppressedKeys.Add(EKeys::W);
+ TestTrue(TEXT("A genuinely held movement key still consumes repeats"),Processor.HandleKeyDownEvent(Slate,MovementRepeat));
+ // Simulate releasing W while this viewport does not receive the key-up, then pressing it again after focus returns.
+ TestFalse(TEXT("A fresh movement press after a missed release reaches gameplay"),Processor.HandleKeyDownEvent(Slate,MovementDown));
+ TestFalse(TEXT("The fresh press clears stale movement suppression"),Processor.SuppressedKeys.Contains(EKeys::W));
+ TestFalse(TEXT("Repeats for the new movement press reach gameplay"),Processor.HandleKeyDownEvent(Slate,MovementRepeat));
+ Processor.SuppressedKeys.Add(EKeys::W);
+ TestFalse(TEXT("The processor leaves a normal movement release available to Slate"),Processor.HandleKeyUpEvent(Slate,MovementDown));
+ TestFalse(TEXT("A normal movement release clears held and suppressed state"),
+  Processor.HeldKeys.Contains(EKeys::W) || Processor.SuppressedKeys.Contains(EKeys::W));
+ return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunSettingsSourcePanelRestorationTest,"Catrun.Settings.SourcePanelStateRestoration",
+ EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FCatrunSettingsSourcePanelRestorationTest::RunTest(const FString&)
+{
+ auto* Settings=NewObject<UCatrunSettingsSubsystem>(GetTransientPackage());
+ auto* Panel=NewObject<UBorder>();
+ for (const auto Visibility : {ESlateVisibility::Visible,ESlateVisibility::Hidden,ESlateVisibility::Collapsed,
+  ESlateVisibility::HitTestInvisible,ESlateVisibility::SelfHitTestInvisible})
+  for (const bool bEnabled : {false,true})
+  {
+   Panel->SetVisibility(Visibility);
+   Panel->SetIsEnabled(bEnabled);
+   Settings->SuspendSourcePanel(Panel);
+   TestTrue(TEXT("An open modal hides the source panel"),Panel->GetVisibility()==ESlateVisibility::Hidden);
+   TestFalse(TEXT("An open modal disables the source panel"),Panel->GetIsEnabled());
+   Settings->RestoreSourcePanel();
+   TestTrue(TEXT("The modal restores the exact original visibility"),Panel->GetVisibility()==Visibility);
+   TestEqual(TEXT("The modal restores the exact original enabled state"),Panel->GetIsEnabled(),bEnabled);
+  }
+ Settings->SuspendSourcePanel(nullptr);
+ Settings->RestoreSourcePanel();
+ TestTrue(TEXT("A session without a source panel leaves other UI alone"),
+  Panel->GetVisibility()==ESlateVisibility::SelfHitTestInvisible && Panel->GetIsEnabled());
+ return true;
+}
+#endif

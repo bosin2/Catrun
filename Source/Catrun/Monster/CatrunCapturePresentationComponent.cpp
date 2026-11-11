@@ -11,6 +11,7 @@
 #include "Camera/CameraActor.h"
 #include "Camera/CameraComponent.h"
 #include "Camera/PlayerCameraManager.h"
+#include "Components/PrimitiveComponent.h"
 #include "Engine/World.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/PlayerController.h"
@@ -290,7 +291,29 @@ void UCatrunCapturePresentationComponent::TickComponent(float DeltaTime, ELevelT
 		// existing upright policy and the same position/rotation completion time.
 		const float Yaw = FRotator::NormalizeAxis(GrabRotation.Yaw
 			+ FMath::FindDeltaAngleDegrees(GrabRotation.Yaw, Armor->GetActorRotation().Yaw) * Blend);
-		Cat->SetActorLocationAndRotation(FMath::Lerp(GrabFrom, Hold, Blend), FRotator(0.f, Yaw, 0.f));
+		FVector CarryLocation = FMath::Lerp(GrabFrom, Hold, Blend);
+		const FRotator CarryRotation(0.f, Yaw, 0.f);
+		if (const auto* Root = Cast<UPrimitiveComponent>(Cat->GetRootComponent()))
+		{
+			// Carry intentionally disables collision. Query the real root shape/profile
+			// explicitly; an actor sweep would otherwise allow movement through scenery.
+			FCollisionQueryParams Params(SCENE_QUERY_STAT(CatrunCaptureCarry), false, Cat.Get());
+			Params.AddIgnoredActor(Armor.Get());
+			const FCollisionResponseParams Responses(Root->GetCollisionResponseToChannels());
+			const auto Shape = Root->GetCollisionShape();
+			const ECollisionChannel Channel = Root->GetCollisionObjectType();
+			const FVector Previous = Cat->GetActorLocation();
+			FHitResult Hit;
+			if (GetWorld()->SweepSingleByChannel(Hit, Previous, CarryLocation, CarryRotation.Quaternion(),
+				Channel, Shape, Params, Responses)
+				|| GetWorld()->OverlapBlockingTestByChannel(CarryLocation, CarryRotation.Quaternion(),
+					Channel, Shape, Params, Responses))
+			{
+				// Preserve the authored heading and deadlines while the hand path is blocked.
+				CarryLocation = Previous;
+			}
+		}
+		Cat->SetActorLocationAndRotation(CarryLocation, CarryRotation);
 	}
 	if (SessionId != TickingSession || !IsCurrentSession(TickingSession, Phase)) return;
 	if (Phase == ECatrunCapturePhase::Fading)
@@ -299,7 +322,21 @@ void UCatrunCapturePresentationComponent::TickComponent(float DeltaTime, ELevelT
 		if (FadeElapsed >= Settings->CatchFadeOutTime + Settings->CatchBlackHoldTime)
 		{
 			bRestartIssued = true;
-			if (auto* Restart = UCatrunRestartSubsystem::Get(this)) Restart->RestartLevel(Settings->RestartFadeInTime);
+			// A queued URL is not arrival. Keep the successful teardown behavior, but
+			// let only this session release its temporary state if the old world survives.
+			const TWeakObjectPtr<UCatrunCapturePresentationComponent> WeakThis(this);
+			auto RestoreRejectedRestart = [WeakThis, TickingSession](const FString&)
+			{
+				auto* Capture = WeakThis.Get();
+				if (!Capture || !Capture->bRestartIssued
+					|| Capture->SessionId != TickingSession || Capture->Phase != ECatrunCapturePhase::Fading
+					|| Capture->bCleaningUp || Capture->bEndingPlay) return;
+				Capture->bRestartIssued = false;
+				Capture->AbortCapture();
+			};
+			auto* Restart = UCatrunRestartSubsystem::Get(this);
+			if (!Restart || !Restart->RestartLevel(Settings->RestartFadeInTime, RestoreRejectedRestart))
+				RestoreRejectedRestart(TEXT("Capture restart was not accepted."));
 		}
 	}
 }

@@ -1,6 +1,8 @@
 #include "CatrunGroundSupport.h"
 #include "Components/CapsuleComponent.h"
 #include "Engine/World.h"
+#include "GameFramework/Character.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Pawn.h"
 
 bool CatrunGround::FindSupport(const UCapsuleComponent& Capsule, const FVector& ReferenceCenter,
@@ -25,6 +27,11 @@ bool CatrunGround::FindSupport(const UCapsuleComponent& Capsule, const FVector& 
 	const float SupportRadius = FMath::Max(0.f, Radius - .15f);
 	if (FVector::DistSquared2D(OutHit.ImpactPoint, OutHit.Location) > FMath::Square(SupportRadius)
 		|| OutHit.Location.Z < End.Z - .01f || OutHit.Location.Z > Start.Z + .01f) return false;
+	if (const auto* Character = Cast<ACharacter>(Capsule.GetOwner()))
+	{
+		const auto* Movement = Character->GetCharacterMovement();
+		if (Movement && !Movement->IsWalkable(OutHit)) return false;
+	}
 	// ImpactPoint can be off-center on a stone face; Location is the swept capsule center.
 	OutCenter = FVector(ReferenceCenter.X, ReferenceCenter.Y, OutHit.Location.Z + 2.f);
 	return true;

@@ -67,19 +67,11 @@ void UCatrunRestartSubsystem::FadeOut(APawn* Cat, float Duration)
 	}
 }
 
-void UCatrunRestartSubsystem::RestartLevel(float FadeInDuration)
+bool UCatrunRestartSubsystem::RestartLevel(float FadeInDuration, TFunction<void(const FString&)> Failure)
 {
-	if (const auto* Flow = UCatrunLevelFlowSubsystem::Get(this); Flow && (Flow->IsTransitioning() || Flow->IsStageComplete())) return;
-	UWorld* World = GetWorld();
-	if (!World)
-	{
-		return;
-	}
-	// The package name of a play-in-editor world starts with a prefix; the level to open does not.
-	const FString LevelName = UWorld::RemovePIEPrefix(World->GetOutermost()->GetName());
-	if (UGameInstance* Instance = World->GetGameInstance())
-		if (auto* Session = Instance->GetSubsystem<UCatrunFlowSession>()) Session->RestartIntent.Request(LevelName, FadeInDuration);
-	UGameplayStatics::OpenLevel(this, FName(*LevelName));
+	if (!CanRecoverWorld()) return false;
+	auto* Flow = UCatrunLevelFlowSubsystem::Get(this);
+	return Flow && Flow->RequestSameMapRestart(this, FadeInDuration, MoveTemp(Failure));
 }
 
 void UCatrunRestartSubsystem::OnWorldBeginPlay(UWorld& InWorld)

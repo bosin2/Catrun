@@ -100,6 +100,9 @@ private:
 	friend class FCatrunBasketRestoreTest;
 #if WITH_DEV_AUTOMATION_TESTS
 	friend class FCatrunBasketEntryHeightTest;
+	friend class FCatrunBasketEntryTransitProfileTest;
+	friend class FCatrunBasketExitTransitProfileTest;
+	friend class FCatrunBasketLateLandingSupportTest;
 #endif
 	friend class FCatrunBasketCandidateRegressionTest;
 	friend class FCatrunBasketRestoreRegressionTest;
@@ -110,7 +113,8 @@ private:
 	void FinishEnter();
 	void ExitBasket();
 	void FinishExit();
-	void UpdateExitCandidate(bool bForce);
+	void UpdateExitCandidate(bool bForce, bool bReadDirectionInput = true);
+	bool FindExitSupport(const FVector& Reference, FVector& OutCenter) const;
 	bool IsBasketExitPathClear(const FVector& Destination) const;
 	void UpdatePreview();
 	// Restore state at the already validated placement; this must not search for another exit.

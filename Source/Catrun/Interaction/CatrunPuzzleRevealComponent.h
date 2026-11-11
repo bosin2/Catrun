@@ -44,6 +44,10 @@ private:
 	friend class FStatueRevealTest;
 	bool SetPhase(ECatrunPuzzleRevealPhase Next);
 	bool ShouldAbort() const;
+	/** Orthographic view origins are corrected by the renderer after the camera cache. */
+	FVector ResolveProjectionOrigin(FMinimalViewInfo View) const;
+	FVector ResolveCollisionLocation(const FVector& Location) const;
+	FVector ResolveOwnedCameraLocation(const FMinimalViewInfo& SourceView) const;
 	void ApplyGameplayFraming();
 	void Cleanup();
 	TWeakObjectPtr<APlayerController> Player;

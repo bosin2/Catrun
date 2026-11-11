@@ -38,7 +38,7 @@ class CATRUN_API UCatrunFlowSession : public UGameInstanceSubsystem
 	GENERATED_BODY()
 public:
 	FCatrunRestartIntent RestartIntent;
-	uint64 AcceptTravel(const FString& Package, bool bBeginProgress, bool bCheckpoint, ECatrunArrivalRestart Restart, int8 OnboardingOnArrival = -1);
+	uint64 AcceptTravel(const FString& Package, bool bBeginProgress, bool bCheckpoint, ECatrunArrivalRestart Restart, int8 OnboardingOnArrival = -1, float FadeInDuration = 0.f);
 	void CancelTravel(uint64 ExpectedToken = 0);
 	void ResolveArrivalRestart(const FString& Package);
 	bool Arrive(const FString& Package);
@@ -63,6 +63,7 @@ private:
 	bool bBeginProgressOnArrival = false;
 	bool bCheckpointOnArrival = false;
 	ECatrunArrivalRestart ArrivalRestart = ECatrunArrivalRestart::Preserve;
+	float ArrivalFadeInDuration = 0.f;
 };
 
 USTRUCT(BlueprintType)
@@ -103,6 +104,7 @@ public:
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCatrunStageCompleted, FName, StageId);
+DECLARE_DYNAMIC_DELEGATE(FCatrunTravelFailureCallback);
 
 /** Rules and travel are native; existing Blueprint cinematics call the library when finished. */
 UCLASS()
@@ -123,6 +125,10 @@ public:
 	bool CompleteStage();
 	bool ReturnToMenu();
 	bool RestartStage();
+	/** The owner restores its own presentation after a same-world engine failure. Rejection returns false without invoking Failure. */
+	bool CompleteStageWithFailure(UObject* Owner, TFunction<void(const FString&)> Failure);
+	/** Same-map recovery also supports loaded development maps outside the canonical stage routes. */
+	bool RequestSameMapRestart(UObject* Owner, float FadeInDuration, TFunction<void(const FString&)> Failure = {});
 	bool ReserveExitTransition(UObject* Owner);
 	void ReleaseExitTransition(const UObject* Owner);
 	bool CompleteStageForExit(UObject* Owner);
@@ -146,8 +152,9 @@ public:
 
 private:
 	bool TravelTo(const TSoftObjectPtr<UWorld>& Map, const FString& Options = FString(), bool bBeginProgress = false,
-		bool bCheckpoint = false, ECatrunArrivalRestart Restart = ECatrunArrivalRestart::Clear, UObject* ExitOwner = nullptr, int8 Onboarding = -1);
-	bool CompleteStageInternal(UObject* ExitOwner);
+		bool bCheckpoint = false, ECatrunArrivalRestart Restart = ECatrunArrivalRestart::Clear, UObject* ExitOwner = nullptr, int8 Onboarding = -1,
+		UObject* FailureOwner = nullptr, TFunction<void(const FString&)> Failure = {}, float FadeInDuration = 0.f, bool bReloadCurrentWorld = false);
+	bool CompleteStageInternal(UObject* ExitOwner, UObject* FailureOwner = nullptr, TFunction<void(const FString&)> Failure = {});
 	void ClearFailedTravel();
 	void FinishTravel();
 	void ResolveRestartIntent();
@@ -166,6 +173,8 @@ private:
 	FString PendingMap;
 	uint64 PendingTravelToken = 0;
 	FString PendingOptions;
+	TWeakObjectPtr<UObject> TravelFailureOwner;
+	TFunction<void(const FString&)> TravelFailureCallback;
 	FDelegateHandle TravelFailureHandle;
 	UPROPERTY(Transient)
 	TObjectPtr<UCatrunPlayHUD> PlayHUD;
@@ -186,6 +195,16 @@ public:
 	static FText GetContinueStageLabel(const UObject* WorldContextObject);
 	UFUNCTION(BlueprintCallable, Category="Catrun|Level Flow", meta=(WorldContext="WorldContextObject"))
 	static bool CompleteCurrentStage(const UObject* WorldContextObject);
+	/** Both immediate rejection and a later same-world failure invoke this owner's BP cleanup once. */
+	UFUNCTION(BlueprintCallable, Category="Catrun|Level Flow", meta=(WorldContext="WorldContextObject"))
+	static bool CompleteCurrentStageWithFailure(const UObject* WorldContextObject, UObject* Owner, FCatrunTravelFailureCallback Failure);
+	UFUNCTION(BlueprintCallable, Category="Catrun|Level Flow")
+	static bool ReserveStagePresentation(UObject* Owner);
+	UFUNCTION(BlueprintCallable, Category="Catrun|Level Flow")
+	static void ReleaseStagePresentation(UObject* Owner);
+	/** Restore the pre-cinematic pawn pose through the existing collision-safe recovery policy. BP owns its sequence, camera and input locks. */
+	UFUNCTION(BlueprintCallable, Category="Catrun|Level Flow")
+	static bool RestoreFailedStagePawn(APawn* Pawn, const FTransform& OriginalTransform, bool bOriginalCollision = true);
 	UFUNCTION(BlueprintCallable, Category="Catrun|Level Flow", meta=(WorldContext="WorldContextObject"))
 	static bool ReturnToMainMenu(const UObject* WorldContextObject);
 	UFUNCTION(BlueprintCallable, Category="Catrun|Level Flow", meta=(WorldContext="WorldContextObject"))

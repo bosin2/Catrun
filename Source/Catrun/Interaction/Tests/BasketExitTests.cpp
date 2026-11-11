@@ -96,6 +96,12 @@ namespace
 			Shape->RegisterComponent();
 			return Actor;
 		}
+		bool SweepCapsule(FHitResult& Hit, const FVector& From, const FVector& To, const FCollisionQueryParams& Params) const
+		{
+			const auto* Capsule = Cat->GetCapsuleComponent();
+			return World->SweepSingleByChannel(Hit, From, To, Capsule->GetComponentQuat(), Capsule->GetCollisionObjectType(),
+				Capsule->GetCollisionShape(), Params, FCollisionResponseParams(Capsule->GetCollisionResponseToChannels()));
+		}
 		void Keys(std::initializer_list<FKey> Pressed)
 		{
 			PC->PlayerInput->FlushPressedKeys();
@@ -155,6 +161,19 @@ bool FCatrunCapsuleGroundSupportTest::RunTest(const FString&)
 	TestTrue(TEXT("Steep rejection exercises a real nonpenetrating sloped hit"),
 		Hit.IsValidBlockingHit() && Hit.ImpactNormal.Z<.65f);
 	Steep->Destroy();
+	auto* Movement = F.Cat->GetCharacterMovement();
+	Movement->SetWalkableFloorZ(.71f);
+	auto* MarginalSlope = F.Box(FVector::ZeroVector,FVector(500,500,5));
+	MarginalSlope->SetActorRotation(FRotator(47,0,0));
+	const bool bAcceptsMarginalSlope = CatrunGround::FindSupport(*Capsule,Reference,50,100,Params,Hit,Center);
+	TestTrue(TEXT("Actual nonpenetrating face meets the shared .65 threshold but not the movement limit"),
+		Hit.IsValidBlockingHit() && Hit.GetActor()==MarginalSlope && Hit.ImpactNormal.Z>=.65f && Hit.ImpactNormal.Z<.71f
+		&& !Movement->IsWalkable(Hit));
+	TestFalse(TEXT("A slope the owner cannot walk on cannot support a landing"), bAcceptsMarginalSlope);
+	Movement->SetWalkableFloorZ(.65f);
+	TestTrue(TEXT("The same face supports a character whose movement can walk on it"),
+		CatrunGround::FindSupport(*Capsule,Reference,50,100,Params,Hit,Center) && Movement->IsWalkable(Hit));
+	MarginalSlope->Destroy();
 	TestFalse(TEXT("Absent floor is rejected"),CatrunGround::FindSupport(*Capsule,Reference,50,100,Params,Hit,Center));
 	F.Box(FVector(-100,0,-10),FVector(50,100,10));
 	F.Box(FVector(100,0,-10),FVector(50,100,10));
@@ -269,6 +288,109 @@ bool FCatrunRoughRestoreSupportTest::RunTest(const FString&)
 	const FTransform Airborne(FRotator::ZeroRotator,FVector(1100,1900,500));
 	TestTrue(TEXT("Initial desired airborne placement semantics remain intact without requiring floor"),CatrunRestore::PlaceForCollision(*F.Cat,Airborne,true));
 	TestTrue(TEXT("Clear initial desired placement is committed exactly"),F.Cat->GetActorTransform().Equals(Airborne,.001));
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunBasketEntryTransitProfileTest, "Catrun.Basket.EntryRespectsPhysicalCapsuleProfile",
+	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FCatrunBasketEntryTransitProfileTest::RunTest(const FString&)
+{
+	FBasketCollisionFixture F;
+	const FVector Start(200,0,26), Approach(82,0,26);
+	FVector Entry;
+	if (!TestTrue(TEXT("Clear entry is available at the exact approach"), F.Actions->TestEntry(F.Basket,Entry) && Entry.Equals(Approach,.01)))
+		return false;
+	auto* Wall = F.Box(FVector(140,0,26),FVector(2,30,26));
+	auto* WallShape = CastChecked<UBoxComponent>(Wall->GetRootComponent());
+	WallShape->SetCollisionResponseToChannel(ECC_Pawn,ECR_Block);
+	TestFalse(TEXT("A wall blocking Pawn and Visibility prevents entry"), F.Actions->TestEntry(F.Basket,Entry));
+	WallShape->SetCollisionResponseToChannel(ECC_Visibility,ECR_Ignore);
+	FHitResult Hit;
+	const FCollisionQueryParams Params(SCENE_QUERY_STAT(BasketEntryPhysicalFixture),false,F.Cat);
+	if (!TestTrue(TEXT("Actual capsule sweep hits the wall that ignores Visibility"),
+		F.SweepCapsule(Hit,Start,Approach,Params) && Hit.IsValidBlockingHit() && Hit.GetActor()==Wall)) return false;
+	TestFalse(TEXT("Entry rejects a physically blocked approach even when the wall ignores Visibility"),
+		F.Actions->TestEntry(F.Basket,Entry));
+	Wall->SetActorLocation(FVector(41,0,26));
+	WallShape->SetCollisionResponseToChannel(ECC_Pawn,ECR_Ignore);
+	WallShape->SetCollisionResponseToChannel(ECC_Visibility,ECR_Block);
+	TestFalse(TEXT("The independent visual guard still rejects a blocked view into the basket"),
+		F.Actions->TestEntry(F.Basket,Entry));
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunBasketExitTransitProfileTest, "Catrun.Basket.ExitRespectsCustomCapsuleChannel",
+	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FCatrunBasketExitTransitProfileTest::RunTest(const FString&)
+{
+	FBasketCollisionFixture F;
+	constexpr ECollisionChannel CustomChannel = ECC_GameTraceChannel1;
+	auto* Capsule = F.Cat->GetCapsuleComponent();
+	Capsule->SetCollisionObjectType(CustomChannel);
+	Capsule->SetCollisionResponseToChannel(ECC_WorldDynamic,ECR_Block);
+	CastChecked<UBoxComponent>(F.Floor->GetRootComponent())->SetCollisionResponseToChannel(CustomChannel,ECR_Block);
+	F.Basket->OpenDirectionLocal = FVector(-1,0,0);
+	F.Keys({});
+	F.Basket->TryOccupy(F.Cat);
+	F.Actions->EnterBasket(F.Basket,FVector(82,0,26));
+	F.Actions->FinishEnter();
+	const FVector Origin(0,0,26), Landing(-82,0,26);
+	if (!TestTrue(TEXT("Clear custom-channel exit selects the exact supported landing"),
+		F.Actions->CanExit && F.Actions->ExitWorldLocation.Equals(Landing,.01))) return false;
+	auto* Wall = F.Box(FVector(-41,0,26),FVector(2,30,26));
+	auto* WallShape = CastChecked<UBoxComponent>(Wall->GetRootComponent());
+	WallShape->SetCollisionResponseToChannel(ECC_Pawn,ECR_Ignore);
+	WallShape->SetCollisionResponseToChannel(CustomChannel,ECR_Block);
+	TestTrue(TEXT("Both ends of the custom-channel exit remain clear"),
+		CatrunRestore::IsPlacementClear(*F.Cat,FTransform(Origin)) && CatrunRestore::IsPlacementClear(*F.Cat,FTransform(Landing)));
+	FHitResult Hit;
+	const FCollisionQueryParams Params(SCENE_QUERY_STAT(BasketExitPhysicalFixture),false,F.Cat);
+	if (!TestTrue(TEXT("The actual custom capsule sweeps into the wall that ignores Pawn"),
+		F.SweepCapsule(Hit,Origin,Landing,Params) && Hit.IsValidBlockingHit() && Hit.GetActor()==Wall)) return false;
+	F.Actions->UpdateExitCandidate(true);
+	TestFalse(TEXT("A custom capsule transit wall rejects the supported exit candidate"),F.Actions->CanExit);
+	F.Actions->ExitBasket();
+	TestEqual(TEXT("Confirming a physically blocked exit keeps the cat hidden"),F.Actions->BasketPhase,ECatrunBasketPhase::Hidden);
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunRestoreTransitProfileTest, "Catrun.Basket.RestoreRespectsCustomCapsuleChannel",
+	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FCatrunRestoreTransitProfileTest::RunTest(const FString&)
+{
+	FBasketCollisionFixture F;
+	constexpr ECollisionChannel CustomChannel = ECC_GameTraceChannel1;
+	const FVector Origin(0,0,26), FirstFallback(44,0,26);
+	const FTransform Desired(Origin);
+	auto* Capsule = F.Cat->GetCapsuleComponent();
+	Capsule->SetCollisionObjectType(CustomChannel);
+	Capsule->SetCollisionResponseToChannel(ECC_Pawn,ECR_Block);
+	Capsule->SetCollisionResponseToChannel(ECC_WorldDynamic,ECR_Block);
+	CastChecked<UBoxComponent>(F.Floor->GetRootComponent())->SetCollisionResponseToChannel(CustomChannel,ECR_Block);
+	F.Cat->SetActorTransform(Desired);
+	FActorSpawnParameters Spawn; Spawn.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	auto* Occupant = F.World->SpawnActor<ACharacter>(Origin,FRotator::ZeroRotator,Spawn);
+	Occupant->GetCapsuleComponent()->SetCapsuleSize(20,24);
+	Occupant->GetCapsuleComponent()->SetCollisionResponseToChannel(CustomChannel,ECR_Block);
+	if (!TestFalse(TEXT("A real Pawn occupies the requested restore position"),CatrunRestore::IsPlacementClear(*F.Cat,Desired)))
+		return false;
+	if (!TestTrue(TEXT("Without a wall the first ring placement is the +X fallback"),
+		CatrunRestore::PlaceForCollision(*F.Cat,Desired,true) && F.Cat->GetActorLocation().Equals(FirstFallback,.01))) return false;
+	auto* Wall = F.Box(FVector(22,0,26),FVector(.5,12,24));
+	auto* WallShape = CastChecked<UBoxComponent>(Wall->GetRootComponent());
+	WallShape->SetCollisionResponseToChannel(ECC_Pawn,ECR_Ignore);
+	WallShape->SetCollisionResponseToChannel(CustomChannel,ECR_Block);
+	FHitResult Hit;
+	FCollisionQueryParams Params(SCENE_QUERY_STAT(RestorePhysicalFixture),false,F.Cat);
+	Params.AddIgnoredActor(Occupant);
+	TestTrue(TEXT("The wall leaves the first fallback endpoint clear"),
+		CatrunRestore::IsPlacementClear(*F.Cat,FTransform(FirstFallback)));
+	if (!TestTrue(TEXT("Actual custom capsule hits the wall only after leaving the occupied origin"),
+		F.SweepCapsule(Hit,Origin,FirstFallback,Params) && Hit.IsValidBlockingHit() && Hit.GetActor()==Wall)) return false;
+	if (!TestTrue(TEXT("An unobstructed alternative is available"),CatrunRestore::PlaceForCollision(*F.Cat,Desired,true))) return false;
+	TestFalse(TEXT("Restoration does not take the first fallback through the custom-channel wall"),
+		F.SweepCapsule(Hit,Origin,F.Cat->GetActorLocation(),Params));
+	TestTrue(TEXT("The replacement restore location is clear"),CatrunRestore::IsPlacementClear(*F.Cat,F.Cat->GetActorTransform()));
 	return true;
 }
 
@@ -438,6 +560,53 @@ bool FCatrunBasketRestoreRegressionTest::RunTest(const FString&)
 	TestTrue(TEXT("Cancellation restores collision"), F.Cat->GetActorEnableCollision());
 	TestEqual(TEXT("Cancellation clears phase"), F.Actions->BasketPhase, ECatrunBasketPhase::Outside);
 	TestFalse(TEXT("Cancellation releases occupancy"), F.Basket->Occupied);
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunBasketLateLandingSupportTest, "Catrun.Basket.ExitRechecksExactLandingSupport",
+	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FCatrunBasketLateLandingSupportTest::RunTest(const FString&)
+{
+	FBasketCollisionFixture F;
+	const FVector Origin(0,0,26), Landing(-82,0,26);
+	const FVector Extent(28,100,10);
+	F.Floor->Destroy();
+	F.Box(FVector(0,0,-10),Extent);
+	auto* LandingFloor = F.Box(FVector(-82,0,-10),Extent);
+	F.Basket->OpenDirectionLocal = FVector(-1,0,0);
+	F.Keys({});
+	F.Basket->TryOccupy(F.Cat);
+	F.Actions->EnterBasket(F.Basket,FVector(82,0,26));
+	F.Actions->FinishEnter();
+	auto StartExit = [&]
+	{
+		F.Actions->ExitBasket();
+		return TestTrue(TEXT("Confirmation commits the original exact landing"),
+			F.Actions->BasketPhase==ECatrunBasketPhase::Exiting && F.Cat->GetActorLocation().Equals(Landing,.01));
+	};
+	if (!StartExit()) return false;
+	LandingFloor->Destroy();
+	F.Actions->FinishExit();
+	if (!TestEqual(TEXT("Removing only the selected landing floor returns the cat to Hidden"),
+		F.Actions->BasketPhase,ECatrunBasketPhase::Hidden)) return false;
+	TestTrue(TEXT("Unsupported exit keeps the same basket reserved and returns to its origin"),
+		F.Basket->Occupied && F.Actions->IsHidden && F.Cat->GetActorLocation().Equals(Origin,.01));
+	TestFalse(TEXT("Unsupported exit keeps collision disabled"),F.Cat->GetActorEnableCollision());
+	TestFalse(TEXT("Unsupported exit leaves no visible guide"),F.Actions->ExitPreview && F.Actions->ExitPreview->IsVisible());
+	LandingFloor = F.Box(FVector(-82,0,-10),Extent);
+	if (!StartExit()) return false;
+	LandingFloor->SetActorLocation(FVector(-82,0,-14));
+	F.Actions->FinishExit();
+	if (!TestEqual(TEXT("A different landing height cannot complete the original exit"),
+		F.Actions->BasketPhase,ECatrunBasketPhase::Hidden)) return false;
+	TestTrue(TEXT("Changed support never moves the cat to an unpreviewed landing"),F.Cat->GetActorLocation().Equals(Origin,.01));
+	LandingFloor->SetActorLocation(FVector(-82,0,-10));
+	if (!StartExit()) return false;
+	F.Actions->FinishExit();
+	TestEqual(TEXT("Restored support allows the exact original exit"),F.Actions->BasketPhase,ECatrunBasketPhase::Outside);
+	TestTrue(TEXT("Successful exit restores collision and preserves the accepted landing"),
+		F.Cat->GetActorEnableCollision() && F.Cat->GetActorLocation().Equals(Landing,.01));
+	TestFalse(TEXT("Successful exit releases the basket"),F.Basket->Occupied);
 	return true;
 }
 

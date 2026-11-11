@@ -1,5 +1,7 @@
 #if WITH_DEV_AUTOMATION_TESTS
+#include "GameFramework/InputSettings.h"
 #include "Misc/AutomationTest.h"
+#include "Misc/ScopeExit.h"
 #include "Settings/CatrunInputBindings.h"
 #include "Settings/CatrunUserSettings.h"
 #include "Settings/CatrunSettingsSubsystem.h"
@@ -35,6 +37,55 @@ bool FCatrunBindingValidationTest::RunTest(const FString&)
  TestTrue(TEXT("Standalone modifier is a digital key, unlike a chord"),Modifier.Validate(Error));
  return true;
 }
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunReservedKeyboardKeysTest,"Catrun.Settings.ReservedKeyboardKeys",
+ EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FCatrunReservedKeyboardKeysTest::RunTest(const FString&)
+{
+ auto* InputSettings=GetMutableDefault<UInputSettings>();
+ const bool bSavedF11TogglesFullscreen=InputSettings->bF11TogglesFullscreen;
+ ON_SCOPE_EXIT { InputSettings->bF11TogglesFullscreen=bSavedF11TogglesFullscreen; };
+ const TGuardValue<TArray<FKey>> ConsoleKeysGuard(InputSettings->ConsoleKeys,TArray<FKey>{EKeys::Tilde,EKeys::F10});
+
+ InputSettings->bF11TogglesFullscreen=true;
+ TestFalse(TEXT("F11 is reserved while fullscreen toggling is enabled"),UCatrunInputBindings::IsKeyboardKey(EKeys::F11));
+ TestFalse(TEXT("Tilde is reserved when configured to open the console"),UCatrunInputBindings::IsKeyboardKey(EKeys::Tilde));
+ TestFalse(TEXT("Additional configured console keys are reserved"),UCatrunInputBindings::IsKeyboardKey(EKeys::F10));
+ TestTrue(TEXT("An ordinary keyboard key is still valid"),UCatrunInputBindings::IsKeyboardKey(EKeys::B));
+
+ InputSettings->bF11TogglesFullscreen=false;
+ TestTrue(TEXT("F11 is valid when fullscreen toggling is disabled and F11 is not a console key"),UCatrunInputBindings::IsKeyboardKey(EKeys::F11));
+ InputSettings->ConsoleKeys.Add(EKeys::F11);
+ TestFalse(TEXT("A console binding still reserves F11 when fullscreen toggling is disabled"),UCatrunInputBindings::IsKeyboardKey(EKeys::F11));
+ return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunReservedBindingTransactionTest,"Catrun.Settings.ReservedBindingTransaction",
+ EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FCatrunReservedBindingTransactionTest::RunTest(const FString&)
+{
+ auto* InputSettings=GetMutableDefault<UInputSettings>();
+ const TGuardValue<TArray<FKey>> ConsoleKeysGuard(InputSettings->ConsoleKeys,TArray<FKey>{EKeys::Tilde});
+ auto* Settings=NewObject<UCatrunUserSettings>();
+ const FCatrunKeyboardBindings Defaults;
+ auto Before=Defaults;
+ Before.Keys[0]=EKeys::I;
+ FText Error;
+ if (!TestTrue(TEXT("A complete draft with an ordinary key commits"),Settings->SetKeyboardBindings(Before,Error))) return false;
+
+ auto ReservedDraft=Before;
+ ReservedDraft.Keys[0]=EKeys::K;
+ ReservedDraft.Keys[6]=EKeys::Tilde;
+ TestFalse(TEXT("A reserved key rejects the complete draft"),Settings->SetKeyboardBindings(ReservedDraft,Error));
+ TestTrue(TEXT("Earlier valid edits in a rejected draft never leak"),Settings->GetKeyboardBindings()==Before);
+
+ auto* Property=FindFProperty<FStructProperty>(Settings->GetClass(),TEXT("KeyboardBindings"));
+ if (!TestNotNull(TEXT("Persisted typed binding property"),Property)) return false;
+ *Property->ContainerPtrToValuePtr<FCatrunKeyboardBindings>(Settings)=ReservedDraft;
+ TestTrue(TEXT("A complete stored draft containing a reserved key reads as defaults"),Settings->GetKeyboardBindings()==Defaults);
+ return true;
+}
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunBindingAtomicTest,"Catrun.Settings.AtomicDraftAndCorruptFallback",
  EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 bool FCatrunBindingAtomicTest::RunTest(const FString&)
@@ -66,8 +117,8 @@ bool FCatrunRemapPreservationTest::RunTest(const FString&)
  auto* Swizzle=NewObject<UInputModifierSwizzleAxis>(Original);
  auto* Negate=NewObject<UInputModifierNegate>(Original);
  Original->MapKey(Move,EKeys::W).Modifiers.Add(Swizzle);
- auto& Back=Original->MapKey(Move,EKeys::S);
- Back.Modifiers.Add(Negate); Back.Modifiers.Add(Swizzle);
+ auto& BackwardMapping=Original->MapKey(Move,EKeys::S);
+ BackwardMapping.Modifiers.Add(Negate); BackwardMapping.Modifiers.Add(Swizzle);
  Original->MapKey(Move,EKeys::Gamepad_Left2D);
  auto* Copy=DuplicateObject<UInputMappingContext>(Original,GetTransientPackage(),MakeUniqueObjectName(GetTransientPackage(),UInputMappingContext::StaticClass(),TEXT("CatrunRemapTestCopy")));
  FCatrunKeyboardBindings Draft;

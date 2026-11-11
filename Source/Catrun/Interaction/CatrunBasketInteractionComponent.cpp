@@ -182,8 +182,9 @@ bool UCatrunBasketInteractionComponent::TestEntry(ACatrunHideBasket* Basket, FVe
 		|| Hit.ImpactPoint.Z > SurfaceReference.Z+.01f || Hit.ImpactPoint.Z < SurfaceReference.Z-50.f-.01f) return false;
 	OutLocation = Supported;
 	// 기존처럼 고양이가 접근한 방향에서 진입하며, 진입 위치까지 캡슐이 지나갈 공간을 확인한다.
-	if (GetWorld()->SweepSingleByChannel(Hit, From, OutLocation, FQuat::Identity, ObstacleChannel,
-		FCollisionShape::MakeCapsule(Capsule->GetScaledCapsuleRadius(), Capsule->GetScaledCapsuleHalfHeight()), Params))
+	const FCollisionResponseParams Responses(Capsule->GetCollisionResponseToChannels());
+	if (GetWorld()->SweepSingleByChannel(Hit, From, OutLocation, Capsule->GetComponentQuat(),
+		Capsule->GetCollisionObjectType(), Capsule->GetCollisionShape(), Params, Responses))
 		return false;
 	if (GetWorld()->LineTraceSingleByChannel(Hit, OutLocation, Center, ObstacleChannel, Params)
 		&& Hit.GetActor()!=Basket && Hit.GetActor()!=Basket->ExternalBody)
@@ -276,25 +277,28 @@ void UCatrunBasketInteractionComponent::TickComponent(float DeltaTime, ELevelTic
 	}
 }
 
-void UCatrunBasketInteractionComponent::UpdateExitCandidate(bool bForce)
+void UCatrunBasketInteractionComponent::UpdateExitCandidate(bool bForce, bool bReadDirectionInput)
 {
-	APlayerController* PC = Cast<APlayerController>(CatOwner->GetController());
 	const FVector Origin = ActiveBasket->GetHiddenLocation();
 	const FVector Forward = ActiveBasket->GetOpenDirection();
 	const FVector Previous = ExitWorldDirection;
-	const float CameraYaw = PC && PC->PlayerCameraManager
-		? PC->PlayerCameraManager->GetCameraRotation().Yaw : Forward.Rotation().Yaw;
-	if (PC && PC->PlayerCameraManager)
+	if (bReadDirectionInput)
 	{
-		auto Down = [PC](const FKey& Key) { return PC->IsInputKeyDown(Key) || PC->WasInputKeyJustPressed(Key); };
-		const FVector2D Input=UCatrunInputBindings::GetMovementInput(Down);
-		// Rejected rear input and released/cancelling keys intentionally retain the last selection.
-		// Its geometry is still rechecked below; confirmation always forces that revalidation.
-		ExitWorldDirection = CatrunBasket::SelectDirection(CameraYaw,
-			Input.X, Input.Y,
-			ExitWorldDirection, Forward);
+		APlayerController* PC = Cast<APlayerController>(CatOwner->GetController());
+		const float CameraYaw = PC && PC->PlayerCameraManager
+			? PC->PlayerCameraManager->GetCameraRotation().Yaw : Forward.Rotation().Yaw;
+		if (PC && PC->PlayerCameraManager)
+		{
+			auto Down = [PC](const FKey& Key) { return PC->IsInputKeyDown(Key) || PC->WasInputKeyJustPressed(Key); };
+			const FVector2D Input=UCatrunInputBindings::GetMovementInput(Down);
+			// Rejected rear input and released/cancelling keys intentionally retain the last selection.
+			// Its geometry is still rechecked below; confirmation always forces that revalidation.
+			ExitWorldDirection = CatrunBasket::SelectDirection(CameraYaw,
+				Input.X, Input.Y,
+				ExitWorldDirection, Forward);
+		}
+		if (!CatrunBasket::IsDirectionAllowed(ExitWorldDirection, Forward, CameraYaw)) ExitWorldDirection = Forward;
 	}
-	if (!CatrunBasket::IsDirectionAllowed(ExitWorldDirection, Forward, CameraYaw)) ExitWorldDirection = Forward;
 	const double Now = GetWorld()->GetTimeSeconds();
 	// 입력이 없어도 움직이는 장애물을 0.1초마다 확인한다. 방향 변경과 F 확정은 즉시 검사한다.
 	if (!bForce && Previous.Equals(ExitWorldDirection,.001) && LastBasketOrigin.Equals(Origin,.1)
@@ -304,15 +308,9 @@ void UCatrunBasketInteractionComponent::UpdateExitCandidate(bool bForce)
 	NextObstacleCheck = Now+.1;
 	CanExit = false;
 	const FVector Candidate = Origin + ExitWorldDirection*ExitDistance;
-	FCollisionQueryParams Params(SCENE_QUERY_STAT(BasketExit), false, CatOwner);
-	Params.AddIgnoredActor(ActiveBasket);
-	if (IsValid(ActiveBasket->ExternalBody)) Params.AddIgnoredActor(ActiveBasket->ExternalBody);
-	FHitResult Floor;
-	const UCapsuleComponent* Capsule = CatOwner->GetCapsuleComponent();
-	if (!CatrunGround::FindSupport(*Capsule, Candidate+FVector(0,0,Capsule->GetScaledCapsuleHalfHeight()),
-		50.f, 100.f, Params, Floor, ExitWorldLocation)
-		|| Floor.ImpactPoint.Z > Candidate.Z+50.f+.01f || Floor.ImpactPoint.Z < Candidate.Z-100.f-.01f) return;
+	if (!FindExitSupport(Candidate, ExitWorldLocation)) return;
 	// Keep the guide centered on the selected landing, not the off-center capsule contact.
+	const UCapsuleComponent* Capsule = CatOwner->GetCapsuleComponent();
 	FloorLocation = ExitWorldLocation - FVector(0,0,Capsule->GetScaledCapsuleHalfHeight()+2.f);
 	FTransform LandingTransform = CatOwner->GetActorTransform();
 	LandingTransform.SetLocation(ExitWorldLocation);
@@ -321,19 +319,24 @@ void UCatrunBasketInteractionComponent::UpdateExitCandidate(bool bForce)
 		&& (!bSavedCollision || CatrunRestore::IsPlacementClear(*CatOwner, LandingTransform));
 }
 
-bool UCatrunBasketInteractionComponent::IsBasketExitPathClear(const FVector& Destination) const
+bool UCatrunBasketInteractionComponent::FindExitSupport(const FVector& Reference, FVector& OutCenter) const
 {
-	if (!IsValid(CatOwner) || !IsValid(ActiveBasket) || !GetWorld()) return false;
-	const FVector Origin = ActiveBasket->GetHiddenLocation();
-	FCollisionQueryParams Params(SCENE_QUERY_STAT(BasketExitOriginFloor), false, CatOwner);
+	constexpr float ProbeUp = 50.f, ProbeDown = 100.f;
+	FCollisionQueryParams Params(SCENE_QUERY_STAT(BasketExitSupport), false, CatOwner);
 	Params.AddIgnoredActor(ActiveBasket);
 	if (IsValid(ActiveBasket->ExternalBody)) Params.AddIgnoredActor(ActiveBasket->ExternalBody);
 	FHitResult Floor;
-	FVector SupportedOrigin;
 	const auto* Capsule = CatOwner->GetCapsuleComponent();
-	if (!CatrunGround::FindSupport(*Capsule, Origin+FVector(0,0,Capsule->GetScaledCapsuleHalfHeight()), 50.f, 100.f,
-		Params, Floor, SupportedOrigin)
-		|| Floor.ImpactPoint.Z > Origin.Z+50.f+.01f || Floor.ImpactPoint.Z < Origin.Z-100.f-.01f) return false;
+	return CatrunGround::FindSupport(*Capsule, Reference+FVector(0,0,Capsule->GetScaledCapsuleHalfHeight()),
+		ProbeUp, ProbeDown, Params, Floor, OutCenter)
+		&& Floor.ImpactPoint.Z <= Reference.Z+ProbeUp+.01f && Floor.ImpactPoint.Z >= Reference.Z-ProbeDown-.01f;
+}
+
+bool UCatrunBasketInteractionComponent::IsBasketExitPathClear(const FVector& Destination) const
+{
+	if (!IsValid(CatOwner) || !IsValid(ActiveBasket) || !GetWorld()) return false;
+	FVector SupportedOrigin;
+	if (!FindExitSupport(ActiveBasket->GetHiddenLocation(), SupportedOrigin)) return false;
 	// HiddenPoint may be authored on the floor. Ground the actual start instead of lifting the
 	// entire transit to a raised destination (which could pass above an intervening blocker's side).
 	return IsExitPathClear(SupportedOrigin, Destination);
@@ -349,11 +352,13 @@ bool UCatrunBasketInteractionComponent::IsExitPathClear(const FVector& Origin, c
 		Params.AddIgnoredActor(ActiveBasket);
 		if (IsValid(ActiveBasket->ExternalBody)) Params.AddIgnoredActor(ActiveBasket->ExternalBody);
 	}
-	const auto Shape = FCollisionShape::MakeCapsule(Capsule->GetScaledCapsuleRadius(), Capsule->GetScaledCapsuleHalfHeight());
+	const auto Shape = Capsule->GetCollisionShape();
+	const FQuat Rotation = Capsule->GetComponentQuat();
+	const ECollisionChannel Channel = Capsule->GetCollisionObjectType();
 	const FCollisionResponseParams Responses(Capsule->GetCollisionResponseToChannels());
 	FHitResult Hit;
-	return !GetWorld()->OverlapBlockingTestByChannel(Destination, FQuat::Identity, ECC_Pawn, Shape, Params, Responses)
-		&& !GetWorld()->SweepSingleByChannel(Hit, Origin, Destination, FQuat::Identity, ECC_Pawn, Shape, Params, Responses);
+	return !GetWorld()->OverlapBlockingTestByChannel(Destination, Rotation, Channel, Shape, Params, Responses)
+		&& !GetWorld()->SweepSingleByChannel(Hit, Origin, Destination, Rotation, Channel, Shape, Params, Responses);
 }
 
 void UCatrunBasketInteractionComponent::UpdatePreview()
@@ -415,18 +420,23 @@ void UCatrunBasketInteractionComponent::FinishExit()
 {
 	if (BasketPhase != ECatrunBasketPhase::Exiting) return;
 	if (!IsValid(CatOwner) || !IsValid(ActiveBasket)) { AbortBasket(); return; }
-	if (!IsBasketExitPathClear(CatOwner->GetActorLocation())
+	// Confirmation freezes the landing and the basket height used to bound its support query.
+	const FVector Landing = ExitWorldLocation;
+	const FVector Reference(Landing.X, Landing.Y, LastBasketOrigin.Z);
+	FVector SupportedLanding;
+	if (!CatOwner->GetActorLocation().Equals(Landing,.01)
+		|| !FindExitSupport(Reference, SupportedLanding) || !SupportedLanding.Equals(Landing,.01)
+		|| !IsBasketExitPathClear(Landing)
 		|| (bSavedCollision && !CatrunRestore::IsPlacementClear(*CatOwner, CatOwner->GetActorTransform())))
 	{
-		// Recheck the exact landing under the real restoration profile as well as the transit policy.
-		// A late blocker keeps us hidden, never displaced to an unpreviewed nearby exit.
+		// A late support or collision change keeps us hidden at the same basket.
 		CatOwner->SetActorLocation(ActiveBasket->GetHiddenLocation(), false, nullptr, ETeleportType::TeleportPhysics);
 		CatOwner->GetMesh()->SetVisibility(false, true);
 		BasketPhase = ECatrunBasketPhase::Hidden;
 		Busy = false;
 		IsHidden = true;
 		ActiveBasket->ClothIdle();
-		UpdateExitCandidate(true);
+		UpdateExitCandidate(true, false);
 		UpdatePreview();
 		BasketHiddenStateChanged();
 		return;

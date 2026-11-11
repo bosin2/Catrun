@@ -9,6 +9,7 @@
 #include "Engine/SkeletalMesh.h"
 #include "Monster/CatrunPatrolPoint.h"
 #include "Sound/CatrunDoor.h"
+#include "Perception/AlertMarkComponent.h"
 #include "Perception/VisionFanComponent.h"
 #include "Materials/MaterialInterface.h"
 #include "Monster/CatrunArmor.h"
@@ -135,6 +136,78 @@ bool FCatrunSoundPriorityTest::RunTest(const FString&)
 	return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunArmorCaptureObstructionTest, "Catrun.PrototypeAI.ArmorCaptureRequiresClearBodyPath", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FCatrunArmorCaptureObstructionTest::RunTest(const FString&)
+{
+	FPrototypeWorld F;
+	auto* Armor = F.Spawn<ACatrunArmor>(FVector(70, 0, 90));
+	Armor->GetCapsuleComponent()->SetCapsuleRadius(35.f);
+	Armor->DispatchBeginPlay();
+	auto* Capture = Armor->CapturePresentation.Get();
+	auto* LowBlocker = F.Box(FVector(32, 0, 47.5), FVector(2, 80, 47.5));
+
+	const FVector ArmorCenter = Armor->GetCapsuleComponent()->GetComponentLocation();
+	const FVector CatCenter = F.Cat->GetCapsuleComponent()->GetComponentLocation();
+	TestTrue(TEXT("Low obstacle blocks the actual body-height line"),
+		CatrunPerception::SightDistance(*F.World, ArmorCenter, CatCenter, Armor, F.Cat) < FVector::Distance(ArmorCenter, CatCenter));
+	TestTrue(TEXT("The existing direct sight ray clears the low obstacle"),
+		CatrunPerception::HasDirectSight(*Armor, *F.Cat, F.Settings->VisionTraceHeight));
+
+	FCatrunSoundEvent Bell;
+	Bell.Kind = ECatrunSoundKind::Bell;
+	Bell.Size = ECatrunSoundSize::Medium;
+	Bell.Location = FVector(400, 200, 90);
+	Armor->OnSoundHeard_Implementation(Bell, 100.f);
+	const EArmorAction InvestigationAction = Armor->GetAction();
+	TestTrue(TEXT("The medium bell starts an investigation"),
+		Armor->IsInvestigatingSound() && Armor->GetInvestigationLocation().Equals(Bell.Location));
+
+	Armor->UpdateDetection();
+	TestTrue(TEXT("The existing detection fan clears the low obstacle"),
+		Armor->Detection->CanSee(F.Cat->GetActorLocation(), F.Settings->CatSightRadius));
+	TestFalse(TEXT("Low obstacle prevents the armor seeing the cat"), Armor->bSeeingCat);
+	TestFalse(TEXT("Low obstacle prevents the alert mark"), Armor->AlertMark->IsVisible());
+	TestFalse(TEXT("Low obstacle prevents normal capture"), Capture->IsCapturing());
+	TestEqual(TEXT("Blocked detection preserves the current action"), Armor->GetAction(), InvestigationAction);
+	TestTrue(TEXT("Blocked detection preserves the investigation and goal"),
+		Armor->IsInvestigatingSound() && Armor->GetInvestigationLocation().Equals(Bell.Location));
+
+	Bell.Size = ECatrunSoundSize::Large;
+	Bell.Location = FVector(450, -200, 90);
+	Armor->OnSoundHeard_Implementation(Bell, 100.f);
+	TestTrue(TEXT("A louder bell is still accepted with the cat behind the obstacle"),
+		Armor->IsInvestigatingSound() && Armor->GetInvestigationLocation().Equals(Bell.Location));
+
+	// Clear an unexpected capture so the controls still exercise normal detection on the old code.
+	if (Capture->IsCapturing())
+	{
+		Capture->AbortCapture();
+		Armor->TickCatching(0.f);
+	}
+	LowBlocker->Destroy();
+	auto* Gate = F.Box(FVector(32, 0, 100), FVector(2, 80, 100));
+	auto* GateCollision = CastChecked<UBoxComponent>(Gate->GetRootComponent());
+	GateCollision->SetCollisionObjectType(ECC_WorldDynamic);
+	TestFalse(TEXT("The tall gate blocks the existing direct sight ray"),
+		CatrunPerception::HasDirectSight(*Armor, *F.Cat, F.Settings->VisionTraceHeight));
+	Armor->UpdateDetection();
+	TestFalse(TEXT("Closed gate prevents normal capture"), Armor->bSeeingCat || Capture->IsCapturing());
+
+	GateCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	auto* BasketActions = NewObject<UCatrunBasketInteractionComponent>(F.Cat);
+	BasketActions->RegisterComponent();
+	BasketActions->BasketPhase = ECatrunBasketPhase::Hidden;
+	Armor->UpdateDetection();
+	TestFalse(TEXT("Hidden cat stays safe on a clear path"), Armor->bSeeingCat || Capture->IsCapturing());
+
+	BasketActions->BasketPhase = ECatrunBasketPhase::Outside;
+	Armor->UpdateDetection();
+	TestTrue(TEXT("An exposed cat is seen and captured after the gate opens"),
+		Armor->bSeeingCat && Armor->AlertMark->IsVisible() && Capture->IsCapturing());
+	Capture->AbortCapture();
+	return true;
+}
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunCandleOcclusionTest, "Catrun.PrototypeAI.CandleTouchRequiresActualLOS", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 bool FCatrunCandleOcclusionTest::RunTest(const FString&)
 {
@@ -247,6 +320,124 @@ bool FCatrunCaptureGrabHeadingTest::RunTest(const FString&)
 	Capture->TickComponent(.01f, LEVELTICK_All, nullptr);
 	TestTrue(TEXT("Explicit zero duration still completes immediately"), FMath::IsNearlyEqual(F.Cat->GetActorRotation().Yaw, -35.f, .01f));
 	Capture->AbortCapture();
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunCaptureCarryClearanceTest, "Catrun.PrototypeAI.CaptureCarryRespectsActualCapsuleWhileCollisionDisabled", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FCatrunCaptureCarryClearanceTest::RunTest(const FString&)
+{
+	// Include a non-Pawn object channel and a disabled component: neither actor sweeps nor
+	// hardcoded ECC_Pawn/default response queries can enforce this carry contract.
+	for (bool bDisableCapsuleQuery : {false, true})
+	{
+		FPrototypeWorld F;
+		auto* Capsule = F.Cat->GetCapsuleComponent();
+		Capsule->SetCollisionObjectType(ECC_WorldDynamic);
+		Capsule->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Block);
+		if (bDisableCapsuleQuery) Capsule->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		F.Cat->SetActorLocation(FVector(0, 0, 92));
+		F.Cat->SetActorRotation(FRotator(0, -90, 0));
+		F.Cat->GetCharacterMovement()->SetMovementMode(MOVE_Flying);
+		F.Box(FVector(0, 0, 55), FVector(500, 500, 5)); // capsule bottom is 2cm above support
+		auto* Armor = F.Spawn<ACatrunArmor>(FVector(70, 0, 92));
+		// The native armor's tall default capsule intersects this low fixture floor. Give
+		// both participants the same supported center, and make hand fallback explicit.
+		Armor->GetCapsuleComponent()->SetCapsuleSize(20.f, 30.f);
+		Armor->SetActorLocation(FVector(70, 0, 92));
+		Armor->GetMesh()->SetSkeletalMesh(nullptr);
+		auto* Capture = Armor->CapturePresentation.Get();
+		Capture->bUseBlueprintPresentation = true;
+		Capture->MissingAnimationDuration = 20.f;
+		F.Settings->CatchCameraBlendTime = 0.f;
+		F.Settings->CatchGrabBlendTime = .4f;
+		F.Settings->CatchGrabLatestTime = 10.f;
+		F.Settings->CatchHoldOffset = FVector(0, 0, -10);
+		F.Settings->CatchFadeOutTime = 10.f; // exercise Fading without issuing travel
+		auto* Overhang = F.Box(FVector(35, 0, 142), FVector(6, 60, 5));
+		auto* OverhangShape = CastChecked<UBoxComponent>(Overhang->GetRootComponent());
+		OverhangShape->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
+		OverhangShape->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Block);
+		FCollisionQueryParams Params(SCENE_QUERY_STAT(CaptureCarryFixture), false, F.Cat);
+		Params.AddIgnoredActor(Armor);
+		const FCollisionResponseParams Responses(Capsule->GetCollisionResponseToChannels());
+		const auto Shape = Capsule->GetCollisionShape();
+		auto IsBlocked = [&](const FVector& Location)
+		{
+			return F.World->OverlapBlockingTestByChannel(Location, FQuat::Identity,
+				Capsule->GetCollisionObjectType(), Shape, Params, Responses);
+		};
+		TestFalse(TEXT("Supported initial cat capsule clears the overhang"), IsBlocked(F.Cat->GetActorLocation()));
+		FVector BodyFrom = Armor->GetCapsuleComponent()->GetComponentLocation();
+		const FVector BodyTo = Capsule->GetComponentLocation();
+		BodyFrom.Z = BodyTo.Z; // same body-height contract as HasClearCapturePath
+		TestTrue(TEXT("Overhang leaves initial body-height capture LOS clear"),
+			CatrunPerception::SightDistance(*F.World, BodyFrom, BodyTo, Armor, F.Cat)
+				>= FVector::Distance(BodyFrom, BodyTo) - KINDA_SMALL_NUMBER);
+		if (!TestTrue(TEXT("Supported capture starts"), Capture->BeginCapture(F.Cat, F.Settings))) continue;
+		Capture->TickComponent(0.f, LEVELTICK_All, nullptr);
+		TestEqual(TEXT("Zero framing still reaches authored Pickup phase"), Capture->Phase, ECatrunCapturePhase::Pickup);
+		const FVector Hold = Armor->GetActorLocation() + Armor->GetActorForwardVector()*35.f
+			+ FVector(0, 0, 40) + Armor->GetActorTransform().TransformVectorNoScale(F.Settings->CatchHoldOffset);
+		AddInfo(FString::Printf(TEXT("Carry fixture disabledQuery=%d cat=%s armor=%s hold=%s capsuleRadius=%.3f halfHeight=%.3f"),
+			bDisableCapsuleQuery, *F.Cat->GetActorLocation().ToString(), *Armor->GetActorLocation().ToString(),
+			*Hold.ToString(), Capsule->GetScaledCapsuleRadius(), Capsule->GetScaledCapsuleHalfHeight()));
+		TestTrue(TEXT("Real overhang blocks the intended hand endpoint"), IsBlocked(Hold));
+		TestFalse(TEXT("Hardcoded Pawn query would incorrectly miss this blocker"),
+			F.World->OverlapBlockingTestByChannel(Hold, FQuat::Identity, ECC_Pawn, Shape, Params, Responses));
+		TestTrue(TEXT("Matching BP grab starts Holding"), Capture->NotifyGrab(Capture->SessionId));
+		TestFalse(TEXT("Carry intentionally keeps actor collision disabled"), F.Cat->GetActorEnableCollision());
+		for (int32 Step = 1; Step <= 8; ++Step)
+		{
+			const FVector Previous = F.Cat->GetActorLocation();
+			Capture->TickComponent(.05f, LEVELTICK_All, nullptr);
+			FHitResult Hit;
+			TestFalse(TEXT("Every carried capsule endpoint stays outside solid scenery"), IsBlocked(F.Cat->GetActorLocation()));
+			TestFalse(TEXT("Every carried segment stays on the clear side of the overhang"),
+				F.World->SweepSingleByChannel(Hit, Previous, F.Cat->GetActorLocation(), FQuat::Identity,
+					Capsule->GetCollisionObjectType(), Shape, Params, Responses));
+			if (Step == 4) TestTrue(TEXT("Obstruction preserves half-time heading interpolation"),
+				FMath::Abs(FMath::FindDeltaAngleDegrees(F.Cat->GetActorRotation().Yaw, -135.f)) < .01f);
+		}
+		TestTrue(TEXT("Obstruction preserves original heading completion time"),
+			FMath::Abs(FMath::FindDeltaAngleDegrees(F.Cat->GetActorRotation().Yaw, 180.f)) < .01f);
+		TestEqual(TEXT("Obstruction does not abort or finish the BP pickup"), Capture->Phase, ECatrunCapturePhase::Holding);
+		TestTrue(TEXT("Original BP finish notify still starts fade"), Capture->NotifyFinished(Capture->SessionId));
+		Capture->TickComponent(.05f, LEVELTICK_All, nullptr);
+		TestEqual(TEXT("Obstructed carry continues through original Fading phase"), Capture->Phase, ECatrunCapturePhase::Fading);
+		TestFalse(TEXT("Fading also keeps the actual capsule outside scenery"), IsBlocked(F.Cat->GetActorLocation()));
+		OverhangShape->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		Capture->TickComponent(.05f, LEVELTICK_All, nullptr);
+		TestTrue(TEXT("Cleared route reaches the unchanged authored hand target"), F.Cat->GetActorLocation().Equals(Hold, .01f));
+		TestFalse(TEXT("Open-route control remains collision clear"), IsBlocked(F.Cat->GetActorLocation()));
+		Capture->AbortCapture();
+
+		// A clear endpoint alone is insufficient: an instant authored lift can cross a thin lintel.
+		Overhang->SetActorLocation(FVector(35, 0, 125));
+		OverhangShape->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		F.Settings->CatchGrabBlendTime = 0.f;
+		F.Settings->CatchHoldOffset = FVector(-70, 0, -10);
+		if (!TestTrue(TEXT("Transit-only blocker capture starts"), Capture->BeginCapture(F.Cat, F.Settings))) continue;
+		Capture->TickComponent(0.f, LEVELTICK_All, nullptr);
+		const FVector FarHold = Armor->GetActorLocation() + Armor->GetActorForwardVector()*35.f
+			+ FVector(0, 0, 40) + Armor->GetActorTransform().TransformVectorNoScale(F.Settings->CatchHoldOffset);
+		TestFalse(TEXT("Transit fixture begins clear"), IsBlocked(F.Cat->GetActorLocation()));
+		TestFalse(TEXT("Transit fixture destination is clear beyond the lintel"), IsBlocked(FarHold));
+		FHitResult TransitHit;
+		const FVector TransitStart = F.Cat->GetActorLocation();
+		TestTrue(TEXT("Actual capsule sweep proves a blocker between clear endpoints"),
+			F.World->SweepSingleByChannel(TransitHit, TransitStart, FarHold, FQuat::Identity,
+				Capsule->GetCollisionObjectType(), Shape, Params, Responses));
+		Capture->NotifyGrab(Capture->SessionId);
+		Capture->TickComponent(.01f, LEVELTICK_All, nullptr);
+		TestFalse(TEXT("Zero-duration carry cannot tunnel through the lintel"),
+			F.World->SweepSingleByChannel(TransitHit, TransitStart, F.Cat->GetActorLocation(), FQuat::Identity,
+				Capsule->GetCollisionObjectType(), Shape, Params, Responses));
+		TestFalse(TEXT("Zero-duration blocked carry endpoint remains clear"), IsBlocked(F.Cat->GetActorLocation()));
+		OverhangShape->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		Capture->TickComponent(.01f, LEVELTICK_All, nullptr);
+		TestTrue(TEXT("Zero-duration clear carry still completes immediately"), F.Cat->GetActorLocation().Equals(FarHold, .01f));
+		Capture->AbortCapture();
+	}
 	return true;
 }
 
@@ -484,6 +675,9 @@ bool FCatrunRestoreRecoveryTest::RunTest(const FString&)
 		const FString Package = UWorld::RemovePIEPrefix(F.World->GetOutermost()->GetName());
 		TestEqual(TEXT("Existing RestartLevel receives same-map recovery travel"), GEngine->GetWorldContextFromWorld(F.World)->TravelURL, Package);
 		float Fade = 0.f;
+		// Queue acceptance does not publish an arrival intent. Resolve the destination
+		// boundary explicitly here; this temporary-world test never loads a level.
+		Session->ResolveArrivalRestart(Package);
 		TestTrue(TEXT("Recovery uses Task1 token to skip tutorial intro"), Session->RestartIntent.Consume(Package, Fade));
 		TestEqual(TEXT("Recovery retains requested fade"), Fade, .5f);
 		Instance->Shutdown(); F.World->SetGameInstance(nullptr);

@@ -27,6 +27,7 @@ public:
  UFUNCTION(BlueprintPure, Category="Catrun|Settings") static FKey GetEffectiveKey(ECatrunInputSlot Slot);
  UFUNCTION(BlueprintPure, Category="Catrun|Settings") static FText GetEffectiveKeyLabel(ECatrunInputSlot Slot);
  static bool IsKeyboardKey(FKey Key);
+ static FText GetInvalidKeyboardKeyMessage();
  static FVector2D GetMovementInput(TFunctionRef<bool(FKey)> IsDown);
  // Only known authored gameplay contexts are cloned; all non-key mapping data remains intact.
  static bool IsGameplayContext(const UInputMappingContext* Context);

@@ -29,6 +29,7 @@ SETTINGS = '/Game/UI/Settings/WBP_Setting'
 MENU = '/Game/UI/WBP_MainMenu'
 N = '/Script/Catrun.CatrunSettingsWidget.'
 S = '/Script/Catrun.CatrunUserSettings.'
+NAV = '/Script/Catrun.CatrunSettingsSubsystem.IsNavigationFocused'
 W = '/Script/UMG.Widget.'
 T = '/Script/UMG.TextBlock.'
 K = '/Script/Engine.KismetMathLibrary.'
@@ -186,6 +187,7 @@ def layout(bp):
     canvas(scrim, (0, 0), (1, 1), 0)
     properties(scrim, brush_color=color('101115', .68), visibility=unreal.SlateVisibility.VISIBLE)
     properties(sw['SettingsTitle'], font=font(32))
+    properties(sw['SettingsPawBounds'].get_editor_property('slot'), vertical_alignment=unreal.VerticalAlignment.V_ALIGN_CENTER)
     properties(sw['SettingsPaw'], visibility=unreal.SlateVisibility.HIT_TEST_INVISIBLE)
     ui('ToggleWidgetAsVariable', bp, sw['SettingsHint'], True)
     properties(sw['SettingsHint'], font=font(18), auto_wrap_text=True)
@@ -627,12 +629,9 @@ def category_graphs(bp):
 
 
 def affordance(q, button_name, decorations, next_node, selected=None, capture=False):
-    owner = q.fn(W + 'GetOwningPlayer')
     hovered = call(q, button_name, W + 'IsHovered')
-    focused = call(q, button_name, W + 'HasKeyboardFocus')
-    child = call(q, button_name, W + 'HasUserFocusedDescendants', PlayerController=(owner, 'ReturnValue'))
+    focused = q.fn(NAV, Widget=q.ref(button_name))
     active = q.fn(K + 'BooleanOR', A=(hovered, 'ReturnValue'), B=(focused, 'ReturnValue'))
-    active = q.fn(K + 'BooleanOR', A=(active, 'ReturnValue'), B=(child, 'ReturnValue'))
     if capture:
         selecting = call(q, button_name, SELECTOR + 'GetIsSelectingKey')
         active = q.fn(K + 'BooleanOR', A=(active, 'ReturnValue'), B=(selecting, 'ReturnValue'))

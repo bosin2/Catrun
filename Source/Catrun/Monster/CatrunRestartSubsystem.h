@@ -32,8 +32,8 @@ public:
 	// Fades the screen of the cat's player to black (and keeps it black).
 	void FadeOut(APawn* Cat, float Duration);
 
-	// Opens the current level again; the new level fades in from black.
-	void RestartLevel(float FadeInDuration);
+	// Queue an owned same-map request. False means no request was accepted; Failure runs only for a later same-world failure.
+	bool RestartLevel(float FadeInDuration, TFunction<void(const FString&)> Failure = {});
 
 	virtual bool ShouldCreateSubsystem(UObject* Outer) const override;
 	virtual void OnWorldBeginPlay(UWorld& InWorld) override;

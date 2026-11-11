@@ -3,7 +3,6 @@
 #include "CatrunProgressSave.h"
 #include "CatrunProgressWriter.h"
 #include "CatrunExitTransitionComponent.h"
-#include "PlatformFeatures.h"
 #include "Interaction/CatrunPuzzleSuspension.h"
 #include "Settings/CatrunUserSettings.h"
 #include "Settings/CatrunSettingsSubsystem.h"
@@ -25,6 +24,7 @@
 #include "Misc/PackageName.h"
 #include "Monster/CatrunRestartSubsystem.h"
 #include "Sound/CatrunNotice.h"
+#include "Perception/CatrunSafeRestore.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogCatrunFlow, Log, All);
 
@@ -101,13 +101,14 @@ bool FCatrunRestartIntent::Consume(const FString& Package, float& OutFadeDuratio
 	return bMatches;
 }
 
-uint64 UCatrunFlowSession::AcceptTravel(const FString& Package, bool bBeginProgress, bool bCheckpoint, ECatrunArrivalRestart Restart, int8 OnboardingOnArrival)
+uint64 UCatrunFlowSession::AcceptTravel(const FString& Package, bool bBeginProgress, bool bCheckpoint, ECatrunArrivalRestart Restart, int8 OnboardingOnArrival, float FadeInDuration)
 {
 	AcceptedOnboarding = OnboardingOnArrival;
 	AcceptedTravelMap = UWorld::RemovePIEPrefix(Package);
 	bBeginProgressOnArrival = bBeginProgress;
 	bCheckpointOnArrival = bCheckpoint;
 	ArrivalRestart = Restart;
+	ArrivalFadeInDuration = FMath::IsFinite(FadeInDuration) ? FMath::Max(0.f, FadeInDuration) : 0.f;
 	AcceptedTravelToken = ++NextTravelToken;
 	return AcceptedTravelToken;
 }
@@ -121,15 +122,17 @@ void UCatrunFlowSession::CancelTravel(uint64 ExpectedToken)
 	bBeginProgressOnArrival = false;
 	bCheckpointOnArrival = false;
 	ArrivalRestart = ECatrunArrivalRestart::Preserve;
+	ArrivalFadeInDuration = 0.f;
 }
 
 void UCatrunFlowSession::ResolveArrivalRestart(const FString& Package)
 {
 	if (AcceptedTravelMap.IsEmpty() || AcceptedTravelMap != UWorld::RemovePIEPrefix(Package)) return;
 	if (ArrivalRestart == ECatrunArrivalRestart::SkipIntro || ArrivalRestart == ECatrunArrivalRestart::Continue)
-		RestartIntent.Request(AcceptedTravelMap, 0.f, ArrivalRestart == ECatrunArrivalRestart::Continue);
+		RestartIntent.Request(AcceptedTravelMap, ArrivalFadeInDuration, ArrivalRestart == ECatrunArrivalRestart::Continue);
 	else if (ArrivalRestart == ECatrunArrivalRestart::Clear) RestartIntent.Clear();
 	ArrivalRestart = ECatrunArrivalRestart::Preserve;
+	ArrivalFadeInDuration = 0.f;
 }
 
 bool UCatrunFlowSession::Arrive(const FString& Package)
@@ -149,6 +152,7 @@ bool UCatrunFlowSession::Arrive(const FString& Package)
 	CancelTravel();
 	return bCheckpoint && !ActiveProgressMap.IsEmpty();
 }
+
 
 bool UCatrunFlowSession::IsTrackingWorld(const FString& Package) const
 {
@@ -208,11 +212,14 @@ void UCatrunLevelFlowSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 		TravelFailureHandle = GEngine->OnTravelFailure().AddWeakLambda(this,
 			[this](UWorld* FailedWorld, ETravelFailure::Type, const FString& Error)
 			{
-				if (FailedWorld != GetWorld() || !bTransitioning) return;
+				if (FailedWorld != GetWorld() || !bTransitioning || FailedWorld->bIsTearingDown) return;
 				UE_LOG(LogCatrunFlow, Error, TEXT("Travel failed; progress retained: %s"), *Error);
                 auto* Exit = Cast<UCatrunExitTransitionComponent>(ExitReservation.Get());
+                const TWeakObjectPtr<UObject> FailureOwner = TravelFailureOwner;
+                auto Failure = MoveTemp(TravelFailureCallback);
                 ClearFailedTravel();
                 if (Exit) Exit->NotifyTravelFailure(Error);
+                if (FailureOwner.IsValid() && Failure) Failure(Error);
 			});
 }
 
@@ -288,6 +295,7 @@ void UCatrunLevelFlowSubsystem::Deinitialize()
 	if (auto* PC = TravelLockController.Get()) PC->SetIgnoreMoveInput(false);
 	TravelLockController.Reset();
 	ExitReservation.Reset();
+	TravelFailureOwner.Reset(); TravelFailureCallback = {};
 	if (PlayHUD) PlayHUD->RemoveFromParent();
 	Super::Deinitialize();
 }
@@ -342,14 +350,17 @@ void UCatrunLevelFlowSubsystem::SetPauseMenu(bool bOpen)
 }
 
 bool UCatrunLevelFlowSubsystem::TravelTo(const TSoftObjectPtr<UWorld>& Map, const FString& Options,
-    bool bBeginProgress, bool bCheckpoint, ECatrunArrivalRestart Restart, UObject* ExitOwner, int8 Onboarding)
+    bool bBeginProgress, bool bCheckpoint, ECatrunArrivalRestart Restart, UObject* ExitOwner, int8 Onboarding,
+    UObject* FailureOwner, TFunction<void(const FString&)> Failure, float FadeInDuration, bool bReloadCurrentWorld)
 {
     if (bTransitioning || (ExitReservation.IsValid() && ExitReservation.Get() != ExitOwner)) return false;
     if (ExitOwner && ExitReservation.Get() != ExitOwner) return false;
 	const FWorldContext* Context = GEngine ? GEngine->GetWorldContextFromWorld(GetWorld()) : nullptr;
-	if (!Context || !Context->TravelURL.IsEmpty() || GetWorld()->bIsTearingDown) return false;
+	if (!Context || !Context->TravelURL.IsEmpty() || GetWorld()->bIsTearingDown || GetWorld()->IsInSeamlessTravel()) return false;
+	if (FailureOwner && (!IsValid(FailureOwner) || FailureOwner->GetWorld() != GetWorld())) return false;
 	const FString Package = Map.ToSoftObjectPath().GetLongPackageName();
-	if (Package.IsEmpty() || !FPackageName::DoesPackageExist(Package))
+	const bool bLoadedCurrentWorld = bReloadCurrentWorld && Package == UWorld::RemovePIEPrefix(GetWorld()->GetOutermost()->GetName());
+	if (Package.IsEmpty() || (!bLoadedCurrentWorld && !FPackageName::DoesPackageExist(Package)))
 	{
 		UE_LOG(LogCatrunFlow, Error, TEXT("Cannot travel: missing map '%s'."), *Package);
 		if (auto* Notice = UCatrunNoticeSubsystem::Get(this))
@@ -358,6 +369,8 @@ bool UCatrunLevelFlowSubsystem::TravelTo(const TSoftObjectPtr<UWorld>& Map, cons
 	}
 	PendingMap = Package;
 	PendingOptions = Options;
+	TravelFailureOwner = FailureOwner;
+	TravelFailureCallback = MoveTemp(Failure);
 	if (auto* SettingsUI=UCatrunSettingsSubsystem::Get(this)) SettingsUI->CloseSettings();
 	bTransitioning = true;
 	if (APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0))
@@ -369,7 +382,7 @@ bool UCatrunLevelFlowSubsystem::TravelTo(const TSoftObjectPtr<UWorld>& Map, cons
 	UE_LOG(LogCatrunFlow, Log, TEXT("Travel requested: %s -> %s [%s]"), *GetWorld()->GetOutermost()->GetName(), *Package, *Options);
 	// Existing level cinematics own their fades. Travel must not add another one.
 	if (auto* Session = GetFlowSession(GetWorld()))
-		PendingTravelToken = Session->AcceptTravel(PendingMap, bBeginProgress, bCheckpoint, Restart, Onboarding);
+		PendingTravelToken = Session->AcceptTravel(PendingMap, bBeginProgress, bCheckpoint, Restart, Onboarding, FadeInDuration);
 	FinishTravel();
 	return bTransitioning;
 }
@@ -397,7 +410,23 @@ bool UCatrunLevelFlowSubsystem::ContinueGame()
 
 bool UCatrunLevelFlowSubsystem::CompleteStage() { return CompleteStageInternal(nullptr); }
 
-bool UCatrunLevelFlowSubsystem::CompleteStageInternal(UObject* ExitOwner)
+bool UCatrunLevelFlowSubsystem::CompleteStageWithFailure(UObject* Owner, TFunction<void(const FString&)> Failure)
+{
+    if (!IsValid(Owner) || Owner->GetWorld() != GetWorld()) return false;
+    return CompleteStageInternal(ExitReservation.Get() == Owner ? Owner : nullptr, Owner, MoveTemp(Failure));
+}
+
+bool UCatrunLevelFlowSubsystem::RequestSameMapRestart(UObject* Owner, float FadeInDuration, TFunction<void(const FString&)> Failure)
+{
+    if (!IsValid(Owner) || Owner->GetWorld() != GetWorld() || IsTransitioning() || bStageComplete) return false;
+    // This low-level recovery path deliberately permits the current capture's catch reservation.
+    // Menu restart admission keeps its separate IsCatching guard in RestartStage.
+    const FString Package = UWorld::RemovePIEPrefix(GetWorld()->GetOutermost()->GetName());
+    return TravelTo(TSoftObjectPtr<UWorld>(FSoftObjectPath(Package)), FString(), false, false,
+        ECatrunArrivalRestart::SkipIntro, nullptr, -1, Owner, MoveTemp(Failure), FadeInDuration, true);
+}
+
+bool UCatrunLevelFlowSubsystem::CompleteStageInternal(UObject* ExitOwner, UObject* FailureOwner, TFunction<void(const FString&)> Failure)
 {
 	if (bTransitioning || bStageComplete || (ExitReservation.IsValid() && ExitReservation.Get() != ExitOwner)) return false;
 	if (const auto* Restart = UCatrunRestartSubsystem::Get(this); Restart && Restart->IsCatching()) return false;
@@ -410,7 +439,8 @@ bool UCatrunLevelFlowSubsystem::CompleteStageInternal(UObject* ExitOwner)
 		const FString Options = Settings->Stages[Index].StageId == TEXT("Tutorial") ? TEXT("FromTutorial") : FString();
         auto* Session = GetFlowSession(GetWorld());
         return TravelTo(Settings->Stages[Index + 1].Map, Options, false,
-            Session && Session->IsTrackingWorld(GetWorld()->GetOutermost()->GetName()), ECatrunArrivalRestart::Clear, ExitOwner);
+            Session && Session->IsTrackingWorld(GetWorld()->GetOutermost()->GetName()), ECatrunArrivalRestart::Clear, ExitOwner,
+            -1, FailureOwner, MoveTemp(Failure));
 	}
 
 	bStageComplete = true;
@@ -462,10 +492,40 @@ FText UCatrunLevelFlowLibrary::GetContinueStageLabel(const UObject* Context)
 	}
 	return NSLOCTEXT("Catrun", "NoContinueProgress", "저장된 진행이 없습니다.");
 }
+
 bool UCatrunLevelFlowLibrary::CompleteCurrentStage(const UObject* Context)
 {
 	auto* Flow = UCatrunLevelFlowSubsystem::Get(Context);
 	return Flow && Flow->CompleteStage();
+}
+bool UCatrunLevelFlowLibrary::CompleteCurrentStageWithFailure(const UObject* Context, UObject* Owner, FCatrunTravelFailureCallback Failure)
+{
+    auto* Flow = UCatrunLevelFlowSubsystem::Get(Context);
+    const bool bAccepted = Flow && Flow->CompleteStageWithFailure(Owner,
+        [Failure](const FString&) { Failure.ExecuteIfBound(); });
+    if (!bAccepted) Failure.ExecuteIfBound();
+    return bAccepted;
+}
+
+bool UCatrunLevelFlowLibrary::ReserveStagePresentation(UObject* Owner)
+{
+    auto* Flow = UCatrunLevelFlowSubsystem::Get(Owner);
+    return Flow && Flow->ReserveExitTransition(Owner);
+}
+
+void UCatrunLevelFlowLibrary::ReleaseStagePresentation(UObject* Owner)
+{
+    if (auto* Flow = UCatrunLevelFlowSubsystem::Get(Owner)) Flow->ReleaseExitTransition(Owner);
+}
+
+bool UCatrunLevelFlowLibrary::RestoreFailedStagePawn(APawn* Pawn, const FTransform& OriginalTransform, bool bOriginalCollision)
+{
+    if (!IsValid(Pawn) || !Pawn->GetWorld() || Pawn->GetWorld()->bIsTearingDown || !OriginalTransform.IsValid()) return false;
+    const bool bPlaced = CatrunRestore::PlaceForCollision(*Pawn, OriginalTransform, bOriginalCollision);
+    Pawn->SetActorEnableCollision(bOriginalCollision && bPlaced);
+    if (auto* Movement = Pawn->GetMovementComponent()) Movement->StopMovementImmediately();
+    if (!bPlaced) if (auto* Character = Cast<ACharacter>(Pawn)) Character->GetCharacterMovement()->DisableMovement();
+    return bPlaced;
 }
 bool UCatrunLevelFlowLibrary::ReturnToMainMenu(const UObject* Context)
 {
@@ -573,7 +633,7 @@ uint64 UCatrunFlowSession::SaveCurrentCheckpoint(const FString& Package, TFuncti
     for (const auto& Route : GetDefault<UCatrunLevelFlowSettings>()->Stages)
         if (Route.Map.ToSoftObjectPath().GetLongPackageName() == CleanPackage) { StageId = Route.StageId; break; }
     if (StageId.IsNone()) return 0;
-    if (!Writer) Writer = MakeShared<FCatrunProgressWriter>(IPlatformFeaturesModule::Get().GetSaveGameSystem());
+    if (!Writer) Writer = MakeShared<FCatrunProgressWriter>();
     const uint64 Generation = ProgressGeneration;
     return Writer->Enqueue([Weak = TWeakObjectPtr<UCatrunFlowSession>(this), Generation, StageId](TArray<uint8>& Data)
     {
@@ -642,6 +702,7 @@ void UCatrunLevelFlowSubsystem::ClearFailedTravel()
     PendingTravelToken = 0;
     bTransitioning = false;
     PendingMap.Reset(); PendingOptions.Reset();
+    TravelFailureOwner.Reset(); TravelFailureCallback = {};
     if (auto* PC = TravelLockController.Get()) PC->SetIgnoreMoveInput(false);
     TravelLockController.Reset();
 }

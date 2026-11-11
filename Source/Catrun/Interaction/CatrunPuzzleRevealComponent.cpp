@@ -12,6 +12,9 @@
 #include "LevelFlow/CatrunLevelFlow.h"
 #include "Monster/CatrunRestartSubsystem.h"
 #include "Engine/World.h"
+#include "Engine/LocalPlayer.h"
+#include "Math/InverseRotationMatrix.h"
+#include "SceneView.h"
 
 UCatrunPuzzleRevealComponent::UCatrunPuzzleRevealComponent()
 {
@@ -21,6 +24,47 @@ UCatrunPuzzleRevealComponent::UCatrunPuzzleRevealComponent()
 float UCatrunPuzzleRevealComponent::ResolvePresentationOrthoWidth(float AuthoredWidth) const
 {
 	return bPreserveSessionFraming ? GameplayView.OrthoWidth : AuthoredWidth;
+}
+FVector UCatrunPuzzleRevealComponent::ResolveProjectionOrigin(FMinimalViewInfo View) const
+{
+	if (View.ProjectionMode != ECameraProjectionMode::Orthographic) return View.Location;
+	int32 Width = 0, Height = 0;
+	if (Player.IsValid()) Player->GetViewportSize(Width, Height);
+	if (Width <= 0 || Height <= 0)
+	{
+		// Headless tests still use the engine plane calculation with the authored aspect.
+		Height = 1080;
+		Width = FMath::Max(1, FMath::RoundToInt(Height * FMath::Max(.01f, View.AspectRatio)));
+	}
+	FSceneViewProjectionData Projection;
+	Projection.ViewOrigin = View.Location;
+	Projection.ViewRotationMatrix = FInverseRotationMatrix(View.Rotation) * FMatrix(
+		FPlane(0,0,1,0), FPlane(1,0,0,0), FPlane(0,1,0,0), FPlane(0,0,0,1));
+	const FIntRect Rect(0, 0, Width, Height);
+	Projection.SetViewRectangle(Rect);
+	const ULocalPlayer* LocalPlayer = Player.IsValid() ? Player->GetLocalPlayer() : nullptr;
+	const EAspectRatioAxisConstraint Constraint = LocalPlayer ? LocalPlayer->AspectRatioAxisConstraint.GetValue() : AspectRatio_MaintainXFOV;
+	FMinimalViewInfo::CalculateProjectionMatrixGivenViewRectangle(View, Constraint, Rect, Projection);
+	return Projection.ViewOrigin;
+}
+FVector UCatrunPuzzleRevealComponent::ResolveCollisionLocation(const FVector& Location) const
+{
+	if (!bPreserveSessionFraming || GameplayView.ProjectionMode != ECameraProjectionMode::Orthographic) return Location;
+	// Probe the rendered origin, not the logical anchor inside nearby geometry.
+	// The owned camera has no component offset; do not inherit the previous owner's offset.
+	FMinimalViewInfo View = GameplayView;
+	View.Location = Location;
+	View.SetCameraToViewTarget(Location);
+	return ResolveProjectionOrigin(View);
+}
+FVector UCatrunPuzzleRevealComponent::ResolveOwnedCameraLocation(const FMinimalViewInfo& SourceView) const
+{
+	if (!bPreserveSessionFraming || GameplayView.ProjectionMode != ECameraProjectionMode::Orthographic) return SourceView.Location;
+	// UE's ortho correction adds the whole camera-to-owner vector, including
+	// its screen-plane part. Preserve that composition when switching to our
+	// zero-offset camera. Forward-only differences do not change ortho framing.
+	const FVector Difference = ResolveProjectionOrigin(SourceView) - ResolveCollisionLocation(SourceView.Location);
+	return SourceView.Location + FVector::VectorPlaneProject(Difference, CameraStartRotation.Vector());
 }
 void UCatrunPuzzleRevealComponent::ApplyGameplayFraming()
 {
@@ -82,8 +126,8 @@ bool UCatrunPuzzleRevealComponent::BeginReveal(FName Id, AActor* Gate, const FBo
 	if (PC->PlayerCameraManager)
 	{
 		GameplayView = PC->PlayerCameraManager->GetCameraCacheView();
-		CameraStart = GameplayView.Location;
 		CameraStartRotation = GameplayView.Rotation;
+		CameraStart = ResolveOwnedCameraLocation(GameplayView);
 		CameraEnd = CameraStart;
 		CameraEndRotation = CameraStartRotation;
 		const FVector Focus = Bounds.GetCenter();
@@ -98,10 +142,12 @@ bool UCatrunPuzzleRevealComponent::BeginReveal(FName Id, AActor* Gate, const FBo
 		{
 			const FVector Candidate = bPreserveSessionFraming ? Focus - Forward * FocusDepth
 				: Focus + FVector(GateCameraOffset.X, GateCameraOffset.Y * Sign, GateCameraOffset.Z);
+			const FVector ProbeStart = ResolveCollisionLocation(CameraStart);
+			const FVector ProbeEnd = ResolveCollisionLocation(Candidate);
 			FHitResult Hit;
-			if (!GetWorld()->OverlapBlockingTestByChannel(Candidate, FQuat::Identity, ECC_Camera, Probe, Params)
-				&& !GetWorld()->SweepSingleByChannel(Hit, CameraStart, Candidate, FQuat::Identity, ECC_Camera, Probe, Params)
-				&& !GetWorld()->LineTraceTestByChannel(Candidate, Focus, ECC_Visibility, Params))
+			if (!GetWorld()->OverlapBlockingTestByChannel(ProbeEnd, FQuat::Identity, ECC_Camera, Probe, Params)
+				&& !GetWorld()->SweepSingleByChannel(Hit, ProbeStart, ProbeEnd, FQuat::Identity, ECC_Camera, Probe, Params)
+				&& !GetWorld()->LineTraceTestByChannel(ProbeEnd, Focus, ECC_Visibility, Params))
 			{
 				CameraEnd = Candidate;
 				CameraEndRotation = bPreserveSessionFraming ? CameraStartRotation : (Focus-Candidate).Rotation();
@@ -159,6 +205,16 @@ void UCatrunPuzzleRevealComponent::TickComponent(float DeltaTime, ELevelTick Tic
 	if (Phase == ECatrunPuzzleRevealPhase::ToGate || Phase == ECatrunPuzzleRevealPhase::Returning)
 	{
 		const bool bReturn = Phase == ECatrunPuzzleRevealPhase::Returning;
+		if (bReturn && PreviousView.IsValid())
+		{
+			// Gameplay follow continues while the reveal owns the screen. Return to
+			// its current component view, not the stale cache captured on acquisition.
+			FMinimalViewInfo ReturnView;
+			PreviousView->CalcCamera(0.f, ReturnView);
+			if (Player->PlayerCameraManager && Player->PlayerCameraManager->bAutoCalculateOrthoPlanes)
+				ReturnView.SetCameraToViewTarget(PreviousView->GetActorLocation());
+			CameraStart = ResolveOwnedCameraLocation(ReturnView);
+		}
 		const float Duration = bReturn ? CameraReturnTime : CameraTravelTime;
 		const float Alpha = Duration > 0 ? FMath::Clamp(PhaseElapsed / Duration, 0.f, 1.f) : 1.f;
 		if (Camera.IsValid())
@@ -167,7 +223,7 @@ void UCatrunPuzzleRevealComponent::TickComponent(float DeltaTime, ELevelTick Tic
 			FCollisionQueryParams Params(SCENE_QUERY_STAT(PuzzleCameraMove), false, TargetGate.Get());
 			Params.AddIgnoredActor(Player->GetPawn());
 			FHitResult Hit;
-			if (!GetWorld()->SweepSingleByChannel(Hit, Camera->GetActorLocation(), Wanted, FQuat::Identity, ECC_Camera, FCollisionShape::MakeSphere(10.f), Params))
+			if (!GetWorld()->SweepSingleByChannel(Hit, ResolveCollisionLocation(Camera->GetActorLocation()), ResolveCollisionLocation(Wanted), FQuat::Identity, ECC_Camera, FCollisionShape::MakeSphere(10.f), Params))
 				Camera->SetActorLocation(Wanted);
 			Camera->SetActorRotation(bPreserveSessionFraming ? CameraStartRotation
 				: FMath::Lerp(bReturn ? CameraEndRotation : CameraStartRotation, bReturn ? CameraStartRotation : CameraEndRotation, Alpha));

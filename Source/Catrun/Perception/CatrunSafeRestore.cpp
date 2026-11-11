@@ -38,10 +38,11 @@ bool CatrunRestore::PlaceForCollision(APawn& Pawn, const FTransform& Desired, bo
 		const float Radius = Capsule->GetScaledCapsuleRadius();
 		const float HalfHeight = Capsule->GetScaledCapsuleHalfHeight();
 		const auto Shape = Capsule->GetCollisionShape();
+		const ECollisionChannel Channel = Capsule->GetCollisionObjectType();
 		const FCollisionResponseParams Responses(Capsule->GetCollisionResponseToChannels());
 		FCollisionQueryParams Transit(SCENE_QUERY_STAT(CatrunRestoreTransit), false, &Pawn);
 		TArray<FOverlapResult> OriginOverlaps;
-		Pawn.GetWorld()->OverlapMultiByChannel(OriginOverlaps, Desired.GetLocation(), Desired.GetRotation(), ECC_Pawn, Shape, Transit, Responses);
+		Pawn.GetWorld()->OverlapMultiByChannel(OriginOverlaps, Desired.GetLocation(), Desired.GetRotation(), Channel, Shape, Transit, Responses);
 		bool bOriginContainsGeometry = false;
 		for (const auto& Overlap : OriginOverlaps)
 		{
@@ -70,7 +71,7 @@ bool CatrunRestore::PlaceForCollision(APawn& Pawn, const FTransform& Desired, bo
 					Candidate.SetLocation(Location);
 					if (!IsPlacementClear(Pawn, Candidate)) continue;
 					FHitResult Hit;
-					if (Pawn.GetWorld()->SweepSingleByChannel(Hit, Desired.GetLocation(), Location, Desired.GetRotation(), ECC_Pawn, Shape, Transit, Responses)) continue;
+					if (Pawn.GetWorld()->SweepSingleByChannel(Hit, Desired.GetLocation(), Location, Desired.GetRotation(), Channel, Shape, Transit, Responses)) continue;
 					if (Place(Candidate)) return true;
 				}
 			}

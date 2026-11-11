@@ -1,5 +1,6 @@
 #pragma once
 #include "CoreMinimal.h"
+#include "Components/SlateWrapperTypes.h"
 #include "Subsystems/WorldSubsystem.h"
 #include "Engine/EngineBaseTypes.h"
 #include "CatrunSettingsSubsystem.generated.h"
@@ -40,6 +41,7 @@ public:
  UFUNCTION(BlueprintCallable, Category="Catrun|Settings") UCatrunSettingsWidget* OpenSettings(APlayerController* PlayerController, UWidget* SourcePanel=nullptr);
  UFUNCTION(BlueprintCallable, Category="Catrun|Settings") void CloseSettings();
  UFUNCTION(BlueprintPure, Category="Catrun|Settings") UCatrunSettingsWidget* GetCurrentSettingsWidget() const { return CurrentSettings; }
+ UFUNCTION(BlueprintPure, Category="Catrun|Settings") static bool IsNavigationFocused(UWidget* Widget);
  virtual bool ShouldCreateSubsystem(UObject* Outer) const override;
  virtual void OnWorldBeginPlay(UWorld& InWorld) override;
  virtual void Deinitialize() override;
@@ -47,16 +49,19 @@ public:
  virtual TStatId GetStatId() const override;
  virtual bool IsTickableWhenPaused() const override { return true; }
  bool HandleEscape();
- bool OwnsInputFocus() const;
+ bool OwnsInputFocus(int32 SlateUserIndex=INDEX_NONE) const;
  // Input repeats of held keyboard keys must not become new gameplay actions on Apply/close.
  void IgnoreHeldKeysUntilRelease();
 private:
+ void SuspendSourcePanel(UWidget* Panel);
+ void RestoreSourcePanel();
+ friend class FCatrunSettingsSourcePanelRestorationTest;
  UPROPERTY(Transient) TObjectPtr<UCatrunSettingsWidget> CurrentSettings;
  UPROPERTY(Transient) TObjectPtr<UWidget> SettingsSourcePanel;
  TWeakObjectPtr<APlayerController> SettingsController;
  TWeakObjectPtr<UGameViewportClient> SavedViewport;
  FCatrunSettingsSlateSnapshot PreviousSlateState;
- TSharedPtr<IInputProcessor> EscapeProcessor;
+ TSharedPtr<IInputProcessor> InputProcessor;
  bool bClosing=false;
  bool bPauseOwned=false;
  bool bPreviousCursor=false;
@@ -64,5 +69,6 @@ private:
  bool bPreviousHideCursor=false;
  EMouseCaptureMode PreviousCaptureMode=EMouseCaptureMode::NoCapture;
  EMouseLockMode PreviousLockMode=EMouseLockMode::DoNotLock;
+ ESlateVisibility PreviousPanelVisibility=ESlateVisibility::Visible;
  bool bPreviousPanelEnabled=true;
 };

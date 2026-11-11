@@ -208,8 +208,8 @@ public:
 	TObjectPtr<UAnimationAsset> PickupAnim;
 
 	// ---- Detection (design doc 4.2, as changed by the designer) ----
-	// The armor has no view cone. It notices the cat inside a small circle around itself (radius
-	// ArmorDetectRadius in the sound settings). Walls, tall furniture and closed doors block it.
+	// ArmorDetectRadius in the sound settings defines the detection circle. Obstacles can block
+	// detection at sight height or at the cat's body height.
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Armor|Detection")
 	TObjectPtr<UCatrunVisionFanComponent> Detection;
 
@@ -258,6 +258,7 @@ private:
 	FQuat TurnMeshBasis = FQuat::Identity;
 	bool bTurnCommitted = true;
 	friend class FCatrunSoundPriorityTest;
+	friend class FCatrunArmorCaptureObstructionTest;
 	friend class FCatrunCaptureInitialSetupTest;
 	// ---- Path ----
 	// Asks the pathfinder for a path to NewDestination. Returns false when there is none.
@@ -323,9 +324,9 @@ private:
 	void DrawDebug() const;
 	void UpdateActionLabel();
 
-	// Looks for the cat inside the detection circle. The circle is also the catch area: a cat that
-	// touches it is caught.
+	// Checks for a nearby cat with clear sight and a clear body-height capture path.
 	void UpdateDetection();
+	bool HasClearCapturePath(const APawn& Cat) const;
 	bool bSeeingCat = false;
 
 	// ---- Following the candle mark ----

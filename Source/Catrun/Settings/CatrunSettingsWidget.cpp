@@ -38,7 +38,7 @@ bool UCatrunSettingsWidget::SetDraftKey(ECatrunInputSlot BindingSlot, FKey Key, 
  const int32 Index=static_cast<int32>(BindingSlot);
  Error=FText::GetEmpty();
  if (!DraftBindings.Keys.IsValidIndex(Index)) { Error=NSLOCTEXT("Catrun","SlotInvalid","올바른 조작을 선택하세요."); return false; }
- if (!UCatrunInputBindings::IsKeyboardKey(Key)) { Error=NSLOCTEXT("Catrun","KeyInvalid","Esc를 제외한 키보드 키 하나를 지정하세요."); return false; }
+ if (!UCatrunInputBindings::IsKeyboardKey(Key)) { Error=UCatrunInputBindings::GetInvalidKeyboardKeyMessage(); return false; }
  // Duplicates may exist in a working draft so two controls can be swapped. Apply validates the complete draft atomically.
  DraftBindings.Keys[Index]=Key;
  return true;

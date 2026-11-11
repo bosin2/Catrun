@@ -7,6 +7,7 @@
 #include "EnhancedPlayerInput.h"
 #include "Engine/LocalPlayer.h"
 #include "Engine/World.h"
+#include "GameFramework/InputSettings.h"
 #include "GameFramework/PlayerController.h"
 
 FCatrunKeyboardBindings::FCatrunKeyboardBindings()
@@ -18,9 +19,15 @@ FKey FCatrunKeyboardBindings::Get(ECatrunInputSlot Slot) const
 }
 bool UCatrunInputBindings::IsKeyboardKey(FKey Key)
 {
+ const auto* InputSettings=GetDefault<UInputSettings>();
  return Key.IsValid() && Key.IsBindableToActions() && !Key.IsVirtual() && !Key.IsGesture() && !Key.IsButtonAxis()
   && Key.GetMenuCategory()==EKeys::NAME_KeyboardCategory && !Key.IsGamepadKey() && !Key.IsMouseButton() && !Key.IsAxis1D() && !Key.IsAxis2D() && !Key.IsAxis3D()
-  && !Key.IsTouch() && Key != EKeys::Escape && Key != EKeys::AnyKey;
+  && !Key.IsTouch() && Key != EKeys::Escape && Key != EKeys::AnyKey
+  && !(Key == EKeys::F11 && InputSettings->bF11TogglesFullscreen) && !InputSettings->ConsoleKeys.Contains(Key);
+}
+FText UCatrunInputBindings::GetInvalidKeyboardKeyMessage()
+{
+ return NSLOCTEXT("Catrun","BindingInvalid","Esc와 시스템 예약 키를 제외한 키보드 키 하나를 지정하세요.");
 }
 bool FCatrunKeyboardBindings::Validate(FText& Error) const
 {
@@ -29,7 +36,7 @@ bool FCatrunKeyboardBindings::Validate(FText& Error) const
  TSet<FKey> Seen;
  for (const FKey& Key : Keys)
  {
-  if (!UCatrunInputBindings::IsKeyboardKey(Key)) { Error = NSLOCTEXT("Catrun","BindingInvalid","Esc를 제외한 키보드 키 하나를 지정하세요."); return false; }
+  if (!UCatrunInputBindings::IsKeyboardKey(Key)) { Error = UCatrunInputBindings::GetInvalidKeyboardKeyMessage(); return false; }
   if (Seen.Contains(Key)) { Error = NSLOCTEXT("Catrun","BindingDuplicate","같은 키를 두 조작에 지정할 수 없습니다."); return false; }
   Seen.Add(Key);
  }
