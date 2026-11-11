@@ -6,6 +6,10 @@
 |---|---|---|
 | 스테이지별 게임 카메라 | 프로젝트 설정 → Catrun Level Flow → Camera Profiles | Tutorial 1.0, Stage1 1.15, Stage2 1.30. 원래 직교 카메라 너비에 곱한다. 튜토리얼은 원본 유지 |
 | 게임 진행 경로 | 프로젝트 설정 → Catrun Level Flow → Stages | 메인메뉴와 플레이 가능한 맵 순서. Stage3 제외 |
+| 바구니 위치·방향 | Tutorial/Stage1/Stage2 및 각 SoundTest 맵의 HideBasket 액터와 ExternalBody/ExternalCloth | 2026-11-11 기준 입구 월드 yaw: Tutorial180, Stage1 두 개0, Stage2 세 개90. 몸체·천·OpenDirectionLocal·ExitDirectionGuide를 함께 맞춘다. 좌표와 검사 절차는 `Docs/Reviews/BasketDoors_2026-11-11.md` 참고. 과거 배치 스크립트로 덮어쓰지 않는다 |
+| 튜토리얼 복도/방 문 | Tutorial 및 SoundTest_Tutorial → `Door_Tutorial_Corridor`, `Door_Tutorial_Bedroom` | 복도는 문짝 메시/충돌 없이 문틀만 유지. 방 문은 bStartOpen=false 및 기존 갑옷 개방 유지 |
+| Stage2 아래 일반 문 | Stage2 및 SoundTest_Stage2 → `S2_Gate_04_Bars`, `S2_Gate_07_Bars` | z=-261cm, NoCollision, SoundWall 태그 제거로 처음부터 열림. 석상 게이트02/05/11과 퍼즐 링크는 변경하지 않는다 |
+| Stage2 최종 탈출구 | Stage2 및 SoundTest_Stage2 → `S2_Gate_00_Bars`, `S2_ExitCorridor_*`, `Flow_Stage2Complete` | 철창 z=-261cm/NoCollision. 문 밖200×400cm 복도, 기존 Stage1 벽·천장·검은 안개 에셋 재사용. 완료 트리거(715,-80,65), Extent(65,30,80), 중심 진입 필수. 새 시네마틱/Stage3 이동 없음 |
 | Stage1→2 포털 구도·속도 | `/Game/Cinematics/Stage1/Portal/LS_Stage1_PortalExit` | 30fps, 총309프레임(10.3초). 걷기0–96, 살피기96–240, 점프240–285, 마무리285–309. 각 구간 끝은 다음 구간 시작이다. 카메라 Transform/FOV와 고양이 애니메이션 재생률을 Sequencer에서 함께 조정 |
 | 포털 문양·발광 | 같은 폴더 `M_Stage1PortalBlue` | 기존 UV/마스크를 보존한 Custom 노드의 분할 원호·팔각형·마름모와 색/세기를 Material Editor에서 편집. 저장/이동 연결은 `BP_Stage1PortalExit` 소유 그대로 |
 | 갑옷 회전 속도 | `/Game/Characters/LivingArmor/Blueprints/BP_LivingArmor` 클래스 기본값 | TurnPlayRate. 기본5; 기존2.5초 회전을 약0.5초에 재생 |

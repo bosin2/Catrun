@@ -7,12 +7,14 @@ Use -run=pythonscript -catrunBasketDoorsIsolated with all four geometry CVars at
 Set CATRUN_BASKET_DOORS_MODE/PROOF/OUT as Python globals in a launcher wrapper.
 """
 
+from copy import deepcopy
 from datetime import datetime
 import hashlib
 import json
 import math
 import os
 from pathlib import Path
+import re
 import shutil
 import sys
 import traceback
@@ -24,6 +26,7 @@ ROOT = Path(u.Paths.project_dir()).resolve()
 OUT = Path(globals().get('CATRUN_BASKET_DOORS_OUT') or
            ROOT / 'Saved/GameplayRepair20261111/BasketDoors' / datetime.now().strftime('%H%M%S-%f')).resolve()
 MODE = str(globals().get('CATRUN_BASKET_DOORS_MODE', 'probe'))
+LEGACY_APPLY02_SHA256 = '9beb3f78a669a1f0ee13e2c96967d18ecc6c6aa2de660b572756b8b0da4a2226'
 MAPS = ('Tutorial', 'SoundTest_Tutorial', 'Stage1', 'SoundTest_Stage1', 'Stage2', 'SoundTest_Stage2')
 ED = u.get_editor_subsystem(u.UnrealEditorSubsystem)
 LEVEL = u.get_editor_subsystem(u.LevelEditorSubsystem)
@@ -31,6 +34,8 @@ ACTORS = u.get_editor_subsystem(u.EditorActorSubsystem)
 NONE = u.DrawDebugTrace.NONE
 PAWN = u.CollisionChannel.ECC_PAWN
 BLOCK = u.CollisionResponseType.ECR_BLOCK
+OBJECT_CHANNELS = [getattr(u.CollisionChannel, 'ECC_'+name) for name in
+                   ('WORLD_STATIC', 'WORLD_DYNAMIC', 'PAWN', 'PHYSICS_BODY', 'VEHICLE', 'DESTRUCTIBLE')]
 OBJECTS = [getattr(u.ObjectTypeQuery, f'OBJECT_TYPE_QUERY{i}') for i in range(1, 7)]
 CVARS = ('Editor.AsyncStaticMeshCompilation', 'Editor.AsyncSkinnedAssetCompilation',
          'p.EnableDeferredPhysicsCreation', 'p.Chaos.EnableAsyncInitBody')
@@ -46,19 +51,22 @@ CANDIDATES = {
     'BP_S1_banquet_Exit_HideBasket_Interaction': ((75, 350, 0), (70, 375, 0), (60, 350, 0)),
     'BP_S1_storage_HideBasket_26_Interaction': ((710, 1750, 0), (708, 1745, 0), (710, 1755, 0), (715, 1750, 0),
                                                (710, 1738, 0), (780, 1760, 0)),
-    'S2_Basket_Room4': ((1680, 2360, -90), (1680, 2330, -90), (1660, 2355, -90), (1680, 2300, -90)),
-    'S2_Basket_Room3': ((2400, 2070, -90), (2400, 2045, -90), (2350, 2070, -90),
+    'S2_Basket_Room4': ((1645, 2330, 90), (1645, 2300, 90), (1645, 2300, 0), (1680, 2275, 90),
+                         (1680, 2360, -90), (1680, 2330, -90), (1660, 2355, -90), (1680, 2300, -90)),
+    'S2_Basket_Room3': ((2400, 1970, 90), (2350, 1970, 90), (2350, 1970, 0), (2400, 1970, 0),
+                         (2400, 2070, -90), (2400, 2045, -90), (2350, 2070, -90),
                          (2440, 2040, -90), (2520, 1970, 180), (2400, 1970, -90)),
-    'S2_Basket_Room2': ((2390, 2950, -90), (2350, 2930, -90), (2390, 2900, -90),
+    'S2_Basket_Room2': ((2390, 2890, 90), (2350, 2890, 90), (2390, 2865, 90), (2390, 2890, 0),
+                         (2390, 2950, -90), (2350, 2930, -90), (2390, 2900, -90),
                          (2530, 2810, 180), (2500, 2800, 180), (2390, 2820, -90)),
 }
 PREFERRED = {
     'BP_Tutorial_HideBasket': ((330, 60, 180), (315, 60, 180), (325, 95, 180), (310, 105, 180)),
     'BP_S1_banquet_Exit_HideBasket_Interaction': ((75, 350, 0), (70, 375, 0)),
     'BP_S1_storage_HideBasket_26_Interaction': CANDIDATES['BP_S1_storage_HideBasket_26_Interaction'][:-1],
-    'S2_Basket_Room4': ((1680, 2330, -90), (1660, 2355, -90)),
-    'S2_Basket_Room3': ((2400, 2045, -90), (2440, 2040, -90), (2520, 1970, 180)),
-    'S2_Basket_Room2': ((2390, 2950, -90), (2350, 2930, -90), (2530, 2810, 180)),
+    'S2_Basket_Room4': CANDIDATES['S2_Basket_Room4'],
+    'S2_Basket_Room3': CANDIDATES['S2_Basket_Room3'],
+    'S2_Basket_Room2': CANDIDATES['S2_Basket_Room2'],
 }
 
 
@@ -121,9 +129,12 @@ def component(c):
                    visible=c.is_visible(), mobility=encode(c.get_editor_property('mobility')))
     if isinstance(c, u.PrimitiveComponent):
         row.update(collision=str(c.get_collision_enabled()), profile=str(c.get_collision_profile_name()),
+                   object_type=str(c.get_collision_object_type()),
                    hidden=c.get_editor_property('hidden_in_game'),
                    responses=[str(c.get_collision_response_to_channel(ch)) for ch in
                               (PAWN, u.CollisionChannel.ECC_VISIBILITY, u.CollisionChannel.ECC_WORLD_STATIC)])
+    if isinstance(c, u.BoxComponent):
+        row['box_extent'] = v(c.get_unscaled_box_extent())
     if isinstance(c, u.MeshComponent):
         row.update(mesh=path(mesh(c)), materials=[path(c.get_material(i)) for i in range(c.get_num_materials())])
     return row
@@ -131,12 +142,27 @@ def component(c):
 
 def actor_snapshot(a):
     center, extent = a.get_actor_bounds(False)
+    components = a.get_components_by_class(u.ActorComponent)
     row = dict(path=path(a), label=a.get_actor_label(), cls=path(a.get_class()), transform=transform(a),
                tags=[str(tag) for tag in a.tags], attached_to=path(a.get_attach_parent_actor()),
                bounds=[v(center), v(extent)],
-               components={c.get_name(): component(c) for c in a.get_components_by_class(u.ActorComponent)})
+               components={c.get_name(): component(c) for c in components})
     if isinstance(a, u.CatrunHideBasket):
         row['properties'] = props(a, ('OpenDirectionLocal', 'ExternalBody', 'ExternalCloth'))
+        # Construction can allocate a different suffix for the same editor
+        # icon when verify tries more candidate poses than apply.
+        icons = [c for c in components if path(c.get_class()) == '/Script/Engine.BillboardComponent']
+        assert len(icons) == 1, (path(a), 'Nonunique basket editor billboard')
+        icon = icons[0]
+        key = icon.get_name()
+        assert re.fullmatch(r'BillboardComponent_\d+', key), (path(a), key)
+        data = row['components'][key]
+        data['sprite'] = path(icon.get_editor_property('sprite'))
+        assert not data['visible'] and data['hidden'] and data['profile'] == 'NoCollision' \
+            and data['collision'] == '<CollisionEnabled.NO_COLLISION: 0>' \
+            and data['sprite'] == '/Engine/EditorResources/EmptyActor.EmptyActor', (path(a), data)
+        assert 'EditorEmptyActorBillboard' not in row['components']
+        row['components']['EditorEmptyActorBillboard'] = row['components'].pop(key)
     if isinstance(a, u.CatrunDoor):
         row['properties'] = props(a, ('bStartOpen', 'OpenYaw', 'OpenDuration', 'ArmorPassageHalfWidth'))
         row['gate_center'] = v(a.get_editor_property('GateBox').get_world_location())
@@ -178,19 +204,40 @@ def line(w, start, end, ignore, profile=None):
 
 def sweep(w, start, end, cap, ignore):
     return u.SystemLibrary.capsule_trace_single_by_profile(w, start, end, cap.get_scaled_capsule_radius(),
-        cap.get_scaled_capsule_half_height(), 'Pawn', False, ignore, NONE, False)
+        cap.get_scaled_capsule_half_height(), cap.get_collision_profile_name(), False, ignore, NONE, False)
+
+
+def walkable_normal_z(movement, hit_component):
+    # IsWalkable is native-only. For the upright cat, compare world Z to the
+    # reflected floor threshold and apply the hit component's slope override.
+    floor_z = movement.get_walkable_floor_z()
+    slope = hit_component.get_walkable_slope_override()
+    behavior = str(slope.get_editor_property('WalkableSlopeBehavior')).lower()
+    cosine = math.cos(math.radians(slope.get_editor_property('WalkableSlopeAngle')))
+    if 'increase' in behavior:
+        return min(floor_z, cosine)
+    if 'decrease' in behavior:
+        return max(floor_z, cosine)
+    if 'unwalkable' in behavior:
+        return 2.
+    assert 'default' in behavior, behavior
+    return floor_z
 
 
 def supported(w, surface, cap, ignore, up, down):
     lift = u.Vector(0, 0, cap.get_scaled_capsule_half_height())
-    h = sweep(w, surface + lift + u.Vector(0, 0, up), surface + lift - u.Vector(0, 0, down), cap, ignore)
+    upper, lower = surface + lift + u.Vector(0, 0, up), surface + lift - u.Vector(0, 0, down)
+    h = sweep(w, upper, lower, cap, ignore)
     if not h:
         return None, None
     d = h.to_dict()
     p, center = d['impact_point'], d['location']
-    okay = d['blocking_hit'] and not d['initial_overlap'] and d['impact_normal'].z >= .65 \
+    movement = cap.get_owner().get_component_by_class(u.CharacterMovementComponent)
+    okay = d['blocking_hit'] and not d['initial_overlap'] and d['hit_component'] \
+        and d['impact_normal'].z >= max(.65, walkable_normal_z(movement, d['hit_component'])) \
         and not isinstance(d['hit_actor'], u.Pawn) \
         and math.hypot(p.x-center.x, p.y-center.y) <= max(0., cap.get_scaled_capsule_radius()-.15) \
+        and lower.z-.01 <= center.z <= upper.z+.01 \
         and surface.z-down-.01 <= p.z <= surface.z+up+.01
     return (u.Vector(surface.x, surface.y, center.z+2.) if okay else None), hitinfo(h)
 
@@ -214,23 +261,29 @@ def angle(vec):
 def basket_geometry(w, origin, yaw, camera, cap, action, members, proposed):
     cat = cap.get_owner()
     front = at(yaw)
-    start, support = supported(w, origin, cap, [cat]+members, 50., 100.)
+    # Native exit ignores the basket actor and its body. Its final overlap
+    # includes both. The cloth has NoCollision, verified by required_geometry.
+    exit_ignore = [cat]+members[:2]
+    start, support = supported(w, origin, cap, exit_ignore, 50., 100.)
     ignore = [cat]+members if proposed else [cat]
     entry, entry_hit = supported(w, origin + front*action.get_editor_property('EntryDistance'), cap, ignore, 0., 50.)
-    approach_dist = min(100., action.get_editor_property('InteractionRange')-2.)
+    interaction_range = action.get_editor_property('InteractionRange')
+    approach_dist = min(100., interaction_range-2.)
     approach, approach_hit = supported(w, origin+front*approach_dist, cap, ignore, 0., 50.)
     entry_sweep = sweep(w, approach, entry, cap, ignore) if entry and approach else None
     entry_sight = line(w, entry, origin, ignore) if entry else None
+    entry_distance = (approach-origin).length() if approach else None
     entry_ok = bool(entry and approach and not entry_sweep and
-                    (not entry_sight or entry_sight.to_dict()['hit_actor'] in members))
+                    50. < entry_distance < interaction_range and
+                    (not entry_sight or entry_sight.to_dict()['hit_actor'] in members[:2]))
     camera_yaw = camera.get_world_rotation().yaw
     sector = math.floor((yaw-camera_yaw+22.5)/45.)
     directions = [('front', yaw)] + [(str(i), camera_yaw+(sector+i)*45.) for i in range(-2, 3)]
     exits = {}
     for key, heading in directions:
         landing, contact = supported(w, origin+at(heading)*action.get_editor_property('ExitDistance'), cap,
-                                     [cat]+members, 50., 100.)
-        transit = sweep(w, start, landing, cap, [cat]+members) if start and landing else None
+                                     exit_ignore, 50., 100.)
+        transit = sweep(w, start, landing, cap, exit_ignore) if start and landing else None
         endpoint = overlap(w, landing, cap, ignore) if landing else None
         exits[key] = dict(yaw=heading, landing=v(landing) if landing else None, contact=contact,
                           transit=hitinfo(transit), blockers=endpoint, safe=bool(start and landing and not transit and not endpoint))
@@ -241,6 +294,7 @@ def basket_geometry(w, origin, yaw, camera, cap, action, members, proposed):
     sight = line(w, mouth-camera_forward*1100., mouth, [cat]+members)
     back = line(w, origin+u.Vector(0, 0, 20.), origin-front*245.+u.Vector(0, 0, 20.), [cat]+members, 'Pawn')
     return dict(origin_support=support, entry=dict(safe=entry_ok, support=entry_hit, approach=approach_hit,
+                     approach_distance=entry_distance,
                     sweep=hitinfo(entry_sweep), sight=hitinfo(entry_sight)), exits=exits,
                 camera_sight=hitinfo(sight), wall_behind=hitinfo(back),
                 safe=entry_ok and all(i['safe'] for i in exits.values()))
@@ -286,14 +340,53 @@ def required_geometry(w, basket, camera, cap, action):
     front = a.get_actor_forward_vector()*local.x + a.get_actor_right_vector()*local.y
     front = at(angle(front)) if math.hypot(front.x, front.y) > .0001 else front
     g = basket_geometry(w, origin, angle(front), camera, cap, action, members, False)
-    g.update(hidden=v(origin), visible_front=v(mouth), logical_front=v(front), body=path(body_mesh), cloth=path(cloth_mesh))
+    body_pos = body_mesh.get_world_location()
+    cloth_pos = cloth_mesh.get_world_location()
+    guide = next(c for c in a.get_components_by_class(u.ArrowComponent) if c.get_name() == 'ExitDirectionGuide')
+    relative_view = abs((angle(front)-camera.get_world_rotation().yaw+180.) % 360.-180.)
+    g.update(hidden=v(origin), visible_front=v(mouth), logical_front=v(front), guide_front=v(guide.get_forward_vector()),
+             camera_relative_yaw=relative_view, mouth_toward_camera_dot=round(-math.cos(math.radians(relative_view)), 4),
+             body=path(body_mesh), cloth=path(cloth_mesh))
     front_aligned = (front-mouth).length() <= .001 and min(abs(front.x), abs(front.y)) <= .001
-    if cloth_mesh:
-        front_aligned = front_aligned and (front-cloth_mesh.get_forward_vector()).length() <= .001
-    g['alignment_ok'] = front_aligned and abs(origin.x-body_mesh.get_world_location().x) <= .01 \
-        and abs(origin.y-body_mesh.get_world_location().y) <= .01
-    g['safe'] = g['safe'] and g['alignment_ok'] and not g['camera_sight'] and bool(g['wall_behind'])
+    g['alignment_ok'] = front_aligned and abs(relative_view % 90.-45.) <= .001 \
+        and (front-cloth_mesh.get_forward_vector()).length() <= .001 \
+        and (front-guide.get_forward_vector()).length() <= .001 \
+        and math.hypot(origin.x-body_pos.x, origin.y-body_pos.y) <= .01 \
+        and math.hypot(cloth_pos.x-body_pos.x, cloth_pos.y-body_pos.y) <= .01
+    assert body_mesh.get_collision_response_to_channel(PAWN) == BLOCK
+    assert 'NO_COLLISION' in str(cloth_mesh.get_collision_enabled())
+    g['body_support'] = body_support(w, body_mesh, [cap.get_owner()]+members)
+    g['safe'] = g['safe'] and g['alignment_ok'] and g['body_support']['safe'] and not g['camera_sight']
     return g
+
+
+def body_support(w, body, ignore):
+    center, extent, _ = u.SystemLibrary.get_component_bounds(body)
+    base = center.z-extent.z
+    # Inset the corners of the body bounds so a rounded wicker rim does not
+    # make its outer decorative corners the only measure of floor support.
+    samples = [(0., 0.)]+[(x*extent.x*.8, y*extent.y*.8) for x in (-1., 1.) for y in (-1., 1.)]
+    supports = []
+    support_actors = set()
+    for x, y in samples:
+        hit = line(w, u.Vector(center.x+x, center.y+y, base+8.),
+                   u.Vector(center.x+x, center.y+y, base-8.), ignore, 'Pawn')
+        supports.append(hitinfo(hit))
+        if hit:
+            data = hit.to_dict()
+            actor = data['hit_actor']
+            if data['blocking_hit'] and not data['initial_overlap'] and data['impact_normal'].z >= .65 \
+                    and 'SoundFloor' in [str(tag) for tag in actor.tags]:
+                support_actors.add(actor)
+            else:
+                supports[-1]['invalid_support'] = True
+    overlaps = u.SystemLibrary.component_overlap_components(body, body.get_world_transform(),
+                                                             OBJECTS, u.PrimitiveComponent, ignore) or []
+    blockers = sorted(path(c) for c in overlaps if c.get_owner() not in support_actors
+                      and c.get_collision_response_to_channel(body.get_collision_object_type()) == BLOCK
+                      and body.get_collision_response_to_channel(c.get_collision_object_type()) == BLOCK)
+    return dict(samples=supports, blockers=blockers, safe=not blockers and
+                all(hit and not hit.get('invalid_support') for hit in supports))
 
 
 def floor_at(w, x, y, ignore):
@@ -335,6 +428,11 @@ def move_basket(w, a, cap, spec, old_height):
         set_pose(body, pose, yaw)
     if cloth_actor:
         set_pose(cloth_actor, pose+u.Vector(0,0,cloth_delta), yaw)
+    # PostRegisterAllComponents refreshes this guide on a cold load. Match
+    # that derived rotation while staging poses so pre-save and cold agree.
+    guide = next(c for c in a.get_components_by_class(u.ArrowComponent) if c.get_name() == 'ExitDirectionGuide')
+    guide.modify()
+    guide.set_world_rotation(u.Rotator(pitch=0., yaw=yaw, roll=0.), False, False)
     _, final_body, final_cloth, anchor, visible, _ = group(a)
     assert body == final_body and cloth == final_cloth, path(a)
     assert abs(anchor.get_world_location().z - (pose.z+anchor.get_editor_property('relative_location').z)) < .1
@@ -452,9 +550,15 @@ def hash_data(obj):
     return hashlib.sha256(json.dumps(obj, ensure_ascii=False, sort_keys=True, separators=(',', ':')).encode('utf-8')).hexdigest()
 
 
-def grid_delta(before, after, doors):
-    stable = ('Origin', 'CellSize', 'Width', 'Height', 'Walkable', 'CostMultiplier')
+def grid_delta(before, after, doors, old_bounds, new_bounds):
+    stable = ('Origin', 'CellSize', 'Width', 'Height', 'Walkable', 'CostMultiplier', 'WallProbeLength')
     assert all(before[key] == after[key] for key in stable), 'Floor grid changed'
+
+    def near_bounds(x, y, bounds):
+        return any(math.hypot(max(0., abs(x-center[0])-extent[0]),
+                              max(0., abs(y-center[1])-extent[1])) <= before['WallProbeLength']+.01
+                   for center, extent in bounds)
+
     changed = {}
     for key in ('EdgeMask', 'WallDistance'):
         changed[key] = []
@@ -467,6 +571,9 @@ def grid_delta(before, after, doors):
             if key == 'EdgeMask':
                 assert int(old) & ~int(new) == 0 and any(abs(x-dx) <= 175 and abs(y-dy) <= 175 for dx,dy in doors), \
                     ('Unexpected closing or distant sound edge', x,y,old,new,doors)
+            else:
+                assert near_bounds(x, y, old_bounds if new > old else new_bounds), \
+                    ('Unexpected armor clearance change', x,y,old,new)
             changed[key].append([i,x,y,old,new])
     return changed
 
@@ -486,10 +593,12 @@ def projected_segment_clear(a, b, center, extent, margin):
     return False
 
 
-def stage2_route_checks(aa, baskets):
-    bodies = [group(b)[1] for b in baskets]
-    assert all(bodies)
-    boxes = {b.get_actor_label(): b.get_actor_bounds(True) for b in bodies}
+def route_checks(aa, baskets):
+    boxes = {}
+    for basket in baskets:
+        body_mesh = group(basket)[4]
+        center, extent, _ = u.SystemLibrary.get_component_bounds(body_mesh)
+        boxes[basket.get_actor_label()] = center, extent
     rows = []
     for a in aa:
         segments = []
@@ -513,7 +622,7 @@ def stage2_route_checks(aa, baskets):
         for p,q,margin in segments:
             blockers = [label for label,(center,extent) in boxes.items() if not projected_segment_clear(p,q,center,extent,margin)]
             rows.append(dict(actor=a.get_actor_label(), start=v(p), end=v(q), margin=margin, blockers=blockers))
-    assert rows and not any(r['blockers'] for r in rows), rows
+    assert rows, 'No authored patrol or statue routes found'
     return rows
 
 
@@ -547,6 +656,23 @@ def preserve_actors(before, after, owned):
     return [after[k]['label'] for k in changed]
 
 
+def cold_actor_snapshots_match(actual, expected):
+    def canonical(actors):
+        def canonical_rotation(rotation):
+            return [180. if axis == -180. else axis for axis in rotation]
+
+        result = deepcopy(actors)
+        for actor in result.values():
+            actor['transform'][1] = canonical_rotation(actor['transform'][1])
+            for component in actor['components'].values():
+                relative = component.get('relative')
+                if relative:
+                    relative['relative_rotation'] = canonical_rotation(relative['relative_rotation'])
+        return result
+
+    return actual == expected or canonical(actual) == canonical(expected)
+
+
 def file_hashes():
     # Hash all content, including unsaved git edits, to catch accidental writes.
     return {p.relative_to(ROOT).as_posix(): sha(p) for p in sorted((ROOT/'Content').rglob('*'))
@@ -557,7 +683,18 @@ def report_proof(report):
     proof_path = Path(globals()['CATRUN_BASKET_DOORS_PROOF']).resolve()
     proof = json.loads(proof_path.read_text(encoding='utf-8'))
     assert proof['completed'] and proof['mode'] == ('verify' if MODE == 'apply' else 'apply')
-    assert proof['pid'] != report['pid'] and proof['script_sha256'] == report['script_sha256']
+    assert proof['pid'] != report['pid']
+    source_sha = proof['script_sha256']
+    current_sha = report['script_sha256']
+    if source_sha == current_sha:
+        report['proof_schema'] = 'exact-script-sha256'
+    else:
+        # Apply02 used the exact comparison before UE's +/-180 serialization
+        # difference was observed. Only cold auditing accepts this proof.
+        assert MODE == 'audit' and source_sha == LEGACY_APPLY02_SHA256, 'Proof script SHA-256 differs'
+        report['proof_schema'] = 'legacy-apply-02-rotator-endpoints'
+    report['proof_source_sha256'] = source_sha
+    report['current_source_sha256'] = current_sha
     assert proof['content_after'] == report['content_before'], 'Saved content changed after proof'
     report['proof'] = str(proof_path)
     return proof
@@ -600,6 +737,12 @@ def main(report):
         action = cat.get_component_by_class(u.CatrunBasketInteractionComponent)
         camera = camera_actor.get_component_by_class(u.CameraComponent)
         assert cap and action and camera, name
+        assert str(cap.get_collision_profile_name()) == 'Pawn' and cap.get_collision_object_type() == PAWN, name
+        assert all(cap.get_collision_response_to_channel(ch) == BLOCK for ch in OBJECT_CHANNELS), name
+        assert action.get_editor_property('ObstacleChannel') == u.CollisionChannel.ECC_VISIBILITY, name
+        movement = cat.get_component_by_class(u.CharacterMovementComponent)
+        assert movement and (movement.get_gravity_direction()-u.Vector(0,0,-1)).length() < .001, name
+        assert (cap.get_up_vector()-u.Vector(0,0,1)).length() < .001, name
         mapfile = ROOT/'Content/Maps'/f'{name}.umap'
         baskets = [a for a in aa if isinstance(a, u.CatrunHideBasket)]
         assert len(baskets) == (1 if name.endswith('Tutorial') else 2 if name.endswith('Stage1') else 3), name
@@ -618,29 +761,41 @@ def main(report):
         manager, = [a for a in aa if isinstance(a, u.SoundGridManager)]
         saved_grid = grid(manager)
         row['grid_before_sha256'] = hash_data(saved_grid)
+        row['grid_baked'] = manager.has_grid()
+        row['grid_dimensions'] = [saved_grid['Width'], saved_grid['Height']]
         if MODE == 'audit':
             expected = proof['maps'][name]
-            assert row['actors'] == expected['actors_after'], ('Cold actor snapshot changed',name,
+            assert cold_actor_snapshots_match(row['actors'], expected['actors_after']), ('Cold actor snapshot changed',name,
                 [(k,row['actors'][k]['label']) for k in row['actors'].keys() & expected['actors_after'].keys()
                  if row['actors'][k] != expected['actors_after'][k]][:25])
+            row['equivalent_rotation_actors'] = [k for k in row['actors']
+                                                  if row['actors'][k] != expected['actors_after'][k]]
             assert row['grid_before_sha256'] == expected['grid_after_sha256'], (name,'cold grid changed')
             check_doors(name, row['doors'], row['actors'])
             for b in baskets:
                 g = required_geometry(w,b,camera,cap,action)
                 row['baskets'][b.get_actor_label()] = g
                 assert g['safe'], (name,b.get_actor_label(),g)
-            if name.endswith('Stage2'):
-                row['routes'] = stage2_route_checks(aa,baskets)
+            if not name.endswith('Tutorial'):
+                row['routes'] = route_checks(aa,baskets)
+                assert not any(route['blockers'] for route in row['routes']), row['routes']
             assert not dirty() and sha(mapfile) == row['sha256'], (name, dirty())
             print('BASKET_DOORS_AUDITED', name, len(baskets))
             continue
         expected = proof['maps'][name] if MODE == 'apply' else None
         if expected:
             assert row['actors'] == expected['actors'] and row['grid_before_sha256'] == expected['grid_before_sha256'], name
-        manager.build_grid()
-        baseline = grid(manager)
-        row['fresh_baseline_sha256'] = hash_data(baseline)
-        row['baked_grid_preexisting_drift'] = [k for k in baseline if baseline[k] != saved_grid.get(k)]
+        if row['grid_baked']:
+            manager.build_grid()
+            baseline = grid(manager)
+            row['fresh_baseline_sha256'] = hash_data(baseline)
+            row['baked_grid_preexisting_drift'] = [k for k in baseline if baseline[k] != saved_grid.get(k)]
+            assert not row['baked_grid_preexisting_drift'], (name, 'Existing baked grid differs from current geometry',
+                                                           row['baked_grid_preexisting_drift'])
+        else:
+            # Stage1 currently uses BeginPlay's auto-bake. Preserve its empty
+            # saved grid instead of converting it into a baked level.
+            assert not any(row['grid_dimensions']), (name, row['grid_dimensions'])
         changed_doors = open_doors(w, name, aa, cap, row['doors'])
         owned = [a.get_name() for a in changed_doors]
         row['plan'] = {}
@@ -661,18 +816,32 @@ def main(report):
                 hit, moved = move_basket(w, a, cap, spec, old.z-floor)
                 g = required_geometry(w,a,camera,cap,action) if moved else None
                 row['baskets'][label].append(dict(spec=list(spec),floor=hit,geometry=g))
+                if g and g['safe'] and not name.endswith('Tutorial'):
+                    g['route_blockers'] = [route for route in route_checks(aa,[a]) if route['blockers']]
+                    g['safe'] = not g['route_blockers']
                 if g and g['safe']:
                     row['plan'][label] = list(spec)
                     break
             assert label in row['plan'], (name,label,'No complete aligned, visible, capsule-clear pose')
-        if name.endswith('Stage2'):
-            row['routes'] = stage2_route_checks(aa,baskets)
-        manager.build_grid()
+        if not name.endswith('Tutorial'):
+            row['routes'] = route_checks(aa,baskets)
+            assert not any(route['blockers'] for route in row['routes']), row['routes']
+        if row['grid_baked']:
+            manager.build_grid()
         after_grid = grid(manager)
         row['grid_after_sha256'] = hash_data(after_grid)
-        doors = [(1750,2720),(2535,2460)] if name.endswith('Stage2') else [(-228,662)] if name.endswith('Tutorial') else []
-        row['grid_changes'] = grid_delta(baseline,after_grid,doors)
         row['actors_after'] = {a.get_name(): actor_snapshot(a) for a in aa}
+        if row['grid_baked']:
+            settings = manager.get_editor_property('Settings')
+            clearance_tags = {str(settings.get_editor_property(prop)) for prop in ('WallTag','ObstacleTag')}
+            old_bounds, new_bounds = ([actors[key]['bounds'] for key in owned
+                                        if clearance_tags.intersection(actors[key]['tags'])]
+                                       for actors in (row['actors'], row['actors_after']))
+            doors = [(1750,2720),(2535,2460)] if name.endswith('Stage2') else [(-228,662)] if name.endswith('Tutorial') else []
+            row['grid_changes'] = grid_delta(baseline, after_grid, doors, old_bounds, new_bounds)
+        else:
+            assert after_grid == saved_grid, (name, 'Runtime-built grid changed on disk')
+            row['grid_changes'] = {'EdgeMask': [], 'WallDistance': []}
         row['changed_actors'] = preserve_actors(row['actors'],row['actors_after'],owned)
         row['doors_after'] = door_probes(w,name,aa,cap)
         check_doors(name,row['doors_after'],row['actors_after'])

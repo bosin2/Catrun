@@ -56,10 +56,10 @@ def connect_flow(path, graph_name, function):
 connect_flow('/Game/UI/WBP_MainMenu', 'EventGraph', 'StartNewGame')
 connect_flow('/Game/Systems/LevelFlow/BP_LevelExit', 'CompleteTransition', 'CompleteCurrentStage')
 
-# The Stage2 endpoint is INSIDE Gate_00, so the unopened future Stage3 doorway remains intact.
+# Stage2 completes after the cat enters the corridor beyond Gate_00.
 for map_name, label, location, extent in [
     ('SoundTest_Stage1', 'Flow_ExitToStage2', (101, 65, 65), (65, 30, 80)),
-    ('SoundTest_Stage2', 'Flow_Stage2Complete', (715, 70, 65), (65, 30, 80)),
+    ('SoundTest_Stage2', 'Flow_Stage2Complete', (715, -80, 65), (65, 30, 80)),
 ]:
     backup_file('Content/Maps/' + map_name + '.umap')
     assert levels.load_level('/Game/Maps/' + map_name)
@@ -70,6 +70,8 @@ for map_name, label, location, extent in [
     actor.set_folder_path('Gameplay/LevelFlow')
     actor.set_actor_location(unreal.Vector(*location), False, True)
     actor.get_editor_property('Trigger').set_box_extent(unreal.Vector(*extent))
+    if label == 'Flow_Stage2Complete':
+        actor.set_editor_property('bRequireCenterInside', True)
     assert levels.save_current_level()
     report['exits'].append({'map': map_name, 'label': label, 'location': location, 'extent': extent})
 

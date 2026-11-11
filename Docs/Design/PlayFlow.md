@@ -2,12 +2,14 @@
 
 2026-11-03. 목표는 메뉴에서 현재 구현된 구간을 순서대로 실행하는 것이다. 스테이지 3은 제작 목표에 유지하지만 아직 맵과 완료 규칙이 없어 이번 실행 경로에는 넣지 않는다.
 
+2026-11-11 출구 수정: Stage2와 SoundTest_Stage2 모두 Gate00을 열고 스테이지1 형태의 짧은 외부 복도를 추가했다. 완료 판정은 문을 통과한 뒤다. 아래의 초기 메뉴/맵 전환 설명과 과거 PIE 기록은 당시 기준이며, 최신 통합 상태는 `HANDOFF.md`를 따른다.
+
 | 구간 | 실행 맵 | 다음 행동 |
 |---|---|---|
 | 시작 메뉴 | `/Game/Maps/MainMenu` | 기존 시작 버튼 → 튜토리얼 |
 | 튜토리얼 | `/Game/Maps/SoundTest_Tutorial` | 기존 계단 연출의 `BP_LevelExit.CompleteTransition` → 스테이지 1 |
 | 스테이지 1 | `/Game/Maps/SoundTest_Stage1` | 기존 `S1_DoorFrame_ExitToStage2` 안쪽 출구 → 스테이지 2 |
-| 스테이지 2 | `/Game/Maps/SoundTest_Stage2` | `S2_Gate_00` 안쪽 도달 → 같은 맵에 남고 완료 안내 |
+| 스테이지 2 | `/Game/Maps/Stage2` 및 SoundTest 미러 | 열린 `S2_Gate_00`을 지나 외부 복도 도달 → 같은 맵에 남고 완료 안내 |
 
 사용자 결정: 스테이지 2 완료 후 자동으로 메뉴로 보내지 않고 현재 맵에 머무른다. 완료 이후에는 갑옷의 새 포획을 막고, 중복 완료 이벤트도 막는다. 고양이 이동은 유지한다. 미확정인 스테이지 3 목표·엔딩은 추가하지 않았다.
 
@@ -25,9 +27,9 @@
 ## 배치와 설정
 
 - `Flow_ExitToStage2`: SoundTest_Stage1 `(101, 65, 65)`, BoxExtent `(65, 30, 80)`.
-- `Flow_Stage2Complete`: SoundTest_Stage2 `(715, 70, 65)`, BoxExtent `(65, 30, 80)`.
+- `Flow_Stage2Complete`: Stage2와 SoundTest_Stage2 `(715, -80, 65)`, BoxExtent `(65, 30, 80)`, `bRequireCenterInside=true`. 바깥에서 캡슐만 닿는 것으로 완료되지 않는다.
 - 트리거는 실제 플레이어 폰만 받는다. 다른 액터·은신/행동 중인 고양이는 완료시키지 않는다.
-- 스테이지 2의 출구 철문은 보존하고 안쪽에서 완료 판정한다. 동상·발판의 규칙과 배치는 변경하지 않는다.
+- 스테이지2 출구 철창은 바닥 아래로 내리고 충돌을 제거했다. 기존 문틀·문턱에 폭200cm/길이400cm의 바닥과 벽·천장·검은 안개를 이어 끝부분을 가린다. 옆벽·끝벽은 추락을 막는다. 동상·발판의 규칙과 배치는 변경하지 않는다.
 - 공통 맵 순서·메뉴: `Config/DefaultGame.ini`의 `CatrunLevelFlowSettings`. 에디터 Project Settings에서도 편집할 수 있다.
 - 기본 맵: `Config/DefaultEngine.ini`. 패키징 대상 4개 맵은 `DefaultGame.ini`에 명시했다.
 - Stage3 준비 후 Stages 배열의 끝에 해당 맵을 추가하면 Stage2 출구는 다음 맵으로 진행한다. 마지막 맵의 완료 안내·최종 엔딩은 당시 확정 기획에 맞춰 교체한다.
