@@ -6,8 +6,13 @@
 #include "Components/PrimitiveComponent.h"
 #include "Engine/World.h"
 #include "Engine/OverlapResult.h"
+#include "EngineUtils.h"
 #include "GameFramework/Character.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/Controller.h"
 #include "GameFramework/Pawn.h"
+#include "GameFramework/PlayerStart.h"
+#include "TimerManager.h"
 
 bool CatrunRestore::IsPlacementClear(const APawn& Pawn, const FTransform& Transform)
 {
@@ -20,15 +25,35 @@ bool CatrunRestore::IsPlacementClear(const APawn& Pawn, const FTransform& Transf
 		Primitive->GetCollisionObjectType(), Primitive->GetCollisionShape(), Params, Responses);
 }
 
-bool CatrunRestore::PlaceForCollision(APawn& Pawn, const FTransform& Desired, bool bRestoreCollision)
+bool CatrunRestore::TryPlaceOnSupport(APawn& Pawn, const FTransform& Reference)
 {
-	Pawn.SetActorEnableCollision(false);
+	const auto* Character = Cast<ACharacter>(&Pawn);
+	const auto* Capsule = Character ? Character->GetCapsuleComponent() : nullptr;
+	if (!Capsule || !Reference.IsValid()) return false;
+	FCollisionQueryParams Params(SCENE_QUERY_STAT(CatrunRestoreSpawn), false, &Pawn);
+	FHitResult Floor;
+	FVector Center;
+	if (!CatrunGround::FindSupport(*Capsule, Reference.GetLocation(), 40.f, 80.f, Params, Floor, Center)) return false;
+	FTransform Supported = Reference;
+	Supported.SetLocation(Center);
+	if (!IsPlacementClear(Pawn, Supported)) return false;
+	const FTransform Previous = Pawn.GetActorTransform();
+	if (!Pawn.TeleportTo(Center, Supported.Rotator(), false, true)) return false;
+	if (IsPlacementClear(Pawn, Pawn.GetActorTransform())) return true;
+	Pawn.SetActorTransform(Previous, false, nullptr, ETeleportType::TeleportPhysics);
+	return false;
+}
+
+namespace
+{
+bool TryPlaceForCollision(APawn& Pawn, const FTransform& Desired, bool bRestoreCollision)
+{
 	auto Place = [&](const FTransform& Candidate)
 	{
-		if (bRestoreCollision && !IsPlacementClear(Pawn, Candidate)) return false;
+		if (bRestoreCollision && !CatrunRestore::IsPlacementClear(Pawn, Candidate)) return false;
 		Pawn.SetActorTransform(Candidate, false, nullptr, ETeleportType::TeleportPhysics);
 		// An overlap callback/teleport hook can change geometry or the pawn's transform.
-		return !bRestoreCollision || IsPlacementClear(Pawn, Pawn.GetActorTransform());
+		return !bRestoreCollision || CatrunRestore::IsPlacementClear(Pawn, Pawn.GetActorTransform());
 	};
 	if (Place(Desired)) return true;
 	const auto* Character = Cast<ACharacter>(&Pawn);
@@ -69,7 +94,7 @@ bool CatrunRestore::PlaceForCollision(APawn& Pawn, const FTransform& Desired, bo
 					Location = Supported;
 					if (FMath::Abs(Location.Z - Desired.GetLocation().Z) > 20.f) continue;
 					Candidate.SetLocation(Location);
-					if (!IsPlacementClear(Pawn, Candidate)) continue;
+					if (!CatrunRestore::IsPlacementClear(Pawn, Candidate)) continue;
 					FHitResult Hit;
 					if (Pawn.GetWorld()->SweepSingleByChannel(Hit, Desired.GetLocation(), Location, Desired.GetRotation(), Channel, Shape, Transit, Responses)) continue;
 					if (Place(Candidate)) return true;
@@ -77,7 +102,59 @@ bool CatrunRestore::PlaceForCollision(APawn& Pawn, const FTransform& Desired, bo
 			}
 		}
 	}
-	if (auto* Restart = UCatrunRestartSubsystem::Get(&Pawn)) Restart->ScheduleRecoveryRestart();
-	UE_LOG(LogCatrunSound, Display, TEXT("%s has no clear capsule restoration position; requested clean stage recovery unless travel/teardown owns the world."), *Pawn.GetName());
+	return false;
+}
+
+bool TryPlaceAtPlayerStart(APawn& Pawn)
+{
+	const auto* Controller = Pawn.GetController();
+	const auto* StartSpot = Controller ? Controller->StartSpot.Get() : nullptr;
+	if (IsValid(StartSpot) && StartSpot->GetWorld() == Pawn.GetWorld()
+		&& CatrunRestore::TryPlaceOnSupport(Pawn, StartSpot->GetActorTransform())) return true;
+	for (TActorIterator<APlayerStart> It(Pawn.GetWorld()); It; ++It)
+		if (*It != StartSpot && CatrunRestore::TryPlaceOnSupport(Pawn, It->GetActorTransform())) return true;
+	return false;
+}
+}
+
+bool CatrunRestore::PlaceForCollision(APawn& Pawn, const FTransform& Desired, bool bRestoreCollision,
+	EMovementMode RestoreMode, uint8 RestoreCustomMode)
+{
+	Pawn.SetActorEnableCollision(false);
+	if (TryPlaceForCollision(Pawn, Desired, bRestoreCollision)) return true;
+	UWorld* World = Pawn.GetWorld();
+	if (!World || World->bIsTearingDown) return false;
+	const auto* Character = Cast<ACharacter>(&Pawn);
+	const auto* Movement = Character ? Character->GetCharacterMovement() : nullptr;
+	if (RestoreMode == MOVE_MAX && Movement && Movement->MovementMode != MOVE_None)
+	{
+		RestoreMode = Movement->MovementMode;
+		RestoreCustomMode = Movement->CustomMovementMode;
+	}
+	const TWeakObjectPtr<APawn> WeakPawn(&Pawn);
+	const TWeakObjectPtr<AController> Controller(Pawn.GetController());
+	auto RestoreAfterFailure = [WeakPawn, Controller, Desired, RestoreMode, RestoreCustomMode]()
+	{
+		auto* Cat = WeakPawn.Get();
+		if (!Cat || !Cat->GetWorld() || Cat->GetWorld()->bIsTearingDown || Cat->GetActorEnableCollision()
+			|| Cat->GetController() != Controller.Get()) return;
+		if (!TryPlaceForCollision(*Cat, Desired, true) && !TryPlaceAtPlayerStart(*Cat))
+		{
+			if (auto* Restart = UCatrunRestartSubsystem::Get(Cat)) Restart->ReportBlockedPawnRecovery(*Cat);
+			return;
+		}
+		Cat->SetActorEnableCollision(true);
+		if (auto* CatCharacter = Cast<ACharacter>(Cat))
+		{
+			auto* CatMovement = CatCharacter->GetCharacterMovement();
+			CatMovement->StopMovementImmediately();
+			if (RestoreMode == MOVE_MAX) CatMovement->SetDefaultMovementMode();
+			else CatMovement->SetMovementMode(RestoreMode, RestoreCustomMode);
+		}
+	};
+	auto* Restart = UCatrunRestartSubsystem::Get(&Pawn);
+	if (!Restart || !Restart->ScheduleRecoveryRestart(.5f, RestoreAfterFailure))
+		World->GetTimerManager().SetTimerForNextTick(FTimerDelegate::CreateWeakLambda(&Pawn, MoveTemp(RestoreAfterFailure)));
+	UE_LOG(LogCatrunSound, Display, TEXT("%s has no clear local restoration position; queued stage recovery."), *Pawn.GetName());
 	return false;
 }

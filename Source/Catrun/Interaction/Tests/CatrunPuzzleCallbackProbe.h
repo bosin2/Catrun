@@ -16,6 +16,15 @@ public:
 	bool bCancelOnFraming = false;
 	int32 Counts[5] = {};
 	int32 SoundCount = 0;
+	int32 CheckpointRestoreCount = 0;
+	FName RestoredPuzzleId;
+	bool bSeatedOnCheckpointRestore = false;
+	UFUNCTION() void CheckpointRestored(FName Id)
+	{
+		++CheckpointRestoreCount;
+		RestoredPuzzleId = Id;
+		bSeatedOnCheckpointRestore = Puzzle->IsPuzzleSeated(Id);
+	}
 	UFUNCTION() void PuzzleEvent(FName Id, ECatrunStatueEvent Event, int32 Revision)
 	{
 		++Counts[static_cast<int32>(Event)];

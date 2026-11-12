@@ -457,7 +457,8 @@ void UCatrunBasketInteractionComponent::AbortBasket()
 	GetWorld()->GetTimerManager().ClearTimer(AnimationTimer);
 	if (BasketPhase != ECatrunBasketPhase::Outside && IsValid(CatOwner))
 	{
-		const bool bPlacedSafely = CatrunRestore::PlaceForCollision(*CatOwner, SavedEntryTransform, bSavedCollision);
+		const bool bPlacedSafely = CatrunRestore::PlaceForCollision(*CatOwner, SavedEntryTransform, bSavedCollision,
+			EMovementMode(SavedMovementMode), SavedCustomMovementMode);
 		RestoreCharacter(bPlacedSafely);
 	}
 	if (IsValid(ActiveBasket)) ActiveBasket->Release(GetOwner());

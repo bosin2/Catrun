@@ -7,6 +7,7 @@
 #include "Sound/CatrunSoundSettings.h"
 #include "Camera/CameraActor.h"
 #include "Camera/PlayerCameraManager.h"
+#include "Components/BoxComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Engine/Engine.h"
 #include "Engine/GameInstance.h"
@@ -14,6 +15,8 @@
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/PlayerController.h"
+#include "GameFramework/PlayerStart.h"
+#include "TimerManager.h"
 
 namespace
 {
@@ -58,6 +61,35 @@ struct FCaptureTravelFixture
     void RequestRestart()
     {
         Armor->CapturePresentation->TickComponent(Settings->CatchFadeOutTime + Settings->CatchBlackHoldTime + .01f, LEVELTICK_All, nullptr);
+    }
+    void BlockOriginalReturn(FVector SafeStart)
+    {
+        auto AddBlock = [this](FVector Location, FVector Extent)
+        {
+            auto* Actor = World->SpawnActor<AActor>();
+            auto* Box = NewObject<UBoxComponent>(Actor);
+            Actor->SetRootComponent(Box);
+            Box->SetBoxExtent(Extent);
+            Box->SetCollisionProfileName(TEXT("BlockAllDynamic"));
+            Box->RegisterComponent();
+            Actor->SetActorLocation(Location);
+        };
+        AddBlock(Original.GetLocation(), FVector(35,35,50));
+        AddBlock(SafeStart - FVector(0,0,42), FVector(100,100,10));
+        FActorSpawnParameters Spawn;
+        Spawn.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+        PC->StartSpot = World->SpawnActor<APlayerStart>(SafeStart, FRotator::ZeroRotator, Spawn);
+    }
+    void CheckEmergencyRestored(FAutomationTestBase& Test, FVector SafeStart)
+    {
+        Test.TestFalse(TEXT("Recovery failure leaves capture inactive"), Armor->CapturePresentation->IsCapturing());
+        Test.TestFalse(TEXT("Recovery failure clears its black fade"), PC->PlayerCameraManager->bEnableFading);
+        Test.TestTrue(TEXT("Safe authored start restores collision"), Cat->GetActorEnableCollision());
+        Test.TestTrue(TEXT("Cat is placed on walkable support at the authored start"), Cat->GetActorLocation().Equals(SafeStart, .1));
+        Test.TestEqual(TEXT("Recovery restores the movement captured before capture"), Cat->GetCharacterMovement()->MovementMode, TEnumAsByte<EMovementMode>(MOVE_Flying));
+        Test.TestTrue(TEXT("Recovery preserves input locks belonging to other owners"), PC->IsMoveInputIgnored() && PC->IsLookInputIgnored());
+        PC->SetIgnoreMoveInput(false); PC->SetIgnoreLookInput(false);
+        Test.TestFalse(TEXT("Recovery leaves no additional input locks"), PC->IsMoveInputIgnored() || PC->IsLookInputIgnored());
     }
     void CheckRestored(FAutomationTestBase& Test)
     {
@@ -125,6 +157,50 @@ bool FCatrunCaptureFailedTravelTest::RunTest(const FString&)
     TestTrue(TEXT("Retry has a new capture session"), F.Armor->CapturePresentation->SessionId > FirstSession);
     GEngine->OnTravelFailure().Broadcast(F.World, ETravelFailure::InvalidURL, TEXT("Late duplicate failure"));
     TestTrue(TEXT("A late old failure cannot abort a new capture"), F.Armor->CapturePresentation->IsCapturing());
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunEmergencyRejectedTravelTest, "Catrun.PrototypeAI.EmergencyRecoveryRejectionRestoresSupportedStart", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FCatrunEmergencyRejectedTravelTest::RunTest(const FString&)
+{
+    FCaptureTravelFixture F;
+    if (!TestTrue(TEXT("Fixture reaches capture fade"), F.ReachFade())) return false;
+    const FVector SafeStart(800,0,90);
+    F.BlockOriginalReturn(SafeStart);
+    auto* Context = GEngine->GetWorldContextFromWorld(F.World);
+    const FString OtherURL(TEXT("/Game/Maps/Stage1?ExternalOwner"));
+    Context->TravelURL = OtherURL;
+    F.RequestRestart();
+    TestFalse(TEXT("Blocked original position initially keeps collision off"), F.Cat->GetActorEnableCollision());
+    F.World->GetTimerManager().Tick(.01f);
+    TestEqual(TEXT("Emergency recovery never takes over competing travel"), Context->TravelURL, OtherURL);
+    F.CheckEmergencyRestored(*this, SafeStart);
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunEmergencyFailedTravelTest, "Catrun.PrototypeAI.EmergencyRecoveryTravelFailureRestoresSupportedStart", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FCatrunEmergencyFailedTravelTest::RunTest(const FString&)
+{
+    AddExpectedError(TEXT("Travel failed; progress retained:"), EAutomationExpectedErrorFlags::Contains, 2);
+    FCaptureTravelFixture F;
+    if (!TestTrue(TEXT("Fixture reaches capture fade"), F.ReachFade())) return false;
+    const FVector SafeStart(800,0,90);
+    F.BlockOriginalReturn(SafeStart);
+    F.RequestRestart();
+    auto* Context = GEngine->GetWorldContextFromWorld(F.World);
+    Context->TravelURL.Reset();
+    GEngine->OnTravelFailure().Broadcast(F.World, ETravelFailure::InvalidURL, TEXT("Injected capture travel failure"));
+    // The engine's own listener schedules a fallback URL after broadcasting. This
+    // case isolates a surviving world without that fallback; the rejection test
+    // above verifies that recovery respects a competing travel owner.
+    Context->TravelURL.Reset();
+    F.World->GetTimerManager().Tick(.01f);
+    TestEqual(TEXT("Blocked original placement queued this world's emergency travel"), Context->TravelURL,
+        F.World->GetOutermost()->GetName());
+    TestFalse(TEXT("Collision remains off while emergency travel owns the world"), F.Cat->GetActorEnableCollision());
+    Context->TravelURL.Reset();
+    GEngine->OnTravelFailure().Broadcast(F.World, ETravelFailure::InvalidURL, TEXT("Injected emergency travel failure"));
+    F.CheckEmergencyRestored(*this, SafeStart);
     return true;
 }
 #endif

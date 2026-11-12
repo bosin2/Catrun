@@ -305,9 +305,17 @@ void ACatrunArmor::SetAction(EArmorAction NewAction)
 		DoorStep = EDoorStep::Approach;
 		break;
 	case EArmorAction::Looking:
-		PlayAnimation(ArrivalLookAnim, false);
-		ActionDuration = AnimationLength(ArrivalLookAnim);
+	{
+		const float PlayRate = FMath::Max(.1f, ArrivalLookPlayRate);
+		const auto* Sequence = Cast<UAnimSequenceBase>(ArrivalLookAnim.Get());
+		const float AssetRate = Sequence ? FMath::Abs(Sequence->RateScale) : 1.f;
+		if (!FMath::IsNearlyZero(AssetRate))
+		{
+			ActionDuration = AnimationLength(ArrivalLookAnim) / (PlayRate * AssetRate);
+			PlayAnimation(ArrivalLookAnim, false, PlayRate);
+		}
 		break;
+	}
 	case EArmorAction::Catching:
 		// Stands still until the camera has arrived; TickCatching starts the pick-up animation.
 		PlayAnimation(IdleAnim, true);

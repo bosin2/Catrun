@@ -17,7 +17,7 @@ namespace
         bool DoesSaveGameExist(const TCHAR*, int32) override { checkNoEntry(); return false; }
         ESaveExistsResult DoesSaveGameExistWithResult(const TCHAR*, int32) override { checkNoEntry(); return Existence; }
         bool SaveGame(bool, const TCHAR*, int32, const TArray<uint8>&) override { checkNoEntry(); return false; }
-        bool LoadGame(bool, const TCHAR*, int32, TArray<uint8>&) override { checkNoEntry(); return false; }
+        bool LoadGame(bool, const TCHAR*, int32, TArray<uint8>& Out) override { if (!bExists || bReadFails) return false; Out = Bytes; return true; }
         bool DeleteGame(bool, const TCHAR*, int32) override { checkNoEntry(); return false; }
         void DoesSaveGameExistAsync(const TCHAR* Slot, FPlatformUserId User, FSaveGameAsyncExistsCallback Callback) override
         {

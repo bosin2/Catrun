@@ -1,6 +1,7 @@
 #include "CatrunSettingsSubsystem.h"
 #include "CatrunSettingsWidget.h"
 #include "CatrunInputBindings.h"
+#include "UI/CatrunChapterSelectWidget.h"
 #include "Blueprint/UserWidget.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "Components/Widget.h"
@@ -251,6 +252,7 @@ bool UCatrunSettingsSubsystem::OwnsInputFocus(int32 SlateUserIndex) const
 bool UCatrunSettingsSubsystem::HandleEscape()
 {
  if (!OwnsInputFocus()) return false;
+ if (!CurrentSettings && UCatrunChapterSelectWidget::CloseForWorld(GetWorld())) return true;
  if (CurrentSettings)
  {
   if (CurrentSettings->IsCapturingBinding()) return false; // SInputKeySelector consumes Escape key-up and cancels only capture.

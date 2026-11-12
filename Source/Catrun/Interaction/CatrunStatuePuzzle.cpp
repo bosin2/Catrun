@@ -13,6 +13,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "LevelFlow/CatrunLevelFlow.h"
 #include "Monster/CatrunRestartSubsystem.h"
+#include "Perception/CatrunCatStateComponent.h"
 #include "Sound/SoundGridManager.h"
 
 ACatrunStatuePuzzle::ACatrunStatuePuzzle()
@@ -161,7 +162,7 @@ bool ACatrunStatuePuzzle::TryPushStatue(int32 Index,ACharacter* Cat,FVector Inpu
 	const double Side=FMath::Abs(Direction.X!=0 ? FromStatue.Y : FromStatue.X);
 	if (Gap < -5 || Gap > Settings->ContactDistance || Side > SideHalf-Radius*.25 || FMath::Abs(FromStatue.Z)>Link.StatueExtent.Z+50) return false;
 	float Speed=FMath::Max(0.f,float(FVector::DotProduct(Link.PushVelocity,Direction)));
-	const float Distance=IntegratePushSpeed(Speed,FMath::Min(Settings->PushSpeed,Cat->GetCharacterMovement()->GetMaxSpeed()),Settings->PushAcceleration,DeltaSeconds);
+	const float Distance=IntegratePushSpeed(Speed,FMath::Min(Settings->PushSpeed,UCatrunCatStateComponent::GetStatuePushSpeedLimit(*Cat)),Settings->PushAcceleration,DeltaSeconds);
 	Link.PushVelocity=Direction*Speed;
 	Link.bDrivenThisFrame=true;
 	return MoveStatue(Link,Direction*Distance,Cat);
@@ -273,11 +274,43 @@ void ACatrunStatuePuzzle::UpdatePlatesAndGates(float DeltaSeconds)
 		if (Link.bPressed && !Link.bCompleted && FMath::IsNearlyEqual(Link.GateOffset,-Link.RequiredGateTravel))
 		{
 			Link.bCompleted=true;
-			if (Broadcast(Index,ECatrunStatueEvent::Completed,Revision) && Link.bCompleted) Reveal->GateOpened(Link.PuzzleId);
+			if (Broadcast(Index,ECatrunStatueEvent::Completed,Revision) && Link.bCompleted)
+			{
+				if (Link.PuzzleId == TEXT("C"))
+					if (auto* Restart = UCatrunRestartSubsystem::Get(this)) Restart->MarkStage2EntryCheckpointReached();
+				Reveal->GateOpened(Link.PuzzleId);
+			}
 		}
 	}
 	if (Changed) NotifyObstaclesChanged();
 }
+
+bool ACatrunStatuePuzzle::IsPuzzleSeated(FName PuzzleId) const
+{
+	const auto* Link = Links.FindByPredicate([PuzzleId](const auto& Candidate) { return Candidate.PuzzleId == PuzzleId; });
+	return bInitialized && Link && Link->bPressed;
+}
+
+bool ACatrunStatuePuzzle::RestoreStage2EntryCheckpoint(FVector& OutGateLocation)
+{
+	InitializePuzzle();
+	auto* Link = Links.FindByPredicate([](const auto& Candidate) { return Candidate.PuzzleId == TEXT("C"); });
+	if (!Link || !IsValid(Link->Statue) || !IsValid(Link->Plate) || !IsValid(Link->Gate)
+		|| !Link->InitialGateBounds.IsValid || Link->RequiredGateTravel <= 0.f) return false;
+
+	Link->bPressed = Link->bCompleted = Link->bGateOpening = true;
+	Link->bSeating = Link->bRevealPending = false;
+	Link->PushVelocity = FVector::ZeroVector;
+	Link->GateOffset = -Link->RequiredGateTravel;
+	Link->Statue->SetActorLocation(Link->SeatLocation, false);
+	Link->Plate->SetActorLocation(Link->InitialPlate - FVector(0,0,Settings->PlateTravel), false);
+	Link->Gate->SetActorLocation(Link->InitialGate + FVector(0,0,Link->GateOffset), false);
+	NotifyObstaclesChanged();
+	OutGateLocation = Link->InitialGate;
+	OnCheckpointRestored.Broadcast(Link->PuzzleId);
+	return true;
+}
+
 bool ACatrunStatuePuzzle::ResetPuzzle()
 {
 	TArray<int32> Indices;

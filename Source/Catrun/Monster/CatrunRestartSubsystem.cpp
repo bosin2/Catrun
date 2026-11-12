@@ -1,15 +1,31 @@
 #include "CatrunRestartSubsystem.h"
 #include "Interaction/CatrunPuzzleSuspension.h"
+#include "Interaction/CatrunStatuePuzzle.h"
+#include "Perception/CatrunSafeRestore.h"
+#include "Sound/CatrunNotice.h"
 
 #include "Camera/PlayerCameraManager.h"
-#include "Engine/GameInstance.h"
 #include "Engine/Engine.h"
-#include "TimerManager.h"
 #include "Engine/World.h"
+#include "EngineUtils.h"
 #include "GameFramework/Pawn.h"
+#include "GameFramework/PawnMovementComponent.h"
 #include "GameFramework/PlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "LevelFlow/CatrunLevelFlow.h"
+#include "TimerManager.h"
+
+namespace
+{
+bool IsStage2World(const UWorld& World)
+{
+	const FString Package = UWorld::RemovePIEPrefix(World.GetOutermost()->GetName());
+	const auto* Settings = GetDefault<UCatrunLevelFlowSettings>();
+	const int32 Index = Settings->FindStageIndex(Package);
+	return (Settings->Stages.IsValidIndex(Index) && Settings->Stages[Index].StageId == TEXT("Stage2"))
+		|| Package == TEXT("/Game/Maps/SoundTest_Stage2");
+}
+}
 
 UCatrunRestartSubsystem* UCatrunRestartSubsystem::Get(const UObject* WorldContextObject)
 {
@@ -25,7 +41,7 @@ bool UCatrunRestartSubsystem::ShouldCreateSubsystem(UObject* Outer) const
 
 bool UCatrunRestartSubsystem::TryBeginCatch()
 {
-	if (UCatrunPuzzleSuspension::IsSuspended(this)) return false;
+	if (bRecoveryScheduled || HasBlockedPawnRecovery() || UCatrunPuzzleSuspension::IsSuspended(this)) return false;
 	if (const auto* Flow = UCatrunLevelFlowSubsystem::Get(this); Flow && (Flow->IsTransitioning() || Flow->IsStageComplete())) return false;
 	if (bCatching)
 	{
@@ -45,17 +61,41 @@ bool UCatrunRestartSubsystem::CanRecoverWorld() const
 	return Context && Context->TravelURL.IsEmpty();
 }
 
-bool UCatrunRestartSubsystem::ScheduleRecoveryRestart(float FadeInDuration)
+bool UCatrunRestartSubsystem::ScheduleRecoveryRestart(float FadeInDuration, TFunction<void()> RestoreAfterFailure)
 {
 	if (bRecoveryScheduled || !CanRecoverWorld()) return false;
 	bRecoveryScheduled = true;
-	RecoveryTimer = GetWorld()->GetTimerManager().SetTimerForNextTick(FTimerDelegate::CreateWeakLambda(this, [this, FadeInDuration]()
+	const bool bWasCapture = IsCatching();
+	RecoveryTimer = GetWorld()->GetTimerManager().SetTimerForNextTick(FTimerDelegate::CreateWeakLambda(this,
+		[this, FadeInDuration, bWasCapture, RestoreAfterFailure = MoveTemp(RestoreAfterFailure)]()
 	{
 		bRecoveryScheduled = false;
-		// Travel/teardown may have begun since the failed placement. They take precedence.
-		if (CanRecoverWorld()) RestartLevel(FadeInDuration);
+		// A competing travel still owns its request. A surviving world needs a playable pawn.
+		if (!RestartLevel(FadeInDuration, [RestoreAfterFailure](const FString&)
+		{
+			if (RestoreAfterFailure) RestoreAfterFailure();
+		}, bWasCapture) && RestoreAfterFailure) RestoreAfterFailure();
 	}));
 	return true;
+}
+
+bool UCatrunRestartSubsystem::HasBlockedPawnRecovery() const
+{
+	const auto* Pawn = BlockedRecoveryPawn.Get();
+	return Pawn && !Pawn->GetActorEnableCollision();
+}
+
+void UCatrunRestartSubsystem::ReportBlockedPawnRecovery(APawn& Pawn)
+{
+	BlockedRecoveryPawn = &Pawn;
+	if (auto* Notice = UCatrunNoticeSubsystem::Get(this))
+		Notice->ShowNotice(NSLOCTEXT("Catrun", "BlockedPawnRecovery", "안전한 위치로 돌아갈 수 없습니다. 설정에서 스테이지를 다시 시작하거나 타이틀로 돌아가세요."), 8.f);
+	UE_LOG(LogTemp, Display, TEXT("Pawn recovery has no clear supported placement in %s."), *GetWorld()->GetName());
+}
+
+void UCatrunRestartSubsystem::MarkStage2EntryCheckpointReached()
+{
+	if (const UWorld* World = GetWorld(); World && IsStage2World(*World)) bStage2EntryCheckpointReached = true;
 }
 
 void UCatrunRestartSubsystem::FadeOut(APawn* Cat, float Duration)
@@ -67,26 +107,56 @@ void UCatrunRestartSubsystem::FadeOut(APawn* Cat, float Duration)
 	}
 }
 
-bool UCatrunRestartSubsystem::RestartLevel(float FadeInDuration, TFunction<void(const FString&)> Failure)
+bool UCatrunRestartSubsystem::RestartLevel(float FadeInDuration, TFunction<void(const FString&)> Failure, bool bIsCaptureRestart)
 {
 	if (!CanRecoverWorld()) return false;
 	auto* Flow = UCatrunLevelFlowSubsystem::Get(this);
-	return Flow && Flow->RequestSameMapRestart(this, FadeInDuration, MoveTemp(Failure));
+	return Flow && Flow->RequestSameMapRestart(this, FadeInDuration, MoveTemp(Failure), bIsCaptureRestart && bStage2EntryCheckpointReached);
 }
 
 void UCatrunRestartSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 {
 	Super::OnWorldBeginPlay(InWorld);
 	auto* Flow = InWorld.GetSubsystem<UCatrunLevelFlowSubsystem>();
+	if (Flow && Flow->ShouldRestoreStage2EntryCheckpoint())
+		InWorld.OnWorldBeginPlay.AddUObject(this, &UCatrunRestartSubsystem::RestoreStage2EntryCheckpoint);
 	if (!Flow || !Flow->ShouldSkipStageIntro() || Flow->GetRestartFadeInDuration() <= 0.f)
 	{
 		return;
 	}
 
-	// The new level starts black and fades in; the cat is at its start place again.
+	// Fade in on the newly loaded level.
 	APlayerController* Controller = UGameplayStatics::GetPlayerController(&InWorld, 0);
 	if (Controller && Controller->PlayerCameraManager)
 	{
 		Controller->PlayerCameraManager->StartCameraFade(1.f, 0.f, Flow->GetRestartFadeInDuration(), FLinearColor::Black, false, false);
 	}
+}
+
+void UCatrunRestartSubsystem::RestoreStage2EntryCheckpoint()
+{
+	UWorld* World = GetWorld();
+	if (!World || !IsStage2World(*World)) return;
+	APawn* Pawn = UGameplayStatics::GetPlayerPawn(World, 0);
+	for (TActorIterator<ACatrunStatuePuzzle> It(World); It; ++It)
+	{
+		FVector GateLocation;
+		if (!It->RestoreStage2EntryCheckpoint(GateLocation)) continue;
+		bStage2EntryCheckpointReached = true;
+		if (Pawn)
+		{
+			// Gate11 spans X. The main Stage2 route continues toward -Y from the practice area.
+			FTransform Spawn = Pawn->GetActorTransform();
+			for (const double Distance : {110., 80., 140.})
+			{
+				Spawn.SetLocation(FVector(GateLocation.X, GateLocation.Y - Distance, Spawn.GetLocation().Z));
+				if (!CatrunRestore::TryPlaceOnSupport(*Pawn, Spawn)) continue;
+				if (auto* Movement = Pawn->GetMovementComponent()) Movement->StopMovementImmediately();
+				return;
+			}
+		}
+		UE_LOG(LogTemp, Display, TEXT("Stage2 checkpoint restored Gate11; no clear supported checkpoint spawn, retaining the normal start."));
+		return;
+	}
+	UE_LOG(LogTemp, Display, TEXT("Stage2 checkpoint has no valid practice puzzle link."));
 }

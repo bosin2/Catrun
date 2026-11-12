@@ -17,6 +17,8 @@ class APlayerController;
 class UCatrunExitTransitionComponent;
 class FCatrunProgressWriter;
 class ISaveGameSystem;
+class UCatrunProgressSave;
+class UTexture2D;
 
 /** A single-use travel token. A different destination discards it rather than leaking into a later run. */
 struct CATRUN_API FCatrunRestartIntent
@@ -24,12 +26,16 @@ struct CATRUN_API FCatrunRestartIntent
 	FString MapPackage;
 	float FadeInDuration = 0.f;
 	bool bContinue = false;
-	void Request(const FString& Package, float FadeDuration, bool bIsContinue = false);
+	bool bRestoreStage2EntryCheckpoint = false;
+	void Request(const FString& Package, float FadeDuration, bool bIsContinue = false, bool bRestoreCheckpoint = false);
 	void Clear();
 	bool Consume(const FString& Package, float& OutFadeDuration);
 };
 
 enum class ECatrunArrivalRestart : uint8 { Preserve, Clear, SkipIntro, Continue };
+UENUM(BlueprintType)
+enum class ECatrunCheckpointState : uint8 { Idle, Pending, Saved, Failed };
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCatrunCheckpointStateChanged, ECatrunCheckpointState, State);
 
 /** Travel state belongs to one game session, including isolated PIE instances. */
 UCLASS()
@@ -37,11 +43,20 @@ class CATRUN_API UCatrunFlowSession : public UGameInstanceSubsystem
 {
 	GENERATED_BODY()
 public:
+	virtual void Deinitialize() override;
 	FCatrunRestartIntent RestartIntent;
-	uint64 AcceptTravel(const FString& Package, bool bBeginProgress, bool bCheckpoint, ECatrunArrivalRestart Restart, int8 OnboardingOnArrival = -1, float FadeInDuration = 0.f);
+	uint64 AcceptTravel(const FString& Package, bool bBeginProgress, bool bCheckpoint, ECatrunArrivalRestart Restart, int8 OnboardingOnArrival = -1, float FadeInDuration = 0.f, bool bRestoreStage2EntryCheckpoint = false);
 	void CancelTravel(uint64 ExpectedToken = 0);
 	void ResolveArrivalRestart(const FString& Package);
 	bool Arrive(const FString& Package);
+	void SaveArrivalCheckpoint(UWorld& World);
+	bool ConsumeArrivalTitle(const FString& Package);
+	int32 GetHighestUnlockedStageIndex();
+	const UCatrunProgressSave* LoadSavedProgress() const;
+	UFUNCTION(BlueprintPure, Category="Catrun|Progress")
+	ECatrunCheckpointState GetCheckpointState() const { return CheckpointState; }
+	UPROPERTY(BlueprintAssignable, Category="Catrun|Progress")
+	FCatrunCheckpointStateChanged OnCheckpointStateChanged;
 	bool IsTrackingWorld(const FString& Package) const;
 	/** Returns zero for an untracked/editor world; callback is not called in that case. */
 	uint64 SaveCurrentCheckpoint(const FString& Package, TFunction<void(bool, const FString&)> Completion = {});
@@ -52,7 +67,21 @@ public:
 	void SetSaveBackendForTest(ISaveGameSystem* Backend);
 #endif
 private:
+	void EnsureProgressLoaded();
+	uint64 BeginCheckpoint(const FString& Package, bool bRetryOnce, TFunction<void(bool, const FString&)> Completion);
+	uint64 EnqueueCheckpoint(FName StageId, uint64 Generation, uint64 Request, bool bRetryOnce, TFunction<void(bool, const FString&)> Completion);
+	void OnCheckpointQueueIdle();
 	TSharedPtr<FCatrunProgressWriter> Writer;
+	uint64 LatestSaveRequest = 0;
+	ECatrunCheckpointState CheckpointState = ECatrunCheckpointState::Idle;
+	ECatrunCheckpointState CompletedCheckpointState = ECatrunCheckpointState::Idle;
+	bool bProgressLoaded = false;
+	FName HighestUnlockedStageId;
+	FString TitleIntentMap;
+	bool bRestoreCheckpointOnArrival = false;
+#if WITH_DEV_AUTOMATION_TESTS
+	ISaveGameSystem* SaveBackendForTest = nullptr;
+#endif
 	uint64 ProgressGeneration = 0;
 	uint64 NextTravelToken = 0;
 	uint64 AcceptedTravelToken = 0;
@@ -83,6 +112,18 @@ struct FCatrunStageRoute
 	FName StageId;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TSoftObjectPtr<UWorld> Map;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly) FText DisplayName;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly) TSoftObjectPtr<UTexture2D> Thumbnail;
+};
+
+USTRUCT(BlueprintType)
+struct FCatrunChapterInfo
+{
+	GENERATED_BODY()
+	UPROPERTY(BlueprintReadOnly) FName StageId;
+	UPROPERTY(BlueprintReadOnly) FText DisplayName;
+	UPROPERTY(BlueprintReadOnly) TSoftObjectPtr<UTexture2D> Thumbnail;
+	UPROPERTY(BlueprintReadOnly) bool bUnlocked = false;
 };
 
 /** Ordered playable maps. Add Stage3 only when its map is ready. */
@@ -101,6 +142,7 @@ public:
 
 	int32 FindStageIndex(const FString& PackageName) const;
 	float GetCameraDistanceScale(FName StageId) const;
+	FText GetStageDisplayName(FName StageId) const;
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCatrunStageCompleted, FName, StageId);
@@ -122,13 +164,14 @@ public:
 
 	bool StartGame();
 	bool ContinueGame();
+	bool ContinueStage(FName StageId);
 	bool CompleteStage();
 	bool ReturnToMenu();
 	bool RestartStage();
 	/** The owner restores its own presentation after a same-world engine failure. Rejection returns false without invoking Failure. */
 	bool CompleteStageWithFailure(UObject* Owner, TFunction<void(const FString&)> Failure);
 	/** Same-map recovery also supports loaded development maps outside the canonical stage routes. */
-	bool RequestSameMapRestart(UObject* Owner, float FadeInDuration, TFunction<void(const FString&)> Failure = {});
+	bool RequestSameMapRestart(UObject* Owner, float FadeInDuration, TFunction<void(const FString&)> Failure = {}, bool bRestoreStage2EntryCheckpoint = false);
 	bool ReserveExitTransition(UObject* Owner);
 	void ReleaseExitTransition(const UObject* Owner);
 	bool CompleteStageForExit(UObject* Owner);
@@ -139,6 +182,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Level Flow")
 	bool ShouldSkipStageIntro();
 	float GetRestartFadeInDuration();
+	bool ShouldRestoreStage2EntryCheckpoint();
+	bool ConsumeStageTitle(FText& OutTitle);
+	FText GetCurrentStageTitle() const;
 	bool ApplyStageCameraProfile(UCameraComponent* Camera, USpringArmComponent* SpringArm);
 	UFUNCTION(BlueprintCallable, Category="Level Flow")
 	void SetPauseMenu(bool bOpen);
@@ -153,7 +199,7 @@ public:
 private:
 	bool TravelTo(const TSoftObjectPtr<UWorld>& Map, const FString& Options = FString(), bool bBeginProgress = false,
 		bool bCheckpoint = false, ECatrunArrivalRestart Restart = ECatrunArrivalRestart::Clear, UObject* ExitOwner = nullptr, int8 Onboarding = -1,
-		UObject* FailureOwner = nullptr, TFunction<void(const FString&)> Failure = {}, float FadeInDuration = 0.f, bool bReloadCurrentWorld = false);
+		UObject* FailureOwner = nullptr, TFunction<void(const FString&)> Failure = {}, float FadeInDuration = 0.f, bool bReloadCurrentWorld = false, bool bRestoreStage2EntryCheckpoint = false);
 	bool CompleteStageInternal(UObject* ExitOwner, UObject* FailureOwner = nullptr, TFunction<void(const FString&)> Failure = {});
 	void ClearFailedTravel();
 	void FinishTravel();
@@ -161,6 +207,8 @@ private:
 	bool bRestartIntentResolved = false;
 	bool bSkipStageIntro = false;
 	bool bContinueArrival = false;
+	bool bRestoreStage2EntryCheckpoint = false;
+	bool bStageTitlePending = false;
 	bool bControlsOffered = false;
 	float RestartFadeInDuration = 0.f;
 	TWeakObjectPtr<UCameraComponent> GameplayCamera;
@@ -185,6 +233,22 @@ class CATRUN_API UCatrunLevelFlowLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_BODY()
 public:
+	UFUNCTION(BlueprintPure, Category="Catrun|Level Flow", meta=(WorldContext="WorldContextObject"))
+	static UCatrunFlowSession* GetFlowSession(const UObject* WorldContextObject);
+	UFUNCTION(BlueprintPure, Category="Catrun|Level Flow", meta=(WorldContext="WorldContextObject"))
+	static TArray<FCatrunChapterInfo> GetChapters(const UObject* WorldContextObject);
+	UFUNCTION(BlueprintPure, Category="Catrun|Level Flow", meta=(WorldContext="WorldContextObject"))
+	static TArray<FName> GetUnlockedStages(const UObject* WorldContextObject);
+	UFUNCTION(BlueprintPure, Category="Catrun|Level Flow", meta=(WorldContext="WorldContextObject"))
+	static bool CanContinueStage(const UObject* WorldContextObject, FName StageId);
+	UFUNCTION(BlueprintCallable, Category="Catrun|Level Flow", meta=(WorldContext="WorldContextObject"))
+	static bool ContinueStage(const UObject* WorldContextObject, FName StageId);
+	UFUNCTION(BlueprintPure, Category="Catrun|Progress", meta=(WorldContext="WorldContextObject"))
+	static ECatrunCheckpointState GetCheckpointState(const UObject* WorldContextObject);
+	UFUNCTION(BlueprintPure, Category="Catrun|Level Flow", meta=(WorldContext="WorldContextObject"))
+	static FText GetCurrentStageTitle(const UObject* WorldContextObject);
+	UFUNCTION(BlueprintCallable, Category="Catrun|Level Flow", meta=(WorldContext="WorldContextObject"))
+	static bool ConsumeStageTitle(const UObject* WorldContextObject, FText& OutTitle);
 	UFUNCTION(BlueprintCallable, Category="Catrun|Level Flow", meta=(WorldContext="WorldContextObject"))
 	static bool StartNewGame(const UObject* WorldContextObject);
 	UFUNCTION(BlueprintPure, Category="Catrun|Level Flow", meta=(WorldContext="WorldContextObject"))

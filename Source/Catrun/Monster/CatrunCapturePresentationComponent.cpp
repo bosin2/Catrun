@@ -335,7 +335,7 @@ void UCatrunCapturePresentationComponent::TickComponent(float DeltaTime, ELevelT
 				Capture->AbortCapture();
 			};
 			auto* Restart = UCatrunRestartSubsystem::Get(this);
-			if (!Restart || !Restart->RestartLevel(Settings->RestartFadeInTime, RestoreRejectedRestart))
+			if (!Restart || !Restart->RestartLevel(Settings->RestartFadeInTime, RestoreRejectedRestart, true))
 				RestoreRejectedRestart(TEXT("Capture restart was not accepted."));
 		}
 	}
@@ -348,7 +348,7 @@ void UCatrunCapturePresentationComponent::Cleanup(bool bRestoreTransform)
 	if (auto* Pawn = Cat.Get())
 	{
 		const FTransform Desired = bRestoreTransform ? OriginalTransform : Pawn->GetActorTransform();
-		const bool bPlacedSafely = CatrunRestore::PlaceForCollision(*Pawn, Desired, bCollision);
+		const bool bPlacedSafely = CatrunRestore::PlaceForCollision(*Pawn, Desired, bCollision, EMovementMode(MovementMode), CustomMode);
 		Pawn->SetActorEnableCollision(bCollision && bPlacedSafely);
 		if (auto* Character = Cast<ACharacter>(Pawn))
 		{

@@ -4,6 +4,8 @@
 #include "Components/ActorComponent.h"
 #include "CatrunCatStateComponent.generated.h"
 
+class ACharacter;
+
 /**
  * Watches what the cat is doing, without changing the cat's blueprints (it only reads the
  * blueprint variables by name). Added to the cat automatically by ASoundGridManager.
@@ -28,6 +30,9 @@ public:
 
 	// True from the start of the "get into a hideout" animation until the cat is hidden.
 	bool IsEnteringHideout() const { return bEnteringHideout; }
+
+	// Keep the pre-tuning locomotion cap for statue pushes when the cat Blueprint opts in.
+	static float GetStatuePushSpeedLimit(const ACharacter& Cat);
 
 private:
 	void UpdateFootsteps(float DeltaTime);

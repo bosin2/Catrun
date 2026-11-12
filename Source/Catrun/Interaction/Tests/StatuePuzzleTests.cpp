@@ -19,6 +19,7 @@
 #include "Components/InputComponent.h"
 #include "Camera/CameraActor.h"
 #include "Engine/Engine.h"
+#include "Engine/GameInstance.h"
 #include "GameFramework/PlayerController.h"
 #include "LevelFlow/CatrunLevelFlow.h"
 #include "UObject/UnrealType.h"
@@ -30,6 +31,7 @@
 #include "Grid/CatrunGridData.h"
 #include "Pathfinding/ArmorPathfinder.h"
 #include "Sound/SoundPropagation.h"
+#include "TimerManager.h"
 
 namespace
 {
@@ -52,11 +54,19 @@ namespace
 			Actor->SetActorLocation(Location);
 			return Actor;
 		}
-		FStatueFixture(float GateHeight=246.f)
+		FStatueFixture(float GateHeight=246.f, bool bStage2Checkpoint=false)
 		{
 			const auto Init=UWorld::InitializationValues().AllowAudioPlayback(false).CreatePhysicsScene(true).CreateNavigation(false).CreateAISystem(false);
-			World=UWorld::CreateWorld(EWorldType::Game,false,NAME_None,nullptr,true,ERHIFeatureLevel::Num,&Init);
+			UPackage* Package = bStage2Checkpoint ? CreatePackage(*FString::Printf(TEXT("/Temp/CatrunCheckpoint_%s/Stage2"),
+				*FGuid::NewGuid().ToString(EGuidFormats::Digits))) : nullptr;
+			World=UWorld::CreateWorld(EWorldType::Game,false,NAME_None,Package,true,ERHIFeatureLevel::Num,&Init);
 			GEngine->CreateNewWorldContext(EWorldType::Game).SetCurrentWorld(World);
+			if (bStage2Checkpoint)
+			{
+				auto* Instance = NewObject<UGameInstance>();
+				World->SetGameInstance(Instance);
+				Instance->Init();
+			}
 			Box(FVector(0,0,-10),FVector(2000,2000,10));
 			Statue=Box(FVector(0,0,0),FVector(60,60,75));
 			Statue->GetRootComponent()->SetRelativeLocation(FVector(0,0,0));
@@ -77,10 +87,29 @@ namespace
 			Puzzle=World->SpawnActor<ACatrunStatuePuzzle>();
 			Puzzle->Settings=NewObject<UCatrunStatuePuzzleSettings>(Puzzle);
 			auto& Link=Puzzle->Links.AddDefaulted_GetRef();
-			Link.PuzzleId=TEXT("Test"); Link.Statue=Statue; Link.Plate=Plate; Link.Gate=Gate;
+			Link.PuzzleId=bStage2Checkpoint ? TEXT("C") : TEXT("Test"); Link.Statue=Statue; Link.Plate=Plate; Link.Gate=Gate;
+			if (bStage2Checkpoint)
+			{
+				auto& Later = Puzzle->Links.AddDefaulted_GetRef();
+				Later.PuzzleId = TEXT("A");
+				Later.Statue = Box(FVector(850,0,75), FVector(60,60,75));
+				Later.Plate = Box(FVector(850,200,5), FVector(65,65,1), false);
+				Later.Gate = Box(FVector(1100,0,GateHeight*.5), FVector(72,3,GateHeight*.5));
+			}
 			Puzzle->InitializePuzzle();
 		}
-		~FStatueFixture(){ Puzzle->Reveal->CancelReveal(); GEngine->DestroyWorldContext(World); World->DestroyWorld(false); }
+		~FStatueFixture()
+		{
+			Puzzle->Reveal->CancelReveal();
+			if (auto* Instance = World->GetGameInstance())
+			{
+				World->EndPlay(EEndPlayReason::Quit);
+				Instance->Shutdown();
+				World->SetGameInstance(nullptr);
+			}
+			GEngine->DestroyWorldContext(World);
+			World->DestroyWorld(false);
+		}
 		APlayerController* AddPlayer()
 		{
 			World->InitializeActorsForPlay(FURL());
@@ -89,6 +118,78 @@ namespace
 			return PC;
 		}
 	};
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FStage2EntryCheckpointTest,"Catrun.Stage2.PracticeCheckpointCapturesOnlyCompletedSolveAndRestoresOnlyC",EAutomationTestFlags::EditorContext|EAutomationTestFlags::EngineFilter)
+bool FStage2EntryCheckpointTest::RunTest(const FString&)
+{
+	AddExpectedError(TEXT("Travel failed; progress retained:"), EAutomationExpectedErrorFlags::Contains, 1);
+	{
+		FStatueFixture F(246.f, true);
+		F.AddPlayer();
+		auto* Restart = F.World->GetSubsystem<UCatrunRestartSubsystem>();
+		auto* Session = F.World->GetGameInstance()->GetSubsystem<UCatrunFlowSession>();
+		F.Puzzle->Reveal->bEnabled = false;
+		TestFalse(TEXT("A fresh Stage2 world has no practice checkpoint"), Restart->HasStage2EntryCheckpoint());
+		F.Statue->SetActorLocation(FVector(0,200,0));
+		F.Puzzle->UpdatePlatesAndGates(.5f);
+		TestTrue(TEXT("The C plate is pressed before the gate completes"), F.Puzzle->Links[0].bPressed);
+		TestFalse(TEXT("A gate still opening does not set a checkpoint"), Restart->HasStage2EntryCheckpoint());
+		F.Puzzle->UpdatePlatesAndGates(3.f);
+		TestTrue(TEXT("The fully opened C gate sets the checkpoint"), Restart->HasStage2EntryCheckpoint());
+		TestTrue(TEXT("A capture can own the solved world"), Restart->TryBeginCatch());
+		TestTrue(TEXT("A capture requests owned same-map travel"), Restart->RestartLevel(0.f, [this, Restart](const FString&)
+		{
+			TestTrue(TEXT("Failed capture queues emergency recovery before releasing its catch"), Restart->ScheduleRecoveryRestart(0.f));
+			Restart->CancelCatch();
+		}, true));
+		const FString Package = F.World->GetOutermost()->GetName();
+		Session->ResolveArrivalRestart(Package);
+		TestTrue(TEXT("Capture carries a practice checkpoint for this destination"), Session->RestartIntent.bRestoreStage2EntryCheckpoint);
+		Session->RestartIntent.Clear();
+		GEngine->GetWorldContextFromWorld(F.World)->TravelURL.Reset();
+		GEngine->OnTravelFailure().Broadcast(F.World, ETravelFailure::InvalidURL, TEXT("Injected Stage2 capture travel failure"));
+		// Isolate recovery without the engine's default disconnect/fallback URL.
+		// A competing URL is covered by EmergencyRecoveryRejectionRestoresSupportedStart.
+		GEngine->GetWorldContextFromWorld(F.World)->TravelURL.Reset();
+		F.World->GetTimerManager().Tick(.01f);
+		Session->ResolveArrivalRestart(Package);
+		TestTrue(TEXT("Emergency reload also carries the checkpoint from the failed capture"), Session->RestartIntent.bRestoreStage2EntryCheckpoint);
+	}
+	for (const bool bCaptureArrival : {false, true})
+	{
+		FStatueFixture F(246.f, true);
+		F.AddPlayer();
+		auto* Session = F.World->GetGameInstance()->GetSubsystem<UCatrunFlowSession>();
+		auto* Probe = NewObject<UCatrunPuzzleCallbackProbe>(F.Puzzle);
+		Probe->Puzzle = F.Puzzle;
+		F.Puzzle->OnPuzzleEvent.AddDynamic(Probe, &UCatrunPuzzleCallbackProbe::PuzzleEvent);
+		F.Puzzle->OnCheckpointRestored.AddDynamic(Probe, &UCatrunPuzzleCallbackProbe::CheckpointRestored);
+		const FVector Start = F.Cat->GetActorLocation();
+		const FTransform LaterGate = F.Puzzle->Links[1].Gate->GetActorTransform();
+		Session->AcceptTravel(F.World->GetOutermost()->GetName(), false, false,
+			bCaptureArrival ? ECatrunArrivalRestart::SkipIntro : ECatrunArrivalRestart::Continue, -1, 0.f, bCaptureArrival);
+		F.World->BeginPlay();
+		const auto& C = F.Puzzle->Links[0];
+		TestEqual(TEXT("Only the captured arrival restores C completion"), C.bCompleted, bCaptureArrival);
+		TestEqual(TEXT("Only the captured arrival restores the depressed plate"), C.bPressed, bCaptureArrival);
+		TestEqual(TEXT("Only the captured arrival restores the recessed gate"), C.GateOffset, bCaptureArrival ? -280.f : 0.f);
+		TestTrue(TEXT("The restored statue sits on C's plate"), F.Statue->GetActorLocation().Equals(
+			bCaptureArrival ? C.SeatLocation : C.InitialStatue.GetLocation()));
+		TestFalse(TEXT("The later puzzle stays unsolved"), F.Puzzle->Links[1].bCompleted);
+		TestTrue(TEXT("The later gate retains its authored location"), F.Puzzle->Links[1].Gate->GetActorTransform().Equals(LaterGate));
+		TestTrue(TEXT("Restore starts no reveal"), F.Puzzle->Reveal->Phase == ECatrunPuzzleRevealPhase::Inactive);
+		TestEqual(TEXT("Restore emits no gameplay completion event"), Probe->Counts[static_cast<int32>(ECatrunStatueEvent::Completed)], 0);
+		TestEqual(TEXT("Only capture restores persistent presentation"), Probe->CheckpointRestoreCount, bCaptureArrival ? 1 : 0);
+		TestEqual(TEXT("Checkpoint visual notification names only C"), Probe->RestoredPuzzleId, bCaptureArrival ? FName(TEXT("C")) : NAME_None);
+		TestEqual(TEXT("Presentation reads solved state during checkpoint notification"), Probe->bSeatedOnCheckpointRestore, bCaptureArrival);
+		const FVector Expected = bCaptureArrival ? FVector(500,-110,28) : Start;
+		TestTrue(TEXT("Captured spawn stands beyond Gate11 and Continue retains the original start"), F.Cat->GetActorLocation().Equals(Expected, .1));
+		TestTrue(TEXT("Arrival keeps normal pawn collision"), F.Cat->GetActorEnableCollision());
+		TestEqual(TEXT("A restored world can carry the same checkpoint on its next capture"),
+			F.World->GetSubsystem<UCatrunRestartSubsystem>()->HasStage2EntryCheckpoint(), bCaptureArrival);
+	}
+	return true;
 }
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FStatuePlateGateTest,"Catrun.Stage2.PlateGateAndSafeClosing",EAutomationTestFlags::EditorContext|EAutomationTestFlags::EngineFilter)

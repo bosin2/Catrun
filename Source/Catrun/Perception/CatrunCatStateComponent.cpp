@@ -1,6 +1,7 @@
 #include "CatrunCatStateComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/Character.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 #include "Catrun.h"
 #include "Sound/CatrunSoundSettings.h"
@@ -46,6 +47,19 @@ bool UCatrunCatStateComponent::ReadCatBool(const TCHAR* VariableName) const
 	const UObject* Cat = GetOwner();
 	const FBoolProperty* Property = Cat ? FindFProperty<FBoolProperty>(Cat->GetClass(), VariableName) : nullptr;
 	return Property && Property->GetPropertyValue_InContainer(Cat);
+}
+
+float UCatrunCatStateComponent::GetStatuePushSpeedLimit(const ACharacter& Cat)
+{
+	const auto* Movement = Cat.GetCharacterMovement();
+	const float Speed = Movement->GetMaxSpeed();
+	if (Movement->IsCrouching()) return Speed;
+
+	const auto* OffsetProperty = FindFProperty<FNumericProperty>(Cat.GetClass(), TEXT("StatuePushLocomotionOffset"));
+	if (!OffsetProperty || !OffsetProperty->IsFloatingPoint()) return Speed;
+
+	const double Offset = OffsetProperty->GetFloatingPointPropertyValue(OffsetProperty->ContainerPtrToValuePtr<void>(&Cat));
+	return FMath::IsFinite(Offset) && Offset > 0.0 ? static_cast<float>(FMath::Max(0.0, Speed - Offset)) : Speed;
 }
 
 bool UCatrunCatStateComponent::ReadActionsBool(const TCHAR* VariableName) const

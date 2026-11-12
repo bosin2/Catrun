@@ -23,6 +23,7 @@
 #include "Monster/CatrunMarkSubsystem.h"
 #include "Interaction/CatrunBasketInteractionComponent.h"
 #include "Interaction/CatrunHideBasket.h"
+#include "Interaction/CatrunStatuePuzzle.h"
 #include "Perception/CatrunCatStateComponent.h"
 #include "LevelFlow/CatrunLevelFlow.h"
 #include "Sound/SoundGridManager.h"
@@ -109,10 +110,35 @@ bool FCatrunSoundPriorityTest::RunTest(const FString&)
 	Sound.Size = ECatrunSoundSize::Large;
 	Armor->OnSoundHeard_Implementation(Sound, 100.f);
 	TestTrue(TEXT("Louder sound can interrupt travel"), Armor->GetInvestigationLocation().Equals(Sound.Location));
-	Armor->SetAction(EArmorAction::Looking); Sound.Size = ECatrunSoundSize::Small; Sound.Location = FVector(500,600,90);
+	Armor->GetMesh()->SetSkeletalMeshAsset(LoadObject<USkeletalMesh>(nullptr,
+		TEXT("/Game/Characters/LivingArmor/Final/Meshes/SK_LivingArmor_Final.SK_LivingArmor_Final")));
+	Armor->ArrivalLookAnim = LoadObject<UAnimSequence>(nullptr,
+		TEXT("/Game/Characters/LivingArmor/Final/Animations/AN_LivingArmor_SoundReact.AN_LivingArmor_SoundReact"));
+	if (!TestNotNull(TEXT("Arrival search clip loads"), Armor->ArrivalLookAnim.Get())) return false;
+	Armor->ArrivalLookPlayRate = .8f;
+	Armor->FinishTrip();
+	const auto* SearchClip = CastChecked<UAnimSequence>(Armor->ArrivalLookAnim.Get());
+	const float SearchDuration = SearchClip->GetPlayLength() / (.8f * FMath::Abs(SearchClip->RateScale));
+	TestEqual(TEXT("Sound arrival enters Looking"), Armor->GetAction(), EArmorAction::Looking);
+	TestTrue(TEXT("Search duration matches the slowed clip"), FMath::IsNearlyEqual(Armor->ActionDuration, SearchDuration));
+	const auto* SearchPlayer = Armor->GetMesh()->GetSingleNodeInstance();
+	if (TestNotNull(TEXT("Search runs through the animation player"), SearchPlayer))
+	{
+		TestEqual(TEXT("Search player uses the same local rate"), SearchPlayer->GetPlayRate(), .8f);
+		TestFalse(TEXT("Search plays one cycle"), SearchPlayer->IsLooping());
+	}
+	Armor->ActionTime = SearchDuration - .01f;
+	Armor->TickLooking(.01f);
+	TestEqual(TEXT("Search remains active just before clip completion"), Armor->GetAction(), EArmorAction::Looking);
+	Sound.Size = ECatrunSoundSize::Small; Sound.Location = FVector(500,600,90);
 	Armor->OnSoundHeard_Implementation(Sound, 100.f);
 	TestTrue(TEXT("Looking accepts a small sound"), Armor->GetInvestigationLocation().Equals(Sound.Location));
-	Armor->StartReturnToPost(); Armor->UpdateMarkFollowing(.1f);
+	TestNotEqual(TEXT("A new sound immediately ends the search"), Armor->GetAction(), EArmorAction::Looking);
+	Armor->FinishTrip();
+	Armor->ActionTime = SearchDuration;
+	Armor->TickLooking(.01f);
+	TestNotEqual(TEXT("Looking exits at the actual clip end"), Armor->GetAction(), EArmorAction::Looking);
+	Armor->UpdateMarkFollowing(.1f);
 	TestFalse(TEXT("Completed investigation releases sound priority"), Armor->IsInvestigatingSound());
 	TestTrue(TEXT("Valid mark resumes at current cat position"), Armor->GetInvestigationLocation().Equals(F.Cat->GetActorLocation()));
 	Armor->TurnRightAnim = LoadObject<UAnimationAsset>(nullptr, TEXT("/Game/Characters/LivingArmor/Final/Animations/AN_LivingArmor_TurnRight90.AN_LivingArmor_TurnRight90"));
@@ -201,10 +227,54 @@ bool FCatrunArmorCaptureObstructionTest::RunTest(const FString&)
 	TestFalse(TEXT("Hidden cat stays safe on a clear path"), Armor->bSeeingCat || Capture->IsCapturing());
 
 	BasketActions->BasketPhase = ECatrunBasketPhase::Outside;
+	Armor->SetAction(EArmorAction::Looking);
 	Armor->UpdateDetection();
-	TestTrue(TEXT("An exposed cat is seen and captured after the gate opens"),
-		Armor->bSeeingCat && Armor->AlertMark->IsVisible() && Capture->IsCapturing());
+	TestTrue(TEXT("An exposed cat is seen and capture interrupts Looking"),
+		Armor->bSeeingCat && Armor->AlertMark->IsVisible() && Capture->IsCapturing() && Armor->IsCatching());
 	Capture->AbortCapture();
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunCanonicalLocomotionTuningTest, "Catrun.Tuning.CanonicalLocomotion", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FCatrunCanonicalLocomotionTuningTest::RunTest(const FString&)
+{
+	FPrototypeWorld F;
+	auto* CatClass = LoadClass<ACharacter>(nullptr, TEXT("/Game/Characters/BlackCat/Blueprints/BP_Cat.BP_Cat_C"));
+	const auto* PushSettings = LoadObject<UCatrunStatuePuzzleSettings>(nullptr,
+		TEXT("/Game/Systems/Interaction/Puzzles/DA_StatuePuzzleSettings.DA_StatuePuzzleSettings"));
+	if (!TestNotNull(TEXT("Canonical cat Blueprint loads"), CatClass) || !TestNotNull(TEXT("Statue puzzle settings load"), PushSettings)) return false;
+	FActorSpawnParameters Params;
+	Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	auto* Cat = F.World->SpawnActor<ACharacter>(CatClass, FVector(0, 300, 90), FRotator::ZeroRotator, Params);
+	if (!TestNotNull(TEXT("Canonical cat spawns"), Cat)) return false;
+	auto* UpdateSpeed = Cat->FindFunction(TEXT("UpdateMovementSpeed"));
+	const auto* Running = FindFProperty<FBoolProperty>(CatClass, TEXT("IsRunning"));
+	const auto* Sneaking = FindFProperty<FBoolProperty>(CatClass, TEXT("IsSneaking"));
+	if (!TestNotNull(TEXT("Normal speed update is callable"), UpdateSpeed) ||
+		!TestNotNull(TEXT("Run flag is reflected"), Running) || !TestNotNull(TEXT("Sneak flag is reflected"), Sneaking)) return false;
+
+	auto* Movement = Cat->GetCharacterMovement();
+	Movement->SetMovementMode(MOVE_Walking);
+	struct FMode { bool bRun; bool bSneak; float Speed; float OriginalSpeed; };
+	for (const FMode& Mode : { FMode{false, false, 79.f, 74.f}, FMode{true, false, 124.f, 119.f},
+		FMode{true, true, 53.f, 48.f}, FMode{false, true, 53.f, 48.f}, FMode{false, false, 79.f, 74.f} })
+	{
+		Running->SetPropertyValue_InContainer(Cat, Mode.bRun);
+		Sneaking->SetPropertyValue_InContainer(Cat, Mode.bSneak);
+		Cat->ProcessEvent(UpdateSpeed, nullptr);
+		Cat->ProcessEvent(UpdateSpeed, nullptr);
+		TestEqual(TEXT("Each Blueprint mode writes its fixed +5 speed"), Movement->GetMaxSpeed(), Mode.Speed);
+		const float PushLimit = UCatrunCatStateComponent::GetStatuePushSpeedLimit(*Cat);
+		TestEqual(TEXT("Statue push uses the prior player locomotion limit"), PushLimit, Mode.OriginalSpeed);
+		TestEqual(TEXT("The effective puzzle push cap is preserved"), FMath::Min(PushSettings->PushSpeed, PushLimit),
+			FMath::Min(PushSettings->PushSpeed, Mode.OriginalSpeed));
+	}
+	Cat->SetIsCrouched(true);
+	TestEqual(TEXT("Native crouch bypasses the Blueprint locomotion offset"),
+		UCatrunCatStateComponent::GetStatuePushSpeedLimit(*Cat), Movement->MaxWalkSpeedCrouched);
+	F.Cat->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+	TestEqual(TEXT("Characters without the authored offset retain their original cap"),
+		UCatrunCatStateComponent::GetStatuePushSpeedLimit(*F.Cat), F.Cat->GetCharacterMovement()->GetMaxSpeed());
 	return true;
 }
 

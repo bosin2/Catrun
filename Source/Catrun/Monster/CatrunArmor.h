@@ -203,6 +203,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Armor|Animation")
 	TObjectPtr<UAnimationAsset> ArrivalLookAnim;
 
+	// Playback rate for the arrival search only. Its state ends with the clip.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Armor|Animation", meta = (ClampMin = "0.1"))
+	float ArrivalLookPlayRate = 1.f;
+
 	// Played once when the armor catches the cat (it lifts the cat). The level restarts after it.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Armor|Animation")
 	TObjectPtr<UAnimationAsset> PickupAnim;

@@ -11,6 +11,7 @@ class UCatrunPuzzleRevealComponent;
 UENUM(BlueprintType)
 enum class ECatrunStatueEvent : uint8 { SnapStarted, Seated, GateOpening, Completed, Reset };
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FCatrunStatueEvent, FName, PuzzleId, ECatrunStatueEvent, Event, int32, Revision);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCatrunPuzzleCheckpointRestored, FName, PuzzleId);
 
 /** Shared tuning for the Stage 2 statue puzzles; level links only contain placement references. */
 UCLASS(BlueprintType)
@@ -101,6 +102,8 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Puzzle") TObjectPtr<UCatrunPuzzleRevealComponent> Reveal;
 	/** Revision changes on reset; callbacks must retain it to reject stale presentation. */
 	UPROPERTY(BlueprintAssignable, Category="Puzzle") FCatrunStatueEvent OnPuzzleEvent;
+	/** Refreshes persistent presentation after a checkpoint without replaying the solve. */
+	UPROPERTY(BlueprintAssignable, Category="Puzzle") FCatrunPuzzleCheckpointRestored OnCheckpointRestored;
 
 	UFUNCTION(BlueprintCallable, Category="Puzzle")
 	void InitializePuzzle();
@@ -118,10 +121,13 @@ public:
 	void OnPlateChanged(FName PuzzleId, bool bPressed);
 
 	UFUNCTION(BlueprintPure, Category="Puzzle") float GetSeatingOverlap(int32 Index) const;
+	UFUNCTION(BlueprintPure, Category="Puzzle") bool IsPuzzleSeated(FName PuzzleId) const;
 	/** Exact integration of a constant acceleration segment, including reaching target speed mid-frame. */
 	static float IntegratePushSpeed(float& Speed, float Target, float Acceleration, float DeltaSeconds);
 	/** Current world boxes for both sound and armor routing. Fully recessed gates cease blocking. */
 	void GetObstacleBounds(TArray<FBox>& OutBounds) const;
+	/** Recreate the practice room solve on a capture restart without gameplay solve events. */
+	bool RestoreStage2EntryCheckpoint(FVector& OutGateLocation);
 
 private:
 	bool ResetStatues(const TArray<int32>& Indices);
