@@ -357,6 +357,7 @@ UCatrunSettingsWidget* UCatrunSettingsSubsystem::OpenSettings(APlayerController*
  }
  IgnoreHeldKeysUntilRelease();
  PlayerController->FlushPressedKeys();
+ OnSettingsOpened.Broadcast();
  return Widget;
 }
 void UCatrunSettingsSubsystem::CloseSettings()

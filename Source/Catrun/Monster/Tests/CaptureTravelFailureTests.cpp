@@ -3,6 +3,7 @@
 #include "Monster/CatrunArmor.h"
 #include "Monster/CatrunCapturePresentationComponent.h"
 #include "Monster/CatrunRestartSubsystem.h"
+#include "Monster/Tests/CatrunCaptureCallbackProbe.h"
 #include "LevelFlow/CatrunLevelFlow.h"
 #include "Sound/CatrunSoundSettings.h"
 #include "Camera/CameraActor.h"
@@ -48,6 +49,7 @@ struct FCaptureTravelFixture
         // These two input-lock layers belong to a separate presentation owner.
         PC->SetIgnoreMoveInput(true); PC->SetIgnoreLookInput(true);
         Armor = World->SpawnActor<ACatrunArmor>(); Armor->SetActorLocation(FVector(100,0,90));
+        Armor->DispatchBeginPlay();
         Settings = NewObject<UCatrunSoundSettings>(Armor);
         Armor->CapturePresentation->bUseBlueprintPresentation = true;
     }
@@ -57,6 +59,14 @@ struct FCaptureTravelFixture
         if (!Capture->BeginCapture(Cat, Settings)) return false;
         Capture->TickComponent(Settings->CatchCameraBlendTime + .01f, LEVELTICK_All, nullptr);
         return Capture->NotifyGrab(Capture->SessionId) && Capture->NotifyFinished(Capture->SessionId);
+    }
+    ACatrunArmor* SpawnWaiter()
+    {
+        auto* Other = World->SpawnActor<ACatrunArmor>();
+        Other->SetActorLocation(FVector(500,0,90));
+        Other->DispatchBeginPlay();
+        Other->GetCharacterMovement()->SetMovementMode(MOVE_Flying);
+        return Other;
     }
     void RequestRestart()
     {
@@ -107,12 +117,151 @@ struct FCaptureTravelFixture
     }
     ~FCaptureTravelFixture()
     {
-        Armor->CapturePresentation->AbortCapture();
+        if (IsValid(Armor)) Armor->CapturePresentation->AbortCapture();
         World->EndPlay(EEndPlayReason::Quit);
         Instance->Shutdown(); World->SetGameInstance(nullptr);
         GEngine->DestroyWorldContext(World); World->DestroyWorld(false);
     }
 };
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunCaptureSingleOwnerTest, "Catrun.PrototypeAI.CaptureSingleOwnerSameFrameAndStaggeredWait", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FCatrunCaptureSingleOwnerTest::RunTest(const FString&)
+{
+    FCaptureTravelFixture F;
+    auto* Other = F.SpawnWaiter();
+    auto* Restart = F.World->GetSubsystem<UCatrunRestartSubsystem>();
+    auto* First = F.Armor->CapturePresentation.Get();
+    auto* Second = Other->CapturePresentation.Get();
+    const FVector OtherLocation = Other->GetActorLocation();
+    Other->AddMovementInput(FVector(-1,0,0));
+    Other->GetCharacterMovement()->Velocity = FVector(-300,0,0);
+    if (!TestTrue(TEXT("First valid captor acquires synchronously"), First->BeginCapture(F.Cat, F.Settings))) return false;
+    AActor* CaptureView = F.PC->GetViewTarget();
+    TestTrue(TEXT("Acquisition immediately puts other AI in WAIT"), Other->IsWaitingForCapture());
+    TestFalse(TEXT("Same-frame contender is rejected"), Second->BeginCapture(F.Cat, F.Settings));
+    TestEqual(TEXT("Rejected contender never begins a presentation session"), Second->SessionId, 0);
+    TestEqual(TEXT("Waiter movement disabled before next movement tick"), Other->GetCharacterMovement()->MovementMode, TEnumAsByte<EMovementMode>(MOVE_None));
+    Other->Tick(.5f);
+    Other->GetCharacterMovement()->TickComponent(.1f, LEVELTICK_All, nullptr);
+    TestTrue(TEXT("Queued input and path velocity cannot push into captured cat"), Other->GetActorLocation().Equals(OtherLocation));
+    Restart->CancelCatch(Second);
+    Restart->CancelCatch();
+    TestTrue(TEXT("Neither rejected component nor legacy caller can release first owner"), Restart->IsCatchOwner(First));
+    First->TickComponent(F.Settings->CatchCameraBlendTime + .01f, LEVELTICK_All, nullptr);
+    TestTrue(TEXT("Owner alone reaches its grab"), First->NotifyGrab(First->SessionId));
+    const FTransform Held = F.Cat->GetActorTransform();
+    TestFalse(TEXT("Staggered contender also rejected during hold"), Second->BeginCapture(F.Cat, F.Settings));
+    TestFalse(TEXT("Non-owner grab notify rejected"), Second->NotifyGrab(First->SessionId));
+    TestFalse(TEXT("Non-owner finish cannot issue restart"), Second->NotifyFinished(First->SessionId));
+    Second->AbortCapture();
+    TestTrue(TEXT("Contender cannot change cat pose or camera"), F.Cat->GetActorTransform().Equals(Held) && F.PC->GetViewTarget() == CaptureView);
+    TestEqual(TEXT("Cat movement remains owned by first capture"), F.Cat->GetCharacterMovement()->MovementMode, TEnumAsByte<EMovementMode>(MOVE_None));
+    First->AbortCapture();
+    TestFalse(TEXT("Cancellation releases waiter immediately"), Other->IsWaitingForCapture());
+    TestEqual(TEXT("Waiter restores prior movement mode"), Other->GetCharacterMovement()->MovementMode, TEnumAsByte<EMovementMode>(MOVE_Flying));
+    TestFalse(TEXT("Waiter restores animation tick state"), Other->GetMesh()->bPauseAnims);
+    TestTrue(TEXT("Previously rejected contender can capture after cancellation"), Second->BeginCapture(F.Cat, F.Settings));
+    Restart->CancelCatch(First);
+    TestTrue(TEXT("Former owner's late release cannot cancel new owner"), Restart->IsCatchOwner(Second));
+    Second->AbortCapture();
+    F.CheckRestored(*this);
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunCaptureFailedStartWaitTest, "Catrun.PrototypeAI.CaptureFailedStartRestoresWaitersAndAllowsRetry", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FCatrunCaptureFailedStartWaitTest::RunTest(const FString&)
+{
+    FCaptureTravelFixture F;
+    auto* Other = F.SpawnWaiter();
+    auto* Capture = F.Armor->CapturePresentation.Get();
+    TestFalse(TEXT("Invalid start cannot reserve cat"), Capture->BeginCapture(nullptr, F.Settings));
+    TestFalse(TEXT("Invalid start never freezes other AI"), Other->IsWaitingForCapture());
+    auto* Probe = NewObject<UCatrunCaptureCallbackProbe>(F.Armor);
+    Probe->Capture = Capture; Probe->AbortAt = ECatrunCapturePhase::Framing;
+    Capture->OnPhaseChanged.AddDynamic(Probe, &UCatrunCaptureCallbackProbe::PhaseChanged);
+    TestFalse(TEXT("Synchronous presentation cancellation reports failed start"), Capture->BeginCapture(F.Cat, F.Settings));
+    TestEqual(TEXT("Initial callback actually cancelled setup"), Probe->Calls, 1);
+    TestFalse(TEXT("Failed setup releases all waiting AI"), Other->IsWaitingForCapture());
+    TestTrue(TEXT("Failed setup restores original view"), F.PC->GetViewTarget() == F.OriginalView);
+    TestTrue(TEXT("Contender may retry after failed setup"), Other->CapturePresentation->BeginCapture(F.Cat, F.Settings));
+    Other->CapturePresentation->AbortCapture();
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunCaptureOwnerDestroyedTest, "Catrun.PrototypeAI.CaptureOwnerRemovalReleasesWaiters", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FCatrunCaptureOwnerDestroyedTest::RunTest(const FString&)
+{
+    FCaptureTravelFixture F;
+    auto* Other = F.SpawnWaiter();
+    if (!TestTrue(TEXT("Owner reaches hold/fade"), F.ReachFade())) return false;
+    F.Armor->Destroy();
+    TestFalse(TEXT("Destroying owner clears its reservation"), F.World->GetSubsystem<UCatrunRestartSubsystem>()->IsCatching());
+    TestFalse(TEXT("Destroying owner resumes other AI"), Other->IsWaitingForCapture());
+    TestTrue(TEXT("Owner destruction restores playable cat and view"), F.Cat->GetActorEnableCollision() && F.PC->GetViewTarget() == F.OriginalView);
+    TestFalse(TEXT("Owner destruction stops owned fade"), F.PC->PlayerCameraManager->bEnableFading);
+    TestTrue(TEXT("Surviving armor can acquire after owner destruction"), Other->CapturePresentation->BeginCapture(F.Cat, F.Settings));
+    Other->CapturePresentation->AbortCapture();
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunCaptureQueuedCancelTest, "Catrun.PrototypeAI.CaptureQueuedRestartCancelAndTravelTeardown", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FCatrunCaptureQueuedCancelTest::RunTest(const FString&)
+{
+    FCaptureTravelFixture F;
+    auto* Other = F.SpawnWaiter();
+    auto* Restart = F.World->GetSubsystem<UCatrunRestartSubsystem>();
+    auto* Flow = F.World->GetSubsystem<UCatrunLevelFlowSubsystem>();
+    auto* Context = GEngine->GetWorldContextFromWorld(F.World);
+    if (!TestTrue(TEXT("Capture reaches fade"), F.ReachFade())) return false;
+    F.RequestRestart();
+    const FString FirstURL = Context->TravelURL;
+    TestFalse(TEXT("Single restart was queued"), FirstURL.IsEmpty());
+    F.RequestRestart();
+    TestEqual(TEXT("Repeated ticks retain the same owned restart"), Context->TravelURL, FirstURL);
+    TestFalse(TEXT("Other owner cannot cancel restart"), Flow->AbortOwnedTravel(Other));
+    F.Armor->CapturePresentation->AbortCapture();
+    TestTrue(TEXT("Explicit cancellation removes its queued URL"), Context->TravelURL.IsEmpty());
+    TestFalse(TEXT("Explicit cancellation releases travel state"), Flow->IsTransitioning());
+    TestFalse(TEXT("Explicit cancellation releases waiting AI"), Other->IsWaitingForCapture());
+    TestFalse(TEXT("Explicit cancellation clears black fade"), F.PC->PlayerCameraManager->bEnableFading);
+    if (!TestTrue(TEXT("Cancelled queued capture can retry"), F.ReachFade())) return false;
+    F.RequestRestart();
+    const FString ForeignURL(TEXT("/Game/Maps/Stage1?ForeignOwner"));
+    Context->TravelURL = ForeignURL;
+    F.Armor->CapturePresentation->AbortCapture();
+    TestEqual(TEXT("Cancellation preserves subsequent foreign travel URL"), Context->TravelURL, ForeignURL);
+    TestFalse(TEXT("Pending foreign travel prevents another catch"), Other->CapturePresentation->BeginCapture(F.Cat, F.Settings));
+    Context->TravelURL.Reset();
+    if (!TestTrue(TEXT("Final capture can acquire"), F.ReachFade())) return false;
+    F.RequestRestart();
+    const FString TravelURL = Context->TravelURL;
+    F.Armor->CapturePresentation->EndPlay(EEndPlayReason::LevelTransition);
+    TestFalse(TEXT("World exit releases capture lease"), Restart->IsCatching());
+    TestEqual(TEXT("Successful world exit keeps accepted restart URL"), Context->TravelURL, TravelURL);
+    TestTrue(TEXT("Successful world exit keeps travel intent"), Flow->IsTransitioning());
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunCaptureQueuedOwnerDestroyedTest, "Catrun.PrototypeAI.CaptureOwnerRemovalCancelsOnlyItsQueuedRestart", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FCatrunCaptureQueuedOwnerDestroyedTest::RunTest(const FString&)
+{
+    FCaptureTravelFixture F;
+    auto* Other = F.SpawnWaiter();
+    if (!TestTrue(TEXT("Capture reaches fade"), F.ReachFade())) return false;
+    F.RequestRestart();
+    F.Armor->Destroy();
+    TestTrue(TEXT("Removed captor's queued URL is cancelled"), GEngine->GetWorldContextFromWorld(F.World)->TravelURL.IsEmpty());
+    TestFalse(TEXT("Removed captor leaves no transition lock"), F.World->GetSubsystem<UCatrunLevelFlowSubsystem>()->IsTransitioning());
+    TestFalse(TEXT("Removed captor leaves no capture lease"), F.World->GetSubsystem<UCatrunRestartSubsystem>()->IsCatching());
+    TestFalse(TEXT("Other AI resumes after queued owner's removal"), Other->IsWaitingForCapture());
+    TestTrue(TEXT("Cat view and movement restore after queued owner's removal"), F.PC->GetViewTarget()==F.OriginalView && F.Cat->GetCharacterMovement()->MovementMode==MOVE_Flying);
+    TestFalse(TEXT("Removed captor cannot leave black fade"), F.PC->PlayerCameraManager->bEnableFading);
+    F.PC->SetIgnoreMoveInput(false); F.PC->SetIgnoreLookInput(false);
+    TestFalse(TEXT("Capture and travel released exactly their own input layers"), F.PC->IsMoveInputIgnored() || F.PC->IsLookInputIgnored());
+    TestTrue(TEXT("Surviving contender can retry"), Other->CapturePresentation->BeginCapture(F.Cat, NewObject<UCatrunSoundSettings>(Other)));
+    Other->CapturePresentation->AbortCapture();
+    return true;
 }
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunCaptureRejectedTravelTest, "Catrun.PrototypeAI.CaptureRestartRejectionRestoresOnlyOwnedState", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
@@ -142,6 +291,7 @@ bool FCatrunCaptureFailedTravelTest::RunTest(const FString&)
     AddExpectedError(TEXT("Travel failed; progress retained:"), EAutomationExpectedErrorFlags::Contains, 0);
     AddExpectedError(TEXT("Injected foreign-world failure"), EAutomationExpectedErrorFlags::Contains, 1);
     FCaptureTravelFixture F;
+    auto* Other = F.SpawnWaiter();
     TestEqual(TEXT("Fixture is flying before capture snapshots movement"), F.Cat->GetCharacterMovement()->MovementMode, TEnumAsByte<EMovementMode>(MOVE_Flying));
     if (!TestTrue(TEXT("Fixture reaches the existing capture fade"), F.ReachFade())) return false;
     const int32 FirstSession = F.Armor->CapturePresentation->SessionId;
@@ -153,6 +303,10 @@ bool FCatrunCaptureFailedTravelTest::RunTest(const FString&)
     GEngine->GetWorldContextFromWorld(F.World)->TravelURL.Reset();
     GEngine->OnTravelFailure().Broadcast(F.World, ETravelFailure::InvalidURL, TEXT("Injected same-world failure"));
     F.CheckRestored(*this);
+    TestFalse(TEXT("Same-world travel failure restores waiting AI"), Other->IsWaitingForCapture());
+    // Engine failure handling may queue its own fallback after the flow listener returns.
+    // Retry here models the old world surviving after that fallback was cancelled.
+    GEngine->GetWorldContextFromWorld(F.World)->TravelURL.Reset();
     TestTrue(TEXT("A subsequent capture can acquire ownership"), F.Armor->CapturePresentation->BeginCapture(F.Cat, F.Settings));
     TestTrue(TEXT("Retry has a new capture session"), F.Armor->CapturePresentation->SessionId > FirstSession);
     GEngine->OnTravelFailure().Broadcast(F.World, ETravelFailure::InvalidURL, TEXT("Late duplicate failure"));

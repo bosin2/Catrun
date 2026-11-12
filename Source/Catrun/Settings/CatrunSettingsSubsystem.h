@@ -37,6 +37,7 @@ class CATRUN_API UCatrunSettingsSubsystem : public UTickableWorldSubsystem
 {
  GENERATED_BODY()
 public:
+ FSimpleMulticastDelegate OnSettingsOpened;
  UFUNCTION(BlueprintPure, Category="Catrun|Settings", meta=(WorldContext="Context")) static UCatrunSettingsSubsystem* Get(const UObject* Context);
  UFUNCTION(BlueprintCallable, Category="Catrun|Settings") UCatrunSettingsWidget* OpenSettings(APlayerController* PlayerController, UWidget* SourcePanel=nullptr);
  UFUNCTION(BlueprintCallable, Category="Catrun|Settings") void CloseSettings();

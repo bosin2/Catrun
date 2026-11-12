@@ -22,7 +22,7 @@ bool FCatrunBindingValidationTest::RunTest(const FString&)
  TestTrue(TEXT("Authored defaults are valid"),Keys.Validate(Error));
  TestEqual(TEXT("Bell default is the actual authored SpaceBar"),Keys.Get(ECatrunInputSlot::Bell),EKeys::SpaceBar);
  TestFalse(TEXT("Out-of-range slot is invalid, never reads beyond the draft"),Keys.Get(static_cast<ECatrunInputSlot>(255)).IsValid());
- for (FKey Invalid : {FKey(),EKeys::Escape,EKeys::AnyKey,EKeys::LeftMouseButton,EKeys::MouseX,EKeys::Gamepad_FaceButton_Bottom,EKeys::Gamepad_LeftX})
+ for (FKey Invalid : {FKey(),EKeys::Escape,EKeys::Tab,EKeys::AnyKey,EKeys::LeftMouseButton,EKeys::MouseX,EKeys::Gamepad_FaceButton_Bottom,EKeys::Gamepad_LeftX})
  {
   auto Draft=Keys; Draft.Keys[6]=Invalid;
   TestFalse(FString::Printf(TEXT("Rejected non-keyboard/reserved key: %s"),*Invalid.ToString()),Draft.Validate(Error));
@@ -83,6 +83,39 @@ bool FCatrunReservedBindingTransactionTest::RunTest(const FString&)
  if (!TestNotNull(TEXT("Persisted typed binding property"),Property)) return false;
  *Property->ContainerPtrToValuePtr<FCatrunKeyboardBindings>(Settings)=ReservedDraft;
  TestTrue(TEXT("A complete stored draft containing a reserved key reads as defaults"),Settings->GetKeyboardBindings()==Defaults);
+ return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunLegacyTabBindingTest,"Catrun.Settings.LegacyTabBindingKeepsOtherKeys",
+ EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FCatrunLegacyTabBindingTest::RunTest(const FString&)
+{
+ auto* InputSettings=GetMutableDefault<UInputSettings>();
+ const TGuardValue<TArray<FKey>> ConsoleKeysGuard(InputSettings->ConsoleKeys,TArray<FKey>{EKeys::Tilde});
+ auto* Settings=NewObject<UCatrunUserSettings>();
+ auto* Property=FindFProperty<FStructProperty>(Settings->GetClass(),TEXT("KeyboardBindings"));
+ if (!TestNotNull(TEXT("Persisted binding property"),Property)) return false;
+ auto* Stored=Property->ContainerPtrToValuePtr<FCatrunKeyboardBindings>(Settings);
+ const int32 Forward=static_cast<int32>(ECatrunInputSlot::Forward);
+ const int32 Bell=static_cast<int32>(ECatrunInputSlot::Bell);
+ const int32 Interact=static_cast<int32>(ECatrunInputSlot::Interact);
+ FCatrunKeyboardBindings Legacy;
+ Legacy.Keys[Forward]=EKeys::I;
+ Legacy.Keys[Bell]=EKeys::Tab;
+ Legacy.Keys[Interact]=EKeys::E;
+ FText Error;
+ TestFalse(TEXT("A new gameplay draft cannot claim the map key"),Settings->SetKeyboardBindings(Legacy,Error));
+
+ *Stored=Legacy;
+ auto Expected=Legacy;
+ Expected.Keys[Bell]=EKeys::SpaceBar;
+ TestTrue(TEXT("Existing Tab uses its free slot default and keeps the other choices"),Settings->GetKeyboardBindings()==Expected);
+
+ Legacy.Keys[Forward]=EKeys::SpaceBar;
+ *Stored=Legacy;
+ Expected=Legacy;
+ Expected.Keys[Bell]=EKeys::W;
+ TestTrue(TEXT("An occupied default picks a free default without taking another action's key"),Settings->GetKeyboardBindings()==Expected);
  return true;
 }
 

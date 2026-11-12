@@ -31,7 +31,8 @@ public:
 	float ActivationTolerance = 18.f;
 	/** ActivationTolerance remains serialized for old assets; seating uses overlap and axis tolerances. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Plate", meta=(ClampMin="0.5", ClampMax="1")) float SeatingOverlap = .8f;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Plate", meta=(ClampMin="0")) float SocketAxisTolerance = 12.f;
+	/** Allows a full stop from a perpendicular push before aligning on the final push axis. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Plate", meta=(ClampMin="0")) float SocketAxisTolerance = 24.f;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Plate", meta=(ClampMin="0")) float SocketHeightTolerance = 12.f;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Plate", meta=(ClampMin="0"))
 	float PlateTravel = 2.f;

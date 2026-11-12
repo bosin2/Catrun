@@ -842,6 +842,20 @@ bool FCatrunBellCaptureTest::RunTest(const FString&)
 	TestFalse(TEXT("Reveal suspension refuses new bell"),Actions->BeginBellAction()); Guard->Release(Armor);
 	Actions->Busy=true; Actions->CancelBellAction();
 	TestTrue(TEXT("No active bell cannot clear another action's Busy"),Actions->Busy); Actions->Busy=false;
+	TestTrue(TEXT("Short bell begins after capture cleanup"),Actions->BeginBellAction());
+	const int32 ShortSession=Actions->BellSessionId;
+	++GFrameCounter; F.World->GetTimerManager().Tick(0.f);
+	++GFrameCounter; F.World->GetTimerManager().Tick(.6f);
+	TestTrue(TEXT("Emission precedes the shorter recovery deadline"),Actions->bBellEmitted && Actions->bBellActive);
+	Actions->EmitBellAction(ShortSession);
+	TestTrue(TEXT("Repeated emission callback retains the emitted session"),Actions->bBellEmitted && Actions->BellSessionId==ShortSession);
+	++GFrameCounter; F.World->GetTimerManager().Tick(.41f);
+	TestFalse(TEXT("Default bell releases Busy and its action by 1.01 seconds"),Actions->Busy || Actions->bBellActive);
+	TestEqual(TEXT("Short recovery restores walking"),F.Cat->GetCharacterMovement()->MovementMode,TEnumAsByte<EMovementMode>(MOVE_Walking));
+	TestEqual(TEXT("Short recovery restores the previous animation mode"),F.Cat->GetMesh()->GetAnimationMode(),StableMode);
+	Actions->Busy=true;
+	Actions->FinishBellAction(ShortSession);
+	TestTrue(TEXT("Late recovery cannot clear a subsequent action's Busy"),Actions->Busy); Actions->Busy=false;
 	F.PC->SetIgnoreLookInput(false);
 	return true;
 }
@@ -1012,8 +1026,9 @@ bool FCatrunArmorTravelSafetyTest::RunTest(const FString&)
 	Armor->Action=EArmorAction::Walking;
 	TestTrue(TEXT("Another capture can acquire shared guard"),F.World->GetSubsystem<UCatrunRestartSubsystem>()->TryBeginCatch());
 	Armor->StartCatch(*F.Cat);
-	TestEqual(TEXT("Refused acquisition preserves prior owner action"),Armor->GetAction(),EArmorAction::Walking);
+	TestEqual(TEXT("Other owner's acquisition freezes approach"),Armor->GetAction(),EArmorAction::WaitingForCapture);
 	F.World->GetSubsystem<UCatrunRestartSubsystem>()->CancelCatch();
+	TestEqual(TEXT("Release restores prior AI action"),Armor->GetAction(),EArmorAction::Walking);
 	auto* Door=F.Spawn<ACatrunDoor>(FVector(1000,1000,0));
 	Door->BeginHandOpen(Armor->GetActorLocation());
 	Armor->DoorBeingOpened=Door; Armor->bDoorHandDriven=true; Armor->bDoorReleased=false;
@@ -1170,6 +1185,33 @@ bool FCatrunCaptureFramingYawTest::RunTest(const FString&)
 	Armor->SetActorRotation(FRotator(0,90,0)); Capture->BeginCapture(F.Cat,F.Settings); Capture->TickComponent(0.f,LEVELTICK_All,nullptr);
 	TestTrue(TEXT("Explicit zero framing reaches target immediately"),Capture->Phase==ECatrunCapturePhase::Pickup && FMath::Abs(FMath::FindDeltaAngleDegrees(Armor->GetActorRotation().Yaw,180.f))<.01f);
 	Capture->AbortCapture();
+	return true;
+}
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunArmorDetectionDisplayTest,"Catrun.PrototypeAI.ArmorDisplayUsesCatCenterBoundaryWithoutChangingPerception",EAutomationTestFlags::EditorContext|EAutomationTestFlags::EngineFilter)
+bool FCatrunArmorDetectionDisplayTest::RunTest(const FString&)
+{
+	FPrototypeWorld F;
+	F.Settings->ArmorDetectRadius = 150.f;
+	F.Settings->CatSightRadius = 15.f;
+	auto* Armor = F.Spawn<ACatrunArmor>(FVector(800,800,90));
+	Armor->DispatchBeginPlay();
+	Armor->bShowDetectionDisplay = true;
+	Armor->Tick(.01f);
+	auto* Fan = Armor->Detection.Get();
+	TestEqual(TEXT("Display radius includes actual cat body overlap threshold"),Fan->GetDisplayRange(),165.f);
+	TestEqual(TEXT("Armor display uses its own faint opacity"),Fan->GetDisplayOpacity(),.12f);
+	const FVector Origin=Armor->GetActorLocation();
+	TestTrue(TEXT("Cat at the visible outer boundary remains detectable"),Fan->CanSee(Origin+FVector(165,0,0),15.f));
+	TestFalse(TEXT("Display padding never increases detection range"),Fan->CanSee(Origin+FVector(166,0,0),15.f));
+	TestFalse(TEXT("Point-sized target is still outside original radius"),Fan->CanSee(Origin+FVector(151,0,0),0.f));
+	auto* Candle = F.Spawn<ACatrunCandle>(FVector(-800,-800,90));
+	Candle->bPenaltiesEnabled=false;
+	Candle->Tick(.01f);
+	TestEqual(TEXT("Candle continues using shared authored opacity"),Candle->Sight->GetDisplayOpacity(),-1.f);
+	TestEqual(TEXT("Shared opacity not changed by armor styling"),F.Settings->VisionOpacity,.35f);
+	F.Box(Origin+FVector(80,0,0),FVector(5,100,100));
+	Armor->Tick(.01f);
+	TestFalse(TEXT("Display style still respects blocking geometry for detection"),Fan->CanSee(Origin+FVector(140,0,0),15.f));
 	return true;
 }
 #endif

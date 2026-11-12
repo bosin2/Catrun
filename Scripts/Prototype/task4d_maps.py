@@ -5,7 +5,7 @@ from task4d_assets import *
 lv=unreal.get_editor_subsystem(unreal.LevelEditorSubsystem);edworld=unreal.get_editor_subsystem(unreal.UnrealEditorSubsystem);actorsys=unreal.get_editor_subsystem(unreal.EditorActorSubsystem)
 assert not edworld.get_game_world()
 SET='/Game/Systems/Interaction/Puzzles/DA_StatuePuzzleSettings';backup(SET);settings=AS.load_asset(SET)
-for k,v in {'PushSpeed':100.,'PushAcceleration':160.,'PushDeceleration':240.,'ContactDistance':12.,'SeatingOverlap':.8,'SocketAxisTolerance':12.,'SocketHeightTolerance':12.,'PlateTravel':2.,'GateTravel':280.,'GateSpeed':140.,'GateFloorClearance':4.}.items():settings.set_editor_property(k,v)
+for k,v in {'PushSpeed':100.,'PushAcceleration':160.,'PushDeceleration':240.,'ContactDistance':12.,'SeatingOverlap':.8,'SocketAxisTolerance':24.,'SocketHeightTolerance':12.,'PlateTravel':2.,'GateTravel':280.,'GateSpeed':140.,'GateFloorClearance':4.}.items():settings.set_editor_property(k,v)
 assert AS.save_loaded_asset(settings,False)
 for mapname in ['Stage2','SoundTest_Stage2']:
  path='/Game/Maps/'+mapname;backup(path,'.umap');assert lv.load_level(path)

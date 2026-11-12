@@ -25,6 +25,19 @@ void UCatrunVisionFanComponent::Configure(float InRange, int32 InRayCount, const
 	RayCount = FMath::Max(InRayCount, 4);
 	Color = InColor;
 	RayDistances.Init(Range, RayCount);
+	DisplayRayDistances.Init(GetDisplayRange(), RayCount);
+}
+
+void UCatrunVisionFanComponent::SetDisplayStyle(float InOpacity, float InRadiusPadding)
+{
+	DisplayOpacity = FMath::Clamp(InOpacity, 0.f, 1.f);
+	DisplayRadiusPadding = FMath::Max(0.f, InRadiusPadding);
+	if (Plane) Plane->SetWorldScale3D(FVector(GetDisplayRange() * .02f, GetDisplayRange() * .02f, 1.f));
+	if (Material)
+	{
+		Material->SetScalarParameterValue(TEXT("Range"), GetDisplayRange());
+		Material->SetScalarParameterValue(TEXT("Opacity"), DisplayOpacity);
+	}
 }
 
 bool UCatrunVisionFanComponent::EnsureReady()
@@ -41,6 +54,7 @@ bool UCatrunVisionFanComponent::EnsureReady()
 	Settings = Manager->GetSettings();
 	FloorZ = Manager->GetGrid().Origin.Z;
 	RayDistances.Init(Range, RayCount);
+	DisplayRayDistances.Init(GetDisplayRange(), RayCount);
 
 	AActor* Owner = GetOwner();
 	UStaticMesh* PlaneMesh = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Plane.Plane"));
@@ -67,16 +81,16 @@ bool UCatrunVisionFanComponent::EnsureReady()
 		Plane->SetUsingAbsoluteLocation(true);
 		Plane->SetUsingAbsoluteRotation(true);
 		Plane->SetUsingAbsoluteScale(true);
-		Plane->SetWorldScale3D(FVector(Range * 2.f / 100.f, Range * 2.f / 100.f, 1.f)); // engine plane is 100 x 100 cm
+		Plane->SetWorldScale3D(FVector(GetDisplayRange() * 2.f / 100.f, GetDisplayRange() * 2.f / 100.f, 1.f)); // engine plane is 100 x 100 cm
 		Plane->SetVisibility(bDisplayVisible);
 
 		Material = UMaterialInstanceDynamic::Create(Settings->VisionMaterial, Owner);
 		Material->SetTextureParameterValue(TEXT("DistTex"), DistanceTexture);
 		Material->SetVectorParameterValue(TEXT("Color"), FLinearColor(Color.R, Color.G, Color.B, 1.f));
-		Material->SetScalarParameterValue(TEXT("Range"), Range);
+		Material->SetScalarParameterValue(TEXT("Range"), GetDisplayRange());
 		Material->SetScalarParameterValue(TEXT("Feather"), Settings->VisionEdgeSoftness);
 		Material->SetScalarParameterValue(TEXT("RangeFade"), Settings->VisionRangeFade);
-		Material->SetScalarParameterValue(TEXT("Opacity"), Settings->VisionOpacity);
+		Material->SetScalarParameterValue(TEXT("Opacity"), DisplayOpacity >= 0.f ? DisplayOpacity : Settings->VisionOpacity);
 		Plane->SetMaterial(0, Material);
 	}
 	else
@@ -122,6 +136,9 @@ void UCatrunVisionFanComponent::Update(float CenterAngleDegrees, float HalfAngle
 		// The first NearClip cm of every ray are skipped (not traced, not drawn).
 		const FVector Direction(FMath::Cos(AngleRad), FMath::Sin(AngleRad), 0.f);
 		RayDistances[i] = NearClip + TraceRay(Start + Direction * NearClip, Direction, FMath::Max(Range - NearClip, 1.f));
+		DisplayRayDistances[i] = DisplayRadiusPadding > 0.f
+			? NearClip + TraceRay(Start + Direction * NearClip, Direction, FMath::Max(GetDisplayRange() - NearClip, 1.f))
+			: RayDistances[i];
 	}
 
 	if (Plane && Material)
@@ -141,7 +158,7 @@ void UCatrunVisionFanComponent::WriteTexture()
 	for (int32 i = 0; i < RayCount; ++i)
 	{
 		Pixels[i] = FFloat16Color();
-		Pixels[i].R = RayDistances[i];
+		Pixels[i].R = DisplayRayDistances[i];
 	}
 	Mip.BulkData.Unlock();
 	DistanceTexture->UpdateResource();

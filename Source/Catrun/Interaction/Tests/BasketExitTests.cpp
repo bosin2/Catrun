@@ -23,6 +23,7 @@
 #include "Perception/CatrunGroundSupport.h"
 #include "Settings/CatrunInputBindings.h"
 #include "Settings/CatrunUserSettings.h"
+#include "Interaction/CatrunPuzzleSuspension.h"
 
 namespace
 {
@@ -235,6 +236,7 @@ bool FCatrunBasketComplexSupportTest::RunTest(const FString&)
 	TestTrue(TEXT("Successful rough-floor exit retains exact accepted placement"),F.Cat->GetActorLocation().Equals(Landing,.01) && F.Cat->GetActorEnableCollision());
 	{
 		FBasketCollisionFixture Bounds;
+		Bounds.Basket->OpenDirectionLocal=FVector(1,0,0);
 		FVector BoundedEntry;
 		// Hidden reference Z26: the original entry ray accepts surface Z[-24,26].
 		Bounds.Floor->SetActorLocation(FVector(0,0,-44)); // surface -34, outside that window
@@ -296,6 +298,7 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunBasketEntryTransitProfileTest, "Catrun.B
 bool FCatrunBasketEntryTransitProfileTest::RunTest(const FString&)
 {
 	FBasketCollisionFixture F;
+	F.Basket->OpenDirectionLocal=FVector(1,0,0);
 	const FVector Start(200,0,26), Approach(82,0,26);
 	FVector Entry;
 	if (!TestTrue(TEXT("Clear entry is available at the exact approach"), F.Actions->TestEntry(F.Basket,Entry) && Entry.Equals(Approach,.01)))
@@ -316,6 +319,60 @@ bool FCatrunBasketEntryTransitProfileTest::RunTest(const FString&)
 	WallShape->SetCollisionResponseToChannel(ECC_Visibility,ECR_Block);
 	TestFalse(TEXT("The independent visual guard still rejects a blocked view into the basket"),
 		F.Actions->TestEntry(F.Basket,Entry));
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunBasketProximityTest, "Catrun.Basket.ProximityPromptMatchesReachableEntry",
+	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FCatrunBasketProximityTest::RunTest(const FString&)
+{
+	FBasketCollisionFixture F;
+	auto* Anchor = NewObject<USceneComponent>(F.Basket,TEXT("HiddenPoint"));
+	Anchor->SetupAttachment(F.Basket->GetRootComponent());
+	Anchor->RegisterComponent();
+	F.Basket->PostInitializeComponents();
+	F.Basket->OpenDirectionLocal=FVector(1,0,0);
+	F.Cat->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+	for (int32 Sector=0; Sector<8; ++Sector)
+	{
+		const FVector Direction=FRotator(0,Sector*45.f,0).Vector();
+		const bool bExpected=Sector<=2 || Sector>=6;
+		for (const float Distance : {40.f, 100.f})
+		{
+			F.Cat->SetActorLocation(F.Basket->GetHiddenLocation()+Direction*Distance);
+			for (const float Yaw : {0.f,180.f})
+			{
+				F.Cat->SetActorRotation(FRotator(0,Yaw,0));
+				TestEqual(TEXT("Position decides front/side versus hinge rear; cat heading never does"),F.Actions->CanEnterNearbyBasket(),bExpected);
+			}
+		}
+	}
+	F.Cat->SetActorLocation(FVector(100,0,26));
+	F.Actions->Busy=true;
+	TestFalse(TEXT("Busy suppresses prompt eligibility"),F.Actions->CanEnterNearbyBasket()); F.Actions->Busy=false;
+	F.Actions->IsHidden=true;
+	TestFalse(TEXT("Hidden suppresses prompt eligibility"),F.Actions->CanEnterNearbyBasket()); F.Actions->IsHidden=false;
+	F.PC->SetIgnoreMoveInput(true);
+	TestFalse(TEXT("Cinematic input lock suppresses prompt eligibility"),F.Actions->CanEnterNearbyBasket()); F.PC->SetIgnoreMoveInput(false);
+	auto* Guard=F.World->GetSubsystem<UCatrunPuzzleSuspension>(); Guard->Acquire(F.Basket);
+	TestFalse(TEXT("Reveal suspension suppresses prompt eligibility"),F.Actions->CanEnterNearbyBasket()); Guard->Release(F.Basket);
+	F.Basket->TryOccupy(F.Cat);
+	TestFalse(TEXT("Occupied basket cannot advertise interaction"),F.Actions->CanEnterNearbyBasket()); F.Basket->Release(F.Cat);
+	F.Cat->SetActorLocation(FVector(120,0,26));
+	TestFalse(TEXT("Leaving range removes eligibility"),F.Actions->CanEnterNearbyBasket());
+	F.Cat->SetActorLocation(FVector(100,0,26));
+	auto* Rear = F.Box(FVector(82,0,26),FVector(2,30,26));
+	F.Basket->ExternalBody=Rear;
+	TestFalse(TEXT("Basket body still blocks the physical approach outside the authored jump"),F.Actions->CanEnterNearbyBasket());
+	Rear->SetActorLocation(FVector(50,0,26));
+	TestTrue(TEXT("An allowed front jump may cross its own shell only after the clear approach"),F.Actions->CanEnterNearbyBasket());
+	auto* Wall=F.Box(FVector(25,0,26),FVector(2,30,26));
+	CastChecked<UBoxComponent>(Wall->GetRootComponent())->SetCollisionResponseToChannel(ECC_Visibility,ECR_Ignore);
+	TestFalse(TEXT("Basket body cannot mask a separate physical blocker toward the hidden point"),F.Actions->CanEnterNearbyBasket());
+	Wall->Destroy(); Rear->Destroy();
+	F.Cat->SetActorLocation(FVector(40,0,26));
+	F.Actions->TryInteract();
+	TestEqual(TEXT("F commits the same close eligible basket advertised by the prompt"),F.Actions->BasketPhase,ECatrunBasketPhase::Entering);
 	return true;
 }
 
@@ -638,7 +695,7 @@ bool FBasketArcTest::RunTest(const FString&)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FBasketFiveDirectionsTest, "Catrun.Basket.ExactlyFiveDirectionsAtAnyRotation",
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FBasketFiveDirectionsTest, "Catrun.Basket.PhysicalRearBlockedAtAnyCameraRotation",
 	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 bool FBasketFiveDirectionsTest::RunTest(const FString&)
 {
@@ -651,15 +708,26 @@ bool FBasketFiveDirectionsTest::RunTest(const FString&)
 			for (int32 Sector = 0; Sector < 8; ++Sector)
 			{
 				const FVector Direction = FRotator(0, CameraYaw + Sector * 45.f, 0).Vector();
-				Allowed += CatrunBasket::IsDirectionAllowed(Direction, Opening, CameraYaw) ? 1 : 0;
+				const bool bAllowed=CatrunBasket::IsDirectionAllowed(Direction,Opening,CameraYaw);
+				Allowed += bAllowed ? 1 : 0;
+				TestFalse(TEXT("Camera quantization cannot admit the physical closed rear"),
+					bAllowed && FVector::DotProduct(Direction,Opening)<-.0001f);
 			}
-			if (Allowed != 5)
+			if (Allowed < 4 || Allowed > 5)
 			{
-				AddError(FString::Printf(TEXT("Camera %.1f, basket %d: expected five directions, got %d"), CameraYaw, Yaw, Allowed));
+				AddError(FString::Printf(TEXT("Camera %.1f, basket %d: expected four or five front-side directions, got %d"), CameraYaw, Yaw, Allowed));
 				return false;
 			}
+			if (FMath::IsNearlyEqual(FMath::Fmod(FMath::Abs(Yaw-CameraYaw),45.f),0.f,.001f))
+				TestEqual(TEXT("Aligned front and exact sides retain five keyboard directions"),Allowed,5);
 			TestFalse(TEXT("Directly behind the opening is blocked"),
 				CatrunBasket::IsDirectionAllowed(-Opening, Opening, CameraYaw));
+			for (const float Offset : {-90.1f,-90.f,-89.9f,89.9f,90.f,90.1f})
+			{
+				const FVector Direction=FRotator(0,Yaw+Offset,0).Vector();
+				TestEqual(TEXT("Physical side boundary stays fixed while camera and basket rotate"),
+					CatrunBasket::IsDirectionAllowed(Direction,Opening,CameraYaw),FMath::Abs(Offset)<=90.f);
+			}
 		}
 	}
 	return true;

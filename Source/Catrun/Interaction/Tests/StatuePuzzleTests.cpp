@@ -340,6 +340,27 @@ bool FStatueSeatThresholdTest::RunTest(const FString&)
 	return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FStatueSeatAfterCrossAxisCoastTest,
+	"Catrun.Stage2.SeatsAfterCrossAxisCoast", EAutomationTestFlags::EditorContext|EAutomationTestFlags::EngineFilter)
+bool FStatueSeatAfterCrossAxisCoastTest::RunTest(const FString&)
+{
+	FStatueFixture F;
+	F.Cat->SetActorLocation(FVector(800,0,26));
+	const auto& Link = F.Puzzle->Links[0];
+	// Use the measured B statue and plate offsets, with the final push on the fixture's Y axis.
+	const FVector ObservedOffset(1050.289 - 1070., 398.988 - 410., 0.);
+	F.Statue->SetActorLocation(Link.SeatLocation + ObservedOffset);
+	TestTrue(TEXT("Observed footprint overlap is 83.345 percent"),
+		FMath::IsNearlyEqual(F.Puzzle->GetSeatingOverlap(0), .8334502f, .0001f));
+
+	F.Puzzle->UpdatePlatesAndGates(0);
+	TestTrue(TEXT("An eligible statue seats after coasting across the socket axis"), Link.bPressed);
+	TestTrue(TEXT("Seating centers the statue exactly"), F.Statue->GetActorLocation().Equals(Link.SeatLocation));
+	F.Puzzle->UpdatePlatesAndGates(10);
+	TestTrue(TEXT("The connected gate finishes opening"), Link.bCompleted);
+	return true;
+}
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FStatueWeightTest,"Catrun.Stage2.WeightedPushIsFrameIndependentAndDecelerates",EAutomationTestFlags::EditorContext|EAutomationTestFlags::EngineFilter)
 bool FStatueWeightTest::RunTest(const FString&)
 {

@@ -1,4 +1,5 @@
 #include "CatrunNotice.h"
+#include "LevelFlow/CatrunLevelFlow.h"
 
 #include "Blueprint/WidgetTree.h"
 #include "Components/CanvasPanel.h"
@@ -43,6 +44,26 @@ void UCatrunNoticeWidget::SetNoticeText(const FText& Text)
 	}
 }
 
+void UCatrunNoticeWidget::NativeTick(const FGeometry& Geometry, float DeltaSeconds)
+{
+	Super::NativeTick(Geometry, DeltaSeconds);
+	RefreshPresentation();
+}
+
+void UCatrunNoticeWidget::SetNoticePolicy(ECatrunNoticePolicy Policy)
+{
+	NoticePolicy = Policy;
+	RefreshPresentation();
+}
+
+void UCatrunNoticeWidget::RefreshPresentation()
+{
+	const bool bHide = NoticePolicy == ECatrunNoticePolicy::BlockedRecovery
+		? UCatrunLevelFlowLibrary::ShouldHideRecoveryNotice(this)
+		: UCatrunLevelFlowLibrary::ShouldHideGameplayHUD(this);
+	SetRenderOpacity(bHide ? 0.f : 1.f);
+}
+
 void UCatrunNoticeWidget::SetScreenAnchor(FVector2D Anchor)
 {
 	if (TextBlock)
@@ -84,7 +105,7 @@ void UCatrunNoticeLibrary::ShowBellDenied(const UObject* Context, float Duration
 	ShowBottomNotice(Context, UCatrunNoticeSubsystem::BellDeniedText(), Duration);
 }
 
-void UCatrunNoticeSubsystem::ShowNotice(const FText& Text, float Duration)
+void UCatrunNoticeSubsystem::ShowNotice(const FText& Text, float Duration, ECatrunNoticePolicy Policy)
 {
 	UWorld* World = GetWorld();
 	if (!World)
@@ -106,6 +127,7 @@ void UCatrunNoticeSubsystem::ShowNotice(const FText& Text, float Duration)
 		Widget->AddToViewport(100);
 	}
 	Widget->SetNoticeText(Text);
+	Widget->SetNoticePolicy(Policy);
 	Widget->SetVisibility(ESlateVisibility::HitTestInvisible);
 
 	World->GetTimerManager().SetTimer(HideTimer, this, &UCatrunNoticeSubsystem::HideNotice, FMath::Max(Duration, 0.1f), false);

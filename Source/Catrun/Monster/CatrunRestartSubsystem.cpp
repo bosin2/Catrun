@@ -39,8 +39,14 @@ bool UCatrunRestartSubsystem::ShouldCreateSubsystem(UObject* Outer) const
 	return World && World->IsGameWorld();
 }
 
-bool UCatrunRestartSubsystem::TryBeginCatch()
+bool UCatrunRestartSubsystem::TryBeginCatch(UObject* Owner)
 {
+	check(IsInGameThread()); // Admission and publication are one synchronous game-thread operation.
+	const UWorld* World = GetWorld();
+	if (!IsValid(Owner) || !World || World->bIsTearingDown) return false;
+	// Detached automation worlds have no travel handler. IsInSeamlessTravel requires one.
+	const FWorldContext* Context = GEngine ? GEngine->GetWorldContextFromWorld(World) : nullptr;
+	if (Context && (!Context->TravelURL.IsEmpty() || World->IsInSeamlessTravel())) return false;
 	if (bRecoveryScheduled || HasBlockedPawnRecovery() || UCatrunPuzzleSuspension::IsSuspended(this)) return false;
 	if (const auto* Flow = UCatrunLevelFlowSubsystem::Get(this); Flow && (Flow->IsTransitioning() || Flow->IsStageComplete())) return false;
 	if (bCatching)
@@ -48,17 +54,44 @@ bool UCatrunRestartSubsystem::TryBeginCatch()
 		return false;
 	}
 	bCatching = true;
+	CatchOwner = Owner;
+	OnCatchOwnerChanged.Broadcast(Owner);
 	return true;
+}
+
+void UCatrunRestartSubsystem::CancelCatch(UObject* Owner)
+{
+	check(IsInGameThread());
+	if (!IsCatchOwner(Owner)) return;
+	bCatching = false;
+	CatchOwner.Reset();
+	OnCatchOwnerChanged.Broadcast(nullptr);
+}
+
+void UCatrunRestartSubsystem::Deinitialize()
+{
+	bCatching = false;
+	CatchOwner.Reset();
+	OnCatchOwnerChanged.Clear();
+	if (GetWorld()) GetWorld()->GetTimerManager().ClearTimer(RecoveryTimer);
+	Super::Deinitialize();
+}
+
+void UCatrunRestartSubsystem::CancelCaptureRestart(UObject* Owner)
+{
+	if (!IsCatchOwner(Owner)) return;
+	if (auto* Flow = UCatrunLevelFlowSubsystem::Get(this)) Flow->AbortOwnedTravel(this);
 }
 
 bool UCatrunRestartSubsystem::CanRecoverWorld() const
 {
 	const UWorld* World = GetWorld();
-	if (!World || !World->IsGameWorld() || World->bIsTearingDown || World->IsInSeamlessTravel()) return false;
+	if (!World || !World->IsGameWorld() || World->bIsTearingDown) return false;
+	const FWorldContext* Context = GEngine ? GEngine->GetWorldContextFromWorld(World) : nullptr;
+	if (!Context || World->IsInSeamlessTravel()) return false;
 	const auto* Flow = World->GetSubsystem<UCatrunLevelFlowSubsystem>();
 	if (Flow && (Flow->IsTransitioning() || Flow->IsStageComplete())) return false;
-	const FWorldContext* Context = GEngine ? GEngine->GetWorldContextFromWorld(World) : nullptr;
-	return Context && Context->TravelURL.IsEmpty();
+	return Context->TravelURL.IsEmpty();
 }
 
 bool UCatrunRestartSubsystem::ScheduleRecoveryRestart(float FadeInDuration, TFunction<void()> RestoreAfterFailure)
@@ -85,11 +118,16 @@ bool UCatrunRestartSubsystem::HasBlockedPawnRecovery() const
 	return Pawn && !Pawn->GetActorEnableCollision();
 }
 
+bool UCatrunRestartSubsystem::HasBlockedPawnRecovery(const APawn* Pawn) const
+{
+	return Pawn && BlockedRecoveryPawn.Get() == Pawn && HasBlockedPawnRecovery();
+}
+
 void UCatrunRestartSubsystem::ReportBlockedPawnRecovery(APawn& Pawn)
 {
 	BlockedRecoveryPawn = &Pawn;
 	if (auto* Notice = UCatrunNoticeSubsystem::Get(this))
-		Notice->ShowNotice(NSLOCTEXT("Catrun", "BlockedPawnRecovery", "안전한 위치로 돌아갈 수 없습니다. 설정에서 스테이지를 다시 시작하거나 타이틀로 돌아가세요."), 8.f);
+		Notice->ShowNotice(NSLOCTEXT("Catrun", "BlockedPawnRecovery", "안전한 위치로 돌아갈 수 없습니다. 설정에서 스테이지를 다시 시작하거나 타이틀로 돌아가세요."), 8.f, ECatrunNoticePolicy::BlockedRecovery);
 	UE_LOG(LogTemp, Display, TEXT("Pawn recovery has no clear supported placement in %s."), *GetWorld()->GetName());
 }
 

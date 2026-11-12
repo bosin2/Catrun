@@ -118,6 +118,50 @@ void ACatrunArmor::BeginPlay()
 		bPatrolWaiting = true;
 		PatrolWaitLeft = 0.f;
 	}
+	if (auto* Restart = UCatrunRestartSubsystem::Get(this))
+	{
+		CatchOwnerChangedHandle = Restart->OnCatchOwnerChanged.AddUObject(this, &ACatrunArmor::CatchOwnerChanged);
+		CatchOwnerChanged(Restart->GetCatchOwner());
+	}
+}
+
+void ACatrunArmor::EndPlay(const EEndPlayReason::Type Reason)
+{
+	if (auto* Restart = UCatrunRestartSubsystem::Get(this)) Restart->OnCatchOwnerChanged.Remove(CatchOwnerChangedHandle);
+	Super::EndPlay(Reason);
+}
+
+void ACatrunArmor::CatchOwnerChanged(UObject* CaptureOwner)
+{
+	const bool bWait = CaptureOwner && CaptureOwner != CapturePresentation.Get();
+	if (bWait == bWaitingForCapture) return;
+	auto* Movement = GetCharacterMovement();
+	if (bWait)
+	{
+		bWaitingForCapture = true;
+		CaptureWaitAction = Action;
+		Action = EArmorAction::WaitingForCapture;
+		CaptureWaitMovementMode = Movement->MovementMode;
+		CaptureWaitCustomMode = Movement->CustomMovementMode;
+		bCaptureWaitMeshPaused = GetMesh()->bPauseAnims;
+		GetMesh()->bPauseAnims = true;
+		if (auto* CaptureController = GetController()) CaptureController->StopMovement();
+		Movement->StopMovementImmediately();
+		Movement->ConsumeInputVector();
+		Movement->DisableMovement();
+	}
+	else
+	{
+		bWaitingForCapture = false;
+		Action = CaptureWaitAction; // timers, path cursor, door/turn pose and patrol intent were frozen
+		GetMesh()->bPauseAnims = bCaptureWaitMeshPaused;
+		Movement->ConsumeInputVector();
+		Movement->SetMovementMode(EMovementMode(CaptureWaitMovementMode), CaptureWaitCustomMode);
+		MarkRepathTimer = 0.f;
+		MarkTargetCell = FIntPoint(INT32_MIN, INT32_MIN);
+		LastWalkLocation = GetActorLocation();
+		StuckTimer = 0.f;
+	}
 }
 
 // ---------------------------------------------------------------------------
@@ -126,6 +170,7 @@ void ACatrunArmor::BeginPlay()
 
 void ACatrunArmor::OnSoundHeard_Implementation(const FCatrunSoundEvent& Event, float RemainingBudget)
 {
+	if (bWaitingForCapture) return;
 	if (UCatrunPuzzleSuspension::IsSuspended(this)) return;
 	// Near detection/capture wins; sound investigations override the live mark target.
 	if (!CatrunPerception::AcceptSound(Action == EArmorAction::Catching || bSeeingCat,
@@ -607,6 +652,7 @@ void ACatrunArmor::TickIdle(float DeltaSeconds)
 
 void ACatrunArmor::Tick(float DeltaSeconds)
 {
+	if (bWaitingForCapture) { UpdateActionLabel(); return; }
 	if (UCatrunPuzzleSuspension::IsSuspended(this)) return;
 	Super::Tick(DeltaSeconds);
 	ActionTime += DeltaSeconds;
@@ -635,6 +681,7 @@ void ACatrunArmor::SetFollowingMark(bool bFollow)
 		return;
 	}
 	bFollowingMark = bFollow;
+	if (bWaitingForCapture) return;
 	if (UCatrunPuzzleSuspension::IsSuspended(this)) return;
 	MarkRepathTimer = 0.f;
 	MarkTargetCell = FIntPoint(INT32_MIN, INT32_MIN);
@@ -669,6 +716,7 @@ void ACatrunArmor::SetFollowingMark(bool bFollow)
 // cell (the grid cell is 25 cm, so this is cheap and keeps the armor from turning on the spot).
 void ACatrunArmor::UpdateMarkFollowing(float DeltaSeconds)
 {
+	if (bWaitingForCapture) return;
 	if (UCatrunPuzzleSuspension::IsSuspended(this)) return;
 	if (!bFollowingMark || bInvestigatingSound || Action == EArmorAction::Catching)
 	{
@@ -704,6 +752,7 @@ void ACatrunArmor::UpdateMarkFollowing(float DeltaSeconds)
 
 void ACatrunArmor::UpdateDetection()
 {
+	if (bWaitingForCapture) return;
 	if (UCatrunPuzzleSuspension::IsSuspended(this)) return;
 	const UCatrunSoundSettings* S = SoundManager.IsValid() ? SoundManager->GetSettings() : nullptr;
 	if (!S)
@@ -713,7 +762,8 @@ void ACatrunArmor::UpdateDetection()
 	// Size and look of the circle come from the settings asset (read once, when it is available).
 	if (!bDetectionConfigured)
 	{
-		Detection->Configure(S->ArmorDetectRadius, S->ArmorDetectRayCount, S->ArmorDetectColor);
+		Detection->Configure(S->ArmorDetectRadius, S->ArmorDetectRayCount, DetectionDisplayColor);
+		Detection->SetDisplayStyle(DetectionDisplayOpacity, S->CatSightRadius);
 		bDetectionConfigured = true;
 	}
 

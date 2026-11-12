@@ -5,6 +5,7 @@
 #include "CatrunRestartSubsystem.generated.h"
 
 class APawn;
+DECLARE_MULTICAST_DELEGATE_OneParam(FCatrunCatchOwnerChanged, UObject*);
 
 /**
  * Handles the failure restart when an armor catches the cat: fades the screen to black, starts the
@@ -22,15 +23,23 @@ public:
 	static UCatrunRestartSubsystem* Get(const UObject* WorldContextObject);
 
 	// The first armor to catch the cat gets true. Others get false, so only one catch plays.
-	bool TryBeginCatch();
+	bool TryBeginCatch(UObject* Owner);
+	bool TryBeginCatch() { return TryBeginCatch(this); }
 	bool IsCatching() const { return bCatching; }
-	// Only the component that successfully acquired TryBeginCatch may release it.
-	void CancelCatch() { bCatching = false; }
+	bool IsCatchOwner(const UObject* Owner) const { return bCatching && Owner && CatchOwner.Get(true) == Owner; }
+	UObject* GetCatchOwner() const { return CatchOwner.Get(); }
+	// A rejected or stale contender cannot release another presentation's reservation.
+	void CancelCatch(UObject* Owner);
+	void CancelCatch() { CancelCatch(this); }
+	void CancelCaptureRestart(UObject* Owner);
+	FCatrunCatchOwnerChanged OnCatchOwnerChanged;
+	virtual void Deinitialize() override;
 
 	// Recovery for an impossible safe placement. Queued after temporary-action cleanup.
 	bool ScheduleRecoveryRestart(float FadeInDuration = .5f, TFunction<void()> RestoreAfterFailure = {});
 	bool HasRecoveryRestartPending() const { return bRecoveryScheduled; }
 	bool HasBlockedPawnRecovery() const;
+	bool HasBlockedPawnRecovery(const APawn* Pawn) const;
 	void ReportBlockedPawnRecovery(APawn& Pawn);
 
 	void MarkStage2EntryCheckpointReached();
@@ -52,5 +61,6 @@ private:
 	FTimerHandle RecoveryTimer;
 	TWeakObjectPtr<APawn> BlockedRecoveryPawn;
 	bool bCatching = false;
+	TWeakObjectPtr<UObject> CatchOwner;
 	bool bStage2EntryCheckpointReached = false;
 };

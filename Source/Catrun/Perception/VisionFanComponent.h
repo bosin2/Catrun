@@ -61,6 +61,11 @@ public:
 
 	// Changes the color of the floor display (for example orange -> red when the cat is spotted).
 	void SetColor(const FLinearColor& NewColor);
+	// Presentation only: draw the cat-center threshold and use an independent opacity.
+	// Perception Range, CanSee and collision queries remain unchanged.
+	void SetDisplayStyle(float InOpacity, float InRadiusPadding = 0.f);
+	float GetDisplayRange() const { return Range + DisplayRadiusPadding; }
+	float GetDisplayOpacity() const { return DisplayOpacity; }
 
 private:
 	FVector GetOrigin() const;
@@ -89,6 +94,8 @@ private:
 	TObjectPtr<UTexture2D> DistanceTexture;
 
 	float Range = 500.f;
+	float DisplayRadiusPadding = 0.f;
+	float DisplayOpacity = -1.f;
 	float NearClip = 0.f;
 	int32 RayCount = 48;
 	FLinearColor Color = FLinearColor::White;
@@ -101,4 +108,5 @@ private:
 
 	// Distance to the first blocker for every ray (cm), left edge of the fan first.
 	TArray<float> RayDistances;
+	TArray<float> DisplayRayDistances;
 };

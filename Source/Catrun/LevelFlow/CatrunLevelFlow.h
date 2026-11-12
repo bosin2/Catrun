@@ -172,6 +172,8 @@ public:
 	bool CompleteStageWithFailure(UObject* Owner, TFunction<void(const FString&)> Failure);
 	/** Same-map recovery also supports loaded development maps outside the canonical stage routes. */
 	bool RequestSameMapRestart(UObject* Owner, float FadeInDuration, TFunction<void(const FString&)> Failure = {}, bool bRestoreStage2EntryCheckpoint = false);
+	/** Cancels only this surviving world's pending request belonging to Owner. Never invokes its failure callback. */
+	bool AbortOwnedTravel(const UObject* Owner);
 	bool ReserveExitTransition(UObject* Owner);
 	void ReleaseExitTransition(const UObject* Owner);
 	bool CompleteStageForExit(UObject* Owner);
@@ -190,6 +192,8 @@ public:
 	void SetPauseMenu(bool bOpen);
 	bool IsTransitioning() const { return bTransitioning || ExitReservation.IsValid(); }
 	bool IsStageComplete() const { return bStageComplete; }
+	/** Cached world identity only; cinematic/input ownership remains live. Refreshes when package/settings change. */
+	bool IsMainMenuWorld() const;
 
 	UPROPERTY(BlueprintAssignable, Category="Level Flow")
 	FCatrunStageCompleted OnStageCompleted;
@@ -204,6 +208,8 @@ private:
 	void ClearFailedTravel();
 	void FinishTravel();
 	void ResolveRestartIntent();
+	mutable FName CachedWorldPackageName, CachedMenuPackageName, NormalizedWorldPackageName;
+	mutable bool bMenuIdentityCached = false, bMainMenuWorld = false;
 	bool bRestartIntentResolved = false;
 	bool bSkipStageIntro = false;
 	bool bContinueArrival = false;
@@ -235,6 +241,11 @@ class CATRUN_API UCatrunLevelFlowLibrary : public UBlueprintFunctionLibrary
 public:
 	UFUNCTION(BlueprintPure, Category="Catrun|Level Flow", meta=(WorldContext="WorldContextObject"))
 	static UCatrunFlowSession* GetFlowSession(const UObject* WorldContextObject);
+	/** Presentation-only query. Reads existing leases/view/input; never changes user HUD preferences or saving. */
+	UFUNCTION(BlueprintPure, Category="Catrun|Presentation", meta=(WorldContext="WorldContextObject"))
+	static bool ShouldHideGameplayHUD(const UObject* WorldContextObject);
+	// Native-only policy for recovery instructions; all presentation owners still suppress it.
+	static bool ShouldHideRecoveryNotice(const UObject* WorldContextObject);
 	UFUNCTION(BlueprintPure, Category="Catrun|Level Flow", meta=(WorldContext="WorldContextObject"))
 	static TArray<FCatrunChapterInfo> GetChapters(const UObject* WorldContextObject);
 	UFUNCTION(BlueprintPure, Category="Catrun|Level Flow", meta=(WorldContext="WorldContextObject"))

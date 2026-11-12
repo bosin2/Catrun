@@ -27,7 +27,7 @@ result['materials']={}
 for path in [BARS,DUST]:
  m=AS.load_asset(path);result['materials'][path]={'domain':str(m.get_editor_property('material_domain')),'expressions':len(unreal.MaterialEditingLibrary.get_material_expressions(m)),'statistics':str(unreal.MaterialEditingLibrary.get_statistics(m)),'custom_code':[e.get_editor_property('code') for e in unreal.MaterialEditingLibrary.get_material_expressions(m) if isinstance(e,unreal.MaterialExpressionCustom)]}
 settings=AS.load_asset('/Game/Systems/Interaction/Puzzles/DA_StatuePuzzleSettings');result['settings']={}
-for name,expected_value in {'PushSpeed':100.,'PushAcceleration':160.,'PushDeceleration':240.,'ContactDistance':12.,'SeatingOverlap':.8,'SocketAxisTolerance':12.,'SocketHeightTolerance':12.,'PlateTravel':2.,'GateTravel':280.,'GateSpeed':140.,'GateFloorClearance':4.}.items():
+for name,expected_value in {'PushSpeed':100.,'PushAcceleration':160.,'PushDeceleration':240.,'ContactDistance':12.,'SeatingOverlap':.8,'SocketAxisTolerance':24.,'SocketHeightTolerance':12.,'PlateTravel':2.,'GateTravel':280.,'GateSpeed':140.,'GateFloorClearance':4.}.items():
  actual_value=settings.get_editor_property(name);assert abs(actual_value-expected_value)<1.e-6;result['settings'][name]=actual_value
 result['settings']['bRequireInteractKey']=settings.get_editor_property('bRequireInteractKey');assert result['settings']['bRequireInteractKey']==False
 registry=unreal.AssetRegistryHelpers.get_asset_registry();options=unreal.AssetRegistryDependencyOptions(include_soft_package_references=True,include_hard_package_references=True)

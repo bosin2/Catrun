@@ -4,12 +4,14 @@
 #include "CatrunProgressWriter.h"
 #include "CatrunExitTransitionComponent.h"
 #include "Interaction/CatrunPuzzleSuspension.h"
+#include "Interaction/CatrunBasketInteractionComponent.h"
 #include "Settings/CatrunUserSettings.h"
 #include "Settings/CatrunSettingsSubsystem.h"
 #include "HAL/IConsoleManager.h"
 
 #include "Components/BoxComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Camera/PlayerCameraManager.h"
 #include "Engine/GameInstance.h"
 #include "Engine/Engine.h"
 #include "Engine/World.h"
@@ -213,6 +215,7 @@ bool UCatrunLevelFlowSubsystem::ShouldCreateSubsystem(UObject* Outer) const
 void UCatrunLevelFlowSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
+	IsMainMenuWorld();
 	if (GEngine)
 		TravelFailureHandle = GEngine->OnTravelFailure().AddWeakLambda(this,
 			[this](UWorld* FailedWorld, ETravelFailure::Type, const FString& Error)
@@ -226,6 +229,27 @@ void UCatrunLevelFlowSubsystem::Initialize(FSubsystemCollectionBase& Collection)
                 if (Exit) Exit->NotifyTravelFailure(Error);
                 if (FailureOwner.IsValid() && Failure) Failure(Error);
 			});
+}
+
+bool UCatrunLevelFlowSubsystem::IsMainMenuWorld() const
+{
+    const UWorld* World = GetWorld();
+    if (!World) return false;
+    const FName WorldPackage = World->GetOutermost()->GetFName();
+    const FName MenuPackage = GetDefault<UCatrunLevelFlowSettings>()->MainMenuMap.ToSoftObjectPath().GetLongPackageFName();
+    if (!bMenuIdentityCached || WorldPackage != CachedWorldPackageName)
+    {
+        CachedWorldPackageName = WorldPackage;
+        NormalizedWorldPackageName = FName(*UWorld::RemovePIEPrefix(WorldPackage.ToString()));
+        bMenuIdentityCached = false;
+    }
+    if (!bMenuIdentityCached || MenuPackage != CachedMenuPackageName)
+    {
+        CachedMenuPackageName = MenuPackage;
+        bMainMenuWorld = !MenuPackage.IsNone() && NormalizedWorldPackageName == MenuPackage;
+        bMenuIdentityCached = true;
+    }
+    return bMainMenuWorld;
 }
 
 void UCatrunLevelFlowSubsystem::OnWorldBeginPlay(UWorld& InWorld)
@@ -484,6 +508,46 @@ bool UCatrunLevelFlowLibrary::StartNewGame(const UObject* Context)
 {
 	auto* Flow = UCatrunLevelFlowSubsystem::Get(Context);
 	return Flow && Flow->StartGame();
+}
+namespace
+{
+bool ShouldHideGameplayPresentation(const UObject* Context, bool bAllowBlockedRecovery)
+{
+    const UWorld* World = GEngine ? GEngine->GetWorldFromContextObject(Context, EGetWorldErrorMode::ReturnNull) : nullptr;
+    if (!World || World->bIsTearingDown || !World->IsGameWorld() || World->IsPaused()) return true;
+    const auto* Flow = UCatrunLevelFlowSubsystem::Get(Context);
+    if (Flow && Flow->IsMainMenuWorld()) return true;
+    const auto* Restart = UCatrunRestartSubsystem::Get(Context);
+    if ((Flow && Flow->IsTransitioning()) || (Restart && Restart->IsCatching())
+        || UCatrunPuzzleSuspension::IsSuspended(Context)) return true;
+    const auto* PC = UGameplayStatics::GetPlayerController(World, 0);
+    if (!IsValid(PC) || PC->bCinematicMode || PC->IsMoveInputIgnored() || PC->IsLookInputIgnored()) return true;
+    // Arrival fades can outlive the old world's camera/input lease. A stopped fade
+    // may retain a nonzero amount, so only an enabled, visible fade owns the overlays.
+    if (PC->PlayerCameraManager && PC->PlayerCameraManager->bEnableFading
+        && PC->PlayerCameraManager->FadeAmount > KINDA_SMALL_NUMBER) return true;
+    const APawn* Pawn = PC->GetPawn();
+    if (!IsValid(Pawn) || Pawn->IsActorBeingDestroyed() || !IsGameplayCameraOwner(PC->GetViewTarget(), Pawn)) return true;
+    if (const auto* Character = Cast<ACharacter>(Pawn); Character && Character->GetCharacterMovement()->MovementMode == MOVE_None)
+    {
+        // Failed restoration deliberately keeps the pawn immobile. Its recovery instruction
+        // may remain visible only after actual camera/input/transition owners have released it.
+        if (bAllowBlockedRecovery && Restart && Restart->HasBlockedPawnRecovery(Pawn)) return false;
+        // Basket and bell actions are ordinary gameplay. Opening/stair BPs also use MOVE_None,
+        // but their temporary camera/input ownership must hide the gameplay overlays.
+        const auto* Basket = Character->FindComponentByClass<UCatrunBasketInteractionComponent>();
+        return !Basket || (!Basket->Busy && !Basket->IsHidden);
+    }
+    return false;
+}
+}
+bool UCatrunLevelFlowLibrary::ShouldHideGameplayHUD(const UObject* Context)
+{
+    return ShouldHideGameplayPresentation(Context, false);
+}
+bool UCatrunLevelFlowLibrary::ShouldHideRecoveryNotice(const UObject* Context)
+{
+    return ShouldHideGameplayPresentation(Context, true);
 }
 bool UCatrunLevelFlowLibrary::HasContinueGame(const UObject* Context)
 {
@@ -899,6 +963,19 @@ void UCatrunLevelFlowSubsystem::ClearFailedTravel()
     TravelFailureOwner.Reset(); TravelFailureCallback = {};
     if (auto* PC = TravelLockController.Get()) PC->SetIgnoreMoveInput(false);
     TravelLockController.Reset();
+}
+
+bool UCatrunLevelFlowSubsystem::AbortOwnedTravel(const UObject* Owner)
+{
+    if (!Owner || Owner->GetWorld() != GetWorld() || TravelFailureOwner.Get(true) != Owner
+        || !bTransitioning || !GetWorld() || GetWorld()->bIsTearingDown) return false;
+    FWorldContext* Context = GEngine ? GEngine->GetWorldContextFromWorld(GetWorld()) : nullptr;
+    if (!Context || GetWorld()->IsInSeamlessTravel()) return false;
+    const FString OwnedURL = PendingMap + (PendingOptions.IsEmpty() ? FString() : TEXT("?") + PendingOptions);
+    if (Context->TravelURL == OwnedURL) Context->TravelURL.Reset();
+    // A subsequent foreign URL survives; only our token and our input-lock layer are retired.
+    ClearFailedTravel();
+    return true;
 }
 
 void UCatrunLevelFlowSubsystem::AbortExitTravel(const UObject* Owner)

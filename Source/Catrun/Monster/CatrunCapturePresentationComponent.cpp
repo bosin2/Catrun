@@ -70,10 +70,16 @@ bool UCatrunCapturePresentationComponent::BeginCapture(APawn* InCat, const UCatr
 #endif
 	auto* OwnerArmor = Cast<ACatrunArmor>(GetOwner());
 	auto* Restart = UCatrunRestartSubsystem::Get(this);
-	if (bBeginningCapture || bCleaningUp || bEndingPlay || IsCapturing() || !IsValid(InCat) || !IsValid(OwnerArmor) || !IsValid(InSettings) || !Restart || !Restart->TryBeginCatch()) return false;
+	if (bBeginningCapture || bCleaningUp || bEndingPlay || IsCapturing() || !IsValid(InCat) || !IsValid(OwnerArmor) || !IsValid(InSettings) || !Restart) return false;
 	// Cleanup may run inside Framing listeners; keep this guard until the outer setup unwinds.
 	TGuardValue<bool> BeginningGuard(bBeginningCapture, true);
 	bAbortPreparation = false;
+	if (!Restart->TryBeginCatch(this)) return false;
+	if (bAbortPreparation || bEndingPlay || !IsValid(OwnerArmor) || !IsValid(InCat) || !Restart->IsCatchOwner(this))
+	{
+		Restart->CancelCatch(this);
+		return false;
+	}
 	bOwnCatch = true;
 	bRestartIssued = false;
 	bOwnFade = false;
@@ -88,7 +94,7 @@ bool UCatrunCapturePresentationComponent::BeginCapture(APawn* InCat, const UCatr
 	OwnerArmor->PrepareForCapture();
 	if (bAbortPreparation || bEndingPlay || !IsValid(this) || !IsValid(OwnerArmor) || !IsValid(InCat) || !IsValid(InSettings))
 	{
-		Restart->CancelCatch(); bOwnCatch = false; Cat.Reset(); Armor.Reset(); Settings = nullptr;
+		Restart->CancelCatch(this); bOwnCatch = false; Cat.Reset(); Armor.Reset(); Settings = nullptr;
 		return false;
 	}
 	ArmorMeshState.Save(OwnerArmor->GetMesh());
@@ -125,8 +131,9 @@ bool UCatrunCapturePresentationComponent::BeginCapture(APawn* InCat, const UCatr
 
 bool UCatrunCapturePresentationComponent::IsCurrentSession(int32 ExpectedSession, ECatrunCapturePhase ExpectedPhase) const
 {
+	const auto* Restart = UCatrunRestartSubsystem::Get(this);
 	return IsValid(this) && !bCleaningUp && !bEndingPlay && SessionId == ExpectedSession && Phase == ExpectedPhase
-		&& Cat.IsValid() && Armor.IsValid() && IsValid(Settings.Get());
+		&& Cat.IsValid() && Armor.IsValid() && IsValid(Settings.Get()) && Restart && Restart->IsCatchOwner(this);
 }
 
 bool UCatrunCapturePresentationComponent::SetPhase(ECatrunCapturePhase Next)
@@ -237,6 +244,7 @@ void UCatrunCapturePresentationComponent::TickComponent(float DeltaTime, ELevelT
 {
 	Super::TickComponent(DeltaTime, TickType, Tick);
 	if (!IsCapturing() || bRestartIssued) return;
+	if (const auto* Restart = UCatrunRestartSubsystem::Get(this); !Restart || !Restart->IsCatchOwner(this)) { AbortCapture(); return; }
 	const auto* Flow = UCatrunLevelFlowSubsystem::Get(this);
 	if (!Cat.IsValid() || !Armor.IsValid() || !Settings || (Flow && (Flow->IsTransitioning() || Flow->IsStageComplete()))) { AbortCapture(); return; }
 	const int32 TickingSession = SessionId;
@@ -367,7 +375,7 @@ void UCatrunCapturePresentationComponent::Cleanup(bool bRestoreTransform)
 	Camera.Reset();
 	bOwnInputLock = false;
 	bOwnFade = false;
-	if (bOwnCatch && !bRestartIssued) if (auto* Restart = UCatrunRestartSubsystem::Get(this)) Restart->CancelCatch();
+	if (bOwnCatch) if (auto* Restart = UCatrunRestartSubsystem::Get(this)) Restart->CancelCatch(this);
 	bOwnCatch = false;
 	Cat.Reset();
 	Settings = nullptr;
@@ -380,11 +388,23 @@ void UCatrunCapturePresentationComponent::AbortCapture()
 {
 	// AnimationRequested during owner preparation can cancel before snapshots/phase callbacks exist.
 	if (bBeginningCapture && !IsCapturing()) { bAbortPreparation = true; return; }
-	if (IsCapturing() && !bCleaningUp) Cleanup(true);
+	if (IsCapturing() && !bCleaningUp)
+	{
+		if (bRestartIssued)
+		{
+			if (auto* Restart = UCatrunRestartSubsystem::Get(this)) Restart->CancelCaptureRestart(this);
+			bRestartIssued = false;
+		}
+		Cleanup(true);
+	}
 }
 void UCatrunCapturePresentationComponent::EndPlay(const EEndPlayReason::Type Reason)
 {
 	bEndingPlay = true;
-	if (IsCapturing()) Cleanup(!bRestartIssued);
+	if (IsCapturing())
+	{
+		if (Reason == EEndPlayReason::Destroyed || Reason == EEndPlayReason::RemovedFromWorld) AbortCapture();
+		else Cleanup(!bRestartIssued); // successful travel keeps its single-use arrival intent
+	}
 	Super::EndPlay(Reason);
 }

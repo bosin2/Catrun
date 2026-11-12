@@ -10,6 +10,7 @@ class ACharacter;
 class ACatrunHideBasket;
 class UAnimInstance;
 class UAnimSequenceBase;
+class UCatrunBasketPromptWidget;
 
 UENUM(BlueprintType)
 enum class ECatrunBasketPhase : uint8 { Outside, Entering, Hidden, Exiting };
@@ -31,10 +32,16 @@ public:
 	/** F 입력: 접근 가능한 가장 가까운 바구니에 들어가거나, 선택한 방향으로 탈출한다. */
 	UFUNCTION(BlueprintCallable, Category="Basket")
 	void TryInteract();
+	/** Uses the same availability and physical reach checks as F interaction. */
+	UFUNCTION(BlueprintPure, Category="Basket|Interaction")
+	bool CanEnterNearbyBasket() const;
+	/** Layout and typography belong to the authored UMG widget. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Basket|Prompt")
+	TSubclassOf<UCatrunBasketPromptWidget> BasketPromptWidgetClass;
 
 	/** Acquire the temporary bell before BP plays its editable clip. Native owns both deadlines. */
 	UFUNCTION(BlueprintCallable, Category="Bell")
-	bool BeginBellAction(float EmitDelay = .566667f, float Duration = 2.8f);
+	bool BeginBellAction(float EmitDelay = .566667f, float Duration = 1.f);
 	/** Capture calls this before taking its snapshot. Does not change collision or input locks. */
 	void CancelBellAction();
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Bell") bool bBellActive = false;
@@ -108,6 +115,10 @@ private:
 	friend class FCatrunBasketRestoreRegressionTest;
 	friend class FCatrunBasketComplexSupportTest;
 	void FindAndEnterBasket();
+	bool IsInteractionAvailable() const;
+	bool FindEntryCandidate(ACatrunHideBasket*& OutBasket, FVector& OutLocation) const;
+	void UpdateInteractionPrompt();
+	void HideInteractionPrompt();
 	bool TestEntry(ACatrunHideBasket* Basket, FVector& OutLocation) const;
 	void EnterBasket(ACatrunHideBasket* Basket, const FVector& Location);
 	void FinishEnter();
@@ -124,6 +135,9 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<UCatrunBasketExitPreview> ExitPreview;
+	UPROPERTY(Transient)
+	TObjectPtr<UCatrunBasketPromptWidget> BasketPromptWidget;
+	double NextPromptCheck = 0;
 	UPROPERTY(Transient)
 	TSubclassOf<UAnimInstance> SavedAnimClass;
 

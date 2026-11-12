@@ -2,20 +2,32 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Components/CanvasPanelSlot.h"
 #include "GameFramework/Actor.h"
+#include "Rendering/SlateRenderTransform.h"
 #include "TimerManager.h"
 #include "CatrunMinimapWidget.generated.h"
 
 class UCanvasPanel;
-class UCanvasPanelSlot;
 class UImage;
 class UTexture2D;
+class UWidget;
+
+enum class ECatrunMinimapEnemyKind : uint8
+{
+	Armor,
+	Candle,
+};
 
 namespace CatrunMinimap
 {
 	/** Matches an orthographic top-down capture at pitch -90 and roll 0. */
 	CATRUN_API bool Project(const FVector2D& WorldXY, const FVector2D& Center, const FVector2D& Size,
 		double YawDegrees, FVector2D& OutUV);
+	/** Fits the capture footprint in the square map surface, with a pivot at its center. */
+	CATRUN_API bool FitCameraProjection(const FVector2D& CaptureSize, double CaptureYawDegrees,
+		const FRotator& CameraRotation, FSlateRenderTransform& OutTransform);
+	CATRUN_API FVector2D ToDisplayUV(const FVector2D& CaptureUV, const FSlateRenderTransform& Transform);
 }
 
 /** The widget Blueprint owns the panel, background and marker appearance. */
@@ -25,23 +37,44 @@ class CATRUN_API UCatrunMinimapWidget : public UUserWidget
 	GENERATED_BODY()
 
 protected:
+	virtual void NativeTick(const FGeometry& Geometry, float DeltaSeconds) override;
 	UPROPERTY(meta=(BindWidget)) TObjectPtr<UImage> MapBackground;
 	UPROPERTY(meta=(BindWidget)) TObjectPtr<UCanvasPanel> MarkerLayer;
+	UPROPERTY(meta=(BindWidgetOptional)) TObjectPtr<UWidget> MinimapFrame;
 	UPROPERTY(EditDefaultsOnly, Category="Minimap") TSubclassOf<UUserWidget> PlayerMarkerClass;
 	UPROPERTY(EditDefaultsOnly, Category="Minimap") TSubclassOf<UUserWidget> EnemyMarkerClass;
+	UPROPERTY(EditDefaultsOnly, Category="Minimap") TSubclassOf<UUserWidget> ArmorMarkerClass;
+	UPROPERTY(EditDefaultsOnly, Category="Minimap") TSubclassOf<UUserWidget> CandleMarkerClass;
+	UPROPERTY(EditDefaultsOnly, Category="Minimap", meta=(ClampMin=".1", ClampMax="1.0"))
+	float ExpandedMapViewportFraction = .76f;
+	UPROPERTY(EditDefaultsOnly, Category="Minimap", meta=(ClampMin="1.0"))
+	float ExpandedMapMaxSize = 700.f;
 
 private:
 	friend class ACatrunMinimapPresenter;
+#if WITH_DEV_AUTOMATION_TESTS
+	friend class FCatrunMinimapLayoutTest;
+	friend class FCatrunMinimapEnemyLifecycleTest;
+#endif
 
-	bool InitializeMap(UTexture2D* Texture);
+	bool InitializeMap(UTexture2D* Texture, const FVector2D& CaptureSize, double CaptureYawDegrees);
+	void SetExpanded(bool bInExpanded);
+	void UpdateLayout();
+	static FAnchorData GetFrameLayout(const FAnchorData& CompactLayout, const FVector2D& ViewportSize,
+		bool bIsExpanded, float ExpandedViewportFraction, float ExpandedMaxSize);
+	void UpdateMapProjection(const FVector2D& CaptureSize, double CaptureYawDegrees, const APlayerController& Controller);
 	void UpdatePlayer(const FVector2D* UV);
-	void UpdateEnemy(int32 Index, const FVector2D& UV);
-	void HideUnusedEnemies(int32 VisibleCount);
+	void UpdateEnemies(ECatrunMinimapEnemyKind Kind, TConstArrayView<FVector2D> Positions);
 	UCanvasPanelSlot* AddMarker(TSubclassOf<UUserWidget> MarkerClass, int32 ZOrder);
-	static void UpdateMarker(UCanvasPanelSlot& MarkerSlot, const FVector2D* UV);
+	void UpdateMarker(UCanvasPanelSlot& MarkerSlot, const FVector2D* UV);
 
+	UPROPERTY(Transient) TObjectPtr<UCanvasPanelSlot> FrameSlot;
 	UPROPERTY(Transient) TObjectPtr<UCanvasPanelSlot> PlayerMarker;
-	UPROPERTY(Transient) TArray<TObjectPtr<UCanvasPanelSlot>> EnemyMarkers;
+	UPROPERTY(Transient) TArray<TObjectPtr<UCanvasPanelSlot>> ArmorMarkers;
+	UPROPERTY(Transient) TArray<TObjectPtr<UCanvasPanelSlot>> CandleMarkers;
+	FAnchorData CompactFrameLayout;
+	FSlateRenderTransform MapProjection;
+	bool bExpanded = false;
 };
 
 /** One placed instance per playable map. Its widget and marker cache belong to that world. */
@@ -83,12 +116,17 @@ private:
 	void StartTracking(UWorld& World);
 	void TrackEnemy(AActor* Actor);
 	UFUNCTION() void UntrackEnemy(AActor* Actor);
-	bool AttachWidget();
+	bool AttachWidget(APlayerController& Controller);
+	void DetachWidget();
+	void HideMinimap();
 	void UpdateMinimap();
+	void ToggleMap();
+	bool CanUseMinimap(const APlayerController* Controller) const;
 	bool ProjectActor(const AActor* Actor, FVector2D& OutUV) const;
 
 	UPROPERTY(Transient) TObjectPtr<UCatrunMinimapWidget> MinimapWidget;
-	TArray<TWeakObjectPtr<AActor>> Enemies;
+	TWeakObjectPtr<APlayerController> InputController;
+	TMap<TWeakObjectPtr<AActor>, ECatrunMinimapEnemyKind> Enemies;
 	FDelegateHandle SpawnedHandle;
 	FTimerHandle UpdateTimer;
 };

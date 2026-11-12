@@ -8,6 +8,12 @@
 
 class UTextBlock;
 
+enum class ECatrunNoticePolicy : uint8
+{
+	Gameplay,
+	BlockedRecovery
+};
+
 /** A line of text at the bottom of the screen. Built in code, so it needs no widget blueprint. */
 UCLASS()
 class CATRUN_API UCatrunNoticeWidget : public UUserWidget
@@ -17,11 +23,16 @@ class CATRUN_API UCatrunNoticeWidget : public UUserWidget
 public:
 	void SetNoticeText(const FText& Text);
 	void SetScreenAnchor(FVector2D Anchor);
+	void SetNoticePolicy(ECatrunNoticePolicy Policy);
 
 protected:
 	virtual TSharedRef<SWidget> RebuildWidget() override;
+	virtual void NativeTick(const FGeometry& Geometry, float DeltaSeconds) override;
 
 private:
+	friend class FCatrunRecoveryNoticeTest;
+	ECatrunNoticePolicy NoticePolicy = ECatrunNoticePolicy::Gameplay;
+	void RefreshPresentation();
 	FText PendingText;
 	UPROPERTY(Transient)
 	TObjectPtr<UTextBlock> TextBlock;
@@ -37,13 +48,14 @@ public:
 	static UCatrunNoticeSubsystem* Get(const UObject* WorldContextObject);
 
 	// Shows Text for Duration seconds (a new notice replaces the one on screen).
-	void ShowNotice(const FText& Text, float Duration);
+	void ShowNotice(const FText& Text, float Duration, ECatrunNoticePolicy Policy = ECatrunNoticePolicy::Gameplay);
 	static FText BellDeniedText();
 
 	virtual bool ShouldCreateSubsystem(UObject* Outer) const override;
 	virtual void Deinitialize() override;
 
 private:
+	friend class FCatrunRecoveryNoticeTest;
 	void HideNotice();
 
 	UPROPERTY(Transient)

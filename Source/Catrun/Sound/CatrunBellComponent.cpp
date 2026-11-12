@@ -3,6 +3,7 @@
 #include "Settings/CatrunUserSettings.h"
 #include "EnhancedPlayerInput.h"
 #include "Interaction/CatrunPuzzleSuspension.h"
+#include "LevelFlow/CatrunLevelFlow.h"
 
 #include "Catrun.h"
 #include "CatrunBellIndicatorWidget.h"
@@ -189,7 +190,7 @@ bool UCatrunBellComponent::ShouldSuppressBellIndicator() const
 	const UCatrunRestartSubsystem* Restart = UCatrunRestartSubsystem::Get(this);
 	return !IsValid(Pawn) || Pawn->IsActorBeingDestroyed() || !Controller
 		|| !Controller->IsLocalController() || !Controller->GetLocalPlayer()
-		|| Pawn->IsHidden() || UCatrunPuzzleSuspension::IsSuspended(this)
+		|| Pawn->IsHidden() || UCatrunLevelFlowLibrary::ShouldHideGameplayHUD(this) || UCatrunPuzzleSuspension::IsSuspended(this)
 		|| (Restart && Restart->IsCatching()) || CatrunCat::IsHiding(Pawn) || IsCatHiding();
 }
 

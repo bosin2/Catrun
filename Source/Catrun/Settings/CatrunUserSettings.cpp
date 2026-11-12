@@ -5,6 +5,35 @@
 #include "Engine/World.h"
 #include "HAL/IConsoleManager.h"
 
+namespace
+{
+	FCatrunKeyboardBindings ReadKeyboardBindings(const FCatrunKeyboardBindings& Stored)
+	{
+		FText Error;
+		if (Stored.Validate(Error))
+			return Stored;
+
+		const FCatrunKeyboardBindings Defaults;
+		const int32 TabSlot = Stored.Keys.Find(EKeys::Tab);
+		if (Stored.Keys.Num() != Defaults.Keys.Num() || TabSlot == INDEX_NONE || TabSlot != Stored.Keys.FindLast(EKeys::Tab))
+			return Defaults;
+
+		// A legacy Tab binding reserves exactly one slot. Keep the other choices when they still validate.
+		auto IsAvailable = [&Stored](const FKey& Key)
+		{
+			return UCatrunInputBindings::IsKeyboardKey(Key) && !Stored.Keys.Contains(Key);
+		};
+		const FKey& Preferred = Defaults.Keys[TabSlot];
+		const FKey* Replacement = IsAvailable(Preferred) ? &Preferred : Defaults.Keys.FindByPredicate(IsAvailable);
+		if (!Replacement)
+			return Defaults;
+
+		FCatrunKeyboardBindings Repaired = Stored;
+		Repaired.Keys[TabSlot] = *Replacement;
+		return Repaired.Validate(Error) ? Repaired : Defaults;
+	}
+}
+
 FSimpleMulticastDelegate UCatrunUserSettings::OnKeyboardBindingsChanged;
 
 UCatrunUserSettings* UCatrunUserSettings::GetCatrunUserSettings()
@@ -23,16 +52,14 @@ void UCatrunUserSettings::ValidateSettings()
 {
 	Super::ValidateSettings();
 	SetMasterVolume(MasterVolume);
-	FText Error;
-	if (!KeyboardBindings.Validate(Error)) KeyboardBindings = FCatrunKeyboardBindings();
+	KeyboardBindings = ReadKeyboardBindings(KeyboardBindings);
 }
 
 void UCatrunUserSettings::LoadSettings(bool bForceReload)
 {
 	Super::LoadSettings(bForceReload);
 	SetMasterVolume(MasterVolume);
-	FText Error;
-	if (!KeyboardBindings.Validate(Error)) KeyboardBindings = FCatrunKeyboardBindings();
+	KeyboardBindings = ReadKeyboardBindings(KeyboardBindings);
 }
 
 void UCatrunUserSettings::SetMasterVolume(float Volume)
@@ -84,8 +111,7 @@ void UCatrunUserSettings::SetNoArmorCaptureEnabled(bool bEnabled)
 
 FCatrunKeyboardBindings UCatrunUserSettings::GetKeyboardBindings() const
 {
- FText Error;
- return KeyboardBindings.Validate(Error) ? KeyboardBindings : FCatrunKeyboardBindings();
+ return ReadKeyboardBindings(KeyboardBindings);
 }
 bool UCatrunUserSettings::SetKeyboardBindings(const FCatrunKeyboardBindings& Bindings, FText& Error)
 {

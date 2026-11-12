@@ -25,7 +25,8 @@ enum class EArmorAction : uint8
 	Turning		UMETA(DisplayName = "Turning 90 degrees"),
 	OpeningDoor	UMETA(DisplayName = "Opening a door"),
 	Looking		UMETA(DisplayName = "Looking around"),
-	Catching	UMETA(DisplayName = "Picking up the cat")
+	Catching	UMETA(DisplayName = "Picking up the cat"),
+	WaitingForCapture UMETA(DisplayName = "Waiting for the captor")
 };
 
 /**
@@ -71,6 +72,7 @@ public:
 	void SetFollowingMark(bool bFollow);
 	bool IsFollowingMark() const { return bFollowingMark; }
 	bool IsCatching() const { return Action == EArmorAction::Catching; }
+	bool IsWaitingForCapture() const { return bWaitingForCapture; }
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Armor|Capture")
 	TObjectPtr<UCatrunCapturePresentationComponent> CapturePresentation;
@@ -225,6 +227,10 @@ public:
 	// has a switch (bDebugShowArmorDetection) that shows the circles of all armors at once.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Armor|Detection")
 	bool bShowDetectionDisplay = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Armor|Detection", meta=(ClampMin="0", ClampMax="1"))
+	float DetectionDisplayOpacity = .12f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Armor|Detection")
+	FLinearColor DetectionDisplayColor = FLinearColor(.015f, .035f, .12f, 1.f);
 
 	// True while the cat is inside the detection circle.
 	UFUNCTION(BlueprintPure, Category = "Armor|Detection")
@@ -242,6 +248,7 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type Reason) override;
 
 private:
 	friend class FCatrunPuzzleSuspensionTest;
@@ -249,6 +256,12 @@ private:
 	friend class FCatrunTurnCurveHandoffTest;
 	friend class UCatrunCapturePresentationComponent;
 	void PrepareForCapture();
+	void CatchOwnerChanged(UObject* CaptureOwner);
+	bool bWaitingForCapture = false;
+	bool bCaptureWaitMeshPaused = false;
+	EArmorAction CaptureWaitAction = EArmorAction::Idle;
+	uint8 CaptureWaitMovementMode = 0, CaptureWaitCustomMode = 0;
+	FDelegateHandle CatchOwnerChangedHandle;
 	// bReturningToPost remains a walk-speed legacy flag; target intent is explicit.
 	enum class ETravelIntent : uint8 { None, Patrol, ReturnPost, Investigation, Mark };
 	ETravelIntent TravelIntent = ETravelIntent::None;

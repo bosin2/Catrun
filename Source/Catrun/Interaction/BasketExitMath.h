@@ -9,11 +9,15 @@ namespace CatrunBasket
 		return (FMath::FloorToInt((Angle + 22.5f) / 45.f) % 8 + 8) % 8;
 	}
 
-	// 실제 열린 면에 가까운 키보드 방향 5개를 허용하고 반대편 3개를 막는다.
-	// 단순 내적 판정은 바구니가 비스듬하면 옆 방향까지 잘려 4개만 허용될 수 있다.
+	// Entry and exit share the physical open half: exact sides are allowed, the
+	// hinge rear is never opened by camera-sector rounding. Aligned input retains
+	// five directions; off-grid rotations may expose four physically valid keys.
 	inline bool IsDirectionAllowed(const FVector& Direction, const FVector& BasketForward, float CameraYaw)
 	{
-		if (Direction.IsNearlyZero() || BasketForward.IsNearlyZero()) return false;
+		const FVector FlatDirection=Direction.GetSafeNormal2D();
+		const FVector FlatForward=BasketForward.GetSafeNormal2D();
+		if (FlatDirection.IsNearlyZero() || FlatForward.IsNearlyZero()
+			|| FVector::DotProduct(FlatDirection,FlatForward)<-.0001f) return false;
 		const int32 Difference = FMath::Abs(DirectionSector(Direction, CameraYaw)
 			- DirectionSector(BasketForward, CameraYaw));
 		return FMath::Min(Difference, 8 - Difference) <= 2;

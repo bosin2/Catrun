@@ -137,6 +137,14 @@ TSharedRef<SWidget> UCatrunPlayHUD::RebuildWidget()
 void UCatrunPlayHUD::NativeTick(const FGeometry& Geometry, float DeltaSeconds)
 {
 	Super::NativeTick(Geometry,DeltaSeconds);
+	if (UCatrunLevelFlowLibrary::ShouldHideGameplayHUD(this))
+	{
+		if (GuidePanel) GuidePanel->SetVisibility(ESlateVisibility::Collapsed);
+		if (StatePanel) StatePanel->SetVisibility(ESlateVisibility::Collapsed);
+		if (ControlsPanel) ControlsPanel->SetVisibility(ESlateVisibility::Collapsed);
+		RefreshDelay = 0; // Restore through the existing preference-aware refresh, never force HUD on.
+		return;
+	}
 	RefreshDelay -= DeltaSeconds;
 	if (RefreshDelay <= 0) { RefreshDelay=.15f; Refresh(); }
 }

@@ -22,12 +22,12 @@ bool UCatrunInputBindings::IsKeyboardKey(FKey Key)
  const auto* InputSettings=GetDefault<UInputSettings>();
  return Key.IsValid() && Key.IsBindableToActions() && !Key.IsVirtual() && !Key.IsGesture() && !Key.IsButtonAxis()
   && Key.GetMenuCategory()==EKeys::NAME_KeyboardCategory && !Key.IsGamepadKey() && !Key.IsMouseButton() && !Key.IsAxis1D() && !Key.IsAxis2D() && !Key.IsAxis3D()
-  && !Key.IsTouch() && Key != EKeys::Escape && Key != EKeys::AnyKey
+  && !Key.IsTouch() && Key != EKeys::Escape && Key != EKeys::Tab && Key != EKeys::AnyKey
   && !(Key == EKeys::F11 && InputSettings->bF11TogglesFullscreen) && !InputSettings->ConsoleKeys.Contains(Key);
 }
 FText UCatrunInputBindings::GetInvalidKeyboardKeyMessage()
 {
- return NSLOCTEXT("Catrun","BindingInvalid","Esc와 시스템 예약 키를 제외한 키보드 키 하나를 지정하세요.");
+ return NSLOCTEXT("Catrun","BindingInvalid","Esc, Tab, 시스템 예약 키를 제외한 키보드 키 하나를 지정하세요.");
 }
 bool FCatrunKeyboardBindings::Validate(FText& Error) const
 {
