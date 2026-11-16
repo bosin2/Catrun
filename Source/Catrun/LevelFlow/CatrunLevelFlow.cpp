@@ -35,6 +35,7 @@ namespace
 {
 	const FString ProgressSlot(TEXT("CatrunProgress"));
 	constexpr int32 ProgressUser = 0;
+	constexpr TCHAR Stage1PortalArrivalOption[] = TEXT("FromStage1Portal");
 
 	UCatrunFlowSession* GetFlowSession(UWorld* World)
 	{
@@ -131,6 +132,13 @@ void UCatrunFlowSession::ResolveArrivalRestart(const FString& Package)
 	else if (ArrivalRestart == ECatrunArrivalRestart::Clear) RestartIntent.Clear();
 	ArrivalRestart = ECatrunArrivalRestart::Preserve;
 	ArrivalFadeInDuration = 0.f;
+}
+
+bool UCatrunFlowSession::HasRestartArrivalIntent(const FString& CleanPackage) const
+{
+	if (AcceptedTravelMap == CleanPackage && ArrivalRestart != ECatrunArrivalRestart::Preserve)
+		return ArrivalRestart == ECatrunArrivalRestart::SkipIntro || ArrivalRestart == ECatrunArrivalRestart::Continue;
+	return RestartIntent.MapPackage == CleanPackage;
 }
 
 bool UCatrunFlowSession::Arrive(const FString& Package)
@@ -284,6 +292,20 @@ bool UCatrunLevelFlowSubsystem::ShouldSkipStageIntro()
 {
 	ResolveRestartIntent();
 	return bSkipStageIntro;
+}
+
+bool UCatrunLevelFlowSubsystem::IsStage2PortalArrival() const
+{
+	UWorld* World = GetWorld();
+	if (!World || !World->URL.HasOption(Stage1PortalArrivalOption)) return false;
+	const int32 Stage2Index = FindStageId(TEXT("Stage2"));
+	if (Stage2Index == INDEX_NONE) return false;
+	const FString Package = UWorld::RemovePIEPrefix(World->GetOutermost()->GetName());
+	const auto& Stage2 = GetDefault<UCatrunLevelFlowSettings>()->Stages[Stage2Index];
+	if (Package != Stage2.Map.ToSoftObjectPath().GetLongPackageName()) return false;
+	if (bRestartIntentResolved) return !bSkipStageIntro;
+	const auto* Session = GetFlowSession(World);
+	return !Session || !Session->HasRestartArrivalIntent(Package);
 }
 
 float UCatrunLevelFlowSubsystem::GetRestartFadeInDuration()
@@ -464,7 +486,8 @@ bool UCatrunLevelFlowSubsystem::RequestSameMapRestart(UObject* Owner, float Fade
         ECatrunArrivalRestart::SkipIntro, nullptr, -1, Owner, MoveTemp(Failure), FadeInDuration, true, bRestoreCheckpoint);
 }
 
-bool UCatrunLevelFlowSubsystem::CompleteStageInternal(UObject* ExitOwner, UObject* FailureOwner, TFunction<void(const FString&)> Failure)
+bool UCatrunLevelFlowSubsystem::CompleteStageInternal(UObject* ExitOwner, UObject* FailureOwner,
+	TFunction<void(const FString&)> Failure, const TCHAR* ArrivalOption)
 {
 	if (bTransitioning || bStageComplete || (ExitReservation.IsValid() && ExitReservation.Get() != ExitOwner)) return false;
 	if (const auto* Restart = UCatrunRestartSubsystem::Get(this); Restart && Restart->IsCatching()) return false;
@@ -474,7 +497,7 @@ bool UCatrunLevelFlowSubsystem::CompleteStageInternal(UObject* ExitOwner, UObjec
 	if (Settings->Stages.IsValidIndex(Index + 1))
 	{
 		// Preserve the existing tutorial stair arrival Blueprint's URL option.
-		const FString Options = Settings->Stages[Index].StageId == TEXT("Tutorial") ? TEXT("FromTutorial") : FString();
+		const FString Options = Settings->Stages[Index].StageId == TEXT("Tutorial") ? TEXT("FromTutorial") : ArrivalOption;
         auto* Session = GetFlowSession(GetWorld());
         return TravelTo(Settings->Stages[Index + 1].Map, Options, false,
             Session && Session->IsTrackingWorld(GetWorld()->GetOutermost()->GetName()), ECatrunArrivalRestart::Clear, ExitOwner,
@@ -676,6 +699,12 @@ bool UCatrunLevelFlowLibrary::ShouldSkipStageIntro(const UObject* Context)
 {
 	auto* Flow = UCatrunLevelFlowSubsystem::Get(Context);
 	return Flow && Flow->ShouldSkipStageIntro();
+}
+
+bool UCatrunLevelFlowLibrary::IsStage2PortalArrival(const UObject* Context)
+{
+	const auto* Flow = UCatrunLevelFlowSubsystem::Get(Context);
+	return Flow && Flow->IsStage2PortalArrival();
 }
 
 bool UCatrunLevelFlowLibrary::RestorePlayableStart(const UObject* Context, APawn* Pawn, const FTransform& PlayableTransform, AActor* GameplayViewTarget)
@@ -951,7 +980,7 @@ bool UCatrunLevelFlowSubsystem::CompleteStageForExit(UObject* Owner)
     const int32 Index = Settings->FindStageIndex(GetWorld()->GetOutermost()->GetName());
     if (Index < 0 || !Settings->Stages.IsValidIndex(Index + 1) || Settings->Stages[Index].StageId != TEXT("Stage1")
         || Settings->Stages[Index + 1].StageId != TEXT("Stage2")) return false;
-    return CompleteStageInternal(Owner);
+    return CompleteStageInternal(Owner, nullptr, {}, Stage1PortalArrivalOption);
 }
 
 void UCatrunLevelFlowSubsystem::ClearFailedTravel()

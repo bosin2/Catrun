@@ -8,10 +8,12 @@
 #include "TimerManager.h"
 #include "CatrunMinimapWidget.generated.h"
 
+class ACatrunMinimapPresenter;
 class UCanvasPanel;
 class UImage;
 class UTexture2D;
 class UWidget;
+struct FSceneViewProjectionData;
 
 enum class ECatrunMinimapEnemyKind : uint8
 {
@@ -27,7 +29,13 @@ namespace CatrunMinimap
 	/** Fits the capture footprint in the square map surface, with a pivot at its center. */
 	CATRUN_API bool FitCameraProjection(const FVector2D& CaptureSize, double CaptureYawDegrees,
 		const FRotator& CameraRotation, FSlateRenderTransform& OutTransform);
+	/** Fits a square centered on the player around the camera's footprint on the horizontal map plane. */
+	CATRUN_API bool MakeLocalProjection(const FVector2D& CaptureCenter, const FVector2D& CaptureSize,
+		double CaptureYawDegrees, const FVector& PlayerLocation, const FSceneViewProjectionData& View,
+		double Coverage, FSlateRenderTransform& OutTransform);
 	CATRUN_API FVector2D ToDisplayUV(const FVector2D& CaptureUV, const FSlateRenderTransform& Transform);
+	CATRUN_API bool TryGetDisplayUV(const FVector2D& CaptureUV, const FSlateRenderTransform& Transform, FVector2D& OutUV);
+	CATRUN_API FSlateRenderTransform ToImageTransform(const FSlateRenderTransform& Transform, const FVector2D& LocalSize);
 }
 
 /** The widget Blueprint owns the panel, background and marker appearance. */
@@ -45,36 +53,39 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category="Minimap") TSubclassOf<UUserWidget> EnemyMarkerClass;
 	UPROPERTY(EditDefaultsOnly, Category="Minimap") TSubclassOf<UUserWidget> ArmorMarkerClass;
 	UPROPERTY(EditDefaultsOnly, Category="Minimap") TSubclassOf<UUserWidget> CandleMarkerClass;
-	UPROPERTY(EditDefaultsOnly, Category="Minimap", meta=(ClampMin=".1", ClampMax="1.0"))
-	float ExpandedMapViewportFraction = .76f;
 	UPROPERTY(EditDefaultsOnly, Category="Minimap", meta=(ClampMin="1.0"))
-	float ExpandedMapMaxSize = 700.f;
+	float HoldSizeMultiplier = 1.25f;
+	UPROPERTY(EditDefaultsOnly, Category="Minimap", meta=(ClampMin="1.0"))
+	float NeighborhoodCoverage = 1.30f;
 
 private:
 	friend class ACatrunMinimapPresenter;
 #if WITH_DEV_AUTOMATION_TESTS
 	friend class FCatrunMinimapLayoutTest;
 	friend class FCatrunMinimapEnemyLifecycleTest;
+	friend class FCatrunMinimapOffscreenPreviewTest;
 #endif
 
-	bool InitializeMap(UTexture2D* Texture, const FVector2D& CaptureSize, double CaptureYawDegrees);
-	void SetExpanded(bool bInExpanded);
-	void UpdateLayout();
+	bool InitializeMap(ACatrunMinimapPresenter& InPresenter);
+	void UpdateHoldState(bool bGameplayAllowed, bool bViewportAcceptsInput, bool bTabDown);
+	void UpdateLayout(const FVector2D& ViewportSize);
 	static FAnchorData GetFrameLayout(const FAnchorData& CompactLayout, const FVector2D& ViewportSize,
-		bool bIsExpanded, float ExpandedViewportFraction, float ExpandedMaxSize);
-	void UpdateMapProjection(const FVector2D& CaptureSize, double CaptureYawDegrees, const APlayerController& Controller);
-	void UpdatePlayer(const FVector2D* UV);
-	void UpdateEnemies(ECatrunMinimapEnemyKind Kind, TConstArrayView<FVector2D> Positions);
+		bool bIsExpanded, float InHoldSizeMultiplier);
+	void ApplyImageProjection() const;
+	void UpdateEnemyMarkers(ECatrunMinimapEnemyKind Kind, TConstArrayView<FVector2D> Positions);
 	UCanvasPanelSlot* AddMarker(TSubclassOf<UUserWidget> MarkerClass, int32 ZOrder);
-	void UpdateMarker(UCanvasPanelSlot& MarkerSlot, const FVector2D* UV);
+	void UpdateMarker(UCanvasPanelSlot& MarkerSlot, const FVector2D* DisplayUV);
 
+	TWeakObjectPtr<ACatrunMinimapPresenter> Presenter;
 	UPROPERTY(Transient) TObjectPtr<UCanvasPanelSlot> FrameSlot;
 	UPROPERTY(Transient) TObjectPtr<UCanvasPanelSlot> PlayerMarker;
 	UPROPERTY(Transient) TArray<TObjectPtr<UCanvasPanelSlot>> ArmorMarkers;
 	UPROPERTY(Transient) TArray<TObjectPtr<UCanvasPanelSlot>> CandleMarkers;
 	FAnchorData CompactFrameLayout;
 	FSlateRenderTransform MapProjection;
+	FSlateRenderTransform FallbackProjection;
 	bool bExpanded = false;
+	bool bWaitForTabRelease = false;
 };
 
 /** One placed instance per playable map. Its widget and marker cache belong to that world. */
@@ -109,6 +120,7 @@ protected:
 	virtual void EndPlay(const EEndPlayReason::Type Reason) override;
 
 private:
+	friend class UCatrunMinimapWidget;
 #if WITH_DEV_AUTOMATION_TESTS
 	friend class FCatrunMinimapEnemyLifecycleTest;
 #endif
@@ -120,13 +132,14 @@ private:
 	void DetachWidget();
 	void HideMinimap();
 	void UpdateMinimap();
-	void ToggleMap();
 	bool CanUseMinimap(const APlayerController* Controller) const;
 	bool ProjectActor(const AActor* Actor, FVector2D& OutUV) const;
 
 	UPROPERTY(Transient) TObjectPtr<UCatrunMinimapWidget> MinimapWidget;
-	TWeakObjectPtr<APlayerController> InputController;
+	TWeakObjectPtr<APlayerController> OwningController;
 	TMap<TWeakObjectPtr<AActor>, ECatrunMinimapEnemyKind> Enemies;
+	TArray<FVector2D, TInlineAllocator<8>> ArmorPositions;
+	TArray<FVector2D, TInlineAllocator<8>> CandlePositions;
 	FDelegateHandle SpawnedHandle;
 	FTimerHandle UpdateTimer;
 };

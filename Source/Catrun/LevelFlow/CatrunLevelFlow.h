@@ -48,6 +48,7 @@ public:
 	uint64 AcceptTravel(const FString& Package, bool bBeginProgress, bool bCheckpoint, ECatrunArrivalRestart Restart, int8 OnboardingOnArrival = -1, float FadeInDuration = 0.f, bool bRestoreStage2EntryCheckpoint = false);
 	void CancelTravel(uint64 ExpectedToken = 0);
 	void ResolveArrivalRestart(const FString& Package);
+	bool HasRestartArrivalIntent(const FString& CleanPackage) const;
 	bool Arrive(const FString& Package);
 	void SaveArrivalCheckpoint(UWorld& World);
 	bool ConsumeArrivalTitle(const FString& Package);
@@ -183,6 +184,7 @@ public:
 	/** Stable for this world: consuming the travel token never changes subsequent BP query results. */
 	UFUNCTION(BlueprintCallable, Category="Level Flow")
 	bool ShouldSkipStageIntro();
+	bool IsStage2PortalArrival() const;
 	float GetRestartFadeInDuration();
 	bool ShouldRestoreStage2EntryCheckpoint();
 	bool ConsumeStageTitle(FText& OutTitle);
@@ -204,7 +206,8 @@ private:
 	bool TravelTo(const TSoftObjectPtr<UWorld>& Map, const FString& Options = FString(), bool bBeginProgress = false,
 		bool bCheckpoint = false, ECatrunArrivalRestart Restart = ECatrunArrivalRestart::Clear, UObject* ExitOwner = nullptr, int8 Onboarding = -1,
 		UObject* FailureOwner = nullptr, TFunction<void(const FString&)> Failure = {}, float FadeInDuration = 0.f, bool bReloadCurrentWorld = false, bool bRestoreStage2EntryCheckpoint = false);
-	bool CompleteStageInternal(UObject* ExitOwner, UObject* FailureOwner = nullptr, TFunction<void(const FString&)> Failure = {});
+	bool CompleteStageInternal(UObject* ExitOwner, UObject* FailureOwner = nullptr, TFunction<void(const FString&)> Failure = {},
+		const TCHAR* ArrivalOption = TEXT(""));
 	void ClearFailedTravel();
 	void FinishTravel();
 	void ResolveRestartIntent();
@@ -286,6 +289,9 @@ public:
 	static bool RestartCurrentStage(const UObject* WorldContextObject);
 	UFUNCTION(BlueprintCallable, Category="Catrun|Level Flow", meta=(WorldContext="WorldContextObject"))
 	static bool ShouldSkipStageIntro(const UObject* WorldContextObject);
+	/** Reads the current arrival route without consuming its travel or restart intent. */
+	UFUNCTION(BlueprintPure, Category="Catrun|Level Flow", meta=(WorldContext="WorldContextObject"))
+	static bool IsStage2PortalArrival(const UObject* WorldContextObject);
 	UFUNCTION(BlueprintCallable, Category="Catrun|Level Flow", meta=(WorldContext="WorldContextObject"))
 	static bool ShouldShowTutorialControls(const UObject* WorldContextObject);
 	UFUNCTION(BlueprintCallable, Category="Catrun|Level Flow", meta=(WorldContext="WorldContextObject"))

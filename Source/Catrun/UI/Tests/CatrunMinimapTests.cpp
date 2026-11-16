@@ -2,14 +2,31 @@
 
 #include "UI/CatrunMinimapWidget.h"
 
+#if WITH_EDITOR
+#include "AssetCompilingManager.h"
+#endif
+#include "Camera/CameraTypes.h"
+#include "Components/Border.h"
 #include "Engine/Engine.h"
+#include "Engine/Texture2D.h"
+#include "Engine/TextureRenderTarget2D.h"
 #include "Engine/World.h"
+#include "Framework/Application/SlateApplication.h"
+#include "HAL/FileManager.h"
+#include "ImageUtils.h"
 #include "Layout/Geometry.h"
+#include "Math/InverseRotationMatrix.h"
+#include "Misc/App.h"
 #include "Misc/AutomationTest.h"
+#include "Misc/CommandLine.h"
+#include "Misc/Paths.h"
 #include "Misc/ScopeExit.h"
 #include "Monster/CatrunArmor.h"
 #include "Monster/CatrunCandle.h"
+#include "SceneView.h"
 #include "Settings/CatrunSettingsSubsystem.h"
+#include "Slate/WidgetRenderer.h"
+#include "Widgets/Layout/SBorder.h"
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunMinimapProjectionTest, "Catrun.UI.Minimap.ProjectionMatchesCapture",
 	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
@@ -100,7 +117,98 @@ bool FCatrunMinimapCameraProjectionTest::RunTest(const FString&)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunMinimapLayoutTest, "Catrun.UI.Minimap.ExpandedLayoutPreservesMapProjection",
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunMinimapNeighborhoodTest, "Catrun.UI.Minimap.NeighborhoodContainsGameplayViewAndRegisters",
+	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
+bool FCatrunMinimapNeighborhoodTest::RunTest(const FString&)
+{
+	const FVector2D CaptureCenter(120., -780.);
+	const FVector2D CaptureSize(4500., 8000.);
+	const double CaptureYaw = 37.;
+	const FRotator Rotation(-55., -135., 0.);
+	const FRotationMatrix Basis(Rotation);
+	const FVector Right = Basis.GetUnitAxis(EAxis::Y);
+	const FVector Down = -Basis.GetUnitAxis(EAxis::Z);
+	const FVector Forward = Basis.GetUnitAxis(EAxis::X);
+	constexpr double Coverage = 1.30;
+	constexpr double OrthoWidth = 1200.;
+
+	for (const FVector& Player : { FVector(340., -620., 75.), FVector(-240., 310., 205.) })
+	{
+		FMinimalViewInfo Camera;
+		Camera.Location = Player - Forward * 900.;
+		Camera.Rotation = Rotation;
+		Camera.ProjectionMode = ECameraProjectionMode::Orthographic;
+		Camera.OrthoWidth = OrthoWidth;
+		Camera.AspectRatio = 16.f / 9.f;
+		for (const FIntPoint& Viewport : { FIntPoint(1280, 720), FIntPoint(600, 800) })
+		{
+			const FIntRect Rect(0, 0, Viewport.X, Viewport.Y);
+			FSceneViewProjectionData View;
+			View.ViewOrigin = Camera.Location;
+			View.ViewRotationMatrix = FInverseRotationMatrix(Rotation) * FMatrix(
+				FPlane(0, 0, 1, 0), FPlane(1, 0, 0, 0), FPlane(0, 1, 0, 0), FPlane(0, 0, 0, 1));
+			View.SetViewRectangle(Rect);
+			FMinimalViewInfo MutableCamera = Camera;
+			FMinimalViewInfo::CalculateProjectionMatrixGivenViewRectangle(
+				MutableCamera, AspectRatio_MaintainXFOV, Rect, View);
+
+			FSlateRenderTransform Projection;
+			if (!TestTrue(TEXT("Camera footprint produces a local projection"),
+				CatrunMinimap::MakeLocalProjection(CaptureCenter, CaptureSize, CaptureYaw, Player, View, Coverage, Projection)))
+				continue;
+			const auto CaptureUV = [&](const FVector& World)
+			{
+				FVector2D UV = FVector2D::ZeroVector;
+				TestTrue(TEXT("Fixture point is on the source image"),
+					CatrunMinimap::Project(FVector2D(World.X, World.Y), CaptureCenter, CaptureSize, CaptureYaw, UV));
+				return UV;
+			};
+			TestTrue(TEXT("Cat remains centered at both world positions"),
+				CatrunMinimap::ToDisplayUV(CaptureUV(Player), Projection).Equals(FVector2D(.5, .5), 1.e-6));
+
+			const double OrthoHeight = OrthoWidth * Viewport.Y / Viewport.X;
+			const double LocalSide = FMath::Max(OrthoWidth, OrthoHeight) * Coverage;
+			const auto GroundCorner = [&](double CameraX, double CameraY)
+			{
+				const FVector Point = Player + Right * CameraX + Down * CameraY;
+				return Point + Forward * ((Player.Z - Point.Z) / Forward.Z);
+			};
+			FVector2D DisplayUV;
+			const FVector2D NearUV = CaptureUV(GroundCorner(OrthoWidth * .3, -OrthoHeight * .2));
+			if (TestTrue(TEXT("Near enemy remains visible"), CatrunMinimap::TryGetDisplayUV(NearUV, Projection, DisplayUV)))
+			{
+				TestTrue(TEXT("Enemy offset follows the viewport's camera axes and real footprint"),
+					DisplayUV.Equals(FVector2D(.5 + OrthoWidth * .3 / LocalSide, .5 - OrthoHeight * .2 / LocalSide), 1.e-6));
+				for (const float Side : { 220.f, 280.f })
+				{
+					const FVector2D Size(Side, Side);
+					const FGeometry MapSurface = FGeometry::MakeRoot(FVector2f(Size),
+						FSlateLayoutTransform(1.25f, FVector2f(24.f, 18.f)));
+					const FGeometry Image = MapSurface.MakeChild(CatrunMinimap::ToImageTransform(Projection, Size));
+					TestTrue(TEXT("Enemy marker stays registered to the texel at both panel sizes"),
+						MapSurface.LocalToAbsolute(FVector2f(DisplayUV * Size)).Equals(
+							Image.LocalToAbsolute(FVector2f(NearUV * Size)), .001f));
+				}
+			}
+			const FVector2D CornerUV = CaptureUV(GroundCorner(OrthoWidth * .5, OrthoHeight * .5));
+			TestTrue(TEXT("Local square contains a camera corner with the configured extra coverage"),
+				CatrunMinimap::TryGetDisplayUV(CornerUV, Projection, DisplayUV)
+				&& DisplayUV.Equals(FVector2D(.5 + OrthoWidth * .5 / LocalSide, .5 + OrthoHeight * .5 / LocalSide), 1.e-6));
+			const FVector2D FarUV = CaptureUV(GroundCorner(LocalSide * .51, 0.));
+			TestFalse(TEXT("Enemy just outside the local window is hidden"),
+				CatrunMinimap::TryGetDisplayUV(FarUV, Projection, DisplayUV));
+
+			const FSlateRenderTransform PreviousProjection = Projection;
+			TestFalse(TEXT("Invalid coverage is rejected"),
+				CatrunMinimap::MakeLocalProjection(CaptureCenter, CaptureSize, CaptureYaw, Player, View, 0., Projection));
+			TestTrue(TEXT("Invalid coverage cannot overwrite the usable transform"), Projection == PreviousProjection);
+		}
+	}
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunMinimapLayoutTest, "Catrun.UI.Minimap.HeldLayoutPreservesCornerPlacement",
 	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 
 bool FCatrunMinimapLayoutTest::RunTest(const FString&)
@@ -110,22 +218,24 @@ bool FCatrunMinimapLayoutTest::RunTest(const FString&)
 	Compact.Alignment = FVector2D(1., 0.);
 	Compact.Offsets = FMargin(-24.f, 24.f, 232.f, 232.f);
 	const FVector2D Desktop(1280., 720.);
-	const FAnchorData Open = UCatrunMinimapWidget::GetFrameLayout(Compact, Desktop, true, .75f, 700.f);
-	TestTrue(TEXT("Expanded map is centered in the player screen"),
-		Open.Anchors == FAnchors(.5f) && Open.Alignment == FVector2D(.5, .5)
-		&& Open.Offsets.Left == 0.f && Open.Offsets.Top == 0.f);
-	TestTrue(TEXT("Expansion fits the smaller screen axis and preserves the square map surface"),
-		Open.Offsets.Right == 540.f && Open.Offsets.Bottom == 540.f);
+	const FAnchorData Open = UCatrunMinimapWidget::GetFrameLayout(Compact, Desktop, true, 1.25f);
+	TestTrue(TEXT("Held map retains authored anchors, alignment and inset"),
+		Open.Anchors == Compact.Anchors && Open.Alignment == Compact.Alignment
+		&& Open.Offsets.Left == Compact.Offsets.Left && Open.Offsets.Top == Compact.Offsets.Top);
+	TestTrue(TEXT("Holding Tab enlarges both authored dimensions by 25 percent"),
+		Open.Offsets.Right == 290.f && Open.Offsets.Bottom == 290.f);
 	TestTrue(TEXT("Closing restores the Blueprint compact placement"),
-		UCatrunMinimapWidget::GetFrameLayout(Compact, Desktop, false, .75f, 700.f) == Compact);
+		UCatrunMinimapWidget::GetFrameLayout(Compact, Desktop, false, 1.25f) == Compact);
 
-	const FAnchorData Tall = UCatrunMinimapWidget::GetFrameLayout(Compact, FVector2D(200., 500.), true, .75f, 700.f);
-	TestTrue(TEXT("Tall viewport fits by its width"), Tall.Offsets.Right == 150.f && Tall.Offsets.Bottom == 150.f);
-	const FAnchorData Large = UCatrunMinimapWidget::GetFrameLayout(Compact, FVector2D(1920., 1080.), true, .75f, 700.f);
-	TestTrue(TEXT("Large viewport respects the authored limit"), Large.Offsets.Right == 700.f && Large.Offsets.Bottom == 700.f);
-	const FAnchorData Narrow = UCatrunMinimapWidget::GetFrameLayout(Compact, FVector2D(200., 500.), false, .75f, 700.f);
+	const FAnchorData Tall = UCatrunMinimapWidget::GetFrameLayout(Compact, FVector2D(200., 500.), true, 1.25f);
+	TestTrue(TEXT("Tall viewport fits by the width available from the authored right inset"),
+		Tall.Offsets.Right == 176.f && Tall.Offsets.Bottom == 176.f);
+	const FAnchorData Short = UCatrunMinimapWidget::GetFrameLayout(Compact, FVector2D(500., 270.), true, 1.25f);
+	TestTrue(TEXT("Short viewport fits by the height available from the authored top inset"),
+		Short.Offsets.Right == 246.f && Short.Offsets.Bottom == 246.f);
+	const FAnchorData Narrow = UCatrunMinimapWidget::GetFrameLayout(Compact, FVector2D(200., 500.), false, 1.25f);
 	TestTrue(TEXT("Compact map shrinks without clipping its authored inset"),
-		Narrow.Anchors == Compact.Anchors && Narrow.Offsets.Right == 152.f && Narrow.Offsets.Bottom == 152.f);
+		Narrow.Anchors == Compact.Anchors && Narrow.Offsets.Right == 176.f && Narrow.Offsets.Bottom == 176.f);
 	return true;
 }
 
@@ -157,9 +267,8 @@ bool FCatrunMinimapEnemyLifecycleTest::RunTest(const FString&)
 	TestTrue(TEXT("Tracking starts the scheduled refresh"), World->GetTimerManager().TimerExists(Presenter->UpdateTimer));
 	const auto* ArmorKind = Presenter->Enemies.Find(TWeakObjectPtr<AActor>(Armor));
 	TestTrue(TEXT("Armor uses its own marker pool"), ArmorKind && *ArmorKind == ECatrunMinimapEnemyKind::Armor);
-	TestFalse(TEXT("No player controller cannot toggle a map"), Presenter->CanUseMinimap(nullptr));
-	Presenter->ToggleMap();
-	TestNull(TEXT("Tab without a game viewport leaves the presenter waiting for its owner"), Presenter->MinimapWidget.Get());
+	TestFalse(TEXT("Gameplay eligibility requires a player controller"), Presenter->CanUseMinimap(nullptr));
+	TestNull(TEXT("Without a game viewport the presenter waits for its owner"), Presenter->MinimapWidget.Get());
 
 	ACatrunCandle* Candle = World->SpawnActor<ACatrunCandle>();
 	World->SpawnActor<AActor>();
@@ -178,14 +287,36 @@ bool FCatrunMinimapEnemyLifecycleTest::RunTest(const FString&)
 	if (!TestNotNull(TEXT("World settings subsystem"), Settings) || !TestNotNull(TEXT("Concrete minimap panel class"), PanelClass))
 		return false;
 	Presenter->MinimapWidget = NewObject<UCatrunMinimapWidget>(World, PanelClass);
-	Presenter->MinimapWidget->SetExpanded(true);
+	UCatrunMinimapWidget* Widget = Presenter->MinimapWidget;
+	Widget->UpdateHoldState(true, true, true);
+	TestTrue(TEXT("Pressing Tab enlarges the map"), Widget->bExpanded);
+	Widget->UpdateHoldState(true, true, true);
+	TestTrue(TEXT("Holding or repeating Tab keeps the map enlarged"), Widget->bExpanded);
+	Widget->UpdateHoldState(true, true, false);
+	TestFalse(TEXT("Releasing Tab returns the map to compact"), Widget->bExpanded);
+	Widget->UpdateHoldState(true, true, true);
+	Widget->UpdateHoldState(true, false, true);
+	TestFalse(TEXT("Losing viewport focus clears enlargement"), Widget->bExpanded);
+	Widget->UpdateHoldState(true, true, true);
+	TestFalse(TEXT("Regaining focus ignores an interrupted Tab hold"), Widget->bExpanded);
+	Widget->UpdateHoldState(true, true, false);
+	Widget->UpdateHoldState(true, true, true);
+	TestTrue(TEXT("A fresh press can enlarge the map after focus returns"), Widget->bExpanded);
+	Widget->UpdateHoldState(false, true, true);
+	TestFalse(TEXT("Losing gameplay eligibility clears enlargement with the key held"), Widget->bExpanded);
+	Widget->UpdateHoldState(true, true, true);
+	TestFalse(TEXT("A Tab key used during interruption cannot reopen the map"), Widget->bExpanded);
+	Widget->UpdateHoldState(true, true, false);
+	Widget->UpdateHoldState(true, true, true);
 	Presenter->MinimapWidget->NativeTick(FGeometry(), 0.f);
-	TestTrue(TEXT("Cinematic suppression retains the user's expanded map choice"), Presenter->MinimapWidget->bExpanded);
+	TestFalse(TEXT("An ineligible widget tick resets compact before the marker timer"), Widget->bExpanded);
 	TestEqual(TEXT("Suppressed map is transparent before the next marker timer"), Presenter->MinimapWidget->GetRenderOpacity(), 0.f);
 	TestTrue(TEXT("Settings interruption is subscribed before gameplay starts"), Settings->OnSettingsOpened.IsBoundToObject(Presenter));
+	Widget->UpdateHoldState(true, true, true);
+	Widget->SetRenderOpacity(1.f);
 	Settings->OnSettingsOpened.Broadcast();
 	TestFalse(TEXT("Opening settings clears expanded state without waiting for the timer"), Presenter->MinimapWidget->bExpanded);
-	TestEqual(TEXT("Opening settings hides the map immediately"), Presenter->MinimapWidget->GetVisibility(), ESlateVisibility::Collapsed);
+	TestEqual(TEXT("Opening settings hides the map immediately"), Presenter->MinimapWidget->GetRenderOpacity(), 0.f);
 
 	Presenter->EndPlay(EEndPlayReason::LevelTransition);
 	TestFalse(TEXT("Leaving the level stops refreshes"), World->GetTimerManager().TimerExists(Presenter->UpdateTimer));
@@ -193,6 +324,136 @@ bool FCatrunMinimapEnemyLifecycleTest::RunTest(const FString&)
 	TestFalse(TEXT("Leaving the level removes the settings callback"), Settings->OnSettingsOpened.IsBoundToObject(Presenter));
 	World->SpawnActor<ACatrunCandle>();
 	TestEqual(TEXT("Leaving the level clears cache and removes spawn hook"), Presenter->Enemies.Num(), 0);
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunMinimapOffscreenPreviewTest, "Catrun.UI.Minimap.OffscreenPreview",
+	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
+bool FCatrunMinimapOffscreenPreviewTest::RunTest(const FString&)
+{
+	if (!FParse::Param(FCommandLine::Get(), TEXT("CatrunMinimapRender")))
+		return true;
+	if (!TestTrue(TEXT("Preview requires an initialized Slate renderer and RHI"),
+		FSlateApplication::IsInitialized() && FApp::CanEverRender() && FSlateApplication::Get().GetRenderer()))
+		return false;
+
+	UClass* PanelClass = LoadClass<UCatrunMinimapWidget>(nullptr, TEXT("/Game/UI/Minimap/WBP_Minimap_Floorplan.WBP_Minimap_Floorplan_C"));
+	UTexture2D* Floorplan = LoadObject<UTexture2D>(nullptr, TEXT("/Game/UI/Minimap/T_Floorplan_Stage2.T_Floorplan_Stage2"));
+	if (!TestNotNull(TEXT("Saved floorplan widget Blueprint"), PanelClass)
+		|| !TestNotNull(TEXT("Saved Stage2 floorplan texture"), Floorplan))
+		return false;
+
+	const auto Init = UWorld::InitializationValues().AllowAudioPlayback(false).CreatePhysicsScene(false)
+		.CreateNavigation(false).CreateAISystem(false);
+	UWorld* World = UWorld::CreateWorld(EWorldType::Game, false, NAME_None, nullptr, true, ERHIFeatureLevel::Num, &Init);
+	if (!TestNotNull(TEXT("Detached widget world"), World))
+		return false;
+	ON_SCOPE_EXIT { World->DestroyWorld(false); };
+
+	ACatrunMinimapPresenter* Presenter = World->SpawnActor<ACatrunMinimapPresenter>();
+	UCatrunMinimapWidget* Widget = CreateWidget<UCatrunMinimapWidget>(World, PanelClass);
+	if (!TestNotNull(TEXT("Preview presenter"), Presenter) || !TestNotNull(TEXT("Preview widget"), Widget))
+		return false;
+	Presenter->BackgroundTexture = Floorplan;
+	Presenter->MapCenter = FVector2D(1450., 1795.);
+	Presenter->MapSize = FVector2D(4862., 4862.);
+	if (!TestTrue(TEXT("Saved widget uses the native minimap configuration"), Widget->InitializeMap(*Presenter))
+		|| !TestNotNull(TEXT("Saved minimap frame slot"), Widget->FrameSlot.Get()))
+		return false;
+
+	const FVector2D DrawSize(1280., 720.);
+	const FIntRect ViewRect(0, 0, 1280, 720);
+	const FVector2D CatUV(.65, .40);
+	const FVector Cat(Presenter->MapCenter.X + (.5 - CatUV.Y) * Presenter->MapSize.Y,
+		Presenter->MapCenter.Y + (CatUV.X - .5) * Presenter->MapSize.X, 75.);
+	FMinimalViewInfo Camera;
+	Camera.Rotation = FRotator(-55., -135., 0.);
+	Camera.Location = Cat - Camera.Rotation.Vector() * 900.;
+	Camera.ProjectionMode = ECameraProjectionMode::Orthographic;
+	Camera.OrthoWidth = 1375.f;
+	Camera.AspectRatio = 16.f / 9.f;
+	FSceneViewProjectionData View;
+	View.ViewOrigin = Camera.Location;
+	View.ViewRotationMatrix = FInverseRotationMatrix(Camera.Rotation) * FMatrix(
+		FPlane(0, 0, 1, 0), FPlane(1, 0, 0, 0), FPlane(0, 1, 0, 0), FPlane(0, 0, 0, 1));
+	View.SetViewRectangle(ViewRect);
+	FMinimalViewInfo::CalculateProjectionMatrixGivenViewRectangle(Camera, AspectRatio_MaintainXFOV, ViewRect, View);
+	if (!TestTrue(TEXT("Fixture produces normal local gameplay projection"),
+		CatrunMinimap::MakeLocalProjection(Presenter->MapCenter, Presenter->MapSize, Presenter->CaptureYawDegrees,
+			Cat, View, Widget->NeighborhoodCoverage, Widget->MapProjection)))
+		return false;
+
+	const FVector2D CenterUV(.5, .5);
+	Widget->UpdateMarker(*Widget->PlayerMarker, &CenterUV);
+	const FVector2D ArmorUVs[] = { FVector2D(.70, .40), FVector2D(.10, .15) };
+	const FVector2D CandleUVs[] = { FVector2D(.64, .45) };
+	Widget->UpdateEnemyMarkers(ECatrunMinimapEnemyKind::Armor, ArmorUVs);
+	Widget->UpdateEnemyMarkers(ECatrunMinimapEnemyKind::Candle, CandleUVs);
+	TestEqual(TEXT("Only the in-window armor is painted"), Widget->ArmorMarkers.Num(), 1);
+	TestEqual(TEXT("The nearby candle is painted"), Widget->CandleMarkers.Num(), 1);
+
+#if WITH_EDITOR
+	FAssetCompilingManager::Get().FinishAllCompilation();
+#endif
+	const TSharedRef<SWidget> SlateWidget = Widget->TakeWidget();
+	SlateWidget->SetCanTick(false);
+	FWidgetRenderer Renderer(true, true);
+	const FString PreviewDirectory = FPaths::ProjectSavedDir() / TEXT("MinimapRepair20261116/Preview");
+	if (!TestTrue(TEXT("Preview directory is writable"), IFileManager::Get().MakeDirectory(*PreviewDirectory, true)))
+		return false;
+
+	for (const bool bHeld : { false, true })
+	{
+		Widget->UpdateHoldState(true, true, bHeld);
+		Widget->UpdateLayout(DrawSize);
+		Widget->ApplyImageProjection();
+		UTextureRenderTarget2D* Target = Renderer.DrawWidget(SlateWidget, DrawSize);
+		FImage Pixels;
+		if (!TestNotNull(TEXT("Offscreen render target"), Target)
+			|| !TestTrue(TEXT("Slate pixels were read back"), FImageUtils::GetRenderTargetImage(Target, Pixels)))
+			return false;
+		const FString Path = PreviewDirectory / (bHeld ? TEXT("held.png") : TEXT("compact.png"));
+		if (!TestTrue(TEXT("Saved minimap preview as PNG"), FImageUtils::SaveImageByExtension(*Path, Pixels)))
+			return false;
+
+		const FAnchorData FrameLayout = Widget->FrameSlot->GetLayout();
+		const FVector2D FrameSize(FrameLayout.Offsets.Right, FrameLayout.Offsets.Bottom);
+		const FVector2D FrameOrigin = FrameLayout.Anchors.Minimum * DrawSize - FrameLayout.Alignment * FrameSize
+			+ FVector2D(FrameLayout.Offsets.Left, FrameLayout.Offsets.Top);
+		const int32 Left = FMath::RoundToInt(FrameOrigin.X);
+		const int32 MidY = FMath::RoundToInt(FrameOrigin.Y + FrameSize.Y * .5);
+		const FIntPoint RimPixel(Left + 1, MidY);
+		const FIntPoint FillPixel(Left + 5, MidY);
+		const FIntRect PixelBounds(0, 0, Pixels.SizeX, Pixels.SizeY);
+		if (!TestTrue(TEXT("Frame samples are inside the rendered viewport"),
+			PixelBounds.Contains(RimPixel) && PixelBounds.Contains(FillPixel)))
+			return false;
+
+		const TCHAR* State = bHeld ? TEXT("Held") : TEXT("Compact");
+		if (const UBorder* Frame = Cast<UBorder>(Widget->FrameSlot->GetContent()))
+		{
+			const TSharedPtr<SWidget> FrameSlate = Frame->GetCachedWidget();
+			const FSlateBrush* SlateBrush = FrameSlate && FrameSlate->GetType() == FName(TEXT("SBorder"))
+				? StaticCastSharedPtr<SBorder>(FrameSlate)->GetBorderImage() : nullptr;
+			const UObject* BrushResource = Frame->Background.GetResourceObject();
+			const UObject* SlateResource = SlateBrush ? SlateBrush->GetResourceObject() : nullptr;
+			const FGeometry& FrameGeometry = Frame->GetPaintSpaceGeometry();
+			const FVector2D PaintedSize = FrameGeometry.GetLocalSize();
+			AddInfo(FString::Printf(TEXT("%s frame draw=%d resource=%s class=%s Slate draw=%d resource=%s brush alpha=%.3f content alpha=%.3f paint bounds=%s local size=(%.1f,%.1f)"),
+				State, int32(Frame->Background.GetDrawType()), *GetPathNameSafe(BrushResource),
+				*GetNameSafe(BrushResource ? BrushResource->GetClass() : nullptr),
+				SlateBrush ? int32(SlateBrush->GetDrawType()) : -1, *GetPathNameSafe(SlateResource),
+				Frame->GetBrushColor().A, Frame->GetContentColorAndOpacity().A,
+				*FrameGeometry.GetRenderBoundingRect().ToString(), PaintedSize.X, PaintedSize.Y));
+		}
+		const float RimAlpha = Pixels.GetOnePixelLinear(RimPixel.X, RimPixel.Y).A;
+		const float FillAlpha = Pixels.GetOnePixelLinear(FillPixel.X, FillPixel.Y).A;
+		AddInfo(FString::Printf(TEXT("%s frame rim alpha %.3f at (%d,%d), padding alpha %.3f at (%d,%d)"),
+			State, RimAlpha, RimPixel.X, RimPixel.Y, FillAlpha, FillPixel.X, FillPixel.Y));
+		TestTrue(FString::Printf(TEXT("%s metallic rim is visible"), State), RimAlpha >= .25f);
+		TestTrue(FString::Printf(TEXT("%s frame padding has translucent fill"), State), FillAlpha >= .04f && FillAlpha <= .20f);
+	}
 	return true;
 }
 

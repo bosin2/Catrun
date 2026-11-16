@@ -5,6 +5,7 @@
 #include "Engine/Engine.h"
 #include "Engine/GameInstance.h"
 #include "Engine/World.h"
+#include "UObject/Package.h"
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunArrivalTokenOwnerTest, "Catrun.LevelFlow.RestartArrivalCancellationHonorsTravelToken", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 bool FCatrunArrivalTokenOwnerTest::RunTest(const FString&)
@@ -60,7 +61,7 @@ bool FCatrunPresentationTravelOwnerTest::RunTest(const FString&)
         TestFalse(TEXT("Flow clears its travel before BP cleanup runs"), Flow->IsTransitioning());
     }));
     auto* Context = GEngine->GetWorldContextFromWorld(World);
-    TestTrue(TEXT("The original FromTutorial arrival option is preserved"), Context->TravelURL.Contains(TEXT("?FromTutorial")));
+    TestEqual(TEXT("Tutorial completion retains its original arrival option"), Context->TravelURL, FString(TEXT("/Game/Maps/Stage1?FromTutorial")));
     const FString Replacement(TEXT("/Game/Maps/Stage2?ReplacementOwner"));
     Context->TravelURL = Replacement;
     GEngine->OnTravelFailure().Broadcast(World, ETravelFailure::InvalidURL, TEXT("Injected original stair failure"));
@@ -77,4 +78,61 @@ bool FCatrunPresentationTravelOwnerTest::RunTest(const FString&)
     GEngine->DestroyWorldContext(World); World->DestroyWorld(false);
     return true;
 }
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunStage2PortalArrivalGateTest, "Catrun.LevelFlow.Stage2PortalArrivalRequiresExactMapAndFreshRoute", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FCatrunStage2PortalArrivalGateTest::RunTest(const FString&)
+{
+    struct FArrivalCase
+    {
+        const TCHAR* Name;
+        const TCHAR* Option;
+        ECatrunArrivalRestart Intent;
+        bool bExactMap;
+        bool bExpectedArrival;
+    };
+    const FArrivalCase Cases[] = {
+        {TEXT("Qualified portal arrival"), TEXT("FromStage1Portal"), ECatrunArrivalRestart::Clear, true, true},
+        {TEXT("Direct load"), nullptr, ECatrunArrivalRestart::Preserve, true, false},
+        {TEXT("Similar option name"), TEXT("FromStage1PortalPreview"), ECatrunArrivalRestart::Preserve, true, false},
+        {TEXT("Same short name in another directory"), TEXT("FromStage1Portal"), ECatrunArrivalRestart::Preserve, false, false},
+        {TEXT("Restart with a stale portal option"), TEXT("FromStage1Portal"), ECatrunArrivalRestart::SkipIntro, true, false},
+        {TEXT("Continue with a stale portal option"), TEXT("FromStage1Portal"), ECatrunArrivalRestart::Continue, true, false},
+    };
+    auto* Settings = GetMutableDefault<UCatrunLevelFlowSettings>();
+    TGuardValue<TArray<FCatrunStageRoute>> RestoreRoutes(Settings->Stages, TArray<FCatrunStageRoute>());
+    auto& Stage2 = Settings->Stages.AddDefaulted_GetRef();
+    Stage2.StageId = TEXT("Stage2");
+    const auto Init = UWorld::InitializationValues().AllowAudioPlayback(false).CreatePhysicsScene(false).CreateNavigation(false).CreateAISystem(false);
+    for (const auto& Case : Cases)
+    {
+        const FString Directory = FString(TEXT("/Temp/CatrunPortalArrival/")) + FGuid::NewGuid().ToString(EGuidFormats::Digits);
+        const FString Package = Directory + TEXT("/Stage2");
+        Stage2.Map = TSoftObjectPtr<UWorld>(FSoftObjectPath(Case.bExactMap ? Package : FString(TEXT("/Game/Maps/Stage2"))));
+        UWorld* World = UWorld::CreateWorld(EWorldType::Game, false, NAME_None, CreatePackage(*(Directory + TEXT("/UEDPIE_0_Stage2"))),
+            true, ERHIFeatureLevel::Num, &Init);
+        GEngine->CreateNewWorldContext(EWorldType::Game).SetCurrentWorld(World);
+        auto* Instance = NewObject<UGameInstance>();
+        World->SetGameInstance(Instance);
+        Instance->Init();
+        auto* Session = Instance->GetSubsystem<UCatrunFlowSession>();
+        if (Case.Intent != ECatrunArrivalRestart::Preserve)
+            Session->AcceptTravel(Package, false, false, Case.Intent);
+        FURL ArrivalURL;
+        if (Case.Option) ArrivalURL.AddOption(Case.Option);
+        World->InitializeActorsForPlay(ArrivalURL);
+        TestEqual(FString::Printf(TEXT("%s before restart intent resolution"), Case.Name),
+            UCatrunLevelFlowLibrary::IsStage2PortalArrival(World), Case.bExpectedArrival);
+        const bool bSkipIntro = Case.Intent == ECatrunArrivalRestart::SkipIntro || Case.Intent == ECatrunArrivalRestart::Continue;
+        TestEqual(FString::Printf(TEXT("%s uses the normal restart intent"), Case.Name),
+            UCatrunLevelFlowLibrary::ShouldSkipStageIntro(World), bSkipIntro);
+        TestEqual(FString::Printf(TEXT("%s after restart intent resolution"), Case.Name),
+            UCatrunLevelFlowLibrary::IsStage2PortalArrival(World), Case.bExpectedArrival);
+        Instance->Shutdown();
+        World->SetGameInstance(nullptr);
+        GEngine->DestroyWorldContext(World);
+        World->DestroyWorld(false);
+    }
+    return true;
+}
+
 #endif

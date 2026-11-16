@@ -238,7 +238,8 @@ bool FCatrunExitTeardownTokenTest::RunTest(const FString&)
         Lease->RequestExitCheckpointSave(); Backend.Drain(); F.World->GetTimerManager().Tick(.01f);
         if (!TestTrue(TEXT("Explicit BP travel call accepts existing destination after save"),Lease->CommitExitTravel())) return false;
         const FString Destination=TEXT("/Game/Maps/Stage2");
-        TestTrue(TEXT("OpenLevel only queued source-owned destination"),GEngine->GetWorldContextFromWorld(F.World)->TravelURL.StartsWith(Destination));
+        TestEqual(TEXT("Only the accepted portal commit queues the Stage2 arrival option"),
+            GEngine->GetWorldContextFromWorld(F.World)->TravelURL, Destination + TEXT("?FromStage1Portal"));
         if (bWorldTeardown)
         {
             F.World->bIsTearingDown=true; F.PC->UnPossess(); Lease->EndPlay(EEndPlayReason::LevelTransition); F.World->bIsTearingDown=false;
@@ -252,6 +253,19 @@ bool FCatrunExitTeardownTokenTest::RunTest(const FString&)
             TestFalse(TEXT("Destroyed owner cannot later advance destination checkpoint"),Session->Arrive(Destination));
         }
     }
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunPlainStage1CompletionTest, "Catrun.LevelFlow.PlainStage1CompletionOmitsPortalArrival", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FCatrunPlainStage1CompletionTest::RunTest(const FString&)
+{
+    FExitLeaseFixture F;
+    auto* Flow = F.World->GetSubsystem<UCatrunLevelFlowSubsystem>();
+    auto* Context = GEngine->GetWorldContextFromWorld(F.World);
+    TestFalse(TEXT("An exit component without a lease cannot issue portal travel"), Flow->CompleteStageForExit(F.Exit->ExitTransition));
+    TestTrue(TEXT("A rejected exit leaves the engine travel URL empty"), Context->TravelURL.IsEmpty());
+    TestTrue(TEXT("The ordinary Stage1 route still accepts completion"), Flow->CompleteStage());
+    TestEqual(TEXT("Plain completion queues Stage2 with no arrival option"), Context->TravelURL, FString(TEXT("/Game/Maps/Stage2")));
     return true;
 }
 

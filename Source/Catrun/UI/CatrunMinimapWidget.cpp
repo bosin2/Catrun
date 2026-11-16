@@ -1,32 +1,67 @@
 #include "CatrunMinimapWidget.h"
 
 #include "Camera/PlayerCameraManager.h"
+#include "Components/Border.h"
 #include "Components/CanvasPanel.h"
 #include "Components/CanvasPanelSlot.h"
 #include "Components/Image.h"
-#include "Components/InputComponent.h"
 #include "Components/SceneComponent.h"
 #include "Engine/GameInstance.h"
+#include "Engine/GameViewportClient.h"
+#include "Engine/LocalPlayer.h"
 #include "Engine/Texture2D.h"
 #include "Engine/World.h"
 #include "EngineUtils.h"
-#include "GameFramework/Character.h"
-#include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerController.h"
-#include "Interaction/CatrunBasketInteractionComponent.h"
+#include "InputCoreTypes.h"
 #include "LevelFlow/CatrunLevelFlow.h"
-#include "Math/RotationMatrix.h"
+#include "Math/InverseRotationMatrix.h"
 #include "Monster/CatrunArmor.h"
 #include "Monster/CatrunCandle.h"
-#include "Monster/CatrunRestartSubsystem.h"
+#include "SceneView.h"
 #include "Settings/CatrunSettingsSubsystem.h"
+#include "Slate/SceneViewport.h"
 #include "Widgets/SWidget.h"
 
 namespace
 {
 	constexpr float MarkerRefreshSeconds = .1f;
 	const FVector2D MapSurfaceCenter(.5, .5);
+
+	UGameViewportClient* GetViewportClient(const APlayerController* Controller)
+	{
+		const ULocalPlayer* LocalPlayer = Controller ? Controller->GetLocalPlayer() : nullptr;
+		return LocalPlayer ? LocalPlayer->ViewportClient.Get() : nullptr;
+	}
+
+	bool GetCameraProjection(const APlayerController& Controller, FSceneViewport& Viewport, FSceneViewProjectionData& OutView)
+	{
+		const ULocalPlayer* LocalPlayer = Controller.GetLocalPlayer();
+		const APlayerCameraManager* Camera = Controller.PlayerCameraManager;
+		if (!LocalPlayer || !Camera)
+			return false;
+
+		const FIntPoint ViewportSize = Viewport.GetSizeXY();
+		const FIntRect Rect(0, 0, FMath::TruncToInt(LocalPlayer->Size.X * ViewportSize.X),
+			FMath::TruncToInt(LocalPlayer->Size.Y * ViewportSize.Y));
+		FMinimalViewInfo View = Camera->GetCameraCacheView();
+		if (Rect.Width() <= 0 || Rect.Height() <= 0 || View.Location.ContainsNaN() || View.Rotation.ContainsNaN()
+			|| !FMath::IsFinite(View.AspectRatio) || View.AspectRatio <= 0.
+			|| (View.ProjectionMode == ECameraProjectionMode::Orthographic
+				&& (!FMath::IsFinite(View.OrthoWidth) || View.OrthoWidth <= 0.))
+			|| (View.ProjectionMode == ECameraProjectionMode::Perspective
+				&& (!FMath::IsFinite(View.FOV) || View.FOV <= 0. || View.FOV >= 180.)))
+			return false;
+
+		// Match the renderer's aspect/axis constraints without invoking view extensions from a widget tick.
+		OutView.ViewOrigin = View.Location;
+		OutView.ViewRotationMatrix = FInverseRotationMatrix(View.Rotation) * FMatrix(
+			FPlane(0, 0, 1, 0), FPlane(1, 0, 0, 0), FPlane(0, 1, 0, 0), FPlane(0, 0, 0, 1));
+		OutView.SetViewRectangle(Rect);
+		FMinimalViewInfo::CalculateProjectionMatrixGivenView(View, LocalPlayer->AspectRatioAxisConstraint, &Viewport, OutView);
+		return true;
+	}
 }
 
 bool CatrunMinimap::Project(const FVector2D& WorldXY, const FVector2D& Center, const FVector2D& Size,
@@ -87,96 +122,215 @@ FVector2D CatrunMinimap::ToDisplayUV(const FVector2D& CaptureUV, const FSlateRen
 	return TransformPoint(Transform, CaptureUV - MapSurfaceCenter) + MapSurfaceCenter;
 }
 
-bool UCatrunMinimapWidget::InitializeMap(UTexture2D* Texture, const FVector2D& CaptureSize, double CaptureYawDegrees)
+bool CatrunMinimap::MakeLocalProjection(const FVector2D& CaptureCenter, const FVector2D& CaptureSize,
+	double CaptureYawDegrees, const FVector& PlayerLocation, const FSceneViewProjectionData& View,
+	double Coverage, FSlateRenderTransform& OutTransform)
 {
-	if (!Texture || !MapBackground || !MarkerLayer || !PlayerMarkerClass
-		|| (!EnemyMarkerClass && (!ArmorMarkerClass || !CandleMarkerClass))
-		|| !CatrunMinimap::FitCameraProjection(CaptureSize, CaptureYawDegrees,
-			FRotator(-90., CaptureYawDegrees, 0.), MapProjection))
+	const FIntRect& Rect = View.GetConstrainedViewRect();
+	const FMatrix ViewProjection = View.ViewRotationMatrix * View.ProjectionMatrix;
+	const double Determinant = ViewProjection.Determinant();
+	if (CaptureCenter.ContainsNaN() || CaptureSize.ContainsNaN() || CaptureSize.X <= 0. || CaptureSize.Y <= 0.
+		|| !FMath::IsFinite(CaptureYawDegrees) || PlayerLocation.ContainsNaN() || View.ViewOrigin.ContainsNaN()
+		|| !View.IsValidViewRectangle() || !FMath::IsFinite(Determinant) || Determinant == 0.
+		|| !FMath::IsFinite(Coverage) || Coverage < 1.)
 		return false;
 
+	const FVector Right = View.ViewRotationMatrix.GetColumn(0);
+	const FVector Down = -View.ViewRotationMatrix.GetColumn(1);
+	const auto ProjectAxis = [&](const FVector& Axis)
+	{
+		return FVector2D(FVector::DotProduct(Axis, Right), FVector::DotProduct(Axis, Down));
+	};
+
+	// Unproject the four actual view corners onto the cat's horizontal plane, relative to its position.
+	// This also accounts for perspective foreshortening and off-center camera framing.
+	const FMatrix InverseViewProjection = ViewProjection.Inverse();
+	const FVector CameraOffset = View.ViewOrigin - PlayerLocation;
+	double HalfSide = 0.;
+	for (const FIntPoint& Corner : { Rect.Min, FIntPoint(Rect.Max.X, Rect.Min.Y), Rect.Max, FIntPoint(Rect.Min.X, Rect.Max.Y) })
+	{
+		FVector Origin, Direction;
+		FSceneView::DeprojectScreenToWorld(FVector2D(Corner.X, Corner.Y), Rect, InverseViewProjection, Origin, Direction);
+		if (FMath::Abs(Direction.Z) <= UE_DOUBLE_KINDA_SMALL_NUMBER)
+			return false;
+		Origin += CameraOffset;
+		const double Distance = -Origin.Z / Direction.Z;
+		if (!FMath::IsFinite(Distance) || (View.IsPerspectiveProjection() && Distance <= 0.))
+			return false;
+		const FVector2D GroundCorner = ProjectAxis(Origin + Direction * Distance);
+		if (GroundCorner.ContainsNaN())
+			return false;
+		HalfSide = FMath::Max(HalfSide, GroundCorner.GetAbsMax());
+	}
+	const double Side = 2. * HalfSide * Coverage;
+	if (!FMath::IsFinite(Side) || Side <= UE_DOUBLE_KINDA_SMALL_NUMBER)
+		return false;
+
+	double SinYaw, CosYaw;
+	FMath::SinCos(&SinYaw, &CosYaw, FMath::DegreesToRadians(CaptureYawDegrees));
+	const FVector2f ImageRight(ProjectAxis(FVector(-SinYaw, CosYaw, 0.)) * (CaptureSize.X / Side));
+	const FVector2f ImageDown(ProjectAxis(FVector(-CosYaw, -SinYaw, 0.)) * (CaptureSize.Y / Side));
+	const FVector2f Translation(ProjectAxis(FVector(CaptureCenter.X - PlayerLocation.X, CaptureCenter.Y - PlayerLocation.Y, 0.)) / Side);
+	if (ImageRight.ContainsNaN() || ImageDown.ContainsNaN() || Translation.ContainsNaN())
+		return false;
+	OutTransform = FSlateRenderTransform(FMatrix2x2(ImageRight.X, ImageRight.Y, ImageDown.X, ImageDown.Y), Translation);
+	return true;
+}
+
+bool CatrunMinimap::TryGetDisplayUV(const FVector2D& CaptureUV, const FSlateRenderTransform& Transform, FVector2D& OutUV)
+{
+	const FVector2D UV = ToDisplayUV(CaptureUV, Transform);
+	if (UV.ContainsNaN() || UV.X < 0. || UV.X > 1. || UV.Y < 0. || UV.Y > 1.)
+		return false;
+	OutUV = UV;
+	return true;
+}
+
+FSlateRenderTransform CatrunMinimap::ToImageTransform(const FSlateRenderTransform& Transform, const FVector2D& LocalSize)
+{
+	if (LocalSize.ContainsNaN() || LocalSize.X <= 0. || LocalSize.Y <= 0.)
+		return FSlateRenderTransform();
+
+	// Slate applies the matrix around the image's center pivot in local units, not UVs.
+	const FVector2f PixelX(TransformVector(Transform, FVector2D(1. / LocalSize.X, 0.)) * LocalSize);
+	const FVector2f PixelY(TransformVector(Transform, FVector2D(0., 1. / LocalSize.Y)) * LocalSize);
+	const FVector2f Translation(Transform.GetTranslation() * LocalSize);
+	return FSlateRenderTransform(FMatrix2x2(PixelX.X, PixelX.Y, PixelY.X, PixelY.Y), Translation);
+}
+
+bool UCatrunMinimapWidget::InitializeMap(ACatrunMinimapPresenter& InPresenter)
+{
+	if (!InPresenter.BackgroundTexture || !MapBackground || !MarkerLayer || !PlayerMarkerClass
+		|| (!EnemyMarkerClass && (!ArmorMarkerClass || !CandleMarkerClass))
+		|| !CatrunMinimap::FitCameraProjection(InPresenter.MapSize, InPresenter.CaptureYawDegrees,
+			FRotator(-90., InPresenter.CaptureYawDegrees, 0.), FallbackProjection))
+		return false;
+
+	Presenter = &InPresenter;
+	MapProjection = FallbackProjection;
 	// Older panels have the same frame in the tree without the optional binding.
 	UWidget* Frame = MinimapFrame ? MinimapFrame.Get() : GetWidgetFromName(TEXT("MinimapFrame"));
 	FrameSlot = Frame ? Cast<UCanvasPanelSlot>(Frame->Slot) : nullptr;
 	if (FrameSlot)
 		CompactFrameLayout = FrameSlot->GetLayout();
+	if (UPanelWidget* MapSurface = MapBackground->GetParent(); MapSurface && MapSurface == MarkerLayer->GetParent())
+		MapSurface->SetClipping(EWidgetClipping::ClipToBounds);
 	SetIsFocusable(false);
 	SetVisibility(ESlateVisibility::HitTestInvisible);
-	MapBackground->SetBrushFromTexture(Texture, false);
+	MapBackground->SetBrushFromTexture(InPresenter.BackgroundTexture, false);
 	MapBackground->SetRenderTransformPivot(MapSurfaceCenter);
 	PlayerMarker = AddMarker(PlayerMarkerClass, 1);
 	return PlayerMarker != nullptr;
 }
 
-void UCatrunMinimapWidget::SetExpanded(bool bInExpanded)
+void UCatrunMinimapWidget::UpdateHoldState(bool bGameplayAllowed, bool bViewportAcceptsInput, bool bTabDown)
 {
-	bExpanded = bInExpanded;
-	UpdateLayout();
+	const bool bCanHold = bGameplayAllowed && bViewportAcceptsInput;
+	bWaitForTabRelease = bTabDown && (bWaitForTabRelease || !bCanHold);
+	bExpanded = bTabDown && bCanHold && !bWaitForTabRelease;
 }
 
 void UCatrunMinimapWidget::NativeTick(const FGeometry& Geometry, float DeltaSeconds)
 {
 	Super::NativeTick(Geometry, DeltaSeconds);
-	const bool bHide = UCatrunLevelFlowLibrary::ShouldHideGameplayHUD(this);
-	// A cheap view/lease check before painting avoids a flash between the 10 Hz marker updates.
-	// Keep this widget alive; the presenter owns removal and normal visibility restoration.
-	SetRenderOpacity(bHide ? 0.f : 1.f);
+	const ACatrunMinimapPresenter* Map = Presenter.Get();
+	const APlayerController* Controller = GetOwningPlayer();
+	UGameViewportClient* ViewportClient = GetViewportClient(Controller);
+	FSceneViewport* Viewport = ViewportClient ? ViewportClient->GetGameViewport() : nullptr;
+	const bool bShow = Map && Map->CanUseMinimap(Controller);
+	// Poll the owning Slate viewport so UI input routing can keep using Tab independently.
+	UpdateHoldState(bShow, Viewport && Viewport->HasFocus() && !ViewportClient->IgnoreInput(),
+		Viewport && Viewport->KeyState(EKeys::Tab));
+	UpdateLayout(Geometry.GetLocalSize());
+	// Opacity leaves this widget ticking while game timers are paused.
+	SetRenderOpacity(bShow ? 1.f : 0.f);
+	if (!bShow)
+		return;
+
+	MapProjection = FallbackProjection;
+	const APawn* Pawn = Controller->GetPawn();
+	FSceneViewProjectionData View;
+	const bool bLocalProjection = IsValid(Pawn) && Viewport
+		&& GetCameraProjection(*Controller, *Viewport, View)
+		&& CatrunMinimap::MakeLocalProjection(Map->MapCenter, Map->MapSize, Map->CaptureYawDegrees,
+			Pawn->GetActorLocation(), View, NeighborhoodCoverage, MapProjection);
+	ApplyImageProjection();
+
+	FVector2D PlayerUV = MapSurfaceCenter;
+	if (bLocalProjection)
+		UpdateMarker(*PlayerMarker, &PlayerUV);
+	else
+	{
+		FVector2D CaptureUV;
+		const bool bPlayerVisible = Map->ProjectActor(Pawn, CaptureUV)
+			&& CatrunMinimap::TryGetDisplayUV(CaptureUV, MapProjection, PlayerUV);
+		UpdateMarker(*PlayerMarker, bPlayerVisible ? &PlayerUV : nullptr);
+	}
+	UpdateEnemyMarkers(ECatrunMinimapEnemyKind::Armor, Map->ArmorPositions);
+	UpdateEnemyMarkers(ECatrunMinimapEnemyKind::Candle, Map->CandlePositions);
 }
 
 FAnchorData UCatrunMinimapWidget::GetFrameLayout(const FAnchorData& CompactLayout, const FVector2D& ViewportSize,
-	bool bIsExpanded, float ExpandedViewportFraction, float ExpandedMaxSize)
+	bool bIsExpanded, float InHoldSizeMultiplier)
 {
 	FAnchorData Layout = CompactLayout;
-	const double ViewportSide = FMath::Min(ViewportSize.X, ViewportSize.Y);
-	if (bIsExpanded)
+	// Stretched CanvasPanel slots use these offsets as margins rather than dimensions.
+	if (Layout.Anchors.Minimum != Layout.Anchors.Maximum || Layout.Offsets.Right <= 0.f || Layout.Offsets.Bottom <= 0.f)
+		return Layout;
+	double Scale = bIsExpanded && FMath::IsFinite(InHoldSizeMultiplier) ? FMath::Max(1.f, InHoldSizeMultiplier) : 1.;
+	if (!ViewportSize.ContainsNaN() && ViewportSize.X > 0. && ViewportSize.Y > 0.)
 	{
-		const float Side = ViewportSide > 1.
-			? FMath::Min(ExpandedMaxSize, static_cast<float>(ViewportSide * ExpandedViewportFraction))
-			: ExpandedMaxSize;
-		Layout.Anchors = FAnchors(.5f);
-		Layout.Alignment = FVector2D(.5, .5);
-		Layout.Offsets = FMargin(0.f, 0.f, Side, Side);
+		const auto Available = [](double Extent, double Anchor, double Offset, double Alignment)
+		{
+			const double Pivot = Extent * Anchor + Offset;
+			const double Start = Alignment > 0. ? Pivot / Alignment : Extent;
+			const double End = Alignment < 1. ? (Extent - Pivot) / (1. - Alignment) : Extent;
+			return FMath::Max(0., FMath::Min(Start, End));
+		};
+		const double Width = Available(ViewportSize.X, Layout.Anchors.Minimum.X, Layout.Offsets.Left, Layout.Alignment.X);
+		const double Height = Available(ViewportSize.Y, Layout.Anchors.Minimum.Y, Layout.Offsets.Top, Layout.Alignment.Y);
+		Scale = FMath::Min3(Scale, Width / Layout.Offsets.Right, Height / Layout.Offsets.Bottom);
 	}
-	else if (ViewportSide > 1.)
-	{
-		const double AvailableWidth = ViewportSize.X - 2. * FMath::Abs(Layout.Offsets.Left);
-		const double AvailableHeight = ViewportSize.Y - 2. * FMath::Abs(Layout.Offsets.Top);
-		const float AvailableSide = static_cast<float>(FMath::Max(1., FMath::Min(AvailableWidth, AvailableHeight)));
-		Layout.Offsets.Right = FMath::Min(Layout.Offsets.Right, AvailableSide);
-		Layout.Offsets.Bottom = FMath::Min(Layout.Offsets.Bottom, AvailableSide);
-	}
+	Layout.Offsets.Right *= Scale;
+	Layout.Offsets.Bottom *= Scale;
 	return Layout;
 }
 
-void UCatrunMinimapWidget::UpdateLayout()
+void UCatrunMinimapWidget::UpdateLayout(const FVector2D& ViewportSize)
 {
 	if (!FrameSlot)
 		return;
 
-	const FAnchorData Layout = GetFrameLayout(CompactFrameLayout, GetCachedGeometry().GetLocalSize(), bExpanded,
-		ExpandedMapViewportFraction, ExpandedMapMaxSize);
+	const FAnchorData Layout = GetFrameLayout(CompactFrameLayout, ViewportSize, bExpanded, HoldSizeMultiplier);
 	if (Layout != FrameSlot->GetLayout())
 		FrameSlot->SetLayout(Layout);
 }
 
-void UCatrunMinimapWidget::UpdateMapProjection(const FVector2D& CaptureSize, double CaptureYawDegrees,
-	const APlayerController& Controller)
+void UCatrunMinimapWidget::ApplyImageProjection() const
 {
-	if (const APlayerCameraManager* Camera = Controller.PlayerCameraManager)
-		CatrunMinimap::FitCameraProjection(CaptureSize, CaptureYawDegrees, Camera->GetCameraRotation(), MapProjection);
-
-	// The map image uses the same affine matrix as the marker positions. The marker layer stays in screen space.
 	if (const TSharedPtr<SWidget> Image = MapBackground->GetCachedWidget())
 	{
+		FVector2D LocalSize = MapBackground->GetCachedGeometry().GetLocalSize();
+		if (FrameSlot && CompactFrameLayout.Anchors.Minimum == CompactFrameLayout.Anchors.Maximum)
+		{
+			// Match the new canvas layout in the same paint that changes the held size.
+			LocalSize = FrameSlot->GetSize();
+			if (const UBorder* Border = Cast<UBorder>(FrameSlot->GetContent()))
+			{
+				const FMargin FramePadding = Border->GetPadding();
+				LocalSize -= FVector2D(FramePadding.GetDesiredSize2f());
+			}
+		}
+		const FSlateRenderTransform ImageTransform = CatrunMinimap::ToImageTransform(MapProjection, LocalSize);
 		const auto& CurrentTransform = Image->GetRenderTransform();
-		if (!CurrentTransform.IsSet() || CurrentTransform.GetValue() != MapProjection)
-			Image->SetRenderTransform(MapProjection);
+		if (!CurrentTransform.IsSet() || CurrentTransform.GetValue() != ImageTransform)
+			Image->SetRenderTransform(ImageTransform);
 	}
 }
 
 UCanvasPanelSlot* UCatrunMinimapWidget::AddMarker(TSubclassOf<UUserWidget> MarkerClass, int32 ZOrder)
 {
-	UUserWidget* Marker = CreateWidget<UUserWidget>(GetOwningPlayer(), MarkerClass);
+	UUserWidget* Marker = CreateWidget<UUserWidget>(this, MarkerClass);
 	if (!Marker)
 		return nullptr;
 
@@ -192,13 +346,12 @@ UCanvasPanelSlot* UCatrunMinimapWidget::AddMarker(TSubclassOf<UUserWidget> Marke
 	return MarkerSlot;
 }
 
-void UCatrunMinimapWidget::UpdateMarker(UCanvasPanelSlot& MarkerSlot, const FVector2D* UV)
+void UCatrunMinimapWidget::UpdateMarker(UCanvasPanelSlot& MarkerSlot, const FVector2D* DisplayUV)
 {
-	const ESlateVisibility MarkerVisibility = UV ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed;
-	if (UV)
+	const ESlateVisibility MarkerVisibility = DisplayUV ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed;
+	if (DisplayUV)
 	{
-		const FVector2D DisplayUV = CatrunMinimap::ToDisplayUV(*UV, MapProjection);
-		const FAnchors Anchors(static_cast<float>(DisplayUV.X), static_cast<float>(DisplayUV.Y));
+		const FAnchors Anchors(static_cast<float>(DisplayUV->X), static_cast<float>(DisplayUV->Y));
 		if (MarkerSlot.GetAnchors() != Anchors)
 			MarkerSlot.SetAnchors(Anchors);
 	}
@@ -206,12 +359,7 @@ void UCatrunMinimapWidget::UpdateMarker(UCanvasPanelSlot& MarkerSlot, const FVec
 		Marker->SetVisibility(MarkerVisibility);
 }
 
-void UCatrunMinimapWidget::UpdatePlayer(const FVector2D* UV)
-{
-	UpdateMarker(*PlayerMarker, UV);
-}
-
-void UCatrunMinimapWidget::UpdateEnemies(ECatrunMinimapEnemyKind Kind, TConstArrayView<FVector2D> Positions)
+void UCatrunMinimapWidget::UpdateEnemyMarkers(ECatrunMinimapEnemyKind Kind, TConstArrayView<FVector2D> Positions)
 {
 	const bool bArmor = Kind == ECatrunMinimapEnemyKind::Armor;
 	auto& Markers = bArmor ? ArmorMarkers : CandleMarkers;
@@ -219,8 +367,12 @@ void UCatrunMinimapWidget::UpdateEnemies(ECatrunMinimapEnemyKind Kind, TConstArr
 	if (!MarkerClass)
 		MarkerClass = EnemyMarkerClass;
 
-	for (int32 Index = 0; Index < Positions.Num(); ++Index)
+	int32 Index = 0;
+	for (const FVector2D& Position : Positions)
 	{
+		FVector2D DisplayUV;
+		if (!CatrunMinimap::TryGetDisplayUV(Position, MapProjection, DisplayUV))
+			continue;
 		if (Index == Markers.Num())
 		{
 			UCanvasPanelSlot* MarkerSlot = AddMarker(MarkerClass, 0);
@@ -228,9 +380,9 @@ void UCatrunMinimapWidget::UpdateEnemies(ECatrunMinimapEnemyKind Kind, TConstArr
 				break;
 			Markers.Add(MarkerSlot);
 		}
-		UpdateMarker(*Markers[Index], &Positions[Index]);
+		UpdateMarker(*Markers[Index++], &DisplayUV);
 	}
-	for (int32 Index = Positions.Num(); Index < Markers.Num(); ++Index)
+	for (; Index < Markers.Num(); ++Index)
 		UpdateMarker(*Markers[Index], nullptr);
 }
 
@@ -253,9 +405,6 @@ void ACatrunMinimapPresenter::BeginPlay()
 		UE_LOG(LogTemp, Warning, TEXT("Minimap presenter %s is missing a widget, map texture or valid capture bounds."), *GetPathName());
 		return;
 	}
-	CreateInputComponent(UInputComponent::StaticClass());
-	FInputKeyBinding& TabBinding = InputComponent->BindKey(EKeys::Tab, IE_Pressed, this, &ThisClass::ToggleMap);
-	TabBinding.bConsumeInput = false;
 	StartTracking(*World);
 }
 
@@ -320,12 +469,11 @@ void ACatrunMinimapPresenter::UntrackEnemy(AActor* Actor)
 bool ACatrunMinimapPresenter::AttachWidget(APlayerController& Controller)
 {
 	UCatrunMinimapWidget* Widget = CreateWidget<UCatrunMinimapWidget>(&Controller, WidgetClass);
-	if (Widget && Widget->InitializeMap(BackgroundTexture, MapSize, CaptureYawDegrees)
+	if (Widget && Widget->InitializeMap(*this)
 		&& Widget->AddToPlayerScreen() && Widget->IsInViewport())
 	{
 		MinimapWidget = Widget;
-		InputController = &Controller;
-		EnableInput(&Controller);
+		OwningController = &Controller;
 		return true;
 	}
 
@@ -338,9 +486,9 @@ bool ACatrunMinimapPresenter::AttachWidget(APlayerController& Controller)
 
 void ACatrunMinimapPresenter::DetachWidget()
 {
-	if (APlayerController* Controller = InputController.Get())
-		DisableInput(Controller);
-	InputController.Reset();
+	OwningController.Reset();
+	ArmorPositions.Reset();
+	CandlePositions.Reset();
 	if (MinimapWidget)
 	{
 		MinimapWidget->RemoveFromParent();
@@ -353,10 +501,11 @@ void ACatrunMinimapPresenter::HideMinimap()
 	if (!MinimapWidget)
 		return;
 
-	if (MinimapWidget->bExpanded)
-		MinimapWidget->SetExpanded(false);
-	if (MinimapWidget->GetVisibility() != ESlateVisibility::Collapsed)
-		MinimapWidget->SetVisibility(ESlateVisibility::Collapsed);
+	UGameViewportClient* ViewportClient = GetViewportClient(OwningController.Get());
+	const FSceneViewport* Viewport = ViewportClient ? ViewportClient->GetGameViewport() : nullptr;
+	MinimapWidget->UpdateHoldState(false, false, Viewport && Viewport->KeyState(EKeys::Tab));
+	MinimapWidget->UpdateLayout(MinimapWidget->GetCachedGeometry().GetLocalSize());
+	MinimapWidget->SetRenderOpacity(0.f);
 }
 
 bool ACatrunMinimapPresenter::CanUseMinimap(const APlayerController* Controller) const
@@ -367,26 +516,7 @@ bool ACatrunMinimapPresenter::CanUseMinimap(const APlayerController* Controller)
 		return false;
 
 	const auto* Settings = World->GetSubsystem<UCatrunSettingsSubsystem>();
-	const auto* Flow = World->GetSubsystem<UCatrunLevelFlowSubsystem>();
-	const auto* Restart = World->GetSubsystem<UCatrunRestartSubsystem>();
-	if ((Settings && Settings->GetCurrentSettingsWidget()) || (Flow && Flow->IsTransitioning())
-		|| (Restart && Restart->IsCatching()))
-		return false;
-
-	// The opening sequence can lock character movement directly. Hiding in a basket remains gameplay.
-	const auto* Character = Cast<ACharacter>(Controller->GetPawn());
-	if (Character && Character->GetCharacterMovement()->MovementMode == MOVE_None)
-	{
-		const auto* Basket = Character->FindComponentByClass<UCatrunBasketInteractionComponent>();
-		return Basket && (Basket->Busy || Basket->IsHidden);
-	}
-	return true;
-}
-
-void ACatrunMinimapPresenter::ToggleMap()
-{
-	if (MinimapWidget && MinimapWidget->IsInViewport() && CanUseMinimap(InputController.Get()))
-		MinimapWidget->SetExpanded(!MinimapWidget->bExpanded);
+	return !Settings || !Settings->GetCurrentSettingsWidget();
 }
 
 bool ACatrunMinimapPresenter::ProjectActor(const AActor* Actor, FVector2D& OutUV) const
@@ -404,7 +534,7 @@ void ACatrunMinimapPresenter::UpdateMinimap()
 	const UGameInstance* GameInstance = World->GetGameInstance();
 	APlayerController* Controller = GameInstance && World->GetGameViewport()
 		? GameInstance->GetFirstLocalPlayerController(World) : nullptr;
-	if (MinimapWidget && (Controller != InputController.Get() || !MinimapWidget->IsInViewport()))
+	if (MinimapWidget && (Controller != OwningController.Get() || !MinimapWidget->IsInViewport()))
 		DetachWidget();
 	if (!Controller || Controller->GetWorld() != World || !Controller->GetLocalPlayer()
 		|| (!MinimapWidget && !AttachWidget(*Controller)))
@@ -412,24 +542,15 @@ void ACatrunMinimapPresenter::UpdateMinimap()
 
 	if (!CanUseMinimap(Controller))
 	{
-		// Cinematic visibility is temporary; retain the user's expanded/compact choice.
-		// SettingsOpened separately owns its deliberate compact reset.
-		MinimapWidget->SetVisibility(ESlateVisibility::Collapsed);
+		HideMinimap();
 		return;
 	}
-	if (MinimapWidget->GetVisibility() != ESlateVisibility::HitTestInvisible)
-		MinimapWidget->SetVisibility(ESlateVisibility::HitTestInvisible);
-	MinimapWidget->UpdateLayout();
-	MinimapWidget->UpdateMapProjection(MapSize, CaptureYawDegrees, *Controller);
+	ArmorPositions.Reset();
+	CandlePositions.Reset();
 	FVector2D UV;
-	MinimapWidget->UpdatePlayer(ProjectActor(Controller->GetPawn(), UV) ? &UV : nullptr);
-	TArray<FVector2D, TInlineAllocator<8>> ArmorPositions;
-	TArray<FVector2D, TInlineAllocator<8>> CandlePositions;
 	for (const auto& Enemy : Enemies)
 	{
 		if (ProjectActor(Enemy.Key.Get(), UV))
 			(Enemy.Value == ECatrunMinimapEnemyKind::Armor ? ArmorPositions : CandlePositions).Add(UV);
 	}
-	MinimapWidget->UpdateEnemies(ECatrunMinimapEnemyKind::Armor, ArmorPositions);
-	MinimapWidget->UpdateEnemies(ECatrunMinimapEnemyKind::Candle, CandlePositions);
 }

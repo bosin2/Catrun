@@ -1,25 +1,21 @@
 """Author the floorplan panel and its three markers inside Unreal Python.
 
-Import author_presentation from the map author. This module owns only its seven
-new UI packages. The caller supplies map textures and presenter assignments.
+Import author_presentation from the map author. The caller supplies map textures
+and presenter assignments.
 """
 
 import hashlib
 from pathlib import Path
-import struct
-import zlib
 
 import unreal as u
 
 from menu_graph import add, compile_bp, properties, ui, widgets
+from author_minimap_hold_neighborhood import (
+    AS, FOLDER, MARKER_CLASSES, OWNER, OWNER_TAG, PANEL_NAME, ensure_frame_texture, rgba_png, update_panel,
+)
 
 
-FOLDER = '/Game/UI/Minimap'
-PANEL_NAME = 'WBP_Minimap_Floorplan'
-OWNER_TAG = 'CatrunMinimapAuthor'
-OWNER = 'CatrunMinimapFloorplan'
 MARKER_HASH_TAG = 'CatrunMinimapMarkerSHA256'
-AS = u.EditorAssetLibrary
 
 # Closed outlines and inset fills on a 48-unit square. The silhouettes remain
 # distinguishable when the compact map is scaled down or colors overlap.
@@ -38,7 +34,6 @@ MARKERS = (
      ((26, 12), (29, 20), (34, 25), (37, 31), (36, 36), (32, 40), (24, 42),
       (16, 40), (12, 35), (11, 30), (15, 22), (15, 30), (22, 26))),
 )
-MARKER_INSET = max(marker[1] for marker in MARKERS) / 2
 
 
 def inside_polygon(x, y, polygon):
@@ -49,11 +44,6 @@ def inside_polygon(x, y, polygon):
             inside = not inside
         ax, ay = bx, by
     return inside
-
-
-def png_chunk(kind, payload):
-    return (struct.pack('>I', len(payload)) + kind + payload
-            + struct.pack('>I', zlib.crc32(kind + payload)))
 
 
 def marker_png(color, outline, fill):
@@ -80,9 +70,7 @@ def marker_png(color, outline, fill):
             else:
                 scanlines.extend(stroke)
             scanlines.append(round(255 * covered / (samples * samples)))
-    header = struct.pack('>IIBBBBB', side, side, 8, 6, 0, 0, 0)
-    return (b'\x89PNG\r\n\x1a\n' + png_chunk(b'IHDR', header)
-            + png_chunk(b'IDAT', zlib.compress(scanlines, 9)) + png_chunk(b'IEND', b''))
+    return rgba_png(side, scanlines)
 
 
 def owned_asset(name, audit, created, create):
@@ -145,53 +133,21 @@ def panel_widget(base_class, marker_bps):
     bp = ui('CreateWidgetBlueprint', FOLDER, PANEL_NAME, base_class)
     root = add(bp, u.CanvasPanel, 'MinimapRoot', None)
     frame = add(bp, u.Border, 'MinimapFrame', root, variable=True)
-    outline = u.SlateBrushOutlineSettings(corner_radii=u.Vector4(4., 4., 4., 4.), width=1.,
-                                          rounding_type=u.SlateBrushRoundingType.FIXED_RADIUS,
-                                          color=u.SlateColor(specified_color=u.LinearColor(.14, .17, .21, .85)))
-    brush = u.SlateBrush(draw_as=u.SlateBrushDrawType.ROUNDED_BOX, outline_settings=outline,
-                         tint_color=u.SlateColor(specified_color=u.LinearColor(.012, .016, .024, .84)))
-    frame.set_brush(brush)
-    properties(frame, padding=u.Margin(MARKER_INSET, MARKER_INSET, MARKER_INSET, MARKER_INSET),
-               horizontal_alignment=u.HorizontalAlignment.H_ALIGN_FILL,
+    properties(frame, horizontal_alignment=u.HorizontalAlignment.H_ALIGN_FILL,
                vertical_alignment=u.VerticalAlignment.V_ALIGN_FILL)
     canvas_slot(frame, (1, 0), (1, 0), (-24, 24, 240, 240), alignment=(1, 0))
 
     surface = add(bp, u.CanvasPanel, 'MapSurface', frame)
     image = add(bp, u.Image, 'MapBackground', surface, variable=True)
     layer = add(bp, u.CanvasPanel, 'MarkerLayer', surface, variable=True)
-    properties(layer, clipping=u.WidgetClipping.INHERIT)
     for order, widget in enumerate((image, layer)):
         canvas_slot(widget, (0, 0), (1, 1), (0, 0, 0, 0), order=order)
 
     compile_bp(bp)
     defaults = u.get_default_object(bp.generated_class())
-    properties(defaults, player_marker_class=marker_bps['Cat'].generated_class(),
-               armor_marker_class=marker_bps['Armor'].generated_class(),
-               candle_marker_class=marker_bps['Candle'].generated_class(),
-               expanded_map_viewport_fraction=.76, expanded_map_max_size=700.,
+    properties(defaults, **{field: marker_bps[kind].generated_class() for field, kind in MARKER_CLASSES.items()},
                is_focusable=False, visibility=u.SlateVisibility.HIT_TEST_INVISIBLE)
     return bp
-
-
-def audit_panel_tree(panel):
-    tree = widgets(panel)
-    frame = tree['MinimapFrame']
-    layer = tree['MarkerLayer']
-    assert tree['MapBackground'].get_parent() == layer.get_parent() == tree['MapSurface']
-    assert tree['MapSurface'].get_parent() == frame
-    assert 'MapToggleHint' not in tree
-    assert layer.get_editor_property('clipping') == u.WidgetClipping.INHERIT
-    padding = frame.get_editor_property('padding')
-    assert padding.left == padding.top == padding.right == padding.bottom == MARKER_INSET
-    frame_offsets = frame.get_editor_property('slot').get_offsets()
-    assert frame_offsets.right == frame_offsets.bottom > 2 * MARKER_INSET
-    for child in (tree['MapBackground'], layer):
-        slot = child.get_editor_property('slot')
-        anchors = slot.get_anchors()
-        offsets = slot.get_offsets()
-        assert anchors.minimum.x == anchors.minimum.y == 0
-        assert anchors.maximum.x == anchors.maximum.y == 1
-        assert offsets.left == offsets.top == offsets.right == offsets.bottom == 0
 
 
 def author_presentation(audit=False, output_dir=None):
@@ -201,6 +157,7 @@ def author_presentation(audit=False, output_dir=None):
     else:
         output_dir = Path(output_dir)
     created = []
+    frame_texture = ensure_frame_texture(audit, created)
     marker_bps = {}
     for kind, size, color, outline, fill in MARKERS:
         name = f'T_MinimapMarker_{kind}'
@@ -217,11 +174,8 @@ def author_presentation(audit=False, output_dir=None):
     base_class = u.load_class(None, '/Script/Catrun.CatrunMinimapWidget')
     assert base_class
     panel = owned_asset(PANEL_NAME, audit, created, lambda: panel_widget(base_class, marker_bps))
-    audit_panel_tree(panel)
-    defaults = u.get_default_object(panel.generated_class())
-    for field, kind in (('player_marker_class', 'Cat'), ('armor_marker_class', 'Armor'),
-                        ('candle_marker_class', 'Candle')):
-        assert defaults.get_editor_property(field) == marker_bps[kind].generated_class(), field
+    if update_panel(panel, frame_texture, audit) and panel not in created:
+        created.append(panel)
     for asset in created:
         assert AS.save_loaded_asset(asset, False), asset
     return panel.generated_class()
