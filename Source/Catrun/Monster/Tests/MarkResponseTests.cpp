@@ -3,6 +3,7 @@
 #include "Monster/CatrunArmor.h"
 #include "Monster/CatrunCandle.h"
 #include "Monster/CatrunMarkSubsystem.h"
+#include "Interaction/CatrunPuzzleSuspension.h"
 #include "Sound/SoundGridManager.h"
 #include "Sound/CatrunSoundSettings.h"
 #include "Components/BoxComponent.h"
@@ -92,6 +93,55 @@ bool FCandleRemarkTest::RunTest(const FString&)
 	Candle->bPenaltiesEnabled = false;
 	Candle->Tick(.016f);
 	TestFalse(TEXT("A demonstration candle with penalties disabled does not mark"), F.Marks->IsMarked());
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunReleasedMarkFollowerTest, "Catrun.Monsters.ReleasedMarkFollowerAfterSuspension", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FCatrunReleasedMarkFollowerTest::RunTest(const FString&)
+{
+	for (const bool bMoving : {false, true})
+	{
+		FMarkFixture F;
+		auto* Guard = UCatrunPuzzleSuspension::Get(F.World);
+		auto* Armor = F.World->SpawnActor<ACatrunArmor>();
+		Armor->SetActorLocation(FVector(500, 0, 100));
+		Armor->bReturnToPost = false;
+		F.Marks->ApplyMark(*F.Cat);
+		F.Marks->Tick(.3f);
+		if (!TestTrue(TEXT("Mark selects a real follower"), F.Marks->FollowingArmor.Get() == Armor)) return false;
+		// Reproduce either a last known path or an idle follower waiting at its destination.
+		const FVector LastKnown(300, 0, 100);
+		if (bMoving)
+		{
+			Armor->Destination = LastKnown;
+			Armor->PathCorners = {LastKnown};
+			Armor->NextCorner = 0;
+			Armor->SetAction(EArmorAction::Walking);
+		}
+		else
+		{
+			Armor->FinishTrip();
+		}
+		Armor->MarkRepathTimer = .18f;
+		Armor->MarkTargetCell = FIntPoint(12, 0);
+		if (!TestTrue(TEXT("Presentation owns enemy suspension"), Guard->Acquire(F.Cat))) return false;
+		F.Marks->ClearMark(TEXT("accepted Stage1 portal"));
+		TestFalse(TEXT("Authoritative mark is gone during suspension"), F.Marks->IsMarked());
+		TestFalse(TEXT("Subsystem releases its follower"), F.Marks->FollowingArmor.IsValid());
+		TestEqual(TEXT("Follow assignment timer is cleared immediately"), F.Marks->FollowTimer, 0.f);
+		TestFalse(TEXT("Follower releases live pursuit"), Armor->IsFollowingMark());
+		TestEqual(TEXT("Frozen armor drops repath timer"), Armor->MarkRepathTimer, 0.f);
+		TestTrue(TEXT("Frozen armor drops live cat target cell"), Armor->MarkTargetCell == FIntPoint(INT32_MIN, INT32_MIN));
+		Guard->Release(F.Cat);
+		Armor->Tick(.016f);
+		if (bMoving)
+		{
+			TestTrue(TEXT("Moving follower continues to the last known location"), Armor->GetAction() == EArmorAction::Walking && Armor->GetInvestigationLocation().Equals(LastKnown));
+			Armor->SetActorLocation(LastKnown);
+			Armor->Tick(.016f);
+		}
+		TestFalse(TEXT("Released follower completes its trip when it reaches the last known point"), Armor->HasDestination());
+	}
 	return true;
 }
 #endif

@@ -28,6 +28,11 @@ void UCatrunVisionFanComponent::Configure(float InRange, int32 InRayCount, const
 	DisplayRayDistances.Init(GetDisplayRange(), RayCount);
 }
 
+void UCatrunVisionFanComponent::SetDisplayMaterialOverride(UMaterialInterface* InMaterial)
+{
+	DisplayMaterialOverride = InMaterial;
+}
+
 void UCatrunVisionFanComponent::SetDisplayStyle(float InOpacity, float InRadiusPadding)
 {
 	DisplayOpacity = FMath::Clamp(InOpacity, 0.f, 1.f);
@@ -58,7 +63,8 @@ bool UCatrunVisionFanComponent::EnsureReady()
 
 	AActor* Owner = GetOwner();
 	UStaticMesh* PlaneMesh = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Plane.Plane"));
-	if (Owner && PlaneMesh && Settings->VisionMaterial)
+	UMaterialInterface* DisplayMaterial = DisplayMaterialOverride ? DisplayMaterialOverride.Get() : Settings->VisionMaterial.Get();
+	if (Owner && PlaneMesh && DisplayMaterial)
 	{
 		// One ray distance per pixel in a one-pixel-high picture. 16-bit float values, filtered
 		// smoothly so the display edge does not show the individual rays.
@@ -84,7 +90,7 @@ bool UCatrunVisionFanComponent::EnsureReady()
 		Plane->SetWorldScale3D(FVector(GetDisplayRange() * 2.f / 100.f, GetDisplayRange() * 2.f / 100.f, 1.f)); // engine plane is 100 x 100 cm
 		Plane->SetVisibility(bDisplayVisible);
 
-		Material = UMaterialInstanceDynamic::Create(Settings->VisionMaterial, Owner);
+		Material = UMaterialInstanceDynamic::Create(DisplayMaterial, Owner);
 		Material->SetTextureParameterValue(TEXT("DistTex"), DistanceTexture);
 		Material->SetVectorParameterValue(TEXT("Color"), FLinearColor(Color.R, Color.G, Color.B, 1.f));
 		Material->SetScalarParameterValue(TEXT("Range"), GetDisplayRange());
@@ -95,7 +101,7 @@ bool UCatrunVisionFanComponent::EnsureReady()
 	}
 	else
 	{
-		UE_LOG(LogCatrunSound, Warning, TEXT("%s: vision display disabled (needs Settings->VisionMaterial). The sight still works."), *GetOwner()->GetName());
+		UE_LOG(LogCatrunSound, Warning, TEXT("%s: vision display could not be created. Sight remains active."), *GetNameSafe(Owner));
 	}
 	bReady = true;
 	return true;

@@ -49,6 +49,7 @@ void UCatrunMarkSubsystem::ClearMark(const TCHAR* Reason)
 		return;
 	}
 	bMarked = false;
+	FollowTimer = 0.f;
 	if (ACatrunArmor* Armor = FollowingArmor.Get())
 	{
 		Armor->SetFollowingMark(false); // it goes on to where it last saw the cat, looks, and returns
@@ -66,8 +67,7 @@ void UCatrunMarkSubsystem::Tick(float DeltaTime)
 	{
 		return;
 	}
-	// The only way to lose the mark: hide. Getting into a hideout counts from the first moment
-	// of the get-in animation.
+	// Hideout entry counts from the first moment of the get-in animation.
 	if (CatrunCat::IsSafeFromCatch(Cat))
 	{
 		ClearMark(TEXT("the cat is in a hideout"));

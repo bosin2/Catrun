@@ -546,6 +546,11 @@ def audit(world, sequence, director, portal, camera):
 
 def main():
     mode = arg('catrunStage2Arrival')
+    if mode in {'migrate', 'cold'}:
+        import stage2_arrival_shots
+        from types import SimpleNamespace
+        stage2_arrival_shots.run(SimpleNamespace(**globals()), mode)
+        return
     assert mode in {'probe', 'author', 'polish', 'audit'}, 'Pass -catrunStage2Arrival=probe|author|polish|audit'
     REPORT['mode'] = mode
     REPORT['cvars'] = {name: u.SystemLibrary.get_console_variable_int_value(name) for name in CVARS}

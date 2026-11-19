@@ -7,6 +7,7 @@
 class ASoundGridManager;
 class UCatrunSoundSettings;
 class UMaterialInstanceDynamic;
+class UMaterialInterface;
 class UStaticMeshComponent;
 class UTexture2D;
 
@@ -15,11 +16,10 @@ class UTexture2D;
  *
  * Every frame the owner calls Update with the direction and width of the fan. The component
  * shoots rays across the fan and stops each one at the first wall, tall piece of furniture or
- * closed door. The result is used for two things that always agree (design doc 10.1):
- *  - CanSee(): is a point (the cat) inside what the monster sees?
- *  - the floor display: the fan is drawn on the floor, cut off by the walls.
+ * closed door. CanSee uses those distances to test targets. The floor display traces the
+ * same blockers up to its visual radius, which can include padding for the cat's body.
  *
- * A candle uses a narrow fan (a cone). An armor uses a full circle (half angle 180).
+ * A candle displays a filled fan. An armor displays the outline of a full circle (half angle 180).
  *
  * Settings (heights, colors, opacity) come from the sound settings asset of the level.
  */
@@ -61,6 +61,8 @@ public:
 
 	// Changes the color of the floor display (for example orange -> red when the cat is spotted).
 	void SetColor(const FLinearColor& NewColor);
+	// Sets the floor material on the owner's default subobject before the first Update.
+	void SetDisplayMaterialOverride(UMaterialInterface* InMaterial);
 	// Presentation only: draw the cat-center threshold and use an independent opacity.
 	// Perception Range, CanSee and collision queries remain unchanged.
 	void SetDisplayStyle(float InOpacity, float InRadiusPadding = 0.f);
@@ -80,6 +82,10 @@ private:
 
 	bool bOriginOverridden = false;
 	FVector OriginOverride = FVector::ZeroVector;
+
+	// Keep the native default subobject's material reference available to the cooker.
+	UPROPERTY()
+	TObjectPtr<UMaterialInterface> DisplayMaterialOverride;
 
 	UPROPERTY(Transient)
 	TObjectPtr<const UCatrunSoundSettings> Settings;

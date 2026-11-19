@@ -7,6 +7,7 @@
 #endif
 #include "Camera/CameraTypes.h"
 #include "Components/Border.h"
+#include "Components/Image.h"
 #include "Engine/Engine.h"
 #include "Engine/Texture2D.h"
 #include "Engine/TextureRenderTarget2D.h"
@@ -19,6 +20,7 @@
 #include "Misc/App.h"
 #include "Misc/AutomationTest.h"
 #include "Misc/CommandLine.h"
+#include "Misc/Guid.h"
 #include "Misc/Paths.h"
 #include "Misc/ScopeExit.h"
 #include "Monster/CatrunArmor.h"
@@ -288,31 +290,13 @@ bool FCatrunMinimapEnemyLifecycleTest::RunTest(const FString&)
 		return false;
 	Presenter->MinimapWidget = NewObject<UCatrunMinimapWidget>(World, PanelClass);
 	UCatrunMinimapWidget* Widget = Presenter->MinimapWidget;
-	Widget->UpdateHoldState(true, true, true);
-	TestTrue(TEXT("Pressing Tab enlarges the map"), Widget->bExpanded);
-	Widget->UpdateHoldState(true, true, true);
-	TestTrue(TEXT("Holding or repeating Tab keeps the map enlarged"), Widget->bExpanded);
-	Widget->UpdateHoldState(true, true, false);
-	TestFalse(TEXT("Releasing Tab returns the map to compact"), Widget->bExpanded);
-	Widget->UpdateHoldState(true, true, true);
-	Widget->UpdateHoldState(true, false, true);
-	TestFalse(TEXT("Losing viewport focus clears enlargement"), Widget->bExpanded);
-	Widget->UpdateHoldState(true, true, true);
-	TestFalse(TEXT("Regaining focus ignores an interrupted Tab hold"), Widget->bExpanded);
-	Widget->UpdateHoldState(true, true, false);
-	Widget->UpdateHoldState(true, true, true);
-	TestTrue(TEXT("A fresh press can enlarge the map after focus returns"), Widget->bExpanded);
-	Widget->UpdateHoldState(false, true, true);
-	TestFalse(TEXT("Losing gameplay eligibility clears enlargement with the key held"), Widget->bExpanded);
-	Widget->UpdateHoldState(true, true, true);
-	TestFalse(TEXT("A Tab key used during interruption cannot reopen the map"), Widget->bExpanded);
-	Widget->UpdateHoldState(true, true, false);
-	Widget->UpdateHoldState(true, true, true);
+	// Input edges are covered through Slate in RoutedHoldAcrossStages. Prime only the detached layout here.
+	Widget->bExpanded = true;
 	Presenter->MinimapWidget->NativeTick(FGeometry(), 0.f);
 	TestFalse(TEXT("An ineligible widget tick resets compact before the marker timer"), Widget->bExpanded);
 	TestEqual(TEXT("Suppressed map is transparent before the next marker timer"), Presenter->MinimapWidget->GetRenderOpacity(), 0.f);
 	TestTrue(TEXT("Settings interruption is subscribed before gameplay starts"), Settings->OnSettingsOpened.IsBoundToObject(Presenter));
-	Widget->UpdateHoldState(true, true, true);
+	Widget->bExpanded = true;
 	Widget->SetRenderOpacity(1.f);
 	Settings->OnSettingsOpened.Broadcast();
 	TestFalse(TEXT("Opening settings clears expanded state without waiting for the timer"), Presenter->MinimapWidget->bExpanded);
@@ -399,13 +383,20 @@ bool FCatrunMinimapOffscreenPreviewTest::RunTest(const FString&)
 	const TSharedRef<SWidget> SlateWidget = Widget->TakeWidget();
 	SlateWidget->SetCanTick(false);
 	FWidgetRenderer Renderer(true, true);
-	const FString PreviewDirectory = FPaths::ProjectSavedDir() / TEXT("MinimapRepair20261116/Preview");
-	if (!TestTrue(TEXT("Preview directory is writable"), IFileManager::Get().MakeDirectory(*PreviewDirectory, true)))
+	FString PreviewDirectory;
+	if (!FParse::Value(FCommandLine::Get(), TEXT("CatrunMinimapPreviewDir="), PreviewDirectory))
+	{
+		PreviewDirectory = FPaths::ProjectSavedDir() / TEXT("MinimapPreviews") / FGuid::NewGuid().ToString(EGuidFormats::Digits);
+	}
+	IFileManager& Files = IFileManager::Get();
+	if (!TestTrue(TEXT("Preview directory is new and writable"), !PreviewDirectory.IsEmpty()
+		&& !Files.DirectoryExists(*PreviewDirectory) && Files.MakeDirectory(*PreviewDirectory, true)))
 		return false;
+	AddInfo(FString::Printf(TEXT("Preview output: %s"), *PreviewDirectory));
 
 	for (const bool bHeld : { false, true })
 	{
-		Widget->UpdateHoldState(true, true, bHeld);
+		Widget->bExpanded = bHeld;
 		Widget->UpdateLayout(DrawSize);
 		Widget->ApplyImageProjection();
 		UTextureRenderTarget2D* Target = Renderer.DrawWidget(SlateWidget, DrawSize);
@@ -425,9 +416,10 @@ bool FCatrunMinimapOffscreenPreviewTest::RunTest(const FString&)
 		const int32 MidY = FMath::RoundToInt(FrameOrigin.Y + FrameSize.Y * .5);
 		const FIntPoint RimPixel(Left + 1, MidY);
 		const FIntPoint FillPixel(Left + 5, MidY);
+		const FIntPoint BackdropPixel(Left + 15, MidY);
 		const FIntRect PixelBounds(0, 0, Pixels.SizeX, Pixels.SizeY);
 		if (!TestTrue(TEXT("Frame samples are inside the rendered viewport"),
-			PixelBounds.Contains(RimPixel) && PixelBounds.Contains(FillPixel)))
+			PixelBounds.Contains(RimPixel) && PixelBounds.Contains(FillPixel) && PixelBounds.Contains(BackdropPixel)))
 			return false;
 
 		const TCHAR* State = bHeld ? TEXT("Held") : TEXT("Compact");
@@ -453,6 +445,20 @@ bool FCatrunMinimapOffscreenPreviewTest::RunTest(const FString&)
 			State, RimAlpha, RimPixel.X, RimPixel.Y, FillAlpha, FillPixel.X, FillPixel.Y));
 		TestTrue(FString::Printf(TEXT("%s metallic rim is visible"), State), RimAlpha >= .25f);
 		TestTrue(FString::Printf(TEXT("%s frame padding has translucent fill"), State), FillAlpha >= .04f && FillAlpha <= .20f);
+
+		const ESlateVisibility ImageVisibility = Widget->MapBackground->GetVisibility();
+		Widget->MapBackground->SetVisibility(ESlateVisibility::Hidden);
+		UTextureRenderTarget2D* BackdropTarget = Renderer.DrawWidget(SlateWidget, DrawSize);
+		Widget->MapBackground->SetVisibility(ImageVisibility);
+		FImage BackdropPixels;
+		if (!TestNotNull(TEXT("Backdrop render target"), BackdropTarget)
+			|| !TestTrue(TEXT("Backdrop pixels were read back"), FImageUtils::GetRenderTargetImage(BackdropTarget, BackdropPixels)))
+			return false;
+		const float BackdropAlpha = BackdropPixels.GetOnePixelLinear(BackdropPixel.X, BackdropPixel.Y).A;
+		AddInfo(FString::Printf(TEXT("%s backdrop alpha %.3f at (%d,%d) with transparent map"),
+			State, BackdropAlpha, BackdropPixel.X, BackdropPixel.Y));
+		TestTrue(FString::Printf(TEXT("%s empty map has a stronger translucent backing than the frame padding"), State),
+			BackdropAlpha > FillAlpha + .12f && BackdropAlpha < .50f);
 	}
 	return true;
 }

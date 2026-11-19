@@ -252,6 +252,7 @@ protected:
 
 private:
 	friend class FCatrunPuzzleSuspensionTest;
+	friend class FCatrunReleasedMarkFollowerTest;
 	friend class FCatrunArmorTravelSafetyTest;
 	friend class FCatrunTurnCurveHandoffTest;
 	friend class UCatrunCapturePresentationComponent;
@@ -348,7 +349,9 @@ private:
 
 	// ---- Following the candle mark ----
 	void UpdateMarkFollowing(float DeltaSeconds);
+	void FinishReleasedMark();
 	bool bFollowingMark = false;
+	bool bPendingMarkRelease = false;
 	bool bInvestigatingSound = false;
 
 	// Stuck detection while walking (see TickWalking).

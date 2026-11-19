@@ -34,6 +34,8 @@
 #include "GameFramework/PawnMovementComponent.h"
 #include "GameFramework/PlayerController.h"
 #include "Kismet/GameplayStatics.h"
+#include "Materials/MaterialInterface.h"
+#include "UObject/ConstructorHelpers.h"
 
 namespace
 {
@@ -90,6 +92,9 @@ ACatrunArmor::ACatrunArmor()
 	ActionLabel->SetCastShadow(false);
 
 	Detection = CreateDefaultSubobject<UCatrunVisionFanComponent>(TEXT("Detection"));
+	static ConstructorHelpers::FObjectFinder<UMaterialInterface> DetectionRing(
+		TEXT("/Game/Systems/Sound/M_ArmorDetectionRing.M_ArmorDetectionRing"));
+	Detection->SetDisplayMaterialOverride(DetectionRing.Object);
 
 	AlertMark = CreateDefaultSubobject<UCatrunAlertMarkComponent>(TEXT("AlertMark"));
 	AlertMark->SetupAttachment(RootComponent);
@@ -655,6 +660,13 @@ void ACatrunArmor::Tick(float DeltaSeconds)
 	if (bWaitingForCapture) { UpdateActionLabel(); return; }
 	if (UCatrunPuzzleSuspension::IsSuspended(this)) return;
 	Super::Tick(DeltaSeconds);
+	if (bPendingMarkRelease)
+	{
+		bPendingMarkRelease = false;
+		// A sound or capture may already have taken ownership since the suspension ended.
+		if (TravelIntent == ETravelIntent::Mark && !bInvestigatingSound && Action != EArmorAction::Catching)
+			FinishReleasedMark();
+	}
 	ActionTime += DeltaSeconds;
 
 	switch (Action)
@@ -681,10 +693,14 @@ void ACatrunArmor::SetFollowingMark(bool bFollow)
 		return;
 	}
 	bFollowingMark = bFollow;
-	if (bWaitingForCapture) return;
-	if (UCatrunPuzzleSuspension::IsSuspended(this)) return;
 	MarkRepathTimer = 0.f;
 	MarkTargetCell = FIntPoint(INT32_MIN, INT32_MIN);
+	bPendingMarkRelease = false;
+	if (bWaitingForCapture || UCatrunPuzzleSuspension::IsSuspended(this))
+	{
+		bPendingMarkRelease = !bFollow && TravelIntent == ETravelIntent::Mark;
+		return;
+	}
 	UE_LOG(LogCatrunSound, Log, TEXT("%s %s the marked cat."), *GetName(), bFollow ? TEXT("starts following") : TEXT("stops following"));
 	if (bInvestigatingSound || Action == EArmorAction::Catching) return;
 	if (bFollow)
@@ -699,17 +715,16 @@ void ACatrunArmor::SetFollowingMark(bool bFollow)
 	}
 	else
 	{
-		// Keep walking to the last place the cat was; from there the usual look and return.
-		CurrentSoundSize = ECatrunSoundSize::Small;
-
-		// Already there (it waited at the end of its path while following)? Then the trip is over
-		// now: look around and go back. Without this it would stand there for ever.
-		const bool bWalkingOn = PathCorners.IsValidIndex(NextCorner) && Action != EArmorAction::Idle;
-		if (!bWalkingOn && Action != EArmorAction::Catching && Action != EArmorAction::Looking)
-		{
-			FinishTrip();
-		}
+		FinishReleasedMark();
 	}
+}
+
+void ACatrunArmor::FinishReleasedMark()
+{
+	// Moving followers finish their last known path. An idle follower has already arrived.
+	CurrentSoundSize = ECatrunSoundSize::Small;
+	const bool bWalkingOn = PathCorners.IsValidIndex(NextCorner) && Action != EArmorAction::Idle;
+	if (!bWalkingOn && Action != EArmorAction::Looking) FinishTrip();
 }
 
 // While following, the way to the cat is planned again whenever the cat has moved to another grid

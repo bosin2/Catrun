@@ -6,23 +6,29 @@
 #include "Components/CanvasPanelSlot.h"
 #include "Components/Image.h"
 #include "Components/SceneComponent.h"
+#include "Engine/Console.h"
 #include "Engine/GameInstance.h"
 #include "Engine/GameViewportClient.h"
 #include "Engine/LocalPlayer.h"
 #include "Engine/Texture2D.h"
 #include "Engine/World.h"
 #include "EngineUtils.h"
+#include "Framework/Application/IInputProcessor.h"
+#include "Framework/Application/SlateApplication.h"
+#include "Framework/Application/SlateUser.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerController.h"
 #include "InputCoreTypes.h"
 #include "LevelFlow/CatrunLevelFlow.h"
+#include "LevelFlow/CatrunPlayHUD.h"
 #include "Math/InverseRotationMatrix.h"
 #include "Monster/CatrunArmor.h"
 #include "Monster/CatrunCandle.h"
 #include "SceneView.h"
 #include "Settings/CatrunSettingsSubsystem.h"
 #include "Slate/SceneViewport.h"
-#include "Widgets/SWidget.h"
+#include "Slate/SObjectWidget.h"
+#include "Widgets/SViewport.h"
 
 namespace
 {
@@ -63,6 +69,80 @@ namespace
 		return true;
 	}
 }
+
+// Tab navigates away from SViewport during key-down, before the minimap's next layout tick.
+class FCatrunMinimapTabInput final : public IInputProcessor
+{
+public:
+	explicit FCatrunMinimapTabInput(ACatrunMinimapPresenter* InPresenter) : Presenter(InPresenter) {}
+
+	virtual void Tick(float, FSlateApplication&, TSharedRef<ICursor>) override {}
+
+	virtual bool HandleKeyDownEvent(FSlateApplication& Slate, const FKeyEvent& Event) override
+	{
+		if (Event.GetKey() != EKeys::Tab || Event.IsShiftDown() || Event.IsControlDown() || Event.IsAltDown() || Event.IsCommandDown())
+			return false;
+		const auto* Map = Presenter.Get();
+		const auto* PC = Map ? Map->OwningController.Get() : nullptr;
+		if (!PC || !Map->CanUseMinimap(PC) || !OwnsGameplayFocus(Slate, PC, Event.GetUserIndex()))
+			return false;
+		if (!Event.IsRepeat())
+			HeldUser = Event.GetUserIndex();
+		return true;
+	}
+
+	virtual bool HandleKeyUpEvent(FSlateApplication&, const FKeyEvent& Event) override
+	{
+		if (Event.GetKey() != EKeys::Tab || HeldUser != int32(Event.GetUserIndex()))
+			return false;
+		Cancel();
+		return true;
+	}
+
+	void OnFocusChanging(const FFocusEvent& Event, const FWeakWidgetPath&, const TSharedPtr<SWidget>& Previous,
+		const FWidgetPath&, const TSharedPtr<SWidget>& Next)
+	{
+		if (HeldUser == int32(Event.GetUser()) && Previous != Next)
+			Cancel();
+	}
+
+	void OnActivationChanged(bool bActive) { if (!bActive) Cancel(); }
+	void Cancel() { HeldUser = INDEX_NONE; }
+
+	bool IsHeld(const APlayerController* PC, bool bGameplayAllowed)
+	{
+		if (HeldUser != INDEX_NONE && (!bGameplayAllowed || !PC || !FSlateApplication::IsInitialized()
+			|| !OwnsGameplayFocus(FSlateApplication::Get(), PC, HeldUser)))
+			Cancel();
+		return HeldUser != INDEX_NONE;
+	}
+
+private:
+	static bool OwnsGameplayFocus(FSlateApplication& Slate, const APlayerController* PC, uint32 Index)
+	{
+		const ULocalPlayer* LocalPlayer = PC->GetLocalPlayer();
+		const auto User = LocalPlayer ? LocalPlayer->GetSlateUser() : nullptr;
+		UGameViewportClient* Viewport = GetViewportClient(PC);
+		if (!User || int32(Index) != User->GetUserIndex() || int32(Index) != Slate.GetUserIndexForKeyboard()
+			|| !Slate.IsActive() || !Viewport || Viewport->IgnoreInput()
+			|| (Viewport->ViewportConsole && Viewport->ViewportConsole->ConsoleActive()))
+			return false;
+		const auto Focus = Slate.GetUserFocusedWidget(Index);
+		const auto Window = Slate.GetActiveTopLevelWindow();
+		if (!Focus || (Window && User->GetWeakFocusPath().Window.Pin() != Window))
+			return false;
+		if (Focus == Viewport->GetGameViewportWidget())
+			return true;
+		// A focused passive play HUD still belongs to gameplay. Its buttons and other UI own their navigation.
+		if (Focus->GetWidgetClass().GetWidgetType() != SObjectWidget::StaticWidgetClass().GetWidgetType())
+			return false;
+		const auto* HUD = Cast<UCatrunPlayHUD>(StaticCastSharedPtr<SObjectWidget>(Focus)->GetWidgetObject());
+		return HUD && !HUD->bMenuOpen && HUD->GetOwningPlayer() == PC && HUD->IsInViewport();
+	}
+
+	TWeakObjectPtr<ACatrunMinimapPresenter> Presenter;
+	int32 HeldUser = INDEX_NONE;
+};
 
 bool CatrunMinimap::Project(const FVector2D& WorldXY, const FVector2D& Center, const FVector2D& Size,
 	double YawDegrees, FVector2D& OutUV)
@@ -223,13 +303,6 @@ bool UCatrunMinimapWidget::InitializeMap(ACatrunMinimapPresenter& InPresenter)
 	return PlayerMarker != nullptr;
 }
 
-void UCatrunMinimapWidget::UpdateHoldState(bool bGameplayAllowed, bool bViewportAcceptsInput, bool bTabDown)
-{
-	const bool bCanHold = bGameplayAllowed && bViewportAcceptsInput;
-	bWaitForTabRelease = bTabDown && (bWaitForTabRelease || !bCanHold);
-	bExpanded = bTabDown && bCanHold && !bWaitForTabRelease;
-}
-
 void UCatrunMinimapWidget::NativeTick(const FGeometry& Geometry, float DeltaSeconds)
 {
 	Super::NativeTick(Geometry, DeltaSeconds);
@@ -238,9 +311,7 @@ void UCatrunMinimapWidget::NativeTick(const FGeometry& Geometry, float DeltaSeco
 	UGameViewportClient* ViewportClient = GetViewportClient(Controller);
 	FSceneViewport* Viewport = ViewportClient ? ViewportClient->GetGameViewport() : nullptr;
 	const bool bShow = Map && Map->CanUseMinimap(Controller);
-	// Poll the owning Slate viewport so UI input routing can keep using Tab independently.
-	UpdateHoldState(bShow, Viewport && Viewport->HasFocus() && !ViewportClient->IgnoreInput(),
-		Viewport && Viewport->KeyState(EKeys::Tab));
+	bExpanded = Map && Map->TabInput && Map->TabInput->IsHeld(Controller, bShow);
 	UpdateLayout(Geometry.GetLocalSize());
 	// Opacity leaves this widget ticking while game timers are paused.
 	SetRenderOpacity(bShow ? 1.f : 0.f);
@@ -474,6 +545,14 @@ bool ACatrunMinimapPresenter::AttachWidget(APlayerController& Controller)
 	{
 		MinimapWidget = Widget;
 		OwningController = &Controller;
+		if (FSlateApplication::IsInitialized())
+		{
+			auto& Slate = FSlateApplication::Get();
+			TabInput = MakeShared<FCatrunMinimapTabInput>(this);
+			Slate.RegisterInputPreProcessor(TabInput);
+			Slate.OnFocusChanging().AddSP(TabInput.ToSharedRef(), &FCatrunMinimapTabInput::OnFocusChanging);
+			Slate.OnApplicationActivationStateChanged().AddSP(TabInput.ToSharedRef(), &FCatrunMinimapTabInput::OnActivationChanged);
+		}
 		return true;
 	}
 
@@ -486,6 +565,14 @@ bool ACatrunMinimapPresenter::AttachWidget(APlayerController& Controller)
 
 void ACatrunMinimapPresenter::DetachWidget()
 {
+	if (TabInput && FSlateApplication::IsInitialized())
+	{
+		auto& Slate = FSlateApplication::Get();
+		Slate.OnApplicationActivationStateChanged().RemoveAll(TabInput.Get());
+		Slate.OnFocusChanging().RemoveAll(TabInput.Get());
+		Slate.UnregisterInputPreProcessor(TabInput);
+	}
+	TabInput.Reset();
 	OwningController.Reset();
 	ArmorPositions.Reset();
 	CandlePositions.Reset();
@@ -501,9 +588,9 @@ void ACatrunMinimapPresenter::HideMinimap()
 	if (!MinimapWidget)
 		return;
 
-	UGameViewportClient* ViewportClient = GetViewportClient(OwningController.Get());
-	const FSceneViewport* Viewport = ViewportClient ? ViewportClient->GetGameViewport() : nullptr;
-	MinimapWidget->UpdateHoldState(false, false, Viewport && Viewport->KeyState(EKeys::Tab));
+	if (TabInput)
+		TabInput->Cancel();
+	MinimapWidget->bExpanded = false;
 	MinimapWidget->UpdateLayout(MinimapWidget->GetCachedGeometry().GetLocalSize());
 	MinimapWidget->SetRenderOpacity(0.f);
 }

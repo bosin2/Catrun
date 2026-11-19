@@ -5,7 +5,7 @@ import re
 import unreal as u
 from editor_toolset.toolsets.actor import ActorTools
 from editor_toolset.toolsets.blueprint import BlueprintTools as BP
-from menu_graph import Graph, compile_bp, wire
+from menu_graph import Graph, compile_bp, literal, pin, wire
 
 
 FLOW = '/Script/Catrun.CatrunLevelFlowLibrary:'
@@ -276,3 +276,26 @@ def audit_graph(bp):
         assert any(token.lower() in name for name in normalized), ('Missing director node', token, types)
     assert all('CommitExitTravel' not in name and 'RequestExitCheckpointSave' not in name for name in types)
     return {'status': str(bp.get_editor_property('status')), 'nodes': types}
+
+
+def arrival_timing(bp, update=False):
+    """Identify the monitor threshold and active-play watchdog, leaving readiness alone."""
+    graph = BP.get_graph(bp, 'EventGraph')
+    infos = BP.get_node_infos(BP.find_nodes(graph))
+    thresholds = [i.node for i in infos if str(i.type_id).endswith('float>=float')
+                  and float(pin(i.node, 'B').get_pin_value()) > 1.]
+    watchdogs = [i.node for i in infos if str(i.type_id).endswith('SetTimerbyFunctionName')
+                 and str(pin(i.node, 'FunctionName').get_pin_value()).strip('"') == 'AbortArrival'
+                 and float(pin(i.node, 'Time').get_pin_value()) > 2.]
+    assert len(thresholds) == len(watchdogs) == 1
+    fields = [(thresholds[0], 'B', 10., 14.8), (watchdogs[0], 'Time', 14., 18.8)]
+    values = [float(pin(node, name).get_pin_value()) for node, name, _, _ in fields]
+    assert all(abs(value - old) < .001 for value, (_, _, old, _) in zip(values, fields)) or all(
+        abs(value - new) < .001 for value, (_, _, _, new) in zip(values, fields)), values
+    if update and abs(values[0] - 10.) < .001:
+        bp.modify()
+        for node, name, _, new in fields:
+            literal(node, name, new)
+        compile_bp(bp)
+        return arrival_timing(bp)
+    return values

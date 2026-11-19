@@ -784,6 +784,8 @@ bool ACatrunStageExit::TryCompleteFor(APawn* Pawn)
     if ((bRequireCenterInside || bUseExitTransition) && !IsCenterQualified(Pawn->GetActorLocation())) return false;
 	if (const auto* Actions = Pawn->FindComponentByClass<UCatrunBasketInteractionComponent>(); Actions && (Actions->Busy || Actions->IsHidden)) return false;
     bArmed = false;
+    // Rolling back into the entry occupies it until the player genuinely leaves again.
+    if (ExitTransition && ExitTransition->BlocksExitQualification()) return false;
     if (bUseExitTransition) { BeginPortalPresentation(Pawn); return true; }
     return UCatrunLevelFlowLibrary::CompleteCurrentStage(this);
 }
@@ -1067,6 +1069,8 @@ bool ACatrunStageExit::IsCenterQualified(const FVector& WorldLocation) const
 void ACatrunStageExit::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
+    // Sequenced motion can leave the trigger. Only gameplay motion should rearm a spent entry.
+    if (ExitTransition && ExitTransition->BlocksExitQualification()) return;
     APawn* Pawn = OverlappingPawn.Get();
     const bool bQualified = Pawn && Trigger->IsOverlappingActor(Pawn)
         && (!(bRequireCenterInside || bUseExitTransition) || IsCenterQualified(Pawn->GetActorLocation()));

@@ -11,9 +11,14 @@ class ACatrunExitTestActor : public ACatrunStageExit
     GENERATED_BODY()
 public:
     int32 Qualified = 0, Saved = 0, TravelFailures = 0;
+    TFunction<void()> OnQualification;
     virtual void ProcessEvent(UFunction* Function, void* Params) override
     {
-        if (Function->GetFName()==GET_FUNCTION_NAME_CHECKED(ACatrunStageExit,BeginPortalPresentation)) ++Qualified;
+        if (Function->GetFName()==GET_FUNCTION_NAME_CHECKED(ACatrunStageExit,BeginPortalPresentation))
+        {
+            ++Qualified;
+            if (OnQualification) OnQualification();
+        }
         if (Function->GetFName()==GET_FUNCTION_NAME_CHECKED(ACatrunStageExit,ExitCheckpointSaveFinished)) ++Saved;
         if (Function->GetFName()==GET_FUNCTION_NAME_CHECKED(ACatrunStageExit,ExitTravelFailed)) ++TravelFailures;
         Super::ProcessEvent(Function,Params);

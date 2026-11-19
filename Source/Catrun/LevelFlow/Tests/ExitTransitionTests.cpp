@@ -5,6 +5,9 @@
 #include "CatrunCheckpointTestBackend.h"
 #include "Interaction/CatrunPuzzleSuspension.h"
 #include "Monster/CatrunRestartSubsystem.h"
+#include "Monster/CatrunCandle.h"
+#include "Monster/CatrunMarkSubsystem.h"
+#include "Sound/SoundGridManager.h"
 #include "Camera/CameraActor.h"
 #include "Camera/PlayerCameraManager.h"
 #include "Components/BoxComponent.h"
@@ -103,6 +106,61 @@ namespace
     }
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunPortalMarkAdmissionTest, "Catrun.LevelFlow.Stage1PortalMarkAdmission", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FCatrunPortalMarkAdmissionTest::RunTest(const FString&)
+{
+    FExitLeaseFixture F;
+    F.Floor->Tags.Add(TEXT("SoundFloor"));
+    F.World->SpawnActor<ASoundGridManager>();
+    auto* Candle = F.World->SpawnActor<ACatrunCandle>();
+    Candle->bAutoAlignEyes = false;
+    Candle->SetActorLocation(FVector(10, 0, 0));
+    Candle->Tick(.016f);
+    auto* Marks = UCatrunMarkSubsystem::Get(F.World);
+    auto HasVisual = [&](FName Name)
+    {
+        for (const UActorComponent* Component : F.Cat->GetComponents())
+            if (IsValid(Component) && Component->IsRegistered() && Component->GetFName() == Name) return true;
+        return false;
+    };
+    if (!TestTrue(TEXT("Actual candle marks the cat and attaches both visuals"),
+        Marks->IsMarked() && HasVisual(TEXT("CatrunMarkOrb")) && HasVisual(TEXT("CatrunMarkLight")))) return false;
+    Candle->SetActorLocation(FVector(5000, 0, 0));
+    auto* Lease = F.Exit->ExitTransition.Get();
+    // The saved Blueprint uses a reflected no-argument call on the accepted branch.
+    UFunction* Clear = Lease->FindFunction(TEXT("ClearAcceptedStage1PortalMark"));
+    if (!TestNotNull(TEXT("Stage1 portal has a reflected mark-clear operation"), Clear)) return false;
+    const FName DirectorTag(TEXT("CatrunAuthoredStage1Exit"));
+    F.Exit->Tags.Add(DirectorTag);
+    FText Failure;
+    F.PC->SetIgnoreMoveInput(true);
+    TestFalse(TEXT("Busy controller rejects the exit"), Lease->AcquireExitLease(F.Cat, Failure));
+    Lease->ProcessEvent(Clear, nullptr);
+    TestTrue(TEXT("Rejected exit preserves the mark and its visuals"),
+        Marks->IsMarked() && HasVisual(TEXT("CatrunMarkOrb")) && HasVisual(TEXT("CatrunMarkLight")));
+    F.PC->SetIgnoreMoveInput(false);
+    F.Exit->Tags.Remove(DirectorTag);
+    if (!AcquireForTest(*this, F, Failure, TEXT("Unrelated owner acquires the generic lease"))) return false;
+    Lease->ProcessEvent(Clear, nullptr);
+    TestTrue(TEXT("Unrelated presentation cannot clear a mark"), Marks->IsMarked());
+    Lease->ReleaseExitLease();
+    F.Exit->Tags.Add(DirectorTag);
+    if (!AcquireForTest(*this, F, Failure, TEXT("Stage1 portal accepts marked pawn"))) return false;
+    TestTrue(TEXT("Lease acquisition alone preserves mark pending the presentation callback"), Marks->IsMarked());
+    Lease->ProcessEvent(Clear, nullptr);
+    TestFalse(TEXT("Accepted portal clears mark before playback"), Marks->IsMarked());
+    TestFalse(TEXT("Mark orb is removed"), HasVisual(TEXT("CatrunMarkOrb")));
+    TestFalse(TEXT("Mark light is removed"), HasVisual(TEXT("CatrunMarkLight")));
+    Lease->ReleaseExitLease(true);
+    Candle->Tick(.016f);
+    TestFalse(TEXT("Abort with no new detection keeps mark cleared"), Marks->IsMarked());
+    Candle->SetActorLocation(FVector(10, 0, 0));
+    Candle->Tick(.016f);
+    TestTrue(TEXT("Fresh candle detection recreates mark and visuals"),
+        Marks->IsMarked() && HasVisual(TEXT("CatrunMarkOrb")) && HasVisual(TEXT("CatrunMarkLight")));
+    return true;
+}
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunExitQualificationTest,"Catrun.LevelFlow.ExitQualificationNotifiesBlueprintOnly",EAutomationTestFlags::EditorContext|EAutomationTestFlags::EngineFilter)
 bool FCatrunExitQualificationTest::RunTest(const FString&)
 {
@@ -126,6 +184,54 @@ bool FCatrunExitQualificationTest::RunTest(const FString&)
     F.Exit->InteriorDirectionLocal=FVector(1,0,0); F.Exit->MinimumInteriorDepth=10;
     TestFalse(TEXT("Rotated/scaled shallow depth rejects"),F.Exit->IsCenterQualified(F.Exit->GetActorTransform().TransformPosition(FVector(5,0,26))));
     TestTrue(TEXT("Rotated/scaled interior depth accepts"),F.Exit->IsCenterQualified(F.Exit->GetActorTransform().TransformPosition(FVector(20,0,26))));
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunExitRollbackAdmissionTest,"Catrun.LevelFlow.ExitRollbackDoesNotReenterPresentation",EAutomationTestFlags::EditorContext|EAutomationTestFlags::EngineFilter)
+bool FCatrunExitRollbackAdmissionTest::RunTest(const FString&)
+{
+    for (bool bNewViewOwner : {false, true})
+    {
+        FExitLeaseFixture F;
+        auto* Lease = F.Exit->ExitTransition.Get();
+        FText Failure;
+        const FVector Start(-60, 0, 26), Outside(-150, 0, 26);
+        F.Cat->SetActorLocation(Start);
+        F.Exit->Trigger->SetGenerateOverlapEvents(true);
+        F.Exit->Trigger->UpdateOverlaps();
+        F.Exit->Tick(0);
+        TestEqual(TEXT("Initial physical entry qualifies exactly once"), F.Exit->Qualified, 1);
+        if (!AcquireForTest(*this, F, Failure, TEXT("Entered character acquires exit lease"))) return false;
+        ACameraActor* Shot = F.World->SpawnActor<ACameraActor>();
+        Lease->RememberOwnedViewTarget(Shot);
+        F.PC->SetViewTarget(Shot);
+        F.Cat->SetActorLocation(Outside);
+        F.Exit->Tick(0); // The departure sequence continues after its pawn has left the trigger.
+        TestFalse(TEXT("Sequenced pawn cleared the whole box"), F.Exit->Trigger->IsOverlappingActor(F.Cat));
+        AActor* ExpectedView = F.Gameplay;
+        if (bNewViewOwner)
+        {
+            ExpectedView = F.World->SpawnActor<ACameraActor>();
+            F.PC->SetViewTarget(ExpectedView);
+        }
+
+        // The portal BP handles rejected admission by stopping its sequence and destroying its camera.
+        F.Exit->OnQualification = [&]()
+        {
+            if (!Lease->AcquireExitLease(F.Cat, Failure) && IsValid(Shot)) Shot->Destroy();
+        };
+        TestTrue(TEXT("Abort teleports the pawn back to its admitted location"), Lease->ReleaseExitLease(true));
+        F.Exit->OnQualification = nullptr;
+        TestTrue(TEXT("Rollback reached the original interior"), F.Cat->GetActorLocation().Equals(Start, .1));
+        TestEqual(TEXT("Rollback overlap does not invoke another BP presentation"), F.Exit->Qualified, 1);
+        TestEqual(TEXT("Abort restores the owned camera or respects its external replacement"), F.PC->GetViewTarget(), ExpectedView);
+        F.Exit->Tick(0);
+        TestEqual(TEXT("Standing at rollback location does not retry"), F.Exit->Qualified, 1);
+        F.Cat->SetActorLocation(Outside);
+        F.Cat->SetActorLocation(Start);
+        F.Exit->Tick(0);
+        TestEqual(TEXT("Genuine exit and reentry qualifies again"), F.Exit->Qualified, 2);
+    }
     return true;
 }
 

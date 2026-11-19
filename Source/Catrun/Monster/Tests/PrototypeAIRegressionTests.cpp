@@ -11,7 +11,9 @@
 #include "Sound/CatrunDoor.h"
 #include "Perception/AlertMarkComponent.h"
 #include "Perception/VisionFanComponent.h"
+#include "Materials/MaterialInstanceDynamic.h"
 #include "Materials/MaterialInterface.h"
+#include "Math/Float16Color.h"
 #include "Monster/CatrunArmor.h"
 #include "Monster/CatrunCandle.h"
 #include "Monster/CatrunCapturePresentationComponent.h"
@@ -30,8 +32,10 @@
 #include "Sound/CatrunSoundSettings.h"
 #include "Components/BoxComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/StaticMeshComponent.h"
 #include "Engine/Engine.h"
 #include "Engine/GameInstance.h"
+#include "Engine/Texture2D.h"
 #include "TimerManager.h"
 #include "Engine/World.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -1191,6 +1195,11 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunArmorDetectionDisplayTest,"Catrun.Protot
 bool FCatrunArmorDetectionDisplayTest::RunTest(const FString&)
 {
 	FPrototypeWorld F;
+	const TCHAR* RingPath = TEXT("/Game/Systems/Sound/M_ArmorDetectionRing.M_ArmorDetectionRing");
+	auto* Ring = LoadObject<UMaterialInterface>(nullptr, RingPath);
+	F.Settings->VisionMaterial = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/Systems/Sound/M_VisionFan.M_VisionFan"));
+	if (!TestNotNull(TEXT("Armor ring material loads"), Ring) ||
+		!TestNotNull(TEXT("Original candle fan material loads"), F.Settings->VisionMaterial.Get())) return false;
 	F.Settings->ArmorDetectRadius = 150.f;
 	F.Settings->CatSightRadius = 15.f;
 	auto* Armor = F.Spawn<ACatrunArmor>(FVector(800,800,90));
@@ -1200,6 +1209,20 @@ bool FCatrunArmorDetectionDisplayTest::RunTest(const FString&)
 	auto* Fan = Armor->Detection.Get();
 	TestEqual(TEXT("Display radius includes actual cat body overlap threshold"),Fan->GetDisplayRange(),165.f);
 	TestEqual(TEXT("Armor display uses its own faint opacity"),Fan->GetDisplayOpacity(),.12f);
+	auto* ArmorPlane = FindObject<UStaticMeshComponent>(Armor, TEXT("Detection_VisionPlane"));
+	if (!TestNotNull(TEXT("Armor created a visible floor plane"), ArmorPlane)) return false;
+	TestTrue(TEXT("Armor actor opts in to its display"), ArmorPlane->IsVisible());
+	auto* RingMID = Cast<UMaterialInstanceDynamic>(ArmorPlane->GetMaterial(0));
+	if (!TestNotNull(TEXT("Armor uses a dynamic display material"), RingMID)) return false;
+	TestTrue(TEXT("Armor floor display uses the dedicated ring parent"), RingMID->Parent.Get() == Ring);
+	TestEqual(TEXT("Rendered ring receives the display radius"), RingMID->K2_GetScalarParameterValue(TEXT("Range")), 165.f);
+	TestEqual(TEXT("Rendered ring receives the actor opacity"), RingMID->K2_GetScalarParameterValue(TEXT("Opacity")), .12f);
+	const FVector DisplayCenter = ArmorPlane->GetComponentLocation();
+	TestEqual(TEXT("Armor floor display retains its authored height"), DisplayCenter.Z, F.Manager->GetGrid().Origin.Z + F.Settings->VisualHeight);
+	auto* DistTex = Cast<UTexture2D>(RingMID->K2_GetTextureParameterValue(TEXT("DistTex")));
+	if (!TestNotNull(TEXT("Ring has the runtime obstacle-distance texture"), DistTex) ||
+		!TestTrue(TEXT("Distance texture stores a row of float samples"), DistTex->GetSizeX() >= 4 &&
+			DistTex->GetSizeY() == 1 && DistTex->GetPixelFormat() == PF_FloatRGBA)) return false;
 	const FVector Origin=Armor->GetActorLocation();
 	TestTrue(TEXT("Cat at the visible outer boundary remains detectable"),Fan->CanSee(Origin+FVector(165,0,0),15.f));
 	TestFalse(TEXT("Display padding never increases detection range"),Fan->CanSee(Origin+FVector(166,0,0),15.f));
@@ -1207,11 +1230,30 @@ bool FCatrunArmorDetectionDisplayTest::RunTest(const FString&)
 	auto* Candle = F.Spawn<ACatrunCandle>(FVector(-800,-800,90));
 	Candle->bPenaltiesEnabled=false;
 	Candle->Tick(.01f);
+	auto* CandlePlane = FindObject<UStaticMeshComponent>(Candle, TEXT("Sight_VisionPlane"));
+	if (!TestNotNull(TEXT("Candle created its floor plane"), CandlePlane)) return false;
+	auto* CandleMID = Cast<UMaterialInstanceDynamic>(CandlePlane->GetMaterial(0));
+	if (!TestNotNull(TEXT("Candle uses a dynamic display material"), CandleMID)) return false;
+	TestTrue(TEXT("Candle floor display uses the original fan parent"), CandleMID->Parent.Get() == F.Settings->VisionMaterial.Get());
+	TestEqual(TEXT("Rendered candle uses authored opacity"), CandleMID->K2_GetScalarParameterValue(TEXT("Opacity")), F.Settings->VisionOpacity);
 	TestEqual(TEXT("Candle continues using shared authored opacity"),Candle->Sight->GetDisplayOpacity(),-1.f);
 	TestEqual(TEXT("Shared opacity not changed by armor styling"),F.Settings->VisionOpacity,.35f);
 	F.Box(Origin+FVector(80,0,0),FVector(5,100,100));
 	Armor->Tick(.01f);
 	TestFalse(TEXT("Display style still respects blocking geometry for detection"),Fan->CanSee(Origin+FVector(140,0,0),15.f));
+	TestTrue(TEXT("Opposite side remains detectable"), Fan->CanSee(Origin - FVector(165,0,0), 15.f));
+	// Ray order covers [-180, 180] degrees. East is at the middle, west at the seam.
+	FTexture2DMipMap& Mip = DistTex->GetPlatformData()->Mips[0];
+	const auto* Samples = static_cast<const FFloat16Color*>(Mip.BulkData.LockReadOnly());
+	const float Blocked = Samples[DistTex->GetSizeX() / 2].R.GetFloat();
+	const float Open = Samples[0].R.GetFloat();
+	Mip.BulkData.Unlock();
+	TestTrue(TEXT("Ring samples the wall distance on its blocked side"), Blocked >= 75.f && Blocked < 80.f);
+	TestEqual(TEXT("Ring samples the padded boundary on its open side"), Open, 165.f);
+	Armor->bShowDetectionDisplay = false;
+	Armor->Tick(.01f);
+	TestFalse(TEXT("Actor can hide the ring"), ArmorPlane->IsVisible());
+	TestTrue(TEXT("Hiding the ring keeps detection active"), Fan->CanSee(Origin - FVector(165,0,0), 15.f));
 	return true;
 }
 #endif

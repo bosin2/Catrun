@@ -9,6 +9,7 @@
 #include "CatrunMinimapWidget.generated.h"
 
 class ACatrunMinimapPresenter;
+class FCatrunMinimapTabInput;
 class UCanvasPanel;
 class UImage;
 class UTexture2D;
@@ -56,7 +57,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category="Minimap", meta=(ClampMin="1.0"))
 	float HoldSizeMultiplier = 1.25f;
 	UPROPERTY(EditDefaultsOnly, Category="Minimap", meta=(ClampMin="1.0"))
-	float NeighborhoodCoverage = 1.30f;
+	float NeighborhoodCoverage = 1.80f;
 
 private:
 	friend class ACatrunMinimapPresenter;
@@ -67,7 +68,6 @@ private:
 #endif
 
 	bool InitializeMap(ACatrunMinimapPresenter& InPresenter);
-	void UpdateHoldState(bool bGameplayAllowed, bool bViewportAcceptsInput, bool bTabDown);
 	void UpdateLayout(const FVector2D& ViewportSize);
 	static FAnchorData GetFrameLayout(const FAnchorData& CompactLayout, const FVector2D& ViewportSize,
 		bool bIsExpanded, float InHoldSizeMultiplier);
@@ -85,7 +85,6 @@ private:
 	FSlateRenderTransform MapProjection;
 	FSlateRenderTransform FallbackProjection;
 	bool bExpanded = false;
-	bool bWaitForTabRelease = false;
 };
 
 /** One placed instance per playable map. Its widget and marker cache belong to that world. */
@@ -121,6 +120,8 @@ protected:
 
 private:
 	friend class UCatrunMinimapWidget;
+	friend class FCatrunMinimapTabInput;
+	TSharedPtr<FCatrunMinimapTabInput> TabInput;
 #if WITH_DEV_AUTOMATION_TESTS
 	friend class FCatrunMinimapEnemyLifecycleTest;
 #endif

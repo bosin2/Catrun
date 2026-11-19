@@ -18,7 +18,10 @@ BASE = '/Game/Cinematics/Stage2/Arrival/'
 SEQUENCE = BASE + 'LS_Stage2_PortalArrival'
 MAP = '/Game/Maps/Stage2'
 FRAMES = (0, 12, 24, 38, 60, 70, 74, 88, 91, 150, 178, 182, 209, 211, 270, 299, 330, 359)
-OUT = ROOT / 'Saved/Stage2Arrival20261116/Frames' / datetime.datetime.now().strftime('%Y%m%d-%H%M%S')
+CUT_FRAMES = (0, 17, 18, 22, 23, 32, 46, 56, 57, 62, 72, 86, 87, 88, 89, 90, 91, 145,
+              199, 200, 229, 230, 239, 249, 250, 267, 284, 285, 286, 295, 305, 306, 323, 324, 344, 365, 389, 415,
+              443, 444, 474, 502, 503)
+OUT = ROOT / 'Saved/PresentationFix20261119/Stage2ArrivalFrames' / datetime.datetime.now().strftime('%Y%m%d-%H%M%S-%f')
 OUT.mkdir(parents=True, exist_ok=False)
 
 # Reuse only definitions from the established capture helper, never its main.
@@ -57,6 +60,17 @@ def capture(world, actor, target, camera, frame):
             'ortho_width': view.ortho_width, 'fov': view.fov}
 
 
+def portal_details(actor):
+    if not actor:
+        return None
+    return {'location':helper.vector(actor.get_actor_location()),
+            'blue_intensity':actor.get_editor_property('BlueLight').get_editor_property('intensity'),
+            'planes':{name:{'scale':helper.vector(item.get_relative_transform().scale3d),
+                            'hidden':item.get_editor_property('hidden_in_game'), 'visible':item.is_visible()}
+                      for name in ('Surface','PortalDepthCore','PortalAetherHalo')
+                      for item in [actor.get_editor_property(name)]}}
+
+
 def main():
     report = {'completed': False, 'pid': os.getpid(), 'frames': [], 'before': hashes(),
               'scope': 'Exact editor-world sequence scrubs with actual map lighting; no PIE, UMG or continuous material time.'}
@@ -92,13 +106,18 @@ def main():
         portal_binding=helper.only(b for b in bindings if b.get_name()=='ArrivalPortal')
         player.play(); player.pause()
         spawned=set()
-        for frame in FRAMES:
+        revised=sequence.get_playback_end()==504
+        assert revised or sequence.get_playback_end()==360
+        for frame in (CUT_FRAMES if revised else FRAMES):
             helper.sequence_frame(player,frame)
             camera=player.get_active_camera_component()
             assert camera,('No evaluated camera',frame)
             visual=helper.only(player.get_bound_objects(sequence.get_binding_id(visual_binding)))
-            portal=helper.only(player.get_bound_objects(sequence.get_binding_id(portal_binding)))
-            spawned.update((visual.get_path_name(),portal.get_path_name(),camera.get_owner().get_path_name()))
+            portals=list(player.get_bound_objects(sequence.get_binding_id(portal_binding)))
+            assert len(portals)==int(not revised or frame<91),(frame,len(portals))
+            portal=portals[0] if portals else None
+            spawned.update([visual.get_path_name(),camera.get_owner().get_path_name()])
+            if portal: spawned.add(portal.get_path_name())
             visual_mesh=visual.get_component_by_class(u.SkeletalMeshComponent)
             bones=[visual_mesh.get_bone_name(i) for i in range(visual_mesh.get_num_bones())]
             pose=helper.pose(visual_mesh,bones)
@@ -107,11 +126,53 @@ def main():
                  'visual_transform':helper.transform(visual.get_actor_transform()),
                  'pose_hash':hashlib.sha256(json.dumps(pose).encode()).hexdigest(),
                  'paws':{b:helper.vector(visual_mesh.get_socket_location(b)) for b in ('paw_f_l','paw_f_r','paw_h_l','paw_h_r')},
-                 'visual_collision':visual.get_actor_enable_collision(),'portal_collision':portal.get_actor_enable_collision(),
+                 'visual_collision':visual.get_actor_enable_collision(),'visual_hidden':helper.hidden(visual),
+                 'visual_mesh_visible':visual_mesh.is_visible() and not visual_mesh.get_editor_property('hidden_in_game'),
+                 'head':helper.vector(visual_mesh.get_socket_location('head')),
+                 'portal':portal_details(portal),'portal_collision':portal.get_actor_enable_collision() if portal else None,
                  'capture':capture(world,capture_actor,target,camera,frame)}
             assert row['real_hidden'] and row['real_transform_unchanged'],row
             report['frames'].append(row)
             (OUT/'report.json').write_text(json.dumps(report,indent=2),encoding='utf8')
+            if revised:
+                assert row['visual_hidden']==(frame<23) and row['visual_mesh_visible'],(frame,row)
+                if portal:
+                    p=row['portal']
+                    assert abs(p['location'][1]-3983)<.02,p
+                    if frame in (0,62,72,86,87,90):
+                        factor=1. if frame<=62 else .8 if frame==72 else .02
+                        for name,plane in p['planes'].items():
+                            xy=(1.18,2.02) if name=='PortalAetherHalo' else (1.05,1.8)
+                            assert all(abs(v-s*factor)<.005 for v,s in zip(plane['scale'][:2],xy)),(frame,name,plane)
+                            assert plane['hidden']==(frame>=87),(frame,name,plane)
+                        if frame in (0,62,72,87,90):
+                            expected=650 if frame<=62 else 520 if frame==72 else 0
+                            assert abs(p['blue_intensity']-expected)<.1,(frame,p)
+                in_pov=230<=frame<=305
+                projection=u.CameraProjectionMode.PERSPECTIVE if in_pov else u.CameraProjectionMode.ORTHOGRAPHIC
+                assert camera.projection_mode==projection,(frame,row['capture'])
+                if in_pov:
+                    assert all(abs(v-w)<.02 for v,w in zip(row['capture']['position'],(1374.7266,3680.1402,33.6515)))
+                expected_width={200:84,306:84,443:910}.get(frame)
+                if expected_width is not None:
+                    assert abs(row['capture']['ortho_width']-expected_width)<.2,(frame,row['capture'])
+        if revised:
+            gaze=[]
+            guide={230:(12.,3.,94.),239:(12.,3.,94.),250:(9.2,-16.,90.),267:(3.,-61.,78.),
+                   284:(-3.1,-110.,61.),295:(-5.6,-126.7,55.),305:(-5.6,-126.7,55.)}
+            for frame in range(230,306):
+                helper.sequence_frame(player,frame)
+                view=player.get_active_camera_component().get_camera_view(0.)
+                assert view.projection_mode==u.CameraProjectionMode.PERSPECTIVE
+                assert (view.location-u.Vector(1374.7266,3680.1402,33.6515)).length()<.02
+                sample=[view.rotation.pitch,view.rotation.yaw,view.fov]
+                if frame in guide:
+                    assert all(abs(x-y)<.02 for x,y in zip(sample,guide[frame])),(frame,sample)
+                if gaze:
+                    for x,y,limit in zip(gaze[-1][1:],sample,(1.,4.,2.)):
+                        assert -.02<=x-y<=limit,(frame,gaze[-1],sample)
+                gaze.append([frame,*sample])
+            report['evaluated_pov_gaze']=gaze
         player.stop()
         report['restored']=(helper.same_transform(original,cat.get_actor_transform()) and helper.hidden(cat)==original_hidden
                             and mesh.get_animation_mode()==original_mode and mesh.get_anim_instance()==original_anim)

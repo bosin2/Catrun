@@ -14,8 +14,8 @@ class UStaticMeshComponent;
  * While the cat is marked:
  *  - the closest armor knows where the cat really is and keeps coming for it,
  *  - a red orb floats above the cat so the player can see the mark.
- * The mark ends only when the cat goes into a hideout. It is gone after a level restart too
- * (the level is opened again, so this subsystem starts fresh).
+ * A hideout or an accepted Stage1 portal departure clears the mark. Reloading the level
+ * creates a fresh subsystem.
  *
  * Which armors follow, and the sound, are provisional (to be discussed with the team), so every
  * number is a setting in DA_SoundSettings ("Mark" category).
@@ -40,6 +40,7 @@ public:
 
 private:
 	friend class FCatrunPuzzleSuspensionTest;
+	friend class FCatrunReleasedMarkFollowerTest;
 	void CreateVisual(APawn& Cat);
 	void DestroyVisual();
 	void UpdateVisual();

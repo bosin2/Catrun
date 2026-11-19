@@ -23,11 +23,16 @@ public:
     /** Captures the actual pawn/view and suspends gameplay; does not play/move/fade anything. */
     UFUNCTION(BlueprintCallable, Category="Exit|Lease")
     bool AcquireExitLease(APawn* Pawn, FText& Failure);
+    /** Called by the Stage1 portal director immediately before playing the departure sequence. */
+    UFUNCTION(BlueprintCallable, Category="Exit|Lease")
+    void ClearAcceptedStage1PortalMark();
     /** Abort recovery; returns false only when no collision-safe start recovery was found. Idempotent. */
     UFUNCTION(BlueprintCallable, Category="Exit|Lease")
     bool ReleaseExitLease(bool bRestoreStart = true);
     UFUNCTION(BlueprintPure, Category="Exit|Lease")
     bool HasExitLease() const { return bLeaseActive; }
+    /** Acquisition and rollback can synchronously move the pawn or dispatch overlap callbacks. */
+    bool BlocksExitQualification() const { return bAcquiring || bLeaseActive || bCleaning || bEnding; }
     /** BP registers cameras it owns. Release never overrides an unregistered newer view owner. */
     UFUNCTION(BlueprintCallable, Category="Exit|Lease")
     void RememberOwnedViewTarget(AActor* ViewTarget);

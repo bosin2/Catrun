@@ -2,6 +2,7 @@
 #include "CatrunLevelFlow.h"
 #include "Interaction/CatrunBasketInteractionComponent.h"
 #include "Interaction/CatrunPuzzleSuspension.h"
+#include "Monster/CatrunMarkSubsystem.h"
 #include "Perception/CatrunGroundSupport.h"
 #include "Camera/CameraComponent.h"
 #include "Camera/PlayerCameraManager.h"
@@ -110,6 +111,14 @@ bool UCatrunExitTransitionComponent::AcquireExitLease(APawn* Pawn, FText& Failur
     // Movement-mode notifications can synchronously destroy/cancel the owning Blueprint.
     if (IsCurrentLease(Serial)) if (auto* Exit=Cast<ACatrunStageExit>(GetOwner())) Exit->RefreshExitTick();
     return IsCurrentLease(Serial);
+}
+
+void UCatrunExitTransitionComponent::ClearAcceptedStage1PortalMark()
+{
+    const auto* Exit = Cast<ACatrunStageExit>(GetOwner());
+    if (!IsCurrentLease(LeaseSerial) || !Exit || !Exit->bUseExitTransition
+        || !Exit->ActorHasTag(TEXT("CatrunAuthoredStage1Exit"))) return;
+    if (auto* Marks = UCatrunMarkSubsystem::Get(this)) Marks->ClearMark(TEXT("accepted Stage1 portal"));
 }
 
 void UCatrunExitTransitionComponent::RememberOwnedViewTarget(AActor* ViewTarget)
