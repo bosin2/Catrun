@@ -45,7 +45,10 @@ class CATRUN_API ACatrunCandle : public AActor
 public:
 	ACatrunCandle();
 
-	virtual void Tick(float DeltaSeconds) override;
+    virtual void Tick(float DeltaSeconds) override;
+    void ForgetCorridorCat();
+    UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="Candle|Sight", meta=(ClampMin="-1", ClampMax="180", Units="Degrees"))
+    float SweepHalfAngleOverride = -1.f;
 
 	// Called once each time the candle starts to track the cat.
 	UPROPERTY(BlueprintAssignable, Category = "Candle")
@@ -110,6 +113,7 @@ protected:
 private:
 	friend class FCatrunPuzzleSuspensionTest;
 	friend class FCatrunCandlePatrolSafetyTest;
+	friend class FCatrunCandleLocalSweepTest;
 	void ResetPatrol();
 	void UpdatePatrol(float DeltaSeconds);
 	bool TryPatrolStep(const FVector& Delta);
@@ -126,7 +130,8 @@ private:
 	float GetConeBackOffset(const UCatrunSoundSettings& Settings) const;
 
 	// Patrol: moves the cone one step along its back-and-forth path.
-	void UpdateSweep(float DeltaSeconds, const UCatrunSoundSettings& Settings);
+    float GetSweepHalfAngle(const UCatrunSoundSettings& Settings) const;
+    void UpdateSweep(float DeltaSeconds, const UCatrunSoundSettings& Settings);
 
 	// Tracking: turns the cone toward the cat, but never beyond the total range.
 	void TrackCat(float DeltaSeconds, const APawn& Cat, const UCatrunSoundSettings& Settings);

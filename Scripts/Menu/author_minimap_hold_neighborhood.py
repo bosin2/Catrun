@@ -34,7 +34,14 @@ MARKER_CLASSES = {
     'armor_marker_class': 'Armor',
     'candle_marker_class': 'Candle',
 }
-PANEL_DEFAULTS = {'hold_size_multiplier': 1.25, 'neighborhood_coverage': 1.80}
+PANEL_DEFAULTS = {
+    # Each row contains the native default and the accepted Blueprint range.
+    'hold_size_multiplier': (1.25, 1.0, math.inf),
+    'neighborhood_coverage': (1.80, 1.0, math.inf),
+    'hold_coverage_multiplier': (1.45, 1.0, math.inf),
+    'hold_marker_size_multiplier': (0.85, 0.01, 1.0),
+    'hold_transition_duration': (0.18, 0.0, 1.0),
+}
 FRAME_PADDING = 10.0
 MAP_OPACITY = 0.82
 BACKDROP_NAME = 'MinimapBackdrop'
@@ -260,6 +267,19 @@ def layout_changes(frame, surface, image, layer, texture):
     return changes
 
 
+def panel_default_repairs(values, legacy_layout):
+    repairs = {}
+    for name, (fallback, minimum, maximum) in PANEL_DEFAULTS.items():
+        value = values.get(name)
+        # Reflected IEEE single precision represents the 0.01 minimum slightly below Python's value.
+        meets_minimum = value is not None and (value >= minimum or math.isclose(value, minimum, rel_tol=1e-7))
+        if not meets_minimum or not math.isfinite(value) or value > maximum:
+            repairs[name] = fallback
+    if legacy_layout and 'neighborhood_coverage' not in repairs and near(values['neighborhood_coverage'], 1.30):
+        repairs['neighborhood_coverage'] = PANEL_DEFAULTS['neighborhood_coverage'][0]
+    return repairs
+
+
 def update_panel(panel, texture, audit):
     assert panel and panel.get_path_name() == PANEL_OBJECT_PATH, PANEL_OBJECT_PATH
     assert AS.get_metadata_tag(panel, OWNER_TAG) == OWNER, PANEL_PATH
@@ -267,11 +287,13 @@ def update_panel(panel, texture, audit):
     defaults = u.get_default_object(panel.generated_class())
     audit_marker_classes(defaults)
     changes = layout_changes(frame, surface, image, layer, texture)
-    defaults_match = all(near(defaults.get_editor_property(k), v) for k, v in PANEL_DEFAULTS.items())
-    changed = bool(hint or changes or not backdrop or not defaults_match)
+    legacy_layout = bool(hint or not backdrop)
+    values = {name: defaults.get_editor_property(name) for name in PANEL_DEFAULTS}
+    repairs = panel_default_repairs(values, legacy_layout)
+    changed = bool(legacy_layout or changes or repairs)
     if changed:
         assert not audit, ('Minimap panel needs migration', bool(hint), bool(backdrop),
-                           [name for _, name, _ in changes], defaults_match)
+                           [name for _, name, _ in changes], sorted(repairs))
         panel.modify()
         if hint:
             ui('RemoveWidget', panel, hint)
@@ -280,15 +302,21 @@ def update_panel(panel, texture, audit):
         for widget, name, value in changes:
             widget.modify()
             properties(widget, **{name: value})
-        compile_bp(panel)
-        defaults = u.get_default_object(panel.generated_class())
-        defaults.modify()
-        properties(defaults, **PANEL_DEFAULTS)
+        if legacy_layout or changes:
+            compile_bp(panel)
+            defaults = u.get_default_object(panel.generated_class())
+        # Reapply any valid values changed by recompilation alongside the actual repairs.
+        values.update(repairs)
+        updates = {name: value for name, value in values.items() if defaults.get_editor_property(name) != value}
+        if updates:
+            defaults.modify()
+            properties(defaults, **updates)
     frame, surface, image, layer, backdrop, hint = panel_tree(panel)
     assert backdrop and not hint and not layout_changes(frame, surface, image, layer, texture)
     audit_marker_classes(defaults)
-    for name, value in PANEL_DEFAULTS.items():
-        assert near(defaults.get_editor_property(name), value), name
+    saved_values = {name: defaults.get_editor_property(name) for name in PANEL_DEFAULTS}
+    assert not panel_default_repairs(saved_values, False), saved_values
+    assert all(near(saved_values[name], value) for name, value in values.items()), (saved_values, values)
     return changed
 
 

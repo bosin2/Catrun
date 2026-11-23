@@ -2,6 +2,7 @@
 
 #include "UI/CatrunMinimapWidget.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
+#include "Components/CanvasPanel.h"
 #include "Engine/GameViewportClient.h"
 #include "Engine/LocalPlayer.h"
 #include "Engine/World.h"
@@ -9,6 +10,7 @@
 #include "Framework/Application/SlateUser.h"
 #include "GameFramework/PlayerController.h"
 #include "HAL/FileManager.h"
+#include "HAL/PlatformTime.h"
 #include "Kismet/GameplayStatics.h"
 #include "LevelFlow/CatrunLevelFlow.h"
 #include "LevelFlow/CatrunPlayHUD.h"
@@ -45,8 +47,14 @@ namespace
 		TWeakObjectPtr<APlayerController> Player;
 		TWeakObjectPtr<UCatrunMinimapWidget> Map;
 		TWeakObjectPtr<UWidget> Frame;
+		TWeakObjectPtr<UWidget> Image;
+		TWeakObjectPtr<UCanvasPanel> Markers;
 		TWeakObjectPtr<UCatrunPlayHUD> HUD;
 		TWeakObjectPtr<UCatrunMinimapWidget> PreviousMap;
+		FVector2D CompactCorner;
+		FVector2D CompactLandmarkSize;
+		FVector2D CompactMarkerSize;
+		TArray<FVector2D, TInlineAllocator<4>> FarCaptureUVs;
 		bool bReady = false;
 		bool bSentDown = false;
 		uint32 User = 0;
@@ -69,7 +77,10 @@ namespace
 			Map = FindPlayerWidget<UCatrunMinimapWidget>(PC);
 			HUD = FindPlayerWidget<UCatrunPlayHUD>(PC);
 			Frame = Map.IsValid() ? Map->GetWidgetFromName(TEXT("MinimapFrame")) : nullptr;
+			Image = Map.IsValid() ? Map->GetWidgetFromName(TEXT("MapBackground")) : nullptr;
+			Markers = Map.IsValid() ? Cast<UCanvasPanel>(Map->GetWidgetFromName(TEXT("MarkerLayer"))) : nullptr;
 			if (!HUD.IsValid() || !Frame.IsValid() || !Cast<UCanvasPanelSlot>(Frame->Slot)
+				|| !Image.IsValid() || !Markers.IsValid() || Markers->GetChildrenCount() == 0
 				|| Map->GetCachedGeometry().GetLocalSize().GetMin() < 324.)
 				return false;
 			bReady = true;
@@ -109,6 +120,66 @@ namespace
 				Test.TestTrue(Label + TEXT(" painted frame dimensions"), PaintedSize.Equals(FVector2D(Expected), .5));
 		}
 
+		void CheckReveal(const TCHAR* Step, bool bHeld, bool bRecordCompact = false)
+		{
+			const FString Label = Stage + TEXT(" ") + Step;
+			const FGeometry& FrameGeometry = Frame->GetPaintSpaceGeometry();
+			const FGeometry& ImageGeometry = Image->GetPaintSpaceGeometry();
+			const FGeometry& Surface = Markers->GetPaintSpaceGeometry();
+			const FGeometry& Cat = Markers->GetChildAt(0)->GetPaintSpaceGeometry();
+			const FVector2D ImageSize = ImageGeometry.GetLocalSize();
+			const FVector2D SurfaceSize = Surface.GetLocalSize();
+			const auto PaintedSize = [](const FGeometry& Geometry, const FVector2D& LocalSize)
+			{
+				const FVector2D Origin = Geometry.LocalToAbsolute(FVector2D::ZeroVector);
+				return FVector2D((FVector2D(Geometry.LocalToAbsolute(FVector2D(LocalSize.X, 0.))) - Origin).Size(),
+					(FVector2D(Geometry.LocalToAbsolute(FVector2D(0., LocalSize.Y))) - Origin).Size());
+			};
+			const FVector2D Corner = FrameGeometry.LocalToAbsolute(FVector2D(FrameGeometry.GetLocalSize().X, 0.));
+			// The same .1-wide image span represents the same world distance before and after pressing Tab.
+			const FVector2D LandmarkSize = PaintedSize(ImageGeometry, ImageSize * .1);
+			const FVector2D MarkerSize = PaintedSize(Cat, Cat.GetLocalSize());
+			Test.TestTrue(Label + TEXT(" paints the landmark and cat marker"), LandmarkSize.GetMin() > 0. && MarkerSize.GetMin() > 0.);
+			Test.TestTrue(Label + TEXT(" cat stays centered"), FVector2D(Cat.LocalToAbsolute(Cat.GetLocalSize() * .5)).Equals(
+				FVector2D(Surface.LocalToAbsolute(SurfaceSize * .5)), .5));
+			if (bRecordCompact)
+			{
+				CompactCorner = Corner;
+				CompactLandmarkSize = LandmarkSize;
+				CompactMarkerSize = MarkerSize;
+				FarCaptureUVs.Reset();
+				// Pick actual capture texels just beyond each compact clip edge. Edges outside the source image are skipped.
+				for (const FVector2D& Outside : { FVector2D(-.1, .5), FVector2D(1.1, .5), FVector2D(.5, -.1), FVector2D(.5, 1.1) })
+				{
+					const FVector2D UV = FVector2D(ImageGeometry.AbsoluteToLocal(Surface.LocalToAbsolute(Outside * SurfaceSize))) / ImageSize;
+					if (UV.GetMin() >= 0. && UV.GetMax() <= 1.)
+						FarCaptureUVs.Add(UV);
+				}
+				Test.TestTrue(Label + TEXT(" contains a fixture texel beyond the compact crop"), !FarCaptureUVs.IsEmpty());
+				return;
+			}
+
+			bool bShowsFarTexel = false;
+			for (const FVector2D& UV : FarCaptureUVs)
+			{
+				const FVector2D OnSurface = Surface.AbsoluteToLocal(ImageGeometry.LocalToAbsolute(UV * ImageSize));
+				bShowsFarTexel |= OnSurface.GetMin() >= 0. && OnSurface.X <= SurfaceSize.X && OnSurface.Y <= SurfaceSize.Y;
+			}
+			Test.TestTrue(Label + TEXT(" fixes the painted outer right corner"), Corner.Equals(CompactCorner, .5));
+			Test.TestEqual(Label + TEXT(" distant capture texel is visible only while held"), bShowsFarTexel, bHeld);
+			if (bHeld)
+			{
+			// A 280/220 inner side and 1.45 times the coverage yield about .88 times the compact texture scale.
+			Test.TestTrue(Label + TEXT(" world distance draws smaller"), LandmarkSize.Equals(CompactLandmarkSize * (280. / 220. / 1.45), .5));
+				Test.TestTrue(Label + TEXT(" cat marker draws smaller"), MarkerSize.Equals(CompactMarkerSize * .85, .5));
+			}
+			else
+			{
+				Test.TestTrue(Label + TEXT(" restores the compact world scale"), LandmarkSize.Equals(CompactLandmarkSize, .5));
+				Test.TestTrue(Label + TEXT(" restores the compact marker size"), MarkerSize.Equals(CompactMarkerSize, .5));
+			}
+		}
+
 		void FocusViewport()
 		{
 			auto& Slate = FSlateApplication::Get();
@@ -135,15 +206,20 @@ bool FCatrunMinimapRoutedInput::RunTest(const FString&)
 	if (FParse::Value(FCommandLine::Get(), TEXT("CatrunMinimapCapture="), State->CaptureDirectory)
 		&& !TestTrue(TEXT("Screenshot folder is writable"), IFileManager::Get().MakeDirectory(*State->CaptureDirectory, true)))
 		return false;
-	auto Step = [this, State](TFunction<void(FRoutedMinimap&)> Action)
+	auto Step = [this, State](TFunction<void(FRoutedMinimap&)> Action, double WaitSeconds = .25)
 	{
-		// Allow several world/Slate frames for event dispatch, widget tick, layout and paint.
-		AddCommand(new FFunctionLatentCommand([State, Action = MoveTemp(Action), First = uint64(0)]() mutable
+		// Allow the .18-second animation and subsequent Slate layout and paint to finish.
+		AddCommand(new FFunctionLatentCommand([State, Action = MoveTemp(Action), WaitSeconds, First = uint64(0), Started = 0.]() mutable
 		{
 			if (!State->bReady) return true;
-			if (!First) First = GFrameCounter;
-			if (GFrameCounter - First < 3) return false;
-			if (!State->Player.IsValid() || !State->Map.IsValid() || !State->Frame.IsValid() || !State->HUD.IsValid())
+			if (!First)
+			{
+				First = GFrameCounter;
+				Started = FPlatformTime::Seconds();
+			}
+			if (GFrameCounter - First < 3 || FPlatformTime::Seconds() - Started < WaitSeconds) return false;
+			if (!State->Player.IsValid() || !State->Map.IsValid() || !State->Frame.IsValid() || !State->Image.IsValid()
+				|| !State->Markers.IsValid() || !State->HUD.IsValid())
 			{
 				State->Test.AddError(TEXT("Live player or stage widgets unexpectedly disappeared"));
 				State->bReady = false;
@@ -168,18 +244,25 @@ bool FCatrunMinimapRoutedInput::RunTest(const FString&)
 			State->Test.AddError(State->Stage + TEXT(" timed out waiting for gameplay, a painted minimap and a local viewport of at least 324 logical units"));
 			return true;
 		}, 90.f));
-		Step([](auto& S) { S.Check(TEXT("natural focus at entry"), 240.); S.Capture(TEXT("compact")); S.FocusViewport(); });
+		Step([](auto& S) { S.Check(TEXT("natural focus at entry"), 240.); S.CheckReveal(TEXT("compact"), false, true); S.Capture(TEXT("compact")); S.FocusViewport(); });
 		if (Package.EndsWith(TEXT("Stage2")))
 		{
 			Step([](auto& S) { S.Key(true, true); });
 			Step([](auto& S) { S.Check(TEXT("old stage key repeat"), 240.); S.Key(false); });
 		}
 		Step([](auto& S) { S.Key(true); });
-		Step([](auto& S) { S.Check(TEXT("viewport press"), 300.); S.Capture(TEXT("held")); S.Key(true, true); });
-		Step([](auto& S) { S.Check(TEXT("viewport held"), 300.); S.Key(false); });
+		Step([](auto& S) { S.Check(TEXT("viewport press"), 300.); S.CheckReveal(TEXT("held"), true); S.Capture(TEXT("held")); S.Key(true, true); });
+		Step([](auto& S)
+		{
+			S.Check(TEXT("viewport held without release"), 300.);
+			S.CheckReveal(TEXT("sustained hold"), true);
+			S.Key(true, true);
+		}, Package.EndsWith(TEXT("Stage1")) ? 5. : .25);
+		Step([](auto& S) { S.Check(TEXT("viewport held after repeat"), 300.); S.Key(false); });
 		Step([](auto& S)
 		{
 			S.Check(TEXT("viewport release"), 240.);
+			S.CheckReveal(TEXT("released"), false);
 			S.Capture(TEXT("released"));
 			auto& Slate = FSlateApplication::Get();
 			Slate.SetUserFocus(S.User, S.HUD->TakeWidget());

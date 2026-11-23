@@ -20,13 +20,12 @@ h=shots.h
 ACTORS=u.get_editor_subsystem(u.EditorActorSubsystem)
 DIRECTOR=h.BASE+'BP_Stage1PortalExit'
 PACKAGES=(DIRECTOR,h.SEQUENCE,*h.MAPS)
-BASELINE=ROOT/'Saved/GameplayRepair20261112/PortalFollowup/Fill/20261112-202339-934682/report.json'
-PREFIX='S1_MagicCorridor_'
-MODULES={'Floor_3':'Floor_2','WallEast_3':'WallEast_2','WallWest_3':'WallWest_2',
-         'FloorBase_3':'FloorBase','Ceiling_3':'Ceiling','CeilingUnderside_3':'CeilingUnderside',
-         'EastOuterShade_3':'EastOuterShade','WestOuterShade_3':'WestOuterShade'}
-NATIVE='/Script/Catrun.CatrunExitTransitionComponent:ClearAcceptedStage1PortalMark'
-VAR='DepartureRearDoor'
+VAR,RIGHT_VAR='DepartureRearDoor','DepartureRearDoorRight'
+MESH_PATH='/Game/Environment/Stage2/Architecture/Doors/ArchedIronDoor/Meshes/SM_Stage2_ArchedIronDoor_'
+TRIGGER_CENTER=(100.,-315.,25.2)
+TRIGGER_EXTENT=(100.,300.,80.)
+FRAME_ORIGIN=(.9,15.,-.8)
+GATE_Z_SCALE=.92
 
 
 def hashes():
@@ -73,57 +72,6 @@ def graph_rows(g):
     return result
 
 
-def director_state(bp):
-    graph=BP.get_graph(bp,'EventGraph')
-    play=h.only(graph_nodes(graph,'Play'))
-    prev=predecessor(play)
-    clear=graph_nodes(graph,'ClearAcceptedStage1PortalMark')
-    if clear:
-        assert prev==h.only(clear)
-        prev=predecessor(prev)
-    assert prev in graph_nodes(graph,'SetTimerbyFunctionName') and function_timer(prev)=='CinematicExpired', (prev.get_name(),function_timer(prev))
-    door_bind=[n for n in graph_nodes(graph,'AddBindingByTag')
-               if str(pin(n,'BindingTag').get_pin_value()).strip('"')==shots.DOOR_TAG]
-    assert bool(clear)==bool(door_bind)
-    if door_bind:
-        node=h.only(door_bind)
-        assert str(h.only(pin(node,'Actor').list_connected_pins()).get_pin_name())==VAR
-        assert str(pin(predecessor(node),'BindingTag').get_pin_value()).strip('"')=='CatrunPortal'
-        assert u.get_default_object(bp.generated_class()).get_editor_property('CinematicTimeout')==30.
-    return bool(clear)
-
-
-def patch_director(bp):
-    bp.modify()
-    BP.add_object_variable(bp,VAR,u.Actor.static_class())
-    BP.set_variable_instance_editable(bp,VAR,True)
-    compile_bp(bp)
-    graph=BP.get_graph(bp,'EventGraph')
-    before=graph_rows(graph)
-    play=h.only(graph_nodes(graph,'Play'))
-    watch=predecessor(play)
-    bind=h.only(n for n in graph_nodes(graph,'AddBindingByTag')
-                if str(pin(n,'BindingTag').get_pin_value()).strip('"')=='CatrunPortal')
-    def insert_after(before_node, inserted):
-        out=pin(before_node,'then',True)
-        old=h.only(out.list_connected_pins())
-        target=old.get_owning_node().get_name()
-        out.break_single_pin_link(old)
-        wire(before_node,'then',inserted,'execute')
-        assert pin(inserted,'then',True).try_create_connection(old)
-        return target
-    q=Graph(graph,2150,-600)
-    clear=q.fn(NATIVE,target=q.ref('ExitTransition'))
-    add=q.fn('/Script/LevelSequence.LevelSequenceActor:AddBindingByTag',target=q.ref('CinematicActor'),
-             BindingTag=shots.DOOR_TAG,Actor=q.ref(VAR),bAllowBindingsFromAsset='false')
-    changed={watch.get_name(),insert_after(watch,clear),bind.get_name(),insert_after(bind,add)}
-    compile_bp(bp)
-    u.get_default_object(bp.generated_class()).set_editor_property('CinematicTimeout',30.)
-    after=graph_rows(graph)
-    assert before.keys()<=after.keys() and all(after[k]==v for k,v in before.items() if k not in changed)
-    assert director_state(bp)
-
-
 def tagged(actors,tag):
     return h.only(a for a in actors if tag in map(str,a.tags))
 
@@ -132,178 +80,223 @@ def label(actors,name):
     return h.only(a for a in actors if a.get_actor_label()==name)
 
 
-def new_module(src,name):
-    # Reuse the actual static mesh, every instance material, actor transform and ground/collision profile.
-    old=src.static_mesh_component
-    src_loc=src.get_actor_location()
-    loc=u.Vector(src_loc.x,src_loc.y-200,src_loc.z)
-    scale=src.get_actor_scale3d()
-    if name not in ('Floor_3','WallEast_3','WallWest_3'):
-        center,extent=src.get_actor_bounds(False)
-        assert abs((center.y-extent.y)+415)<.1 and abs(src.get_actor_rotation().yaw)<.1
-        loc=u.Vector(src_loc.x,-515,src_loc.z)
-        scale=u.Vector(scale.x,scale.y*100/extent.y,scale.z)
-    actor=ACTORS.spawn_actor_from_class(u.StaticMeshActor,loc,src.get_actor_rotation())
-    assert actor
-    actor.set_actor_label(PREFIX+name)
-    actor.set_folder_path(src.get_folder_path())
-    actor.tags=list(src.tags)
+def binding_nodes(bp):
+    graph=BP.get_graph(bp,'EventGraph')
+    return {str(pin(n,'BindingTag').get_pin_value()).strip('"'):n for n in graph_nodes(graph,'AddBindingByTag')}
+
+
+def director_state(bp):
+    by_tag=binding_nodes(bp)
+    left=by_tag[shots.DOOR_TAG]
+    assert str(h.only(pin(left,'Actor').list_connected_pins()).get_pin_name())==VAR
+    if shots.RIGHT_TAG not in by_tag:
+        return False
+    right=by_tag[shots.RIGHT_TAG]
+    assert predecessor(right)==left and str(h.only(pin(right,'Actor').list_connected_pins()).get_pin_name())==RIGHT_VAR
+    return True
+
+
+def patch_director(bp):
+    bp.modify()
+    BP.add_object_variable(bp,RIGHT_VAR,u.Actor.static_class())
+    BP.set_variable_instance_editable(bp,RIGHT_VAR,True)
+    compile_bp(bp)
+    g=BP.get_graph(bp,'EventGraph')
+    before=graph_rows(g)
+    left=binding_nodes(bp)[shots.DOOR_TAG]
+    link=pin(left,'then',True)
+    downstream=h.only(link.list_connected_pins())
+    changed={left.get_name(),downstream.get_owning_node().get_name()}
+    q=Graph(g,3020,-950)
+    right=q.fn('/Script/LevelSequence.LevelSequenceActor:AddBindingByTag',target=q.ref('CinematicActor'),
+               BindingTag=shots.RIGHT_TAG,Actor=q.ref(RIGHT_VAR),bAllowBindingsFromAsset='false')
+    link.break_single_pin_link(downstream)
+    wire(left,'then',right,'execute')
+    assert pin(right,'then',True).try_create_connection(downstream)
+    compile_bp(bp)
+    after=graph_rows(g)
+    assert before.keys()<=after.keys() and all(before[k]==after[k] for k in before if k not in changed)
+    assert director_state(bp)
+
+
+def checked_meshes():
+    expected={'Frame':((0,-30,0),(200,0,300)),
+              'Leaf_L':((-1.4,-17.1084,1),(68,1.5084,237.995)),
+              'Leaf_R':((-68,-17.1084,1),(1.4,1.5084,237.995))}
+    meshes={}
+    for name,(low,high) in expected.items():
+        mesh=meshes[name]=h.load_asset(MESH_PATH+name)
+        box=mesh.get_bounding_box()
+        assert (box.min-u.Vector(*low)).length()<.02 and (box.max-u.Vector(*high)).length()<.02,(name,box)
+    return meshes
+
+
+def setup_part(actor,mesh,location,yaw,movable):
+    actor.modify()
     c=actor.static_mesh_component
-    c.set_static_mesh(old.get_editor_property('static_mesh'))
-    for i in range(old.get_num_materials()):
-        c.set_material(i,old.get_material(i))
-    c.set_collision_profile_name(old.get_collision_profile_name())
-    for prop in ('generate_overlap_events','cast_shadow','visible','hidden_in_game'):
-        c.set_editor_property(prop,old.get_editor_property(prop))
-    actor.set_actor_scale3d(scale)
-    c.set_mobility(old.get_editor_property('mobility'))
-    return actor
+    c.modify()
+    c.set_mobility(u.ComponentMobility.MOVABLE)
+    c.set_static_mesh(mesh)
+    c.set_editor_property('override_materials',[])
+    c.set_collision_profile_name('BlockAllDynamic' if movable else 'BlockAll')
+    c.set_editor_property('generate_overlap_events',False)
+    actor.set_actor_scale3d(u.Vector(1.,1.,GATE_Z_SCALE))
+    assert actor.set_actor_location_and_rotation(u.Vector(*location),u.Rotator(yaw=yaw),False,True)
+    if not movable:
+        c.set_mobility(u.ComponentMobility.STATIC)
+    assert c.get_material(0)==mesh.get_material(0)
 
 
-def saved_keys(channel, expected, tolerance=.001):
-    keys=h.key_data(channel)
-    assert len(keys)==len(expected) and all(t==h.tick(f) and abs(v-w)<=tolerance
-        for (t,v),(f,w) in zip(keys,expected)), (str(channel),keys,expected)
-
-
-def verified_tracks(seq,door,motion):
-    state=shots.verify_sequence(seq)
-    parts=h.sequence_parts(seq)
-    animations=state['animations']
-    rates=(motion['rate'],1.,17.5/(shots.LIFT-shots.JUMP),18.5/(shots.AIR_END-shots.LIFT),0.)
-    for row,rate,st,off in zip(animations,rates,(0,0,0,17.5,0),(motion['first_loop_offset'],0,0,0,36.-1/800)):
-        assert row['play_rate']==u.MovieSceneTimeWarpExtensions.make_time_warp(rate).export_text(),row
-        assert (row['start_offset'],row['first_loop_offset'])==(h.tick(st),h.tick(off)),row
-        assert row['custom_mode'] and row['skip_notifiers'],row
-    for section,curve in zip(parts['camera_sections'],shots.CAMERAS):
-        for i,ch in enumerate(h.transform_channels(section)):
-            saved_keys(ch,[(f,axes[i]) for f,axes in curve])
-    original=h.only(b for b in seq.get_bindings() if shots.DOOR_TAG in map(str,b.get_binding_tags()))
-    proxy=h.only(b for b in seq.get_bindings() if b.get_name()==shots.PROXY)
-    bound_mesh=proxy.get_object_template().static_mesh_component
-    assert bound_mesh.get_editor_property('static_mesh')==door.static_mesh_component.get_editor_property('static_mesh')
-    assert [bound_mesh.get_material(i) for i in range(bound_mesh.get_num_materials())]==[
-        door.static_mesh_component.get_material(i) for i in range(door.static_mesh_component.get_num_materials())]
-    start,closed=shots.door_profile(door)
-    channels=h.transform_channels(h.property_section(proxy,u.MovieScene3DTransformTrack))
-    for ch,value in zip(channels,start):
-        assert abs(ch.get_default()-value)<.001
-    yaw=[]
-    for f in (0,15,20,25,30,35,40,45,50,54,shots.END-1):
-        t=min(1.,max(0.,(f-15)/39))
-        yaw.append((f,h.lerp(start[5],closed,t*t*(3-2*t))))
-    saved_keys(channels[5],yaw)
-    for actor,expected in ((original,[(0,False)]),(parts['bindings'][0],[(0,True),(shots.HIDE,False)])):
-        track=h.property_track(actor,u.MovieSceneVisibilityTrack)
-        section=h.only(track.get_sections())
-        assert str(track.get_property_path())=='bHidden' and section.get_completion_mode()==shots.RESTORE
-        saved_keys(h.only(section.get_all_channels()),expected)
-    return {'camera_bindings':state['bindings'],'cuts':state['cuts'],'animations':animations,
-            'closed_door_yaw':closed,'visibility_cut_frame':shots.HIDE}
-
-
-def map_state(actors):
+def verify_map(actors):
     director=tagged(actors,'CatrunAuthoredStage1Exit')
     portal=tagged(actors,'CatrunAuthoredStage1Portal')
     assert director.get_editor_property('PortalPresentation')==portal
-    door=label(actors,shots.DOOR_LABEL)
-    shots.door_profile(door)
     assert director.get_editor_property('CinematicActor').get_sequence()==h.load_asset(h.SEQUENCE)
-    assert (director.get_actor_location()-u.Vector(101,-80,25.2)).length()<.1
-    assert (director.get_editor_property('Trigger').get_unscaled_box_extent()-u.Vector(30,35,80)).length()<.1
-    cap=label(actors,PREFIX+'DarkEnd')
-    present={a.get_actor_label().removeprefix(PREFIX) for a in actors if a.get_actor_label() in [PREFIX+k for k in MODULES]}
-    assert not present or present==set(MODULES), ('Partial corridor in saved map',present)
-    done=bool(present)
-    expected_y=shots.PORTAL_Y if done else shots.PORTAL_Y+200
-    assert (portal.get_actor_location()-u.Vector(101,expected_y,-.8)).length()<.1
-    assert abs(cap.get_actor_location().y-(-625 if done else -425))<.1
-    if done:
-        assert director.get_editor_property(VAR)==door and director.get_editor_property('CinematicTimeout')==30.
-        for name in MODULES:
-            a=label(actors,PREFIX+name)
-            c,e=a.get_actor_bounds(False)
-            assert abs(c.y+515)<.1 and abs(e.y-100)<.1,(name,c,e)
-    return director,portal,cap,door,done
+    assert (director.get_actor_location()-u.Vector(*TRIGGER_CENTER)).length()<.02
+    assert (director.get_editor_property('Trigger').get_unscaled_box_extent()-u.Vector(*TRIGGER_EXTENT)).length()<.02
+    assert director.get_editor_property('bProtectStage1Corridor') and director.get_editor_property('bUseExitTransition')
+    assert director.get_editor_property('bRequireCenterInside')
+    assert (director.get_editor_property('InteriorDirectionLocal')-u.Vector(0,-1,0)).length()<.001
+    assert abs(director.get_editor_property('CorridorEntryDepth')-(TRIGGER_CENTER[1]-shots.THRESHOLD_Y))<.001
+    assert abs(director.get_editor_property('MinimumInteriorDepth')-(TRIGGER_CENTER[1]-shots.START_Y))<.001
+    assert (portal.get_actor_location()-u.Vector(101.,shots.PORTAL_Y,-.8)).length()<.01
+    assert (portal.get_actor_scale3d()-u.Vector(1.25,1.25,1.25)).length()<.01
+    stone=h.only(c for c in portal.get_components_by_class(u.StaticMeshComponent) if c.get_name()=='Stone')
+    center,extent,_=u.SystemLibrary.get_component_bounds(stone)
+    assert center.z+extent.z<=279 and center.x-extent.x>=-1 and center.x+extent.x<=201,(center,extent)
+    left,right=director.get_editor_property(VAR),director.get_editor_property(RIGHT_VAR)
+    for actor,key,yaw,x,y in ((label(actors,shots.FRAME_LABEL),'Frame',0.,0.,0.),
+                              (left,'Leaf_L',-100.,31.5,-1.6),(right,'Leaf_R',100.,168.5,-1.6)):
+        c=actor.static_mesh_component
+        assert c.get_editor_property('static_mesh')==h.load_asset(MESH_PATH+key)
+        assert abs(actor.get_actor_rotation().yaw-yaw)<.01
+        assert (actor.get_actor_location()-u.Vector(FRAME_ORIGIN[0]+x,FRAME_ORIGIN[1]+y,FRAME_ORIGIN[2])).length()<.01
+        assert c.get_collision_response_to_channel(u.CollisionChannel.ECC_PAWN)==u.CollisionResponseType.ECR_BLOCK
+    return director,portal,left,right
 
 
-def map_work(package,author,original):
+def map_work(package,author):
     actors=load_map(package)
-    d,p,cap,door,done=map_state(actors)
-    motion=shots.calibrate(h.only(a for a in actors if a.get_name()=='BP_Cat_C_0').get_component_by_class(u.SkeletalMeshComponent))
+    director=tagged(actors,'CatrunAuthoredStage1Exit')
+    portal=tagged(actors,'CatrunAuthoredStage1Portal')
+    cat=h.only(a for a in actors if a.get_name()=='BP_Cat_C_0')
+    movement=cat.get_component_by_class(u.CharacterMovementComponent)
+    assert abs(movement.max_walk_speed-shots.WALK_SPEED)<.01,movement.max_walk_speed
+    motion=shots.calibrate(cat.get_component_by_class(u.SkeletalMeshComponent))
     seq=h.load_asset(h.SEQUENCE)
-    if seq.get_playback_end()!=shots.END:
-        allowed=(original[h.SEQUENCE],'52a45c63114aed4d5b963ac61a62ccc16c9d9dfe6ae77f965b4c2ba404ef3b58')
-        assert author and package==h.MAPS[0] and h.digest(h.asset_file(h.SEQUENCE)) in allowed
-        shots.patch(seq,door,motion)
-        shots.verify_sequence(seq)
-        assert h.AS.save_loaded_asset(seq,False)
-    else:
-        shots.verify_sequence(seq)
-    if not done:
-        assert author and h.digest(h.asset_file(package))==original[package], ('Unknown map',package)
-        excluded={a.get_name() for a in (d,p,cap)}
+    saved=False
+    if not director.get_editor_property(RIGHT_VAR):
+        assert author,('Stage1 exit requires migration',package)
+        left=director.get_editor_property(VAR)
+        frame=label(actors,shots.FRAME_LABEL)
+        assert left==label(actors,shots.DOOR_LABEL)
+        assert 'Stage2TransitionDoor' in map(str,left.tags) and 'Stage2TransitionDoorFrame' in map(str,frame.tags)
+        assert not any(a.get_actor_label()==shots.RIGHT_LABEL for a in actors)
+        assert (portal.get_actor_location()-u.Vector(101.,-493.9189189,-.8)).length()<.01
+        meshes=checked_meshes()
+        excluded={a.get_name() for a in (frame,left,portal,director)}
         before=actor_rows(actors,excluded)
-        for name,sourcename in MODULES.items():
-            actor=new_module(label(actors,PREFIX+sourcename),name)
-            excluded.add(actor.get_name())
-        for a in (cap,p):
-            a.modify()
-            xyz=a.get_actor_location()
-            assert a.set_actor_location(u.Vector(xyz.x,xyz.y-200,xyz.z),False,True)
-        d.modify()
-        d.set_editor_property(VAR,door)
-        d.set_editor_property('CinematicTimeout',30.)
-        current=list(u.GameplayStatics.get_all_actors_of_class(h.ED.get_editor_world(),u.Actor))
-        assert actor_rows(current,excluded)==before, ('Unrelated actor changed',package)
-        assert map_state(current)[-1]
+        right=ACTORS.spawn_actor_from_class(u.StaticMeshActor,u.Vector(*FRAME_ORIGIN),u.Rotator())
+        right.set_actor_label(shots.RIGHT_LABEL)
+        right.set_folder_path(left.get_folder_path())
+        right.tags=['Stage2TransitionDoorRight']
+        excluded.add(right.get_name())
+        for a,name,x,y,yaw in ((frame,'Frame',0.,0.,0.),(left,'Leaf_L',31.5,-1.6,-100.),
+                               (right,'Leaf_R',168.5,-1.6,100.)):
+            setup_part(a,meshes[name],(FRAME_ORIGIN[0]+x,FRAME_ORIGIN[1]+y,FRAME_ORIGIN[2]),yaw,a!=frame)
+        director.modify()
+        trigger=director.get_editor_property('Trigger')
+        trigger.modify()
+        assert director.set_actor_location(u.Vector(*TRIGGER_CENTER),False,True)
+        trigger.set_box_extent(u.Vector(*TRIGGER_EXTENT),False)
+        director.set_editor_property('InteriorDirectionLocal',u.Vector(0,-1,0))
+        director.set_editor_property('bProtectStage1Corridor',True)
+        director.set_editor_property('bRequireCenterInside',True)
+        director.set_editor_property('CorridorEntryDepth',TRIGGER_CENTER[1]-shots.THRESHOLD_Y)
+        director.set_editor_property('MinimumInteriorDepth',TRIGGER_CENTER[1]-shots.START_Y)
+        director.set_editor_property(RIGHT_VAR,right)
+        portal.modify()
+        portal.set_actor_scale3d(u.Vector(1.25,1.25,1.25))
+        assert portal.set_actor_location(u.Vector(101.,shots.PORTAL_Y,-.8),False,True)
+        actors=list(u.GameplayStatics.get_all_actors_of_class(h.ED.get_editor_world(),u.Actor))
+        assert actor_rows(actors,excluded)==before
+        saved=True
+    _,_,left,right=verify_map(actors)
+    door_checks=door_collision(cat,director,left,right) if saved else {}
+    migration=seq.get_playback_end()!=shots.END
+    if migration or not shots.fill_binding(seq):
+        assert author and package==h.MAPS[0]
+        if migration:
+            shots.patch(seq,left,right,motion)
+        else:
+            # The 312-frame published-in-workspace revision has known IDs and known bytes.
+            # For it change only camera properties/tracks and the two existing portal lights.
+            assert h.digest(h.asset_file(h.SEQUENCE))==shots.PREVIOUS_SEQUENCE_SHA
+        shots.apply_lens_and_fill(seq,portal)
+        shots.verify_sequence(seq)
+        assert set(h.dirty())<={package,h.SEQUENCE},h.dirty()
+        assert h.AS.save_loaded_asset(seq,False)
+    state=shots.verify_sequence(seq)
+    if saved:
         assert set(h.dirty())<={package},h.dirty()
         assert h.LEVEL.save_current_level()
-    return dict(saved_map=not done,portal_y=shots.PORTAL_Y,gate_yaw=shots.door_profile(door),gait=motion,
-                persisted_tracks=verified_tracks(seq,door,motion))
+    return dict(saved=saved,portal_y=shots.PORTAL_Y,ground_walk_speed=movement.max_walk_speed,
+                start_y=shots.START_Y,door_checks=door_checks,gait=motion,cuts=state['cuts'],animations=state['animations'])
+
+
+def capsule_hit(cat,director,start,end):
+    c=cat.get_component_by_class(u.CapsuleComponent)
+    return u.SystemLibrary.capsule_trace_single_by_profile(h.ED.get_editor_world(),u.Vector(*start),u.Vector(*end),
+        c.get_scaled_capsule_radius(),c.get_scaled_capsule_half_height(),'Pawn',False,[cat,director],h.NONE,False)
+
+
+def door_collision(cat,director,left,right):
+    # Validate the installed leaf bodies (including the central seam) before saving.
+    rots=[a.get_actor_rotation() for a in (left,right)]
+    across=lambda x:capsule_hit(cat,director,(x,70.,25.2),(x,-80.,25.2))
+    opened=[across(x) for x in (79.,101.,123.)]
+    assert not any(opened),('open door obstruction',[hit.to_dict() if hit else None for hit in opened])
+    try:
+        for a in (left,right):
+            assert a.set_actor_rotation(u.Rotator(),True)
+        closed=[across(x) for x in (70.,101.,130.)]
+        assert all(hit and hit.to_dict()['hit_actor'] in (left,right) for hit in closed),[
+            hit.to_dict() if hit else None for hit in closed]
+        assert {hit.to_dict()['hit_actor'] for hit in closed}=={left,right}
+        return {'open_sweeps':3,'closed_hits':[hit.to_dict()['hit_actor'].get_actor_label() for hit in closed]}
+    finally:
+        for actor,rotation in zip((left,right),rots):
+            actor.set_actor_rotation(rotation,True)
 
 
 def geometry(package):
-    # The former exact capsule sweeps, sampled floor support and camera traces are retained for the new curve.
-    h.END,h.LIFT,h.AIR_END,h.EASE_FRAMES=shots.END,shots.LIFT,shots.AIR_END,shots.WALK
-    h.PORTAL_Y,h.INSPECT_Y,h.ENTRY_Y=shots.PORTAL_Y,shots.INSPECT_Y,shots.ENTRY_Y
-    h.CUTS,h.CAMERA_CURVES,h.cat_point=shots.CUTS,shots.CAMERAS,shots.position
-    result=h.verify_map(package)
-    # Validate capsule chords over delayed render/game ticks (8, 15 and 30 display frames),
-    # including lift and the curved airborne path. Native checks each straight frame-to-frame chord.
-    world=h.ED.get_editor_world()
-    actors=list(u.GameplayStatics.get_all_actors_of_class(world,u.Actor))
+    actors=load_map(package)
+    d,p,left,right=verify_map(actors)
     cat=h.only(a for a in actors if a.get_name()=='BP_Cat_C_0')
-    capsule=cat.get_component_by_class(u.CapsuleComponent)
-    radius,half=capsule.get_scaled_capsule_radius(),capsule.get_scaled_capsule_half_height()
-    ignored=[cat,tagged(actors,'CatrunAuthoredStage1Exit')]
-    chords=0
-    for gap in (8,15,30):
-        for frame in range(0,shots.END-1):
-            end=min(frame+gap,shots.END-1)
-            a,b=u.Vector(*shots.position(frame)),u.Vector(*shots.position(end))
-            if (a-b).length()<.01:
-                continue
-            hit=u.SystemLibrary.capsule_trace_single_by_profile(world,a,b,radius,half,'Pawn',False,ignored,h.NONE,False)
-            assert not hit,(package,'long-frame capsule chord',frame,end,hit.to_dict())
-            chords+=1
-    result['delayed_frame_sweeps']=chords
-    lo,hi=shots.LIFT,shots.AIR_END
-    for _ in range(24):
-        mid=(lo+hi)/2
-        if shots.position(mid)[1]>shots.PORTAL_Y: lo=mid
-        else: hi=mid
-    result['crossing_frame']=hi
-    result['crossing_position']=shots.position(hi)
-    assert abs(result['crossing_position'][1]-shots.PORTAL_Y)<.001
-    return result
+    rows={'capsule_sweeps':0,'floor_supports':0}
+    for x in (25.,101.,175.):
+        origin=(x,shots.START_Y,25.2)
+        for gap in (1,8,15,30):
+            for f in range(0,shots.END-1,2):
+                start=shots.position(f,origin)
+                end=shots.position(min(f+gap,shots.END-1),origin)
+                hit=capsule_hit(cat,d,start,end)
+                assert not hit,(package,'capsule chord',x,f,gap,hit.to_dict())
+                rows['capsule_sweeps']+=1
+                if gap==1 and f<shots.LIFT:
+                    x_,y,z=start
+                    floor=capsule_hit(cat,d,(x_,y,z+12),(x_,y,z-9))
+                    assert floor and floor.to_dict()['impact_normal'].z>=.65,(package,f,start)
+                    rows['floor_supports']+=1
+    assert not h.dirty(),h.dirty()
+    return rows
 
 
 def main():
     cmd=u.SystemLibrary.get_command_line().lower()
     author='-catrundepartureauthor' in cmd
     assert author!=('-catrundepartureaudit' in cmd) and '-run=pythonscript' in cmd
-    out=ROOT/'Saved/PresentationFix20261119/DepartureAuthor'/datetime.datetime.now().strftime('%Y%m%d-%H%M%S-%f')
+    out=ROOT/'Saved/StageRevision20261123/DepartureAuthor'/datetime.datetime.now().strftime('%Y%m%d-%H%M%S-%f')
     out.mkdir(parents=True,exist_ok=False)
     report={'author':author,'completed':False,'maps':{},'geometry':{},'backups':{},'saved_packages':[]}
     before=None
@@ -311,10 +304,8 @@ def main():
         (out/'report.json').write_text(json.dumps(report,indent=2),encoding='utf-8')
     try:
         assert not h.ED.get_game_world() and not h.dirty()
-        original=json.loads(BASELINE.read_text(encoding='utf-8'))['after_hashes']
+        checked_meshes()
         before=hashes()
-        (out/'before-sha256.json').write_text(json.dumps(before,indent=1),encoding='utf-8')
-        report['content_packages']=len(before)
         if author:
             for package in PACKAGES:
                 source=h.asset_file(package)
@@ -325,33 +316,33 @@ def main():
         persist()
         bp=h.load_asset(DIRECTOR)
         if not director_state(bp):
-            assert author and h.digest(h.asset_file(DIRECTOR))==original[DIRECTOR]
+            assert author
             patch_director(bp)
             assert set(h.dirty())<={DIRECTOR} and h.AS.save_loaded_asset(bp,False)
-        for package in h.MAPS:
-            report['maps'][package]=map_work(package,author,original)
+        for pkg in h.MAPS:
+            report['maps'][pkg]=map_work(pkg,author)
             persist()
-        for package in h.MAPS:
-            gc.collect()
-            report['geometry'][package]=geometry(package)
+        for pkg in h.MAPS:
+            report['geometry'][pkg]=geometry(pkg)
             persist()
         assert not h.dirty(),h.dirty()
-        after=hashes()
-        report['changed_files']=[k for k in before.keys()|after.keys() if before.get(k)!=after.get(k)]
-        allowed={h.asset_file(p).relative_to(ROOT).as_posix() for p in PACKAGES} if author else set()
-        assert set(report['changed_files'])<=allowed,report['changed_files']
         report['completed']=True
     except Exception:
         report['error']=traceback.format_exc()
         raise
     finally:
         if before is not None:
-            now=hashes()
-            (out/'after-sha256.json').write_text(json.dumps(now,indent=1),encoding='utf-8')
-            report['changed_files']=sorted(k for k in before.keys()|now.keys() if before.get(k)!=now.get(k))
-            report['saved_packages']=[p for p in PACKAGES if h.asset_file(p).relative_to(ROOT).as_posix() in report['changed_files']]
+            after=hashes()
+            changed=sorted(k for k in before.keys()|after.keys() if before.get(k)!=after.get(k))
+            report['changed_files']=changed
+            report['saved_packages']=[p for p in PACKAGES if h.asset_file(p).relative_to(ROOT).as_posix() in changed]
+            allowed={h.asset_file(p).relative_to(ROOT).as_posix() for p in PACKAGES} if author else set()
+            if not set(changed)<=allowed:
+                report['completed']=False
+                report['unexpected_saves']=sorted(set(changed)-allowed)
         persist()
         print('CATRUN_STAGE1_DEPARTURE',str(out),report['completed'])
+        assert 'unexpected_saves' not in report,report
 
 
 if __name__=='__main__':

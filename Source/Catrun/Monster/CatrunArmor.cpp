@@ -1,4 +1,5 @@
 #include "CatrunArmor.h"
+#include "CatrunMarkSubsystem.h"
 #include "Interaction/CatrunPuzzleSuspension.h"
 #include "CatrunCapturePresentationComponent.h"
 #include "CatrunPerceptionPolicy.h"
@@ -178,7 +179,10 @@ void ACatrunArmor::OnSoundHeard_Implementation(const FCatrunSoundEvent& Event, f
 {
 	if (bWaitingForCapture) return;
 	if (UCatrunPuzzleSuspension::IsSuspended(this)) return;
-	// Near detection/capture wins; sound investigations override the live mark target.
+    AActor* Source = Event.Instigator.Get();
+    if (!Source && Event.Source == ECatrunSoundSource::Cat) Source = CatrunCat::Find(this);
+    if (UCatrunMarkSubsystem::IsExcludedFromPerception(Source)) return;
+    // Near detection/capture wins; sound investigations override the live mark target.
 	if (!CatrunPerception::AcceptSound(Action == EArmorAction::Catching || bSeeingCat,
 		bInvestigatingSound, Action == EArmorAction::Looking, CurrentSoundSize, Event.Size))
 	{
@@ -194,6 +198,7 @@ void ACatrunArmor::OnSoundHeard_Implementation(const FCatrunSoundEvent& Event, f
 	}
 	bAwaitingDoorReplan = false;
 	TravelIntent = ETravelIntent::Investigation;
+	InvestigationSource = Source;
 	bInvestigatingSound = true;
 	CurrentSoundSize = Event.Size;
 	RunCause = Event.Kind == ECatrunSoundKind::Bell ? ERunCause::Bell : ERunCause::Noise;
@@ -518,9 +523,11 @@ void ACatrunArmor::StartReturnToPost()
 	DoorReplanWait = 0.f;
 	TravelIntent = ETravelIntent::None;
 	bInvestigatingSound = false;
+	InvestigationSource.Reset();
 	if (bFollowingMark)
-	{
-		TravelIntent = ETravelIntent::Mark;
+    {
+        InvestigationSource = CatrunCat::Find(this);
+        TravelIntent = ETravelIntent::Mark;
 		RunCause = ERunCause::Mark;
 		ApplyMoveSpeed();
 		MarkRepathTimer = 0.f;
@@ -694,8 +701,9 @@ void ACatrunArmor::Tick(float DeltaSeconds)
 {
 	if (bWaitingForCapture) { UpdateActionLabel(); return; }
 	if (UCatrunPuzzleSuspension::IsSuspended(this)) return;
-	Super::Tick(DeltaSeconds);
-	if (bPendingMarkRelease)
+    Super::Tick(DeltaSeconds);
+    if (auto* Marks = UCatrunMarkSubsystem::Get(this)) Marks->RefreshCorridor();
+    if (bPendingMarkRelease)
 	{
 		bPendingMarkRelease = false;
 		// A sound or capture may already have taken ownership since the suspension ended.
@@ -722,7 +730,7 @@ void ACatrunArmor::Tick(float DeltaSeconds)
 
 void ACatrunArmor::SetFollowingMark(bool bFollow)
 {
-	if (bFollow && UCatrunPuzzleSuspension::IsSuspended(this)) return;
+	if (bFollow && (UCatrunPuzzleSuspension::IsSuspended(this) || UCatrunMarkSubsystem::IsExcludedFromPerception(CatrunCat::Find(this)))) return;
 	if (bFollowingMark == bFollow)
 	{
 		return;
@@ -739,8 +747,9 @@ void ACatrunArmor::SetFollowingMark(bool bFollow)
 	UE_LOG(LogCatrunSound, Log, TEXT("%s %s the marked cat."), *GetName(), bFollow ? TEXT("starts following") : TEXT("stops following"));
 	if (bInvestigatingSound || Action == EArmorAction::Catching) return;
 	if (bFollow)
-	{
-		TravelIntent = ETravelIntent::Mark;
+    {
+        InvestigationSource = CatrunCat::Find(this);
+        TravelIntent = ETravelIntent::Mark;
 		RunCause = ERunCause::Mark;
 		ApplyMoveSpeed();
 		bHasDestination = true; // a trip is on, so the post is forgotten
@@ -847,7 +856,7 @@ void ACatrunArmor::UpdateDetection()
 	Detection->Update(0.f, 180.f);
 
 	APawn* Cat = CatrunCat::Find(this);
-	const bool bSees = Cat && !CatrunCat::IsSafeFromCatch(Cat) && Detection->CanSee(Cat->GetActorLocation(), S->CatSightRadius)
+	const bool bSees = Cat && !UCatrunMarkSubsystem::IsExcludedFromPerception(Cat) && !CatrunCat::IsSafeFromCatch(Cat) && Detection->CanSee(Cat->GetActorLocation(), S->CatSightRadius)
 		&& CatrunPerception::HasDirectSight(*this, *Cat, S->VisionTraceHeight)
 		&& HasClearCapturePath(*Cat);
 
@@ -890,7 +899,32 @@ void ACatrunArmor::StartCatch(APawn& Cat)
 	}
 }
 
+void ACatrunArmor::ForgetCorridorCat(const APawn& Cat)
+{
+    const bool bCatTrip = InvestigationSource.Get() == &Cat || (!bInvestigatingSound
+        && (bFollowingMark || bPendingMarkRelease || TravelIntent == ETravelIntent::Mark));
+    bSeeingCat = false;
+    AlertMark->SetVisibility(false);
+    bFollowingMark = false;
+    bPendingMarkRelease = false;
+    MarkTargetCell = FIntPoint(INT32_MIN, INT32_MIN);
+    MarkRepathTimer = 0.f;
+    if (!bCatTrip) return; // Keep an unrelated device investigation, patrol or return trip.
+    DiscardActiveTrip();
+    Destination = FVector::ZeroVector;
+    CurrentSoundSize = ECatrunSoundSize::Small;
+    RunCause = ERunCause::Noise;
+    GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+    StartReturnToPost();
+}
+
 void ACatrunArmor::PrepareForCapture()
+{
+    DiscardActiveTrip();
+    SetAction(EArmorAction::Catching);
+}
+
+void ACatrunArmor::DiscardActiveTrip()
 {
 	// Detection follows the animated body while opening a door. If it catches the cat
 	// before that animation finishes, commit the body's current position and release
@@ -921,8 +955,11 @@ void ACatrunArmor::PrepareForCapture()
 	bPatrolWaiting = false;
 	PathCorners.Reset();
 	NextCorner = 0;
-	GetCharacterMovement()->StopMovementImmediately();
-	SetAction(EArmorAction::Catching);
+    InvestigationSource.Reset();
+    DoorReplanWait = 0.f;
+    StuckTimer = 0.f;
+    GetCharacterMovement()->ConsumeInputVector();
+    GetCharacterMovement()->StopMovementImmediately();
 }
 
 void ACatrunArmor::TickCatching(float DeltaSeconds)

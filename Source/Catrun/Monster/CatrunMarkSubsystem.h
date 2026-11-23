@@ -5,6 +5,7 @@
 #include "CatrunMarkSubsystem.generated.h"
 
 class ACatrunArmor;
+class ACatrunStageExit;
 class UPointLightComponent;
 class UStaticMeshComponent;
 
@@ -29,7 +30,12 @@ public:
 	static UCatrunMarkSubsystem* Get(const UObject* WorldContextObject);
 
 	// Puts the mark on the cat (nothing happens if it is already marked).
-	void ApplyMark(APawn& Cat);
+    // Only the opted-in Stage1 doorway registers the local cat as a candidate.
+    void ObserveCorridor(ACatrunStageExit& Exit, APawn& Cat);
+    void LeaveCorridor(const ACatrunStageExit& Exit);
+    void RefreshCorridor();
+    static bool IsExcludedFromPerception(const AActor* Subject);
+    void ApplyMark(APawn& Cat);
 	void ClearMark(const TCHAR* Reason);
 	bool IsMarked() const { return bMarked; }
 
@@ -46,7 +52,10 @@ private:
 	void UpdateVisual();
 	void UpdateFollowingArmor(const APawn& Cat);
 
-	bool bMarked = false;
+    TWeakObjectPtr<ACatrunStageExit> Corridor;
+    TWeakObjectPtr<APawn> CorridorCandidate;
+    bool bCorridorAdmitted = false;
+    bool bMarked = false;
 	float FollowTimer = 0.f;
 
 	TWeakObjectPtr<ACatrunArmor> FollowingArmor;

@@ -26,6 +26,13 @@ public:
     /** Called by the Stage1 portal director immediately before playing the departure sequence. */
     UFUNCTION(BlueprintCallable, Category="Exit|Lease")
     void ClearAcceptedStage1PortalMark();
+    UFUNCTION(BlueprintCallable, Category="Exit|Arrival")
+    bool ClaimArrivalTitleGate();
+    UFUNCTION(BlueprintCallable, Category="Exit|Arrival")
+    void ReleaseArrivalTitleGate();
+    /** The lease's original gameplay camera has taken over, including the final blend update. */
+    UFUNCTION(BlueprintPure, Category="Exit|Arrival")
+    bool IsArrivalViewSettled(AActor* ExpectedView) const;
     /** Abort recovery; returns false only when no collision-safe start recovery was found. Idempotent. */
     UFUNCTION(BlueprintCallable, Category="Exit|Lease")
     bool ReleaseExitLease(bool bRestoreStart = true);

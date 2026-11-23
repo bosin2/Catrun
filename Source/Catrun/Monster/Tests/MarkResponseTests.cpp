@@ -144,4 +144,36 @@ bool FCatrunReleasedMarkFollowerTest::RunTest(const FString&)
 	}
 	return true;
 }
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunCandleLocalSweepTest, "Catrun.Monsters.CandleLocalSweepAppliesToTrackingAndPatrol", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FCatrunCandleLocalSweepTest::RunTest(const FString&)
+{
+    FMarkFixture F;
+    auto* Candle = F.World->SpawnActor<ACatrunCandle>();
+    F.Settings->CandleTotalAngle = 70.f;
+    F.Settings->CandleConeAngle = 30.f;
+    F.Settings->CandleSweepSpeed = F.Settings->CandleTrackSpeed = 150.f;
+    F.Cat->SetActorLocation(FVector(0, 100, 50));
+    for (float Override : {-1.f, 0.f, 8.f})
+    {
+        Candle->SweepHalfAngleOverride = Override;
+        const float Expected = Override < 0.f ? 20.f : Override;
+        Candle->SweepOffset = 0.f;
+        Candle->SweepDirection = 1.f;
+        Candle->PauseLeft = 0.f;
+        Candle->UpdateSweep(1.f, *F.Settings);
+        TestEqual(TEXT("Patrol uses local or default half-angle"), Candle->SweepOffset, Expected);
+        Candle->SweepOffset = 0.f;
+        Candle->TrackCat(1.f, *F.Cat, *F.Settings);
+        TestEqual(TEXT("Tracking uses the same local or default half-angle"), Candle->SweepOffset, Expected);
+        if (Override >= 0.f)
+        {
+            F.Cat->SetActorLocation(Candle->GetActorLocation() + FVector(0, -100, 0));
+            Candle->TrackCat(1.f, *F.Cat, *F.Settings);
+            TestEqual(TEXT("Left tracking stays within the signed local sweep"), Candle->SweepOffset, -Expected);
+            F.Cat->SetActorLocation(Candle->GetActorLocation() + FVector(0, 100, 0));
+        }
+    }
+    return true;
+}
 #endif

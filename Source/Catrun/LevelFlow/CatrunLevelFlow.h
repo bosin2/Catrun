@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DeveloperSettings.h"
+#include "Engine/LatentActionManager.h"
 #include "GameFramework/Actor.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Subsystems/WorldSubsystem.h"
@@ -187,7 +188,10 @@ public:
 	bool IsStage2PortalArrival() const;
 	float GetRestartFadeInDuration();
 	bool ShouldRestoreStage2EntryCheckpoint();
-	bool ConsumeStageTitle(FText& OutTitle);
+    bool IsTitleWindowOpen();
+    bool ClaimArrivalTitleGate(UCatrunExitTransitionComponent& Owner);
+    void ReleaseArrivalTitleGate(const UCatrunExitTransitionComponent& Owner);
+    bool ConsumeStageTitle(FText& OutTitle);
 	FText GetCurrentStageTitle() const;
 	bool ApplyStageCameraProfile(UCameraComponent* Camera, USpringArmComponent* SpringArm);
 	UFUNCTION(BlueprintCallable, Category="Level Flow")
@@ -217,7 +221,9 @@ private:
 	bool bSkipStageIntro = false;
 	bool bContinueArrival = false;
 	bool bRestoreStage2EntryCheckpoint = false;
-	bool bStageTitlePending = false;
+    bool bStageTitlePending = false;
+    bool bArrivalTitleReleased = false;
+    TWeakObjectPtr<UCatrunExitTransitionComponent> ArrivalTitleOwner;
 	bool bControlsOffered = false;
 	float RestartFadeInDuration = 0.f;
 	TWeakObjectPtr<UCameraComponent> GameplayCamera;
@@ -262,7 +268,9 @@ public:
 	UFUNCTION(BlueprintPure, Category="Catrun|Level Flow", meta=(WorldContext="WorldContextObject"))
 	static FText GetCurrentStageTitle(const UObject* WorldContextObject);
 	UFUNCTION(BlueprintCallable, Category="Catrun|Level Flow", meta=(WorldContext="WorldContextObject"))
-	static bool ConsumeStageTitle(const UObject* WorldContextObject, FText& OutTitle);
+    static bool ConsumeStageTitle(const UObject* WorldContextObject, FText& OutTitle);
+    UFUNCTION(BlueprintCallable, Category="Catrun|Level Flow", meta=(WorldContext="WorldContextObject", Latent, LatentInfo="LatentInfo"))
+    static void WaitForStageTitleWindow(const UObject* WorldContextObject, FLatentActionInfo LatentInfo);
 	UFUNCTION(BlueprintCallable, Category="Catrun|Level Flow", meta=(WorldContext="WorldContextObject"))
 	static bool StartNewGame(const UObject* WorldContextObject);
 	UFUNCTION(BlueprintPure, Category="Catrun|Level Flow", meta=(WorldContext="WorldContextObject"))
@@ -311,6 +319,8 @@ class CATRUN_API ACatrunStageExit : public AActor
 	GENERATED_BODY()
 public:
 	ACatrunStageExit();
+	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type Reason) override;
 	virtual void Tick(float DeltaSeconds) override;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Exit")
 	TObjectPtr<UBoxComponent> Trigger;
@@ -320,7 +330,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Exit") bool bUseExitTransition = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Exit") FVector InteriorDirectionLocal = FVector::ZeroVector;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Exit") float MinimumInteriorDepth = 0.f;
-	bool IsCenterQualified(const FVector& WorldLocation) const;
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="Exit") bool bProtectStage1Corridor = false;
+    UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="Exit") float CorridorEntryDepth = 0.f;
+    bool IsInsideCorridor(const APawn& Pawn) const;
+    bool IsCenterQualified(const FVector& WorldLocation) const;
 	UFUNCTION(BlueprintCallable, Category="Exit")
 	bool TryCompleteFor(APawn* Pawn);
 	/** Presentation, sequence ownership and completion order are authored in the exit Blueprint. */
@@ -332,7 +345,12 @@ public:
 	void ExitTravelFailed(const FText& Reason);
 	void RefreshExitTick();
 private:
-	bool bArmed = true;
+    void ObserveLocalController(APlayerController* Player);
+    UFUNCTION() void OnCorridorControllerAssigned(APawn* Pawn, AController* Controller);
+    UFUNCTION() void OnCorridorPossessionChanged(APawn* Previous, APawn* Current);
+    TWeakObjectPtr<APlayerController> CorridorController;
+    bool IsCenterBeyondDepth(const FVector& WorldLocation, float Depth) const;
+    bool bArmed = true;
 	TWeakObjectPtr<APawn> OverlappingPawn;
 	UFUNCTION()
 	void HandleOverlap(AActor* OverlappedActor, AActor* OtherActor);

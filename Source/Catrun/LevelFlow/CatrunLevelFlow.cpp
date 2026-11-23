@@ -25,6 +25,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "Misc/PackageName.h"
 #include "Monster/CatrunRestartSubsystem.h"
+#include "Monster/CatrunMarkSubsystem.h"
+#include "LatentActions.h"
 #include "Sound/CatrunNotice.h"
 #include "Perception/CatrunSafeRestore.h"
 #include "SaveGameSystem.h"
@@ -755,20 +757,73 @@ ACatrunStageExit::ACatrunStageExit()
 	OnActorEndOverlap.AddDynamic(this, &ACatrunStageExit::HandleEndOverlap);
 }
 
+void ACatrunStageExit::BeginPlay()
+{
+    Super::BeginPlay();
+    if (!bProtectStage1Corridor) return;
+    if (auto* Instance = GetGameInstance())
+        Instance->GetOnPawnControllerChanged().AddDynamic(this, &ACatrunStageExit::OnCorridorControllerAssigned);
+    ObserveLocalController(UGameplayStatics::GetPlayerController(this, 0));
+    OnCorridorPossessionChanged(nullptr, UGameplayStatics::GetPlayerPawn(this, 0));
+}
+
+void ACatrunStageExit::EndPlay(const EEndPlayReason::Type Reason)
+{
+    if (auto* Instance = GetGameInstance())
+        Instance->GetOnPawnControllerChanged().RemoveDynamic(this, &ACatrunStageExit::OnCorridorControllerAssigned);
+    ObserveLocalController(nullptr);
+    if (bProtectStage1Corridor)
+        if (auto* Marks = UCatrunMarkSubsystem::Get(this)) Marks->LeaveCorridor(*this);
+    Super::EndPlay(Reason);
+}
+
+void ACatrunStageExit::ObserveLocalController(APlayerController* Player)
+{
+    if (CorridorController.Get() == Player) return;
+    if (auto* Old = CorridorController.Get(true))
+        Old->OnPossessedPawnChanged.RemoveDynamic(this, &ACatrunStageExit::OnCorridorPossessionChanged);
+    CorridorController = Player;
+    if (Player) Player->OnPossessedPawnChanged.AddUniqueDynamic(this, &ACatrunStageExit::OnCorridorPossessionChanged);
+}
+
+void ACatrunStageExit::OnCorridorControllerAssigned(APawn* Pawn, AController* Controller)
+{
+    // PossessedBy fires before the controller commits GetPawn(). Its subsequent possession
+    // notification is the first point where both sides identify the same local player.
+    auto* Player = Cast<APlayerController>(Controller);
+    if (Pawn && Pawn->GetWorld() == GetWorld() && Player && Player->IsLocalController()
+        && Player == UGameplayStatics::GetPlayerController(this, 0))
+        ObserveLocalController(Player);
+}
+
+void ACatrunStageExit::OnCorridorPossessionChanged(APawn* Previous, APawn* Current)
+{
+    if (!GetWorld() || GetWorld()->bIsTearingDown || IsActorBeingDestroyed()) return;
+    if (auto* Old = OverlappingPawn.Get(); Old && Old != Current)
+        HandleEndOverlap(this, Old);
+    if (Current && Trigger->IsOverlappingActor(Current)) HandleOverlap(this, Current);
+}
+
 void ACatrunStageExit::HandleOverlap(AActor*, AActor* OtherActor)
 {
 	APawn* Pawn = Cast<APawn>(OtherActor);
+    if (Pawn && bProtectStage1Corridor)
+        ObserveLocalController(UGameplayStatics::GetPlayerController(this, 0));
 	if (!Pawn || !Pawn->IsLocallyControlled() || Pawn != UGameplayStatics::GetPlayerPawn(this, 0)) return;
-	OverlappingPawn = Pawn;
-	RefreshExitTick();
-	TryCompleteFor(Pawn);
+    OverlappingPawn = Pawn;
+    if (bProtectStage1Corridor)
+        if (auto* Marks = UCatrunMarkSubsystem::Get(this)) Marks->ObserveCorridor(*this, *Pawn);
+    RefreshExitTick();
+    TryCompleteFor(Pawn);
 }
 
 void ACatrunStageExit::HandleEndOverlap(AActor*, AActor* OtherActor)
 {
 	if (OverlappingPawn.Get() != OtherActor) return;
-	OverlappingPawn.Reset();
-	RefreshExitTick();
+    if (bProtectStage1Corridor)
+        if (auto* Marks = UCatrunMarkSubsystem::Get(this)) Marks->LeaveCorridor(*this);
+    OverlappingPawn.Reset();
+    RefreshExitTick();
 }
 
 void ACatrunStageExit::RefreshExitTick()
@@ -783,9 +838,14 @@ bool ACatrunStageExit::TryCompleteFor(APawn* Pawn)
     if (!bArmed || !Pawn || !Pawn->IsLocallyControlled() || Pawn != UGameplayStatics::GetPlayerPawn(this, 0) || !Trigger->IsOverlappingActor(Pawn)) return false;
     if ((bRequireCenterInside || bUseExitTransition) && !IsCenterQualified(Pawn->GetActorLocation())) return false;
 	if (const auto* Actions = Pawn->FindComponentByClass<UCatrunBasketInteractionComponent>(); Actions && (Actions->Busy || Actions->IsHidden)) return false;
+    // Rollback occupies the trigger synchronously, while hostile admission is still suspended.
+    if (ExitTransition && ExitTransition->BlocksExitQualification())
+    {
+        bArmed = false;
+        return false;
+    }
+    if (bProtectStage1Corridor && !UCatrunMarkSubsystem::IsExcludedFromPerception(Pawn)) return false;
     bArmed = false;
-    // Rolling back into the entry occupies it until the player genuinely leaves again.
-    if (ExitTransition && ExitTransition->BlocksExitQualification()) return false;
     if (bUseExitTransition) { BeginPortalPresentation(Pawn); return true; }
     return UCatrunLevelFlowLibrary::CompleteCurrentStage(this);
 }
@@ -942,11 +1002,78 @@ FText UCatrunLevelFlowSubsystem::GetCurrentStageTitle() const
     const int32 Index = Settings->FindStageIndex(GetWorld()->GetOutermost()->GetName());
     return Index == INDEX_NONE ? FText::GetEmpty() : FText::Format(NSLOCTEXT("Catrun", "StageTitleFormat", "~ {0} ~"), Settings->GetStageDisplayName(Settings->Stages[Index].StageId));
 }
+bool UCatrunLevelFlowSubsystem::ClaimArrivalTitleGate(UCatrunExitTransitionComponent& Owner)
+{
+    if (GetWorld() != Owner.GetWorld() || !IsStage2PortalArrival() || bArrivalTitleReleased) return false;
+    if (ArrivalTitleOwner.IsValid()) return ArrivalTitleOwner.Get() == &Owner;
+    ArrivalTitleOwner = &Owner;
+    return true;
+}
+
+void UCatrunLevelFlowSubsystem::ReleaseArrivalTitleGate(const UCatrunExitTransitionComponent& Owner)
+{
+    if (ArrivalTitleOwner.Get(true) != &Owner || Owner.HasExitLease()) return;
+    ArrivalTitleOwner.Reset();
+    bArrivalTitleReleased = true;
+}
+
+bool UCatrunLevelFlowSubsystem::IsTitleWindowOpen()
+{
+    ResolveRestartIntent();
+    if (!bStageTitlePending) return true;
+    if (!GetWorld() || GetWorld()->bIsTearingDown) return false;
+    if (IsStage2PortalArrival() && !bArrivalTitleReleased)
+    {
+        // Qualified directors claim synchronously in BeginPlay, before retrying the pawn/camera.
+        // A missing director must not strand the title past its two-second readiness window.
+        if (ArrivalTitleOwner.IsValid() || GetWorld()->GetTimeSeconds() <= 2.f) return false;
+        bArrivalTitleReleased = true;
+    }
+    const auto* PC = UGameplayStatics::GetPlayerController(this, 0);
+    return !UCatrunLevelFlowLibrary::ShouldHideGameplayHUD(this) && PC && PC->PlayerCameraManager
+        && !PC->PlayerCameraManager->PendingViewTarget.Target;
+}
+
+namespace
+{
+class FWaitForStageTitle final : public FPendingLatentAction
+{
+public:
+    FWaitForStageTitle(UCatrunLevelFlowSubsystem& InFlow, const FLatentActionInfo& Info)
+        : Flow(&InFlow), Target(Info.CallbackTarget.Get()), Function(Info.ExecutionFunction), Link(Info.Linkage) {}
+    virtual void UpdateOperation(FLatentResponse& Response) override
+    {
+        const UObject* Listener = Target.Get();
+        if (!Flow.IsValid() || !IsValid(Listener) || Listener->GetWorld() != Flow->GetWorld()
+            || !Flow->GetWorld() || Flow->GetWorld()->bIsTearingDown)
+        {
+            Response.DoneIf(true);
+            return;
+        }
+        Response.FinishAndTriggerIf(Flow->IsTitleWindowOpen(), Function, Link, Target);
+    }
+private:
+    TWeakObjectPtr<UCatrunLevelFlowSubsystem> Flow;
+    FWeakObjectPtr Target;
+    FName Function;
+    int32 Link;
+};
+}
+
+void UCatrunLevelFlowLibrary::WaitForStageTitleWindow(const UObject* Context, FLatentActionInfo LatentInfo)
+{
+    auto* Flow = UCatrunLevelFlowSubsystem::Get(Context);
+    if (!Flow || !IsValid(LatentInfo.CallbackTarget)) return;
+    auto& Manager = Flow->GetWorld()->GetLatentActionManager();
+    if (!Manager.FindExistingAction<FWaitForStageTitle>(LatentInfo.CallbackTarget, LatentInfo.UUID))
+        Manager.AddNewAction(LatentInfo.CallbackTarget, LatentInfo.UUID, new FWaitForStageTitle(*Flow, LatentInfo));
+}
+
 bool UCatrunLevelFlowSubsystem::ConsumeStageTitle(FText& OutTitle)
 {
     ResolveRestartIntent();
     OutTitle = FText::GetEmpty();
-    if (!bStageTitlePending) return false;
+    if (!bStageTitlePending || !IsTitleWindowOpen()) return false;
     bStageTitlePending = false;
     OutTitle = GetCurrentStageTitle();
     return !OutTitle.IsEmpty();
@@ -1054,21 +1181,35 @@ void UCatrunLevelFlowLibrary::MarkTutorialOnboardingCompleted(const UObject* Con
     if (auto* Flow = UCatrunLevelFlowSubsystem::Get(Context)) Flow->MarkTutorialOnboardingCompleted();
 }
 
+bool ACatrunStageExit::IsInsideCorridor(const APawn& Pawn) const
+{
+    return bProtectStage1Corridor && bUseExitTransition && OverlappingPawn.Get() == &Pawn
+        && !InteriorDirectionLocal.IsNearlyZero() && CorridorEntryDepth <= MinimumInteriorDepth
+        && IsCenterBeyondDepth(Pawn.GetActorLocation(), CorridorEntryDepth);
+}
+
 bool ACatrunStageExit::IsCenterQualified(const FVector& WorldLocation) const
 {
-    if (!Trigger || WorldLocation.ContainsNaN() || InteriorDirectionLocal.ContainsNaN() || !FMath::IsFinite(MinimumInteriorDepth)) return false;
+    return IsCenterBeyondDepth(WorldLocation, MinimumInteriorDepth);
+}
+
+bool ACatrunStageExit::IsCenterBeyondDepth(const FVector& WorldLocation, float Depth) const
+{
+    if (!Trigger || WorldLocation.ContainsNaN() || InteriorDirectionLocal.ContainsNaN() || !FMath::IsFinite(Depth)) return false;
     const FTransform Transform = Trigger->GetComponentTransform();
     const FVector Scale = Transform.GetScale3D().GetAbs();
     if (!Transform.IsValid() || Scale.GetMin() < UE_SMALL_NUMBER) return false;
     const FVector Local = Transform.InverseTransformPosition(WorldLocation);
     const FVector Extent = Trigger->GetUnscaledBoxExtent();
     return FMath::Abs(Local.X) <= Extent.X && FMath::Abs(Local.Y) <= Extent.Y && FMath::Abs(Local.Z) <= Extent.Z
-        && (InteriorDirectionLocal.IsNearlyZero() || FVector::DotProduct(Local, InteriorDirectionLocal.GetSafeNormal()) >= MinimumInteriorDepth);
+        && (InteriorDirectionLocal.IsNearlyZero() || FVector::DotProduct(Local, InteriorDirectionLocal.GetSafeNormal()) >= Depth);
 }
 
 void ACatrunStageExit::Tick(float DeltaSeconds)
 {
     Super::Tick(DeltaSeconds);
+    if (bProtectStage1Corridor)
+        if (auto* Marks = UCatrunMarkSubsystem::Get(this)) Marks->RefreshCorridor();
     // Sequenced motion can leave the trigger. Only gameplay motion should rearm a spent entry.
     if (ExitTransition && ExitTransition->BlocksExitQualification()) return;
     APawn* Pawn = OverlappingPawn.Get();
