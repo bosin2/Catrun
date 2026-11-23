@@ -144,7 +144,8 @@ void UCatrunCatStateComponent::UpdateFootsteps(float DeltaTime)
 	{
 		UE_LOG(LogCatrunSound, Log, TEXT("Cat moves: %s."), MoveMode == 0 ? TEXT("sneaking (silent)") : (MoveMode == 2 ? TEXT("running") : TEXT("walking")));
 		LastMoveMode = MoveMode;
-		StepTimer = 0.f;
+		// The step timer is kept: changing how the cat moves must not make an extra step every time
+		// (tapping the sneak or run key would otherwise make a footstep on every tap).
 	}
 	if (bSneaking)
 	{
@@ -152,6 +153,7 @@ void UCatrunCatStateComponent::UpdateFootsteps(float DeltaTime)
 	}
 
 	const float Interval = bRunning ? S->RunStepInterval : S->WalkStepInterval;
+	StepTimer = FMath::Min(StepTimer, Interval); // a shorter interval (starting to run) takes effect at once
 	if (StepTimer <= 0.f)
 	{
 		EmitFootstep(bRunning);

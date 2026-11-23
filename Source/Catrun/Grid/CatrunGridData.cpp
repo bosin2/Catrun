@@ -30,6 +30,10 @@ int32 FCatrunGridData::WorldToCell(const FVector& WorldLocation) const
 
 int32 FCatrunGridData::Neighbor(int32 Cell, int32 Dir) const
 {
+	if (!IsValid() || Cell < 0 || Cell >= NumCells())
+	{
+		return INDEX_NONE; // never turn a missing cell into a real one
+	}
 	const int32 X = CellX(Cell) + DirX[Dir];
 	const int32 Y = CellY(Cell) + DirY[Dir];
 	return InBounds(X, Y) ? CellIndex(X, Y) : INDEX_NONE;
@@ -102,6 +106,11 @@ bool FCatrunGridData::Bake(UWorld& World, const UCatrunSoundSettings& Settings)
 			}
 		}
 		const FBox Box = Actor->GetComponentsBoundingBox(false);
+		if (!Box.IsValid)
+		{
+			UE_LOG(LogCatrunSound, Warning, TEXT("Grid bake: floor %s has no collision bounds and is ignored."), *Actor->GetName());
+			continue;
+		}
 		Floors.Emplace(Box, Cost);
 		AllFloors += Box;
 	}
@@ -117,6 +126,16 @@ bool FCatrunGridData::Bake(UWorld& World, const UCatrunSoundSettings& Settings)
 		FMath::FloorToFloat(AllFloors.Min.Y / CellSize) * CellSize, AllFloors.Max.Z);
 	Width = FMath::CeilToInt((AllFloors.Max.X - Origin.X) / CellSize);
 	Height = FMath::CeilToInt((AllFloors.Max.Y - Origin.Y) / CellSize);
+	// Biggest grid we accept: a bigger one (a stray floor tag far away, a tiny CellSize) would take
+	// minutes to bake and a lot of memory.
+	constexpr int64 MaxCells = 1000000;
+	if (Width <= 0 || Height <= 0 || static_cast<int64>(Width) * Height > MaxCells)
+	{
+		UE_LOG(LogCatrunSound, Error, TEXT("Grid bake: the floors give a %d x %d grid (empty or more than %lld cells). Check the floor tags and CellSize."), Width, Height, MaxCells);
+		Width = 0;
+		Height = 0;
+		return false;
+	}
 
 	Walkable.Init(0, NumCells());
 	CostMultiplier.Init(1.f, NumCells());

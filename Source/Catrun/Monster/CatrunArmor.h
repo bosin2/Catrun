@@ -255,6 +255,7 @@ private:
 	friend class FCatrunPuzzleSuspensionTest;
 	friend class FCatrunReleasedMarkFollowerTest;
 	friend class FCatrunArmorTravelSafetyTest;
+	friend class FCatrunArmorPatrolSlotsAndFirstSoundTest;
 	friend class FCatrunTurnCurveHandoffTest;
 	friend class UCatrunCapturePresentationComponent;
     void PrepareForCapture();
@@ -337,9 +338,12 @@ private:
 	void OnPatrolPointReached();
 	// Walks to the patrol point PatrolIndex (waits and tries again when no path can be planned).
 	void BeginPatrolLeg();
+	// Moves PatrolIndex on to the next filled patrol slot (itself included). False when every slot is empty.
+	bool SkipEmptyPatrolSlots();
 
 	int32 PatrolIndex = 0;			// the patrol point the armor is heading to (or waiting at, then the next)
 	int32 PatrolStep = 1;			// +1 / -1 along the route
+	bool bPatrolAlerted = false;	// a sound has interrupted the patrol and no patrol point was reached since
 	bool bPatrolWaiting = false;	// standing still between two patrol points
 	float PatrolWaitLeft = 0.f;
 
