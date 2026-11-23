@@ -34,8 +34,11 @@ def inspect_map(package):
                             'bounds':[h.tuple3(v) for v in a.get_actor_bounds(False)],
                             'mesh':c.get_editor_property('static_mesh').get_path_name() if c else None,
                             'collision':str(c.get_collision_profile_name()) if c else None}
-    axes,closed=shots.door_profile(door)
-    result=dict(portal=h.tuple3(portal.get_actor_location()),door=axes, closed_yaw=closed, geometry=geometry,
+    leaves=[a for a in actors if a.get_actor_label() in (shots.DOOR_LABEL,shots.RIGHT_LABEL)]
+    result=dict(portal=h.tuple3(portal.get_actor_location()),portal_scale=h.tuple3(portal.get_actor_scale3d()),
+                leaves=[dict(label=a.get_actor_label(),location=h.tuple3(a.get_actor_location()),
+                              yaw=a.get_actor_rotation().yaw,collision=str(a.static_mesh_component.get_collision_profile_name()))
+                        for a in leaves],geometry=geometry,
                 timeout=director.get_editor_property('CinematicTimeout'),
                 gait=shots.calibrate(cat.get_component_by_class(u.SkeletalMeshComponent)))
     assert not h.dirty()
@@ -43,7 +46,7 @@ def inspect_map(package):
 
 
 def main():
-    out=ROOT/'Saved/PresentationFix20261119/DepartureProbe'/datetime.datetime.now().strftime('%Y%m%d-%H%M%S-%f')
+    out=ROOT/'Saved/StageRevision20261123/DepartureProbe'/datetime.datetime.now().strftime('%Y%m%d-%H%M%S-%f')
     out.mkdir(parents=True,exist_ok=False)
     report={'maps':{},'completed':False}
     try:

@@ -6,7 +6,6 @@
 #include "Perception/CatrunSafeRestore.h"
 #include "Perception/CatrunGroundSupport.h"
 #include "CatrunHideBasket.h"
-#include "CatrunPuzzleReset.h"
 #include "Sound/CatrunNoBellZone.h"
 #include "Sound/CatrunNotice.h"
 #include "LevelFlow/CatrunLevelFlow.h"
@@ -139,8 +138,7 @@ void UCatrunBasketInteractionComponent::TryInteract()
 		ExitBasket();
 	else if (BasketPhase == ECatrunBasketPhase::Outside && CatOwner->GetCharacterMovement()->IsMovingOnGround())
 	{
-		if (auto* Recovery = ACatrunPuzzleReset::FindNearby(CatOwner)) Recovery->TryUse(CatOwner);
-		else FindAndEnterBasket();
+		FindAndEnterBasket();
 	}
 }
 
@@ -172,7 +170,7 @@ bool UCatrunBasketInteractionComponent::FindEntryCandidate(ACatrunHideBasket*& O
 {
 	OutBasket=nullptr;
 	if (!IsInteractionAvailable() || IsHidden || BasketPhase!=ECatrunBasketPhase::Outside
-		|| !CatOwner->GetCharacterMovement()->IsMovingOnGround() || ACatrunPuzzleReset::FindNearby(CatOwner)) return false;
+		|| !CatOwner->GetCharacterMovement()->IsMovingOnGround()) return false;
 	double Nearest = InteractionRange;
 	for (TActorIterator<ACatrunHideBasket> It(GetWorld()); It; ++It)
 	{

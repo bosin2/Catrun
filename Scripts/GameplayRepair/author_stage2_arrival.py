@@ -546,6 +546,11 @@ def audit(world, sequence, director, portal, camera):
 
 def main():
     mode = arg('catrunStage2Arrival')
+    if mode in {'revise', 'revision_cold'}:
+        import stage2_arrival_revision
+        from types import SimpleNamespace
+        stage2_arrival_revision.run(SimpleNamespace(**globals()), mode)
+        return
     if mode in {'migrate', 'cold'}:
         import stage2_arrival_shots
         from types import SimpleNamespace

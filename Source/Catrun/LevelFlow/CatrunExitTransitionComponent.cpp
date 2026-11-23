@@ -343,5 +343,25 @@ void UCatrunExitTransitionComponent::EndPlay(const EEndPlayReason::Type Reason)
     const bool bWorldEnding=!World || World->bIsTearingDown || Reason==EEndPlayReason::LevelTransition
         || Reason==EEndPlayReason::EndPlayInEditor || Reason==EEndPlayReason::Quit;
     CleanupLease(!bWorldEnding,bWorldEnding);
+    if (!bWorldEnding) ReleaseArrivalTitleGate();
     Super::EndPlay(Reason);
+}
+
+bool UCatrunExitTransitionComponent::ClaimArrivalTitleGate()
+{
+    auto* LevelFlow = UCatrunLevelFlowSubsystem::Get(this);
+    return !bEnding && LevelFlow && LevelFlow->ClaimArrivalTitleGate(*this);
+}
+
+void UCatrunExitTransitionComponent::ReleaseArrivalTitleGate()
+{
+    if (auto* LevelFlow = UCatrunLevelFlowSubsystem::Get(this)) LevelFlow->ReleaseArrivalTitleGate(*this);
+}
+
+bool UCatrunExitTransitionComponent::IsArrivalViewSettled(AActor* ExpectedView) const
+{
+    if (!IsCurrentLease(LeaseSerial) || !IsValid(ExpectedView) || ExpectedView != PreviousView.Get()) return false;
+    const APlayerController* PC = Controller.Get();
+    return IsValid(PC->PlayerCameraManager) && !PC->PlayerCameraManager->PendingViewTarget.Target
+        && PC->GetViewTarget() == ExpectedView;
 }

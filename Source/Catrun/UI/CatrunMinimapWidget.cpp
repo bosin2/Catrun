@@ -33,6 +33,8 @@
 namespace
 {
 	constexpr float MarkerRefreshSeconds = .1f;
+	constexpr float DefaultHoldTransitionSeconds = .18f;
+	constexpr double MaxHeldWorldPixelScale = .90;
 	const FVector2D MapSurfaceCenter(.5, .5);
 
 	UGameViewportClient* GetViewportClient(const APlayerController* Controller)
@@ -311,8 +313,13 @@ void UCatrunMinimapWidget::NativeTick(const FGeometry& Geometry, float DeltaSeco
 	UGameViewportClient* ViewportClient = GetViewportClient(Controller);
 	FSceneViewport* Viewport = ViewportClient ? ViewportClient->GetGameViewport() : nullptr;
 	const bool bShow = Map && Map->CanUseMinimap(Controller);
-	bExpanded = Map && Map->TabInput && Map->TabInput->IsHeld(Controller, bShow);
-	UpdateLayout(Geometry.GetLocalSize());
+	const bool bHeld = Map && Map->TabInput && Map->TabInput->IsHeld(Controller, bShow);
+	if (bShow)
+		AdvanceHoldAnimation(bHeld, DeltaSeconds);
+	else
+		HoldProgress = 0.f;
+	const FVector2D ViewportSize = Geometry.GetLocalSize();
+	UpdateLayout(ViewportSize);
 	// Opacity leaves this widget ticking while game timers are paused.
 	SetRenderOpacity(bShow ? 1.f : 0.f);
 	if (!bShow)
@@ -324,7 +331,7 @@ void UCatrunMinimapWidget::NativeTick(const FGeometry& Geometry, float DeltaSeco
 	const bool bLocalProjection = IsValid(Pawn) && Viewport
 		&& GetCameraProjection(*Controller, *Viewport, View)
 		&& CatrunMinimap::MakeLocalProjection(Map->MapCenter, Map->MapSize, Map->CaptureYawDegrees,
-			Pawn->GetActorLocation(), View, NeighborhoodCoverage, MapProjection);
+			Pawn->GetActorLocation(), View, GetNeighborhoodCoverage(ViewportSize), MapProjection);
 	ApplyImageProjection();
 
 	FVector2D PlayerUV = MapSurfaceCenter;
@@ -341,14 +348,28 @@ void UCatrunMinimapWidget::NativeTick(const FGeometry& Geometry, float DeltaSeco
 	UpdateEnemyMarkers(ECatrunMinimapEnemyKind::Candle, Map->CandlePositions);
 }
 
+void UCatrunMinimapWidget::AdvanceHoldAnimation(bool bHeld, float DeltaSeconds)
+{
+	const float Target = bHeld ? 1.f : 0.f;
+	const float Duration = FMath::IsFinite(HoldTransitionDuration)
+		? FMath::Clamp(HoldTransitionDuration, 0.f, 1.f) : DefaultHoldTransitionSeconds;
+	HoldProgress = Duration > UE_SMALL_NUMBER
+		? FMath::FInterpConstantTo(HoldProgress, Target, DeltaSeconds, 1.f / Duration) : Target;
+}
+
+double UCatrunMinimapWidget::GetHoldBlend() const
+{
+	return FMath::SmoothStep(0., 1., double(HoldProgress));
+}
+
 FAnchorData UCatrunMinimapWidget::GetFrameLayout(const FAnchorData& CompactLayout, const FVector2D& ViewportSize,
-	bool bIsExpanded, float InHoldSizeMultiplier)
+	double HoldBlend, float InHoldSizeMultiplier)
 {
 	FAnchorData Layout = CompactLayout;
 	// Stretched CanvasPanel slots use these offsets as margins rather than dimensions.
 	if (Layout.Anchors.Minimum != Layout.Anchors.Maximum || Layout.Offsets.Right <= 0.f || Layout.Offsets.Bottom <= 0.f)
 		return Layout;
-	double Scale = bIsExpanded && FMath::IsFinite(InHoldSizeMultiplier) ? FMath::Max(1.f, InHoldSizeMultiplier) : 1.;
+	double HeldScale = FMath::IsFinite(InHoldSizeMultiplier) ? FMath::Max(1.f, InHoldSizeMultiplier) : 1.;
 	if (!ViewportSize.ContainsNaN() && ViewportSize.X > 0. && ViewportSize.Y > 0.)
 	{
 		const auto Available = [](double Extent, double Anchor, double Offset, double Alignment)
@@ -360,8 +381,9 @@ FAnchorData UCatrunMinimapWidget::GetFrameLayout(const FAnchorData& CompactLayou
 		};
 		const double Width = Available(ViewportSize.X, Layout.Anchors.Minimum.X, Layout.Offsets.Left, Layout.Alignment.X);
 		const double Height = Available(ViewportSize.Y, Layout.Anchors.Minimum.Y, Layout.Offsets.Top, Layout.Alignment.Y);
-		Scale = FMath::Min3(Scale, Width / Layout.Offsets.Right, Height / Layout.Offsets.Bottom);
+		HeldScale = FMath::Min3(HeldScale, Width / Layout.Offsets.Right, Height / Layout.Offsets.Bottom);
 	}
+	const double Scale = FMath::Lerp(FMath::Min(1., HeldScale), HeldScale, HoldBlend);
 	Layout.Offsets.Right *= Scale;
 	Layout.Offsets.Bottom *= Scale;
 	return Layout;
@@ -372,9 +394,38 @@ void UCatrunMinimapWidget::UpdateLayout(const FVector2D& ViewportSize)
 	if (!FrameSlot)
 		return;
 
-	const FAnchorData Layout = GetFrameLayout(CompactFrameLayout, ViewportSize, bExpanded, HoldSizeMultiplier);
+	const FAnchorData Layout = GetFrameLayout(CompactFrameLayout, ViewportSize, GetHoldBlend(), HoldSizeMultiplier);
 	if (Layout != FrameSlot->GetLayout())
 		FrameSlot->SetLayout(Layout);
+}
+
+FVector2D UCatrunMinimapWidget::GetFrameInnerSize(const FAnchorData& Layout) const
+{
+	FVector2D Size(Layout.Offsets.Right, Layout.Offsets.Bottom);
+	if (const UBorder* Border = Cast<UBorder>(FrameSlot->GetContent()))
+		Size -= FVector2D(Border->GetPadding().GetDesiredSize2f());
+	return Size;
+}
+
+double UCatrunMinimapWidget::GetNeighborhoodCoverage(const FVector2D& ViewportSize) const
+{
+	const double Blend = GetHoldBlend();
+	if (Blend == 0.)
+		return NeighborhoodCoverage;
+
+	double PixelGrowth = 1.;
+	if (FrameSlot && CompactFrameLayout.Anchors.Minimum == CompactFrameLayout.Anchors.Maximum)
+	{
+		const FVector2D CompactSize = GetFrameInnerSize(GetFrameLayout(CompactFrameLayout, ViewportSize, 0., HoldSizeMultiplier));
+		if (CompactSize.GetMin() > 0.)
+		{
+			const FVector2D HeldSize = GetFrameInnerSize(GetFrameLayout(CompactFrameLayout, ViewportSize, 1., HoldSizeMultiplier));
+			PixelGrowth = (HeldSize / CompactSize).GetMax();
+		}
+	}
+	const double Requested = FMath::IsFinite(HoldCoverageMultiplier) ? HoldCoverageMultiplier : 1.;
+	const double HeldMultiplier = FMath::Max(Requested, PixelGrowth / MaxHeldWorldPixelScale);
+	return NeighborhoodCoverage * FMath::Lerp(1., HeldMultiplier, Blend);
 }
 
 void UCatrunMinimapWidget::ApplyImageProjection() const
@@ -385,12 +436,7 @@ void UCatrunMinimapWidget::ApplyImageProjection() const
 		if (FrameSlot && CompactFrameLayout.Anchors.Minimum == CompactFrameLayout.Anchors.Maximum)
 		{
 			// Match the new canvas layout in the same paint that changes the held size.
-			LocalSize = FrameSlot->GetSize();
-			if (const UBorder* Border = Cast<UBorder>(FrameSlot->GetContent()))
-			{
-				const FMargin FramePadding = Border->GetPadding();
-				LocalSize -= FVector2D(FramePadding.GetDesiredSize2f());
-			}
+			LocalSize = GetFrameInnerSize(FrameSlot->GetLayout());
 		}
 		const FSlateRenderTransform ImageTransform = CatrunMinimap::ToImageTransform(MapProjection, LocalSize);
 		const auto& CurrentTransform = Image->GetRenderTransform();
@@ -419,14 +465,30 @@ UCanvasPanelSlot* UCatrunMinimapWidget::AddMarker(TSubclassOf<UUserWidget> Marke
 
 void UCatrunMinimapWidget::UpdateMarker(UCanvasPanelSlot& MarkerSlot, const FVector2D* DisplayUV)
 {
+	UWidget* Marker = MarkerSlot.GetContent();
+	if (!Marker)
+		return;
+
 	const ESlateVisibility MarkerVisibility = DisplayUV ? ESlateVisibility::HitTestInvisible : ESlateVisibility::Collapsed;
 	if (DisplayUV)
 	{
 		const FAnchors Anchors(static_cast<float>(DisplayUV->X), static_cast<float>(DisplayUV->Y));
 		if (MarkerSlot.GetAnchors() != Anchors)
 			MarkerSlot.SetAnchors(Anchors);
+		if (const TSharedPtr<SWidget> SlateMarker = Marker->GetCachedWidget())
+		{
+			// Scale the paint about the authored pivot, keeping the Canvas slot centered and auto-sized.
+			const double HeldMultiplier = FMath::IsFinite(HoldMarkerSizeMultiplier)
+				? FMath::Clamp(HoldMarkerSizeMultiplier, .01f, 1.f) : 1.f;
+			FWidgetTransform Transform = Marker->GetRenderTransform();
+			Transform.Scale *= FMath::Lerp(1., HeldMultiplier, GetHoldBlend());
+			const TOptional<FSlateRenderTransform> MarkerRenderTransform = Transform.IsIdentity()
+				? TOptional<FSlateRenderTransform>() : TOptional<FSlateRenderTransform>(Transform.ToSlateRenderTransform());
+			if (SlateMarker->GetRenderTransform() != MarkerRenderTransform)
+				SlateMarker->SetRenderTransform(MarkerRenderTransform);
+		}
 	}
-	if (UWidget* Marker = MarkerSlot.GetContent(); Marker && Marker->GetVisibility() != MarkerVisibility)
+	if (Marker->GetVisibility() != MarkerVisibility)
 		Marker->SetVisibility(MarkerVisibility);
 }
 
@@ -590,7 +652,7 @@ void ACatrunMinimapPresenter::HideMinimap()
 
 	if (TabInput)
 		TabInput->Cancel();
-	MinimapWidget->bExpanded = false;
+	MinimapWidget->HoldProgress = 0.f;
 	MinimapWidget->UpdateLayout(MinimapWidget->GetCachedGeometry().GetLocalSize());
 	MinimapWidget->SetRenderOpacity(0.f);
 }

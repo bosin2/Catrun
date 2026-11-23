@@ -220,22 +220,22 @@ bool FCatrunMinimapLayoutTest::RunTest(const FString&)
 	Compact.Alignment = FVector2D(1., 0.);
 	Compact.Offsets = FMargin(-24.f, 24.f, 232.f, 232.f);
 	const FVector2D Desktop(1280., 720.);
-	const FAnchorData Open = UCatrunMinimapWidget::GetFrameLayout(Compact, Desktop, true, 1.25f);
+	const FAnchorData Open = UCatrunMinimapWidget::GetFrameLayout(Compact, Desktop, 1., 1.25f);
 	TestTrue(TEXT("Held map retains authored anchors, alignment and inset"),
 		Open.Anchors == Compact.Anchors && Open.Alignment == Compact.Alignment
 		&& Open.Offsets.Left == Compact.Offsets.Left && Open.Offsets.Top == Compact.Offsets.Top);
 	TestTrue(TEXT("Holding Tab enlarges both authored dimensions by 25 percent"),
 		Open.Offsets.Right == 290.f && Open.Offsets.Bottom == 290.f);
 	TestTrue(TEXT("Closing restores the Blueprint compact placement"),
-		UCatrunMinimapWidget::GetFrameLayout(Compact, Desktop, false, 1.25f) == Compact);
+		UCatrunMinimapWidget::GetFrameLayout(Compact, Desktop, 0., 1.25f) == Compact);
 
-	const FAnchorData Tall = UCatrunMinimapWidget::GetFrameLayout(Compact, FVector2D(200., 500.), true, 1.25f);
+	const FAnchorData Tall = UCatrunMinimapWidget::GetFrameLayout(Compact, FVector2D(200., 500.), 1., 1.25f);
 	TestTrue(TEXT("Tall viewport fits by the width available from the authored right inset"),
 		Tall.Offsets.Right == 176.f && Tall.Offsets.Bottom == 176.f);
-	const FAnchorData Short = UCatrunMinimapWidget::GetFrameLayout(Compact, FVector2D(500., 270.), true, 1.25f);
+	const FAnchorData Short = UCatrunMinimapWidget::GetFrameLayout(Compact, FVector2D(500., 270.), 1., 1.25f);
 	TestTrue(TEXT("Short viewport fits by the height available from the authored top inset"),
 		Short.Offsets.Right == 246.f && Short.Offsets.Bottom == 246.f);
-	const FAnchorData Narrow = UCatrunMinimapWidget::GetFrameLayout(Compact, FVector2D(200., 500.), false, 1.25f);
+	const FAnchorData Narrow = UCatrunMinimapWidget::GetFrameLayout(Compact, FVector2D(200., 500.), 0., 1.25f);
 	TestTrue(TEXT("Compact map shrinks without clipping its authored inset"),
 		Narrow.Anchors == Compact.Anchors && Narrow.Offsets.Right == 176.f && Narrow.Offsets.Bottom == 176.f);
 	return true;
@@ -290,16 +290,32 @@ bool FCatrunMinimapEnemyLifecycleTest::RunTest(const FString&)
 		return false;
 	Presenter->MinimapWidget = NewObject<UCatrunMinimapWidget>(World, PanelClass);
 	UCatrunMinimapWidget* Widget = Presenter->MinimapWidget;
+	Widget->HoldTransitionDuration = .5f;
+	Widget->AdvanceHoldAnimation(true, .125f);
+	TestEqual(TEXT("Custom duration takes a quarter of a half-second transition"), Widget->HoldProgress, .25f);
+	Widget->AdvanceHoldAnimation(true, .375f);
+	TestEqual(TEXT("Custom duration reaches the held endpoint in half a second"), Widget->HoldProgress, 1.f);
+	Widget->AdvanceHoldAnimation(true, 10.f);
+	TestEqual(TEXT("Ten seconds of continued hold keep the endpoint expanded"), Widget->HoldProgress, 1.f);
+	Widget->AdvanceHoldAnimation(false, .25f);
+	TestEqual(TEXT("Release starts the reverse transition at the custom pace"), Widget->HoldProgress, .5f);
+	Widget->AdvanceHoldAnimation(false, .25f);
+	TestEqual(TEXT("Release restores the compact endpoint"), Widget->HoldProgress, 0.f);
+	Widget->HoldTransitionDuration = 0.f;
+	Widget->AdvanceHoldAnimation(true, 0.f);
+	TestEqual(TEXT("Zero duration expands immediately"), Widget->HoldProgress, 1.f);
+	Widget->AdvanceHoldAnimation(false, 0.f);
+	TestEqual(TEXT("Zero duration collapses immediately"), Widget->HoldProgress, 0.f);
 	// Input edges are covered through Slate in RoutedHoldAcrossStages. Prime only the detached layout here.
-	Widget->bExpanded = true;
+	Widget->HoldProgress = 1.f;
 	Presenter->MinimapWidget->NativeTick(FGeometry(), 0.f);
-	TestFalse(TEXT("An ineligible widget tick resets compact before the marker timer"), Widget->bExpanded);
+	TestEqual(TEXT("An ineligible widget tick resets compact before the marker timer"), Widget->HoldProgress, 0.f);
 	TestEqual(TEXT("Suppressed map is transparent before the next marker timer"), Presenter->MinimapWidget->GetRenderOpacity(), 0.f);
 	TestTrue(TEXT("Settings interruption is subscribed before gameplay starts"), Settings->OnSettingsOpened.IsBoundToObject(Presenter));
-	Widget->bExpanded = true;
+	Widget->HoldProgress = 1.f;
 	Widget->SetRenderOpacity(1.f);
 	Settings->OnSettingsOpened.Broadcast();
-	TestFalse(TEXT("Opening settings clears expanded state without waiting for the timer"), Presenter->MinimapWidget->bExpanded);
+	TestEqual(TEXT("Opening settings clears expanded state without waiting for the timer"), Widget->HoldProgress, 0.f);
 	TestEqual(TEXT("Opening settings hides the map immediately"), Presenter->MinimapWidget->GetRenderOpacity(), 0.f);
 
 	Presenter->EndPlay(EEndPlayReason::LevelTransition);
@@ -363,19 +379,17 @@ bool FCatrunMinimapOffscreenPreviewTest::RunTest(const FString&)
 		FPlane(0, 0, 1, 0), FPlane(1, 0, 0, 0), FPlane(0, 1, 0, 0), FPlane(0, 0, 0, 1));
 	View.SetViewRectangle(ViewRect);
 	FMinimalViewInfo::CalculateProjectionMatrixGivenViewRectangle(Camera, AspectRatio_MaintainXFOV, ViewRect, View);
-	if (!TestTrue(TEXT("Fixture produces normal local gameplay projection"),
-		CatrunMinimap::MakeLocalProjection(Presenter->MapCenter, Presenter->MapSize, Presenter->CaptureYawDegrees,
-			Cat, View, Widget->NeighborhoodCoverage, Widget->MapProjection)))
+	// This point is 1,485 units to the right of the cat. The compact half-width is 1,237.5 units.
+	const FVector Far = Cat + FRotationMatrix(Camera.Rotation).GetUnitAxis(EAxis::Y) * 1485.;
+	FVector2D FarUV;
+	if (!TestTrue(TEXT("Far armor lies within the source capture"),
+		CatrunMinimap::Project(FVector2D(Far.X, Far.Y), Presenter->MapCenter, Presenter->MapSize,
+			Presenter->CaptureYawDegrees, FarUV)))
 		return false;
 
 	const FVector2D CenterUV(.5, .5);
-	Widget->UpdateMarker(*Widget->PlayerMarker, &CenterUV);
-	const FVector2D ArmorUVs[] = { FVector2D(.70, .40), FVector2D(.10, .15) };
+	const FVector2D ArmorUVs[] = { FVector2D(.70, .40), FarUV, FVector2D(.10, .15) };
 	const FVector2D CandleUVs[] = { FVector2D(.64, .45) };
-	Widget->UpdateEnemyMarkers(ECatrunMinimapEnemyKind::Armor, ArmorUVs);
-	Widget->UpdateEnemyMarkers(ECatrunMinimapEnemyKind::Candle, CandleUVs);
-	TestEqual(TEXT("Only the in-window armor is painted"), Widget->ArmorMarkers.Num(), 1);
-	TestEqual(TEXT("The nearby candle is painted"), Widget->CandleMarkers.Num(), 1);
 
 #if WITH_EDITOR
 	FAssetCompilingManager::Get().FinishAllCompilation();
@@ -394,17 +408,51 @@ bool FCatrunMinimapOffscreenPreviewTest::RunTest(const FString&)
 		return false;
 	AddInfo(FString::Printf(TEXT("Preview output: %s"), *PreviewDirectory));
 
-	for (const bool bHeld : { false, true })
+	struct FPreviewPhase
 	{
-		Widget->bExpanded = bHeld;
+		const TCHAR* Name;
+		bool bHeld;
+		float FrameSide;
+		double Coverage;
+		double MarkerSize;
+		int32 VisibleArmor;
+	};
+	const FPreviewPhase Phases[] = {
+		{ TEXT("compact"), false, 240.f, 1., 1., 1 },
+		{ TEXT("expanding"), true, 270.f, 1.225, .925, 2 },
+		{ TEXT("held"), true, 300.f, 1.45, .85, 2 },
+		{ TEXT("collapsing"), false, 270.f, 1.225, .925, 2 },
+		{ TEXT("released"), false, 240.f, 1., 1., 1 },
+	};
+	FVector2D CompactArmorSize = FVector2D::ZeroVector;
+	FVector2D CompactCandleSize = FVector2D::ZeroVector;
+	double CompactLandmarkWidth = 0.;
+	for (const FPreviewPhase& Preview : Phases)
+	{
+		const TCHAR* Phase = Preview.Name;
+		Widget->AdvanceHoldAnimation(Preview.bHeld, .09f);
 		Widget->UpdateLayout(DrawSize);
+		if (!TestTrue(TEXT("Fixture produces local gameplay projection"),
+			CatrunMinimap::MakeLocalProjection(Presenter->MapCenter, Presenter->MapSize, Presenter->CaptureYawDegrees,
+				Cat, View, Widget->GetNeighborhoodCoverage(DrawSize), Widget->MapProjection)))
+			return false;
 		Widget->ApplyImageProjection();
+		Widget->UpdateMarker(*Widget->PlayerMarker, &CenterUV);
+		Widget->UpdateEnemyMarkers(ECatrunMinimapEnemyKind::Armor, ArmorUVs);
+		Widget->UpdateEnemyMarkers(ECatrunMinimapEnemyKind::Candle, CandleUVs);
+		int32 VisibleArmor = 0;
+		for (const UCanvasPanelSlot* Slot : Widget->ArmorMarkers)
+			VisibleArmor += Slot->GetContent()->GetVisibility() == ESlateVisibility::HitTestInvisible;
+		TestEqual(FString::Printf(TEXT("%s visible armor includes the far marker only while held"), Phase),
+			VisibleArmor, Preview.VisibleArmor);
+		TestTrue(FString::Printf(TEXT("%s nearby candle remains visible"), Phase), Widget->CandleMarkers.Num() == 1
+			&& Widget->CandleMarkers[0]->GetContent()->GetVisibility() == ESlateVisibility::HitTestInvisible);
 		UTextureRenderTarget2D* Target = Renderer.DrawWidget(SlateWidget, DrawSize);
 		FImage Pixels;
 		if (!TestNotNull(TEXT("Offscreen render target"), Target)
 			|| !TestTrue(TEXT("Slate pixels were read back"), FImageUtils::GetRenderTargetImage(Target, Pixels)))
 			return false;
-		const FString Path = PreviewDirectory / (bHeld ? TEXT("held.png") : TEXT("compact.png"));
+		const FString Path = PreviewDirectory / FString::Printf(TEXT("%s.png"), Phase);
 		if (!TestTrue(TEXT("Saved minimap preview as PNG"), FImageUtils::SaveImageByExtension(*Path, Pixels)))
 			return false;
 
@@ -412,6 +460,41 @@ bool FCatrunMinimapOffscreenPreviewTest::RunTest(const FString&)
 		const FVector2D FrameSize(FrameLayout.Offsets.Right, FrameLayout.Offsets.Bottom);
 		const FVector2D FrameOrigin = FrameLayout.Anchors.Minimum * DrawSize - FrameLayout.Alignment * FrameSize
 			+ FVector2D(FrameLayout.Offsets.Left, FrameLayout.Offsets.Top);
+		TestTrue(FString::Printf(TEXT("%s dimensions fit the animation phase"), Phase), FrameSize.Equals(FVector2D(Preview.FrameSide), .01));
+		TestTrue(FString::Printf(TEXT("%s keeps the upper-right corner fixed"), Phase),
+			(FrameOrigin + FVector2D(FrameSize.X, 0.)).Equals(FVector2D(1256., 24.), .01));
+		const FGeometry& ImageGeometry = Widget->MapBackground->GetPaintSpaceGeometry();
+		const FVector2D ImageSize = ImageGeometry.GetLocalSize();
+		const auto Texel = [&](const FVector2D& UV) { return FVector2D(ImageGeometry.LocalToAbsolute(UV * ImageSize)); };
+		const double LandmarkWidth = (Texel(FVector2D(.6, .5)) - Texel(FVector2D(.5, .5))).Size();
+		if (&Preview == &Phases[0])
+			CompactLandmarkWidth = LandmarkWidth;
+		TestTrue(FString::Printf(TEXT("%s landmark follows the animated crop"), Phase),
+			LandmarkWidth > 0. && FMath::IsNearlyEqual(LandmarkWidth,
+				CompactLandmarkWidth * (Preview.FrameSide - 20.) / 220. / Preview.Coverage, .1));
+		const auto CheckEnemyPaint = [&](const TCHAR* Kind, const UCanvasPanelSlot& Slot, const FVector2D& CaptureUV,
+			FVector2D* CompactSize)
+		{
+			const FGeometry& MarkerGeometry = Slot.GetContent()->GetPaintSpaceGeometry();
+			const FVector2D MarkerSize = MarkerGeometry.GetLocalSize();
+			const FVector2D Center = MarkerGeometry.LocalToAbsolute(MarkerSize * .5);
+			TestTrue(FString::Printf(TEXT("%s %s stays registered to its texel"), Phase, Kind), Center.Equals(Texel(CaptureUV), .5));
+			if (CompactSize)
+			{
+				const FSlateRect Rect = MarkerGeometry.GetRenderBoundingRect();
+				const FVector2D Painted(Rect.Right - Rect.Left, Rect.Bottom - Rect.Top);
+				if (&Preview == &Phases[0])
+					*CompactSize = Painted;
+				TestTrue(FString::Printf(TEXT("%s %s scales about its center"), Phase, Kind),
+					Painted.GetMin() > 0. && Painted.Equals(*CompactSize * Preview.MarkerSize, .1));
+			}
+		};
+		if (Widget->ArmorMarkers.IsValidIndex(0))
+			CheckEnemyPaint(TEXT("near armor"), *Widget->ArmorMarkers[0], ArmorUVs[0], &CompactArmorSize);
+		if (Widget->CandleMarkers.IsValidIndex(0))
+			CheckEnemyPaint(TEXT("near candle"), *Widget->CandleMarkers[0], CandleUVs[0], &CompactCandleSize);
+		if (VisibleArmor == 2)
+			CheckEnemyPaint(TEXT("far armor"), *Widget->ArmorMarkers[1], FarUV, nullptr);
 		const int32 Left = FMath::RoundToInt(FrameOrigin.X);
 		const int32 MidY = FMath::RoundToInt(FrameOrigin.Y + FrameSize.Y * .5);
 		const FIntPoint RimPixel(Left + 1, MidY);
@@ -422,7 +505,6 @@ bool FCatrunMinimapOffscreenPreviewTest::RunTest(const FString&)
 			PixelBounds.Contains(RimPixel) && PixelBounds.Contains(FillPixel) && PixelBounds.Contains(BackdropPixel)))
 			return false;
 
-		const TCHAR* State = bHeld ? TEXT("Held") : TEXT("Compact");
 		if (const UBorder* Frame = Cast<UBorder>(Widget->FrameSlot->GetContent()))
 		{
 			const TSharedPtr<SWidget> FrameSlate = Frame->GetCachedWidget();
@@ -433,7 +515,7 @@ bool FCatrunMinimapOffscreenPreviewTest::RunTest(const FString&)
 			const FGeometry& FrameGeometry = Frame->GetPaintSpaceGeometry();
 			const FVector2D PaintedSize = FrameGeometry.GetLocalSize();
 			AddInfo(FString::Printf(TEXT("%s frame draw=%d resource=%s class=%s Slate draw=%d resource=%s brush alpha=%.3f content alpha=%.3f paint bounds=%s local size=(%.1f,%.1f)"),
-				State, int32(Frame->Background.GetDrawType()), *GetPathNameSafe(BrushResource),
+				Phase, int32(Frame->Background.GetDrawType()), *GetPathNameSafe(BrushResource),
 				*GetNameSafe(BrushResource ? BrushResource->GetClass() : nullptr),
 				SlateBrush ? int32(SlateBrush->GetDrawType()) : -1, *GetPathNameSafe(SlateResource),
 				Frame->GetBrushColor().A, Frame->GetContentColorAndOpacity().A,
@@ -442,9 +524,9 @@ bool FCatrunMinimapOffscreenPreviewTest::RunTest(const FString&)
 		const float RimAlpha = Pixels.GetOnePixelLinear(RimPixel.X, RimPixel.Y).A;
 		const float FillAlpha = Pixels.GetOnePixelLinear(FillPixel.X, FillPixel.Y).A;
 		AddInfo(FString::Printf(TEXT("%s frame rim alpha %.3f at (%d,%d), padding alpha %.3f at (%d,%d)"),
-			State, RimAlpha, RimPixel.X, RimPixel.Y, FillAlpha, FillPixel.X, FillPixel.Y));
-		TestTrue(FString::Printf(TEXT("%s metallic rim is visible"), State), RimAlpha >= .25f);
-		TestTrue(FString::Printf(TEXT("%s frame padding has translucent fill"), State), FillAlpha >= .04f && FillAlpha <= .20f);
+			Phase, RimAlpha, RimPixel.X, RimPixel.Y, FillAlpha, FillPixel.X, FillPixel.Y));
+		TestTrue(FString::Printf(TEXT("%s metallic rim is visible"), Phase), RimAlpha >= .25f);
+		TestTrue(FString::Printf(TEXT("%s frame padding has translucent fill"), Phase), FillAlpha >= .04f && FillAlpha <= .20f);
 
 		const ESlateVisibility ImageVisibility = Widget->MapBackground->GetVisibility();
 		Widget->MapBackground->SetVisibility(ESlateVisibility::Hidden);
@@ -456,9 +538,24 @@ bool FCatrunMinimapOffscreenPreviewTest::RunTest(const FString&)
 			return false;
 		const float BackdropAlpha = BackdropPixels.GetOnePixelLinear(BackdropPixel.X, BackdropPixel.Y).A;
 		AddInfo(FString::Printf(TEXT("%s backdrop alpha %.3f at (%d,%d) with transparent map"),
-			State, BackdropAlpha, BackdropPixel.X, BackdropPixel.Y));
-		TestTrue(FString::Printf(TEXT("%s empty map has a stronger translucent backing than the frame padding"), State),
+			Phase, BackdropAlpha, BackdropPixel.X, BackdropPixel.Y));
+		TestTrue(FString::Printf(TEXT("%s empty map has a stronger translucent backing than the frame padding"), Phase),
 			BackdropAlpha > FillAlpha + .12f && BackdropAlpha < .50f);
+	}
+	Widget->HoldSizeMultiplier = 1.50f;
+	Widget->HoldCoverageMultiplier = 1.05f;
+	for (const FVector2D& ViewportSize : { DrawSize, FVector2D(304., 720.) })
+	{
+		Widget->AdvanceHoldAnimation(false, .18f);
+		Widget->UpdateLayout(ViewportSize);
+		const double CompactCoverage = Widget->GetNeighborhoodCoverage(ViewportSize);
+		const double CompactSide = Widget->GetFrameInnerSize(Widget->FrameSlot->GetLayout()).X;
+		Widget->AdvanceHoldAnimation(true, .18f);
+		Widget->UpdateLayout(ViewportSize);
+		const double HeldCoverage = Widget->GetNeighborhoodCoverage(ViewportSize);
+		const double HeldSide = Widget->GetFrameInnerSize(Widget->FrameSlot->GetLayout()).X;
+		TestTrue(TEXT("Custom low coverage still shrinks terrain for the available inner frame size"),
+			FMath::IsNearlyEqual((HeldSide / HeldCoverage) / (CompactSide / CompactCoverage), .90, .001));
 	}
 	return true;
 }

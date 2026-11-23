@@ -6,6 +6,9 @@
 #include "Interaction/CatrunPuzzleSuspension.h"
 #include "Monster/CatrunRestartSubsystem.h"
 #include "Monster/CatrunCandle.h"
+#include "Monster/CatrunArmor.h"
+#include "Monster/CatrunPatrolPoint.h"
+#include "Monster/CatrunCapturePresentationComponent.h"
 #include "Monster/CatrunMarkSubsystem.h"
 #include "Sound/SoundGridManager.h"
 #include "Camera/CameraActor.h"
@@ -235,6 +238,37 @@ bool FCatrunExitRollbackAdmissionTest::RunTest(const FString&)
     return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunUnqualifiedLeaseRollbackTest,"Catrun.LevelFlow.ExitRollbackDisarmsBeforeFirstPhysicalEntry",EAutomationTestFlags::EditorContext|EAutomationTestFlags::EngineFilter)
+bool FCatrunUnqualifiedLeaseRollbackTest::RunTest(const FString&)
+{
+    for (bool bCorridor : {false, true})
+    {
+        FExitLeaseFixture F;
+        const FVector Start(30,0,26), Outside(180,0,26);
+        F.Exit->bProtectStage1Corridor = bCorridor;
+        F.Exit->Tags.Add(TEXT("CatrunAuthoredStage1Exit"));
+        F.Exit->InteriorDirectionLocal = FVector::ForwardVector;
+        F.Exit->CorridorEntryDepth = -40;
+        F.Exit->MinimumInteriorDepth = 20;
+        F.Cat->SetActorLocation(Start);
+        FText Failure;
+        if (!AcquireForTest(*this, F, Failure, TEXT("Explicit lease before first physical qualification"))) return false;
+        F.Cat->SetActorLocation(Outside);
+        F.Exit->Trigger->SetGenerateOverlapEvents(true);
+        F.Exit->Trigger->UpdateOverlaps();
+        TestFalse(TEXT("Player is outside when trigger is enabled"), F.Exit->Trigger->IsOverlappingActor(F.Cat));
+        TestTrue(TEXT("Rollback returns to occupied trigger"), F.Exit->ExitTransition->ReleaseExitLease(true));
+        TestTrue(TEXT("Actual rollback overlap was delivered"), F.Exit->Trigger->IsOverlappingActor(F.Cat));
+        F.Exit->Tick(0);
+        TestEqual(TEXT("Rollback into previously armed trigger does not start film"), F.Exit->Qualified, 0);
+        F.Cat->SetActorLocation(Outside);
+        F.Cat->SetActorLocation(Start);
+        F.Exit->Tick(0);
+        TestEqual(TEXT("Later genuine reentry still starts one film"), F.Exit->Qualified, 1);
+    }
+    return true;
+}
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunExitQueryTest,"Catrun.LevelFlow.ExitCollisionQueriesNeverMovePawn",EAutomationTestFlags::EditorContext|EAutomationTestFlags::EngineFilter)
 bool FCatrunExitQueryTest::RunTest(const FString&)
 {
@@ -413,6 +447,209 @@ bool FCatrunExitSubjectLifetimeTest::RunTest(const FString&)
         TestFalse(TEXT("Lost subject cannot commit travel"),Lease->CommitExitTravel());
         TestTrue(TEXT("Lost subject never queues a destination"),GEngine->GetWorldContextFromWorld(F.World)->TravelURL.IsEmpty());
         TestEqual(TEXT("Late callback cannot duplicate abort"),F.Exit->TravelFailures,1);
+    }
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunCorridorFreeWalkTest, "Catrun.LevelFlow.Stage1CorridorFreeWalk", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FCatrunCorridorFreeWalkTest::RunTest(const FString&)
+{
+    FExitLeaseFixture F;
+    F.Floor->Tags.Add(TEXT("SoundFloor"));
+    auto* Manager = F.World->SpawnActor<ASoundGridManager>();
+    auto* Candle = F.World->SpawnActor<ACatrunCandle>();
+    Candle->bAutoAlignEyes = false;
+    auto* Armor = F.World->SpawnActor<ACatrunArmor>();
+    Armor->SetActorLocation(FVector(350, 0, 100));
+    F.Exit->Tags.Add(TEXT("CatrunAuthoredStage1Exit"));
+    auto* Patrol = F.World->SpawnActor<ACatrunArmor>(FVector(-500, 350, 100), FRotator::ZeroRotator);
+    auto* Point = F.World->SpawnActor<ACatrunPatrolPoint>(FVector(-650, 350, 100), FRotator::ZeroRotator);
+    Patrol->PatrolPoints.Add(Point);
+    Patrol->BeginPatrolLeg();
+    const TArray<FVector> PatrolPath = Patrol->PathCorners;
+    Armor->bReturnToPost = false;
+    F.Exit->bProtectStage1Corridor = true;
+    F.Exit->InteriorDirectionLocal = FVector::ForwardVector;
+    F.Exit->CorridorEntryDepth = -40;
+    F.Exit->MinimumInteriorDepth = 45;
+    F.Cat->SetActorLocation(FVector(-50, 0, 26));
+    Candle->SetActorLocation(FVector(-45, 0, 0));
+    Candle->Tick(.016f);
+    auto* Marks = UCatrunMarkSubsystem::Get(F.World);
+    Marks->Tick(.3f);
+    if (!TestTrue(TEXT("Actual candle and armor track before threshold"), Candle->IsTrackingCat() && Marks->IsMarked() && Armor->IsFollowingMark())) return false;
+    FCatrunSoundEvent Bell;
+    Bell.Instigator = F.Cat;
+    Bell.Location = F.Cat->GetActorLocation();
+    Armor->OnSoundHeard_Implementation(Bell, 100);
+    if (!TestTrue(TEXT("Live bell owns a real path and cat source"), Armor->InvestigationSource.Get() == F.Cat &&
+        Armor->bInvestigatingSound && !Armor->PathCorners.IsEmpty() && Armor->HasDestination())) return false;
+    Armor->GetCharacterMovement()->Velocity = FVector(-150, 0, 0);
+    F.Exit->Trigger->SetGenerateOverlapEvents(true);
+    F.Exit->Trigger->UpdateOverlaps();
+    F.Exit->Tick(0);
+    TestTrue(TEXT("Before plane, ordinary detection remains enabled"), Marks->IsMarked());
+    F.Cat->SetActorLocation(FVector(-35, 0, 26));
+    F.Exit->Tick(0);
+    TestFalse(TEXT("Entering corridor immediately clears candle recognition"), Candle->IsTrackingCat());
+    TestFalse(TEXT("Entering corridor clears actual mark and armor assignment"), Marks->IsMarked() || Armor->IsFollowingMark());
+    TestTrue(TEXT("Armor dropped the cat object, seen flag, cell, sound snapshot and running path"),
+        !Armor->InvestigationSource.IsValid() && !Armor->IsSeeingCat() && !Armor->bInvestigatingSound
+        && !Armor->IsFollowingMark() && !Armor->HasDestination() && Armor->Destination.IsZero()
+        && Armor->MarkTargetCell == FIntPoint(INT32_MIN, INT32_MIN) && Armor->PathCorners.IsEmpty()
+        && Armor->TravelIntent == ACatrunArmor::ETravelIntent::None && Armor->GetAction() == EArmorAction::Idle
+        && Armor->GetVelocity().IsNearlyZero() && Armor->GetCharacterMovement()->MaxWalkSpeed == Armor->WalkSpeed);
+    TestTrue(TEXT("An unrelated patrol keeps its destination and viable path"),
+        !PatrolPath.IsEmpty() && Patrol->TravelIntent == ACatrunArmor::ETravelIntent::Patrol && Patrol->PathCorners == PatrolPath);
+    Armor->OnSoundHeard_Implementation(Bell, 100);
+    Armor->SetFollowingMark(true);
+    Armor->SetActorLocation(FVector(45, 0, 100));
+    Armor->Tick(.016f);
+    TestTrue(TEXT("A delayed bell, mark and actual proximity cannot reacquire the excluded cat"),
+        !Armor->InvestigationSource.IsValid() && !Armor->IsFollowingMark() && !Armor->IsSeeingCat()
+        && !Armor->bInvestigatingSound && !Armor->CapturePresentation->IsCapturing());
+    FCatrunSoundEvent Device;
+    Device.Source = ECatrunSoundSource::Device;
+    Device.Instigator = F.Floor;
+    Device.Location = FVector(400, 200, 0);
+    Armor->OnSoundHeard_Implementation(Device, 100);
+    TestTrue(TEXT("Independent device still starts a real investigation"), Armor->bInvestigatingSound &&
+        Armor->InvestigationSource.Get() == F.Floor && Armor->Destination.Equals(Device.Location));
+    TestEqual(TEXT("Camera has not started"), F.Exit->Qualified, 0);
+    TestTrue(TEXT("Free walk keeps player movement and hostile simulation"), !F.PC->IsMoveInputIgnored() && F.Cat->GetCharacterMovement()->MovementMode == MOVE_Walking && !UCatrunPuzzleSuspension::IsSuspended(F.Cat));
+    Candle->Tick(.016f);
+    TestFalse(TEXT("Candle cannot reacquire inside corridor"), Marks->IsMarked() || Candle->IsTrackingCat());
+    const bool bCaptured = Armor->CapturePresentation->BeginCapture(F.Cat, Manager->GetSettings());
+    TestFalse(TEXT("Actual capture admission rejects protected cat"), bCaptured);
+    if (bCaptured) return false;
+    F.Cat->SetActorLocation(FVector(-50, 0, 26));
+    F.Exit->Tick(0);
+    Candle->Tick(.016f);
+    TestTrue(TEXT("Backing across entry plane restores sight"), Marks->IsMarked());
+    F.Cat->SetActorLocation(FVector(-35, 0, 26));
+    F.Exit->Tick(0);
+    TestTrue(TEXT("Reentry with an unrelated investigation retains its source and route"),
+        Armor->InvestigationSource.Get() == F.Floor && Armor->IsInvestigatingSound());
+    F.Exit->Destroy();
+    TestFalse(TEXT("Live destruction of the corridor owner restores ordinary perception"), UCatrunMarkSubsystem::IsExcludedFromPerception(F.Cat));
+    TestTrue(TEXT("Actual capture is enabled again outside"), Armor->CapturePresentation->BeginCapture(F.Cat, Manager->GetSettings()));
+    Armor->CapturePresentation->AbortCapture();
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunCorridorReplacementTest, "Catrun.LevelFlow.Stage1CorridorStationaryReplacement", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FCatrunCorridorReplacementTest::RunTest(const FString&)
+{
+    for (const double X : {-150., -30., 50.})
+    {
+        FExitLeaseFixture F;
+        F.Cat->SetActorLocation(FVector(-350, 0, 26));
+        F.Exit->Tags.Add(TEXT("CatrunAuthoredStage1Exit"));
+        F.Exit->bProtectStage1Corridor = true;
+        F.Exit->InteriorDirectionLocal = FVector::ForwardVector;
+        F.Exit->CorridorEntryDepth = -40;
+        F.Exit->MinimumInteriorDepth = 45;
+        F.Exit->Trigger->SetGenerateOverlapEvents(true);
+        F.Cat->SetActorLocation(FVector(0, 0, 26));
+        F.Exit->Trigger->UpdateOverlaps();
+        TestTrue(TEXT("Old cat enters corridor"), UCatrunMarkSubsystem::IsExcludedFromPerception(F.Cat));
+        F.Cat->SetActorLocation(FVector(-350, 0, 26));
+        F.Exit->Trigger->UpdateOverlaps();
+        TestFalse(TEXT("Empty exit does not tick"), F.Exit->IsActorTickEnabled());
+        FActorSpawnParameters Spawn;
+        Spawn.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+        auto* Replacement = F.World->SpawnActor<ACharacter>(FVector(X, 0, 96), FRotator::ZeroRotator, Spawn);
+        Replacement->GetCapsuleComponent()->SetCapsuleSize(20,24);
+        Replacement->SetActorLocation(FVector(X,0,26));
+        F.Exit->Trigger->UpdateOverlaps();
+        TestEqual(TEXT("Replacement has the intended overlap before possession"), F.Exit->Trigger->IsOverlappingActor(Replacement), X >= -40.);
+        TestFalse(TEXT("Unpossessed pawn is not the corridor subject"), UCatrunMarkSubsystem::IsExcludedFromPerception(Replacement));
+        const FVector Stationary = Replacement->GetActorLocation();
+        F.PC->Possess(Replacement);
+        TestEqual(TEXT("Admission requires no movement"), Replacement->GetActorLocation(), Stationary);
+        TestEqual(TEXT("Possession reconciles exclusion before next tick"), UCatrunMarkSubsystem::IsExcludedFromPerception(Replacement), X >= -40.);
+        TestFalse(TEXT("Former pawn is no longer excluded"), UCatrunMarkSubsystem::IsExcludedFromPerception(F.Cat));
+        TestEqual(TEXT("Stationary pawn past camera plane invokes presentation once"), F.Exit->Qualified, X >= 45. ? 1 : 0);
+        F.Exit->Destroy();
+        F.PC->Possess(F.Cat);
+        TestFalse(TEXT("Exit teardown leaves later possession unrestricted"), UCatrunMarkSubsystem::IsExcludedFromPerception(F.Cat));
+    }
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunArrivalTitleGateTest, "Catrun.LevelFlow.Stage2ArrivalTitleGate", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FCatrunArrivalTitleGateTest::RunTest(const FString&)
+{
+    for (auto Reason : {ECatrunArrivalRestart::Clear, ECatrunArrivalRestart::Continue, ECatrunArrivalRestart::SkipIntro})
+    {
+        FExitLeaseFixture F;
+        auto* Settings = GetMutableDefault<UCatrunLevelFlowSettings>();
+        Settings->Stages[0].StageId = TEXT("Stage2");
+        Settings->Stages[1].StageId = TEXT("Other");
+        F.World->URL.AddOption(TEXT("FromStage1Portal"));
+        FCheckpointBackend Backend; Backend.bExists = false;
+        auto* Session = F.Track(Backend);
+        const FString Package = F.World->GetOutermost()->GetName();
+        Session->AcceptTravel(Package, false, false, Reason);
+        F.Gameplay->Tags.Add(TEXT("CatrunGameplayCamera"));
+        auto* Flow = UCatrunLevelFlowSubsystem::Get(F.World);
+        FText Title;
+        if (Reason != ECatrunArrivalRestart::Clear)
+        {
+            TestEqual(TEXT("Skip and Continue preserve existing title rules"), Flow->ConsumeStageTitle(Title), Reason == ECatrunArrivalRestart::Continue);
+            TestFalse(TEXT("Skipped arrival does not claim presentation"), F.Exit->ExitTransition->ClaimArrivalTitleGate());
+            continue;
+        }
+        TestFalse(TEXT("Readiness before arrival lease cannot consume title"), Flow->ConsumeStageTitle(Title));
+        auto* Director = F.Exit->ExitTransition.Get();
+        TestTrue(TEXT("Qualified director claims route title gate"), Director->ClaimArrivalTitleGate());
+        auto* Other = F.World->SpawnActor<ACatrunStageExit>(FVector(700, 400, 80), FRotator::ZeroRotator)->ExitTransition.Get();
+        TestFalse(TEXT("A different owner cannot claim the gate"), Other->ClaimArrivalTitleGate());
+        Other->ReleaseArrivalTitleGate();
+        TestFalse(TEXT("Foreign release preserves title deferral"), Flow->ConsumeStageTitle(Title));
+        FText Failure;
+        if (!AcquireForTest(*this, F, Failure, TEXT("Actual arrival camera lease acquired"))) return false;
+        TestFalse(TEXT("Playing arrival cannot consume title"), Flow->ConsumeStageTitle(Title));
+        Director->ReleaseExitLease(false);
+        TestFalse(TEXT("Title still waits for director visual cleanup"), Flow->ConsumeStageTitle(Title));
+        auto* BlendTo = F.World->SpawnActor<ACameraActor>();
+        BlendTo->Tags.Add(TEXT("CatrunGameplayCamera"));
+        F.PC->SetViewTargetWithBlend(BlendTo, .2f);
+        Director->ReleaseArrivalTitleGate();
+        TestFalse(TEXT("Even an early director release waits for the real native blend"), Flow->ConsumeStageTitle(Title));
+        F.PC->PlayerCameraManager->UpdateCamera(.3f);
+        TestTrue(TEXT("After cleanup exactly one title is delivered"), Flow->ConsumeStageTitle(Title));
+        TestFalse(TEXT("Duplicate finish cannot replay title"), Flow->ConsumeStageTitle(Title));
+    }
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunTitleReadinessAbortTest, "Catrun.LevelFlow.Stage2TitleReadinessAbort", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FCatrunTitleReadinessAbortTest::RunTest(const FString&)
+{
+    for (const bool bMissingDirector : {false, true})
+    {
+        FExitLeaseFixture F;
+        auto* Settings = GetMutableDefault<UCatrunLevelFlowSettings>();
+        Settings->Stages[0].StageId = TEXT("Stage2");
+        Settings->Stages[1].StageId = TEXT("Other");
+        F.World->URL.AddOption(TEXT("FromStage1Portal"));
+        FCheckpointBackend Backend;
+        Backend.bExists = false;
+        F.Track(Backend);
+        F.Gameplay->Tags.Add(TEXT("CatrunGameplayCamera"));
+        auto* Flow = UCatrunLevelFlowSubsystem::Get(F.World);
+        FText Title;
+        TestFalse(TEXT("Both readiness cases start with deferred title"), Flow->ConsumeStageTitle(Title));
+        if (bMissingDirector)
+            F.World->TimeSeconds += 2.1;
+        else
+        {
+            TestTrue(TEXT("Director can claim before camera acquisition"), F.Exit->ExitTransition->ClaimArrivalTitleGate());
+            F.Exit->Destroy();
+        }
+        TestTrue(TEXT("Readiness abort or missing director returns pending title to gameplay"), Flow->ConsumeStageTitle(Title));
+        TestFalse(TEXT("Aborted gate cannot publish twice"), Flow->ConsumeStageTitle(Title));
     }
     return true;
 }

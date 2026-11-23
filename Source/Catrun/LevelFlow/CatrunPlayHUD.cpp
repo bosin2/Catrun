@@ -16,7 +16,6 @@
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Interaction/CatrunBasketInteractionComponent.h"
-#include "Interaction/CatrunPuzzleReset.h"
 #include "Kismet/GameplayStatics.h"
 #include "Monster/CatrunMarkSubsystem.h"
 #include "Monster/CatrunRestartSubsystem.h"
@@ -128,7 +127,6 @@ TSharedRef<SWidget> UCatrunPlayHUD::RebuildWidget()
 		AddButton(MenuBox,TEXT("RestartButton"),TEXT("이 구간 처음부터"),Label)->OnClicked.AddDynamic(this,&UCatrunPlayHUD::RequestRestart);
 		RestartLabel = Label;
 		AddButton(MenuBox,TEXT("MainMenuButton"),TEXT("시작 메뉴로"),Label)->OnClicked.AddDynamic(this,&UCatrunPlayHUD::ReturnToMenu);
-		AddText(MenuBox,TEXT("RecoveryHelp"),TEXT("동상을 잘못 밀었다면 방 안의 푸른 복구 장치에서 F를 누르세요. 해당 동상만 되돌아갑니다."),17,Ink);
 		PausePanel->SetVisibility(ESlateVisibility::Collapsed);
 	}
 	return Super::RebuildWidget();
@@ -188,8 +186,6 @@ void UCatrunPlayHUD::Refresh()
 	FString Hint = TEXT("방울은 현재 위치에서 울려요. 울린 뒤 다른 길로 빠져나가세요.");
 	FString State = TEXT("흔적 없음");
 	if (ACatrunNoBellZone::IsBellForbidden(*Cat)) Hint=TEXT("캣홀 근처에서는 방울을 울릴 수 없어요. 통로를 벗어나세요.");
-	if (auto* Recovery = ACatrunPuzzleReset::FindNearby(Cat))
-		Hint=FString::Printf(TEXT("%s  동상 %s 원위치  ·  적과 표식은 그대로 유지됩니다."), *InteractKey, *Recovery->PuzzleId.ToString());
 	if (Marked) { State=TEXT("표식 · 바구니로"); Hint=FString::Printf(TEXT("촛불에 발각됐어요. 바구니 가까이에서 %s를 눌러 표식을 지우세요."),*InteractKey); }
 	if (Hidden) { State=TEXT("바구니 안 · 은신"); Hint=FString::Printf(TEXT("%s  바구니에서 나오기  ·  출구 앞이 안전한지 살펴보세요."),*InteractKey); }
 	if (Restart && Restart->IsCatching()) { State=TEXT("붙잡혔어요"); Hint=TEXT("잠시 후 이 구간의 시작 지점에서 다시 시작합니다."); }

@@ -1,4 +1,5 @@
 #include "CatrunCapturePresentationComponent.h"
+#include "CatrunMarkSubsystem.h"
 #include "CatrunArmor.h"
 #include "Interaction/CatrunBasketInteractionComponent.h"
 #include "Perception/CatrunSafeRestore.h"
@@ -71,7 +72,8 @@ bool UCatrunCapturePresentationComponent::BeginCapture(APawn* InCat, const UCatr
 	auto* OwnerArmor = Cast<ACatrunArmor>(GetOwner());
 	auto* Restart = UCatrunRestartSubsystem::Get(this);
 	if (bBeginningCapture || bCleaningUp || bEndingPlay || IsCapturing() || !IsValid(InCat) || !IsValid(OwnerArmor) || !IsValid(InSettings) || !Restart) return false;
-	// Cleanup may run inside Framing listeners; keep this guard until the outer setup unwinds.
+    if (UCatrunMarkSubsystem::IsExcludedFromPerception(InCat)) return false;
+    // Cleanup may run inside Framing listeners; keep this guard until the outer setup unwinds.
 	TGuardValue<bool> BeginningGuard(bBeginningCapture, true);
 	bAbortPreparation = false;
 	if (!Restart->TryBeginCatch(this)) return false;

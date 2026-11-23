@@ -234,7 +234,8 @@ public:
 
 	// True while the cat is inside the detection circle.
 	UFUNCTION(BlueprintPure, Category = "Armor|Detection")
-	bool IsSeeingCat() const { return bSeeingCat; }
+    bool IsSeeingCat() const { return bSeeingCat; }
+    void ForgetCorridorCat(const APawn& Cat);
 
 	// Show the current action above the armor and draw its path and destination.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debug")
@@ -256,7 +257,10 @@ private:
 	friend class FCatrunArmorTravelSafetyTest;
 	friend class FCatrunTurnCurveHandoffTest;
 	friend class UCatrunCapturePresentationComponent;
-	void PrepareForCapture();
+    void PrepareForCapture();
+    void DiscardActiveTrip();
+    TWeakObjectPtr<AActor> InvestigationSource;
+    friend class FCatrunCorridorFreeWalkTest;
 	void CatchOwnerChanged(UObject* CaptureOwner);
 	bool bWaitingForCapture = false;
 	bool bCaptureWaitMeshPaused = false;

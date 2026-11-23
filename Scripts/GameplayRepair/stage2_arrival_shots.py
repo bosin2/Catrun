@@ -318,6 +318,8 @@ def verify_component_locators(h,world,seq,pawn):
         def live(name):
             return h.one(seq_player.get_bound_objects(seq.get_binding_id(parts[name])))
         portal_children=[*PLANES,'BlueLight']
+        if 'Stone' in parts:
+            portal_children.append('Stone')
         if STYLE_COMPONENT in parts:
             portal_children.append(STYLE_COMPONENT)
         meshes={'Stone','Runes',*PLANES}
@@ -334,6 +336,8 @@ def verify_component_locators(h,world,seq,pawn):
             expected=actor.get_component_by_class(u.CameraComponent) if child.endswith('Lens') else actor.get_editor_property(child)
             assert actual==expected and actual.get_owner()==actor,(child,actual,expected,actor)
             resolved[child]=[parent,actual.get_name(),actual.get_class().get_name()]
+            if child=='Stone':
+                assert actual.get_editor_property('hidden_in_game') or not actual.is_visible(),actual
             if child==STYLE_COMPONENT:
                 assert isinstance(actual,u.StaticMeshComponent)
                 assert actual.get_path_name()==actor.get_path_name()+'.'+STYLE_COMPONENT,actual.get_path_name()

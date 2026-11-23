@@ -498,7 +498,8 @@ def make_director(title):
     is_valid = q.fn(SYSTEM + 'IsValid', Object=controller)
     has_owner = q.branch((is_valid, 'ReturnValue'))
     wire(begin, 'then', delay, 'execute')
-    wire(delay, 'then', has_owner, 'execute')
+    wait = q.fn(FLOW + 'WaitForStageTitleWindow')
+    q.chain(delay, wait, has_owner)
     local = q.fn('/Script/Engine.Controller:IsLocalPlayerController', target=controller)
     local_gate = q.branch((local, 'ReturnValue'))
     wire(has_owner, 'then', local_gate, 'execute')
@@ -693,6 +694,7 @@ def audit_graphs(main, selector, title, director, preservation):
     assert not editor(g).find_event_node('ReceiveTick')
     assert not u.get_default_object(director.generated_class()).get_editor_property(
         'primary_actor_tick').get_editor_property('start_with_tick_enabled')
+    audit_title_wait(director)
     consume = exactly_one(g, '|ConsumeStageTitle')
     accept = pin(consume, 'ReturnValue', True).list_connected_pins()
     assert len(accept) == 1 and str(accept[0].get_pin_name()) == 'Condition'
@@ -702,6 +704,41 @@ def audit_graphs(main, selector, title, director, preservation):
     linked_to(consume, 'OutTitle', (set_title.get_name(), 'TitleText'))
     exactly_one(g, '|AddToViewport')
     exactly_one(g, '|RemoveFromParent')
+
+
+def audit_title_wait(director):
+    graph = BP.get_graph(director, 'EventGraph')
+    delay = exactly_one(graph, '|Delay')
+    wait = exactly_one(graph, '|WaitForStageTitleWindow')
+    linked_to(delay, 'then', (wait.get_name(), 'execute'))
+    (resume,) = pin(wait, 'then', True).list_connected_pins()
+    branch = resume.get_owning_node()
+    assert str(resume.get_pin_name()) == 'execute' and branch.get_class().get_name() == 'K2Node_IfThenElse'
+    consume = exactly_one(graph, '|ConsumeStageTitle')
+    (local_check,) = pin(branch, 'then', True).list_connected_pins()
+    linked_to(local_check.get_owning_node(), 'then', (consume.get_name(), 'execute'))
+    assert director.get_editor_property('status') == u.BlueprintStatus.BS_UP_TO_DATE
+
+
+def defer_existing_title():
+    director = asset(DIRECTOR)
+    graph = BP.get_graph(director, 'EventGraph')
+    if any(str(i.type_id).endswith('|WaitForStageTitleWindow') for i in node_infos(graph)):
+        audit_title_wait(director)
+        return
+    assert DIRECTOR not in dirty_packages()
+    delay = exactly_one(graph, '|Delay')
+    (resume,) = pin(delay, 'then', True).list_connected_pins()
+    owner_gate = resume.get_owning_node()
+    assert str(resume.get_pin_name()) == 'execute' and owner_gate.get_class().get_name() == 'K2Node_IfThenElse'
+    output = pin(delay, 'then', True)
+    BP.break_pins(BP._pin_to_id(output), BP._pin_to_id(resume))
+    q = Graph(graph, 700, -280)
+    wait = q.fn(FLOW + 'WaitForStageTitleWindow')
+    q.chain(delay, wait, owner_gate)
+    compile_bp(director)
+    audit_title_wait(director)
+    save(director)
 
 
 def audit_saved(include_maps):
@@ -762,7 +799,8 @@ def main():
     assert ed and not ed.get_game_world()
     mode = os.environ.get('CATRUN_CHAPTER_MODE', 'probe').lower()
     actions = {'probe': probe, 'author': author, 'maps': author_maps, 'audit': lambda: audit_saved(True),
-               'audit_widgets': lambda: audit_saved(False)}
+               'audit_widgets': lambda: audit_saved(False), 'defer_title': defer_existing_title,
+               'audit_deferred_title': lambda: audit_title_wait(asset(DIRECTOR))}
     actions[mode]()
     print('CATRUN_CHAPTER_' + mode.upper() + '_COMPLETE')
 

@@ -299,3 +299,119 @@ def arrival_timing(bp, update=False):
         compile_bp(bp)
         return arrival_timing(bp)
     return values
+
+def revision_graph(bp, apply=False, unlock_blend=False):
+    """Patch the saved graph in place, retaining existing events, comments and delegates."""
+    if apply:
+        bp.modify()
+        BP.add_variable(bp,'NaturalPlaybackEnded','bool')
+        compile_bp(bp)
+    graph = BP.get_graph(bp, 'EventGraph')
+    infos = BP.get_node_infos(BP.find_nodes(graph))
+
+    def nodes(suffix):
+        return [i.node for i in infos if str(i.type_id).endswith('|' + suffix)]
+
+    def only(items):
+        item, = items
+        return item
+
+    def linked(node, name='then', output=True):
+        return only(pin(node, name, output).list_connected_pins()).get_owning_node()
+
+    thresholds = [i.node for i in infos if str(i.type_id).endswith('float>=float')
+                  and float(pin(i.node, 'B').get_pin_value()) > 1.]
+    abort_timer = only(n for n in nodes('SetTimerbyFunctionName')
+                       if str(pin(n, 'FunctionName').get_pin_value()).strip('"') == 'AbortArrival'
+                       and float(pin(n, 'Time').get_pin_value()) > 2.)
+    finish_timer = only(n for n in nodes('SetTimerbyFunctionName')
+                        if str(pin(n, 'FunctionName').get_pin_value()).strip('"') == 'FinishArrival')
+    cubic = only(n for n in nodes('SetViewTargetWithBlend') if float(pin(n, 'BlendTime').get_pin_value()) > 0)
+    if unlock_blend:
+        assert str(pin(cubic,'bLockOutgoing').get_pin_value()).lower()=='true'
+        assert abs(float(pin(cubic,'BlendTime').get_pin_value())-1.2)<.002
+        bp.modify()
+        literal(cubic,'bLockOutgoing','false')
+        compile_bp(bp)
+        return revision_graph(bp)
+    settings = [(only(thresholds), 'B', 14.8, 11.4), (abort_timer, 'Time', 18.8, 14.6),
+                (cubic, 'BlendTime', 2., 1.2), (finish_timer, 'Time', 2.06, 1.26)]
+    claims, releases = nodes('ClaimArrivalTitleGate'), nodes('ReleaseArrivalTitleGate')
+    qualified = linked(only(nodes('IsStage2PortalArrival')), 'ReturnValue')
+    reset = only(nodes('ResetBindings'))
+    has_actor = linked(reset, 'execute', False)
+    stopped = linked(has_actor, 'execute', False)
+    disable = linked(stopped, 'execute', False)
+    has_player = linked(disable, 'execute', False)
+    abort_event = only(i.node for i in infos if str(i.type_id).endswith('|Custom|AbortArrival'))
+    def custom(name):
+        return only(i.node for i in infos if str(i.type_id).endswith('|Custom|'+name))
+    natural_handoff=linked(linked(custom('SequenceFinished')))
+    finish_handoff=linked(linked(custom('FinishArrival')))
+    # The monitor's HandoffStarted branch validates either the outgoing or gameplay view.
+    monitor=custom('MonitorArrival')
+    for _ in range(5):
+        monitor=linked(monitor)
+    monitor_returning=linked(monitor)
+    active = abort_event
+    # Abort event -> close readiness -> clear four timers -> Playing branch.
+    for _ in range(6):
+        active = linked(active)
+    assert all(n.get_class().get_name() == 'K2Node_IfThenElse' for n in (qualified, active, has_actor, has_player))
+    assert linked(active, 'Condition', False).find_output_pin('Playing').is_valid()
+    if apply and not claims:
+        assert not releases and all(abs(float(pin(n, k).get_pin_value()) - old) < .002 for n,k,old,_ in settings)
+        bp.modify()
+        opened = linked(qualified)
+        out = pin(qualified, 'then', True)
+        out.break_single_pin_link(pin(opened, 'execute'))
+        q = Graph(graph, 600, -450)
+        claim = q.fn(LEASE + 'ClaimArrivalTitleGate', target=q.ref('ExitTransition'))
+        wire(qualified, 'then', claim, 'execute')
+        q.chain(claim, opened)
+        q = Graph(graph, 6000, 7250)
+        ending = q.branch(q.ref('EndingWorld'))
+        release = q.fn(LEASE + 'ReleaseArrivalTitleGate', target=q.ref('ExitTransition'))
+        wire(ending,'else',release,'execute')
+        # The inactive branch covers readiness timeout before a lease exists.
+        for n,k in ((active,'else'), (has_player,'else'), (has_actor,'else'), (reset,'then')):
+            assert not pin(n,k,True).list_connected_pins()
+            wire(n,k,ending,'execute')
+        for n,k,_,new in settings:
+            literal(n,k,new)
+        literal(cubic,'bLockOutgoing','false')
+        q=Graph(graph,1300,4050)
+        natural=q.set('NaturalPlaybackEnded',value='true')
+        wire(natural_handoff,'then',natural,'execute')
+        # The periodic ownership monitor survives pause-at-end. Wait for both the
+        # sequence delegate and the camera manager's actual pending view to clear.
+        q=Graph(graph,2400,4580)
+        owned=linked(finish_handoff)
+        pin(finish_handoff,'then',True).break_single_pin_link(pin(owned,'execute'))
+        settled=q.fn(LEASE+'IsArrivalViewSettled',target=q.ref('ExitTransition'),ExpectedView=q.ref('GameplayViewTarget'))
+        both=q.fn(MATH+'BooleanAND',A=q.ref('NaturalPlaybackEnded'),B=(settled,'ReturnValue'))
+        guard=q.branch((both,'ReturnValue'))
+        wire(finish_handoff,'then',guard,'execute')
+        wire(guard,'then',owned,'execute')
+        q=Graph(graph,3350,2250)
+        retry=q.fn(bp.generated_class().get_path_name()+':FinishArrival')
+        wire(monitor_returning,'then',retry,'execute')
+        compile_bp(bp)
+        return revision_graph(bp)
+    assert len(claims) == len(releases) == 1
+    claim,release = claims[0],releases[0]
+    assert linked(qualified) == claim and linked(claim).find_input_pin('ReadinessOpen').is_valid()
+    ending=linked(release,'execute',False)
+    assert linked(ending,'else')==release and linked(ending,'Condition',False).find_output_pin('EndingWorld').is_valid()
+    assert all(linked(n,k)==ending for n,k in ((active,'else'),(has_player,'else'),(has_actor,'else'),(reset,'then')))
+    assert linked(natural_handoff).find_input_pin('NaturalPlaybackEnded').is_valid()
+    guard=linked(finish_handoff)
+    both=linked(guard,'Condition',False)
+    assert linked(both,'A',False).find_output_pin('NaturalPlaybackEnded').is_valid()
+    assert linked(both,'B',False)==only(nodes('IsArrivalViewSettled'))
+    assert linked(monitor_returning) in nodes('FinishArrival')
+    values = [float(pin(n,k).get_pin_value()) for n,k,_,_ in settings]
+    assert all(abs(v-new)<.002 for v,(_,_,_,new) in zip(values,settings))
+    assert str(pin(cubic,'bLockOutgoing').get_pin_value()).lower()=='false'
+    return {'claim_before_readiness':True,'release_after_cleanup':True,'seconds':values,
+            'requires_natural_end_and_settled_view':True,'live_outgoing_blend':True}

@@ -58,6 +58,15 @@ protected:
 	float HoldSizeMultiplier = 1.25f;
 	UPROPERTY(EditDefaultsOnly, Category="Minimap", meta=(ClampMin="1.0"))
 	float NeighborhoodCoverage = 1.80f;
+	/** Target multiplier on normal world coverage. It increases as needed to keep terrain smaller in the fitted held frame. */
+	UPROPERTY(EditDefaultsOnly, Category="Minimap", meta=(ClampMin="1.0"))
+	float HoldCoverageMultiplier = 1.45f;
+	/** Multiplies the authored marker sizes while Tab is held. */
+	UPROPERTY(EditDefaultsOnly, Category="Minimap", meta=(ClampMin="0.01", ClampMax="1.0"))
+	float HoldMarkerSizeMultiplier = .85f;
+	/** Seconds for the expand or collapse transition only. Tab stays expanded while held. Zero snaps each transition. */
+	UPROPERTY(EditDefaultsOnly, Category="Minimap", meta=(ClampMin="0.0", ClampMax="1.0", Units="s"))
+	float HoldTransitionDuration = .18f;
 
 private:
 	friend class ACatrunMinimapPresenter;
@@ -68,9 +77,13 @@ private:
 #endif
 
 	bool InitializeMap(ACatrunMinimapPresenter& InPresenter);
+	void AdvanceHoldAnimation(bool bHeld, float DeltaSeconds);
+	double GetHoldBlend() const;
 	void UpdateLayout(const FVector2D& ViewportSize);
 	static FAnchorData GetFrameLayout(const FAnchorData& CompactLayout, const FVector2D& ViewportSize,
-		bool bIsExpanded, float InHoldSizeMultiplier);
+		double HoldBlend, float InHoldSizeMultiplier);
+	double GetNeighborhoodCoverage(const FVector2D& ViewportSize) const;
+	FVector2D GetFrameInnerSize(const FAnchorData& Layout) const;
 	void ApplyImageProjection() const;
 	void UpdateEnemyMarkers(ECatrunMinimapEnemyKind Kind, TConstArrayView<FVector2D> Positions);
 	UCanvasPanelSlot* AddMarker(TSubclassOf<UUserWidget> MarkerClass, int32 ZOrder);
@@ -84,7 +97,7 @@ private:
 	FAnchorData CompactFrameLayout;
 	FSlateRenderTransform MapProjection;
 	FSlateRenderTransform FallbackProjection;
-	bool bExpanded = false;
+	float HoldProgress = 0.f;
 };
 
 /** One placed instance per playable map. Its widget and marker cache belong to that world. */

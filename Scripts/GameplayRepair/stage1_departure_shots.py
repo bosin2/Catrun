@@ -26,22 +26,28 @@ def definitions(file, last):
 
 
 h = definitions('upgrade_portal_paw_20261112.py', 'command')
-OLD_END = 539
-WALK = 386
-BLEND = 4
-EXTRA = WALK-350
-END, JUMP, LIFT, AIR_END, HIDE = (f+EXTRA for f in (539,470,491,526,526))
-INSPECT_Y, PORTAL_Y, ENTRY_Y = -450., -493.9189189189189, -558.
-WALK_Y = INSPECT_Y + 8.96
-CUTS = ((0, 406+EXTRA), (406+EXTRA, 464+EXTRA), (464+EXTRA, END))
-CLIPS = (h.CLIP_DIR + 'AN_BlackCat_CautiousWalk', *h.CLIPS[1:])
+OLD_END = 575
+WALK_START, WALK, STOP = 57, 177, 189
+REAR, SIDE, JUMP, LIFT, AIR_END, END = 195, 231, 231, 255, 294, 312
+HIDE, BLEND = AIR_END, 8
+THRESHOLD_Y, WALK_SPEED = -15., 79.
+START_Y = THRESHOLD_Y - 2 * WALK_SPEED
+SPEED_PER_FRAME = .70
+WALK_Y = START_Y - SPEED_PER_FRAME * WALK
+INSPECT_Y = WALK_Y - SPEED_PER_FRAME * (STOP-WALK)/2
+PORTAL_Y, ENTRY_Y = INSPECT_Y - 72., INSPECT_Y - 150.
+CUTS = ((0,39), (39,WALK_START), (WALK_START,REAR), (REAR,SIDE), (SIDE,LIFT), (LIFT,END))
+CAMERA_NAMES = ('DoorFace','DoorGlance','FrontTracking','RearPortal','SidePreparation','JumpFollow')
+FOV = (72., 74., 76., 89., 82., 81.)
+FOCUS = (81.,125.,54.,275.,96.,135.)
+ATTACHED = frozenset((0,1,2))
+CLIPS = (h.CLIP_DIR+'AN_BlackCat_CautiousWalk', h.CLIP_DIR+'AN_BlackCat_Idle', h.CLIPS[2])
 RESTORE = u.MovieSceneCompletionMode.RESTORE_STATE
 PAWS = ('paw_f_l', 'paw_f_r', 'paw_h_l', 'paw_h_r')
-DOOR_TAG = 'CatrunDepartureRearDoor'
-PROXY = 'DepartureRearDoorProxy'
-DOOR_LABEL = 'S1_Door_ExitToStage2_Open'
+DOOR_TAG, RIGHT_TAG = 'CatrunDepartureRearDoor','CatrunDepartureRearDoorRight'
+PROXY, DOOR_LABEL = 'DepartureRearDoorProxy','S1_Door_ExitToStage2_Open'
+RIGHT_LABEL, FRAME_LABEL = 'S1_ExitToStage2_Leaf_R','S1_DoorFrame_ExitToStage2'
 DEFAULT_SECTION = h.property_section
-
 
 def primary_section(binding, kind):
     if kind==u.MovieScene3DTransformTrack and 'CatrunCat' in map(str,binding.get_binding_tags()):
@@ -56,52 +62,59 @@ h.property_section=primary_section
 
 
 def cat_curve():
-    # A linear section weight interpolates from the actual captured XY to this FIXED
-    # endpoint. Blending toward a moving target would multiply velocity during admission.
-    rows = [(0., WALK_Y, 25.2), (WALK, WALK_Y, 25.2)]
-    for i in range(1, 17):
-        t = i / 16
-        rows.append((WALK + 19.2*t, WALK_Y - 17.92*(t-t**3+.5*t**4), 25.2))
-    rows.append((JUMP + 11 / (17.5/(LIFT-JUMP)), INSPECT_Y, 25.2))
-    # The rear paws remain planted during the final short horizontal push.
-    for i in range(1, 9):
-        t = i / 8
-        rows.append((JUMP + (11 + 6.5*t)*(LIFT-JUMP)/17.5, INSPECT_Y-1.2*t*t, 25.2))
-    for i in range(1, 65):
-        t = i / 64
-        # Continuous takeoff, then acceleration into the portal. Keep the tail behind the depth core.
-        distance = .08*t + .92*(t*t*(2-t))
-        rows.append((LIFT + (AIR_END-LIFT)*t, INSPECT_Y-1.2+(ENTRY_Y-INSPECT_Y+1.2)*distance,
-                     25.2 + 14*t + 58*math.sin(math.pi*t)**1.25))
-    rows.append((END, ENTRY_Y, 39.2))
-    return [(f,y) for f,y,z in rows], [(f,z) for f,y,z in rows]
+    # Blending to a stationary endpoint preserves a constant gait from each actual entry.
+    rows=[(0,WALK_Y,25.2),(WALK,WALK_Y,25.2)]
+    for i in range(1,13):
+        t=i/12
+        rows.append((WALK+(STOP-WALK)*t,WALK_Y-SPEED_PER_FRAME*(STOP-WALK)*(t-t*t/2),25.2))
+    rows.append((JUMP+11*(LIFT-JUMP)/17.5,INSPECT_Y,25.2))
+    for i in range(1,9):
+        t=i/8
+        rows.append((JUMP+(11+6.5*t)*(LIFT-JUMP)/17.5,INSPECT_Y-1.2*t*t,25.2))
+    for i in range(1,65):
+        t=i/64
+        distance=.08*t+.92*t*t*(2-t)
+        rows.append((LIFT+(AIR_END-LIFT)*t, INSPECT_Y-1.2+(ENTRY_Y-INSPECT_Y+1.2)*distance,
+                     25.2+14*t+58*math.sin(math.pi*t)**1.25))
+    rows.append((END,ENTRY_Y,39.2))
+    return [(f,y) for f,y,z in rows],[(f,z) for f,y,z in rows]
 
 
-Y_KEYS, Z_KEYS = cat_curve()
+Y_KEYS,Z_KEYS=cat_curve()
 
 
-def position(frame, arrival=(101., -115., 25.2)):
-    weight = min(frame/WALK,1.)
-    target = (101., h.interpolate(Y_KEYS, frame), h.interpolate(Z_KEYS, frame))
-    return tuple(h.lerp(a, b, weight) for a, b in zip(arrival, target))
+def position(frame, arrival=(101.,START_Y,25.2)):
+    weight=min(frame/WALK,1.)
+    target=(101.,h.interpolate(Y_KEYS,frame),h.interpolate(Z_KEYS,frame))
+    return tuple(h.lerp(a,b,weight) for a,b in zip(arrival,target))
 
 
-def camera(rows):
-    return [h.camera_key(round(f*WALK/350) if f<350 else f+EXTRA, xyz, aim) for f, xyz, aim in rows]
+def camera_curves():
+    # First three cameras ride the pawn root, keeping a side-entry cat in frame.
+    # Their coordinates are relative to the character's forward (+X) axis.
+    return [[h.camera_key(f,loc,aim) for f,loc,aim in rows] for rows in (
+        [(0,(94.,0.,0.),(11.,0.,-1.)),(39,(90.,0.,0.),(11.,0.,-1.))],
+        [(39,(105.,18.,30.),(-36.,0.,6.)),(57,(106.,15.,27.),(-36.,0.,6.))],
+        [(57,(67.,0.,4.),(11.,0.,-1.)),(177,(64.,0.,3.),(11.,0.,-1.)),
+         (189,(64.,0.,3.),(11.,0.,1.)),(195,(64.,0.,3.),(11.,0.,1.))],
+        [(195,(85.,PORTAL_Y+281.,13.),(101.,PORTAL_Y,102.)),
+         (231,(83.,PORTAL_Y+275.,13.),(101.,PORTAL_Y,102.))],
+        [(231,(13.,INSPECT_Y+23.,34.),(101.,INSPECT_Y+1.,22.)),
+         (255,(15.,INSPECT_Y+21.,33.),(101.,INSPECT_Y,22.))],
+        [(255,(19.,INSPECT_Y+29.,35.),(101.,INSPECT_Y-10.,26.)),
+         (266,(22.,INSPECT_Y+29.,50.),(101.,INSPECT_Y-31.,69.)),
+         (280,(30.,INSPECT_Y+49.,60.),(101.,PORTAL_Y,83.)),
+         (294,(41.,INSPECT_Y+65.,62.),(101.,PORTAL_Y,86.)),
+         (312,(43.,INSPECT_Y+67.,62.),(101.,PORTAL_Y,86.))]
+    )]
 
 
-CAMERAS = (
-    camera([(0,(88,-272,49),(101,-94,21)),(90,(84,-327,46),(101,-183,20)),
-            (190,(76,-390,43),(101,-288,20)),(285,(60,-449,39),(101,-389,22)),
-            (350,(44,-484,36),(101,-455,24)),(405,(44,-487,36),(101,-461,24))]),
-    camera([(406,(30,-262,13),(101,-482,82)),(428,(28,-244,13),(101,-482,83)),
-            (463,(25,-212,13),(101,-483,84))]),
-    camera([(464,(9,-414,39),(101,-448,21)),(483,(9,-414,39),(101,-448,19)),
-            (491,(9,-413,36),(101,-449,24)),(503,(12,-399,43),(101,-468,71)),
-            (518,(20,-366,55),(101,-501,73)),(526,(28,-345,61),(101,PORTAL_Y,79)),
-            (538,(28,-345,61),(101,PORTAL_Y,79))]),
-)
-FOV = (66., 87., 84.)
+CAMERAS=camera_curves()
+# The installed BlueLight uses Unreal's unitless inverse-square units (about 50 per lumen).
+LIGHT_KEYS=((0,1450.),(WALK_START,1600.),(96,5300.),(138,16400.),(WALK,36500.),(SIDE,36500.),(AIR_END,23000.))
+SOFT_FILL='PortalApproachFill'
+FILL_KEYS=((0,1750.),(39,1750.),(WALK_START,800.),(WALK,450.),(SIDE,850.),(LIFT,850.),(AIR_END,430.))
+PREVIOUS_SEQUENCE_SHA='3f132fbb7d40b8bba9757404a48aa6eef91a73b6116b775a4ba70a2faa688165'
 
 
 def calibrate(mesh):
@@ -128,7 +141,7 @@ def calibrate(mesh):
     assert len(stance)>30, ('Insufficient planted-paw samples', len(stance), scale)
     cm_s = statistics.median(stance)
     assert 8 < cm_s < 20, ('Unexpected cautious gait speed at installed scale', cm_s, scale)
-    speed = (abs(WALK_Y+80.)*30/WALK) / cm_s
+    speed = (SPEED_PER_FRAME*30.) / cm_s
     finish = pose(inspect,0)
     differences = [sum((a[b]-finish[b]).length()**2 for b in finish) for a in poses[:-1]]
     best = min(range(n), key=differences.__getitem__)
@@ -158,135 +171,217 @@ def visibility(binding, visible, first=0):
         channel.add_key(u.FrameNumber(first), visible)
 
 
-def door_profile(door):
-    c = door.static_mesh_component
-    center, extent = door.get_actor_bounds(False)
-    loc = door.get_actor_location()
-    rot = door.get_actor_rotation()
-    scale = door.get_actor_scale3d()
-    dx,dy = center.x-loc.x,center.y-loc.y
-    assert extent.y > 60 and extent.x < 15 and abs(dy) > 55, ('Door pivot is not near an open leaf end', loc,center,extent)
-    sign = min((-1,1),key=lambda s: abs(loc.x-s*dy-101))
-    assert abs(loc.x-sign*dy-101) < 30 and abs(loc.y+sign*dx) < 60
-    return [*h.tuple3(loc), rot.roll,rot.pitch,rot.yaw, *h.tuple3(scale)], rot.yaw+sign*90
+def section(binding, kind):
+    tracks=binding.find_tracks_by_type(kind)
+    return h.property_section(binding,kind) if tracks else binding.add_track(kind).add_section()
 
 
-def patch(sequence, door, motion):
-    parts = h.sequence_parts(sequence)
-    upgrade=sequence.get_playback_end()==OLD_END
-    assert upgrade or sequence.get_playback_end()==308
-    sequence.modify()
-    sequence.set_playback_end(END)
-    for section in (parts['cat'], parts['light'], parts['light_transform'], *parts['camera_sections'], *parts['spawns']):
-        section.set_range(0,END)
-    for section,(a,b) in zip(parts['cuts'],CUTS):
-        section.set_range(a,b)
-    for ch,keys in zip(h.transform_channels(parts['cat'])[1:3], (Y_KEYS,Z_KEYS)):
-        h.write_keys(ch,keys)
-    h.EASING.set_ease_in_duration(parts['cat'],h.tick(WALK))
-    easing=u.find_object(parts['cat'],'EaseInFunction')
-    assert easing and easing.get_class().get_name()=='MovieSceneBuiltInEasingFunction',str(easing)
-    easing.modify()
-    easing.set_editor_property('type',u.MovieSceneBuiltInEasing.LINEAR)
-    # The transform blender evaluates only channels with keys or defaults. Retain the
-    # original short heading/scale handoff independently of the full-walk XY weight.
-    pose=parts['bindings'][0].find_tracks_by_type(u.MovieScene3DTransformTrack)[0].add_section()
-    pose.set_range(0,END)
-    pose.set_blend_type(u.MovieSceneBlendType.ABSOLUTE)
-    pose.set_completion_mode(parts['cat'].get_completion_mode())
-    h.EASING.set_ease_in_duration(pose,h.tick(16))
-    for i,(base,heading) in enumerate(zip(h.transform_channels(parts['cat']),h.transform_channels(pose))):
+def axes(section_, rows):
+    section_.set_range(0,END)
+    section_.set_completion_mode(RESTORE)
+    for i,ch in enumerate(h.transform_channels(section_)):
+        values=[(f,xyz[i]) for f,xyz in rows]
+        h.write_keys(ch,values,values[0][1])
+
+
+def leaf_curve(door):
+    loc, rot, scale = door.get_actor_location(),door.get_actor_rotation(),door.get_actor_scale3d()
+    rows=[]
+    for f in (0,4,8,12,16,20,24,28,32,36,39,END-1):
+        t=min(1.,f/39.)
+        yaw=rot.yaw*(1-t*t*(3.-2.*t))
+        rows.append((f,(*h.tuple3(loc),rot.roll,rot.pitch,yaw,*h.tuple3(scale))))
+    return rows
+
+
+def camera_tracks(seq,parts):
+    cat=parts['bindings'][0]
+    cut_track=h.only(t for t in seq.get_tracks() if isinstance(t,u.MovieSceneCameraCutTrack))
+    for cut in list(cut_track.get_sections()):
+        cut_track.remove_section(cut)
+    for i,(name,curve,fov,(start,end)) in enumerate(zip(CAMERA_NAMES,CAMERAS,FOV,CUTS)):
         if i<3:
-            heading.remove_default()
+            camera=parts['bindings'][3+i]
         else:
-            assert not base.get_keys() and base.has_default()
-            heading.set_default(base.get_default())
-            base.remove_default()
-    for section, component, curve,fov in zip(parts['camera_sections'],parts['camera_components'], CAMERAS,FOV):
+            camera=seq.add_spawnable_from_class(u.CameraActor.static_class())
+        camera.set_name(name)
+        spawn=section(camera,u.MovieSceneSpawnTrack)
+        spawn.set_range(0,END)
+        spawn.set_completion_mode(RESTORE)
+        h.only(spawn.get_all_channels()).set_default(True)
+        axes(section(camera,u.MovieScene3DTransformTrack),curve)
+        if i in ATTACHED:
+            attach=section(camera,u.MovieScene3DAttachTrack)
+            attach.set_range(0,END)
+            attach.set_completion_mode(RESTORE)
+            attach.set_constraint_binding_id(seq.get_binding_id(cat))
+            for prop in ('attachment_location_rule','attachment_rotation_rule','attachment_scale_rule'):
+                attach.set_editor_property(prop,u.AttachmentRule.KEEP_RELATIVE)
+        component=camera.get_object_template().get_editor_property('camera_component')
         component.modify()
         component.set_field_of_view(fov)
-        for i,ch in enumerate(h.transform_channels(section)):
-            h.write_keys(ch, [(f,axes[i]) for f,axes in curve], curve[0][1][i])
-    anim = sorted(parts['anim_track'].get_sections(),key=h.span)
-    specs = ((0,WALK+BLEND,0,motion['rate'],0,motion['first_loop_offset']), (WALK,JUMP,1,1.,0,0),
-             (JUMP,LIFT,2,17.5/(LIFT-JUMP),0,0), (LIFT,AIR_END,2,18.5/(AIR_END-LIFT),17.5,0),
-             (AIR_END,END,2,0.,0,36.-1/800))
-    assert len(anim)==len(specs)
-    for section,(a,b,clip,rate,start,offset) in zip(anim,specs):
-        params = section.get_editor_property('params')
-        params.set_editor_property('animation',h.load_asset(CLIPS[clip]))
-        params.set_editor_property('play_rate', u.MovieSceneTimeWarpExtensions.make_time_warp(rate))
+        settings=component.get_editor_property('post_process_settings').copy()
+        for prop,value in (('depth_of_field_fstop',2.4 if i==0 else 8.),
+                           ('depth_of_field_focal_distance',FOCUS[i]),
+                           ('motion_blur_amount',.08)):
+            settings.set_editor_property('override_'+prop,True)
+            settings.set_editor_property(prop,value)
+        component.set_editor_property('post_process_settings',settings)
+        component.set_editor_property('post_process_blend_weight',1.)
+        cut=cut_track.add_section()
+        cut.set_range(start,end)
+        cut.set_camera_binding_id(seq.get_binding_id(camera))
+        cut.set_completion_mode(u.MovieSceneCompletionMode.KEEP_STATE)
+
+
+def patch(seq,left,right,motion):
+    assert seq.get_playback_end()==OLD_END,seq.get_playback_end()
+    seq.modify()
+    h.CAMERAS=('Front_BackwardTracking','Face_BlueInspection','Rear_PortalJump')
+    parts=h.sequence_parts(seq)
+    seq.set_playback_end(END)
+    cat=parts['bindings'][0]
+    for part in h.property_track(cat,u.MovieScene3DTransformTrack).get_sections():
+        part.set_range(0,END)
+    for ch,keys in zip(h.transform_channels(parts['cat'])[1:3],(Y_KEYS,Z_KEYS)):
+        h.write_keys(ch,keys)
+    h.EASING.set_ease_in_duration(parts['cat'],h.tick(WALK))
+    anim=sorted(parts['anim_track'].get_sections(),key=h.span)
+    specs=((0,WALK+BLEND,0,motion['rate'],0,motion['first_loop_offset']),(WALK,JUMP,1,1.,0,0),
+           (JUMP,LIFT,2,17.5/(LIFT-JUMP),0,0),(LIFT,AIR_END,2,18.5/(AIR_END-LIFT),17.5,0),
+           (AIR_END,END,2,0.,0,36.-1/800))
+    assert len(specs)==len(anim)
+    for part,(a,b,i,rate,start,offset) in zip(anim,specs):
+        params=part.get_editor_property('params')
+        params.set_editor_property('animation',h.load_asset(CLIPS[i]))
+        params.set_editor_property('play_rate',u.MovieSceneTimeWarpExtensions.make_time_warp(rate))
         params.set_editor_property('start_frame_offset',u.FrameNumber(h.tick(start)))
         params.set_editor_property('first_loop_start_frame_offset',u.FrameNumber(h.tick(offset)))
-        section.set_editor_property('params',params)
-        section.set_range(a,b)
-        section.set_completion_mode(RESTORE)
+        part.set_editor_property('params',params)
+        part.set_range(a,b)
+        part.set_completion_mode(RESTORE)
     h.EASING.set_ease_out_duration(anim[0],h.tick(BLEND))
     h.EASING.set_ease_in_duration(anim[1],h.tick(BLEND))
-    # The portal actor has yaw 180. Drive its blue light from 42 cm ahead of the approaching face.
-    light_curves = {0:[(0,23),(WALK,23)],1:[(0,PORTAL_Y+80+45),(WALK,PORTAL_Y-WALK_Y+45),
-                    (WALK+20,PORTAL_Y-INSPECT_Y+45),(LIFT,PORTAL_Y-INSPECT_Y+45),(AIR_END,-8)],
-                    2:[(0,55),(WALK,57),(LIFT,64),(AIR_END,90)]}
-    for i,ch in enumerate(h.transform_channels(parts['light_transform'])):
-        h.write_keys(ch,light_curves.get(i,[]),[25.,-337.,68.,0.,0.,0.,1.,1.,1.][i])
-    h.write_keys(h.only(parts['light'].get_all_channels()),[(0,430.),(WALK,540.),(463+EXTRA,810.),(LIFT,1100.),(AIR_END,1250.)])
+    camera_tracks(seq,parts)
+    # Portal parent is at 180 degrees and scaled to 125%. Keep fill in front of the face.
+    rows=[]
+    for f in (0,WALK_START,96,138,WALK,STOP,LIFT,AIR_END):
+        _,y,z=position(f)
+        rows.append((f,(16.,(PORTAL_Y-y+36.)/1.25,(z+25.)/1.25,0.,0.,0.,1.,1.,1.)))
+    axes(parts['light_transform'],rows)
+    parts['light'].set_range(0,END)
+    h.write_keys(h.only(parts['light'].get_all_channels()),LIGHT_KEYS)
     parts['fade'].set_range(AIR_END,END)
-    h.write_keys(h.only(parts['fade'].get_all_channels()),[(AIR_END,0.),(530+EXTRA,0.),(END-1,1.)])
-    visibility(parts['bindings'][0],False,HIDE)
+    h.write_keys(h.only(parts['fade'].get_all_channels()),[(AIR_END,0.),(AIR_END+3,0.),(END-1,1.)])
+    visibility(cat,False,HIDE)
+    original=h.only(b for b in seq.get_bindings() if DOOR_TAG in map(str,b.get_binding_tags()))
+    h.only(b for b in seq.get_bindings() if b.get_name()==PROXY).remove()
+    original.remove_track(h.property_track(original,u.MovieSceneVisibilityTrack))
+    other=seq.add_possessable(right)
+    other.tag_binding(RIGHT_TAG)
+    for binding,actor in ((original,left),(other,right)):
+        axes(section(binding,u.MovieScene3DTransformTrack),leaf_curve(actor))
 
-    if upgrade:
-        original=h.only(b for b in sequence.get_bindings() if DOOR_TAG in map(str,b.get_binding_tags()))
-        proxy=h.only(b for b in sequence.get_bindings() if b.get_name()==PROXY)
+
+def fill_binding(seq):
+    matches=[b for b in seq.get_bindings() if b.get_name()==SOFT_FILL]
+    assert len(matches)<=1
+    return matches[0] if matches else None
+
+
+def bind_fill(seq,portal,parent):
+    # Reuse the existing movable portal component. Old sequence IDs remain valid on both maps.
+    component=h.only(c for c in portal.get_components_by_class(u.PointLightComponent) if c.get_name()==SOFT_FILL)
+    assert component.get_editor_property('mobility')==u.ComponentMobility.MOVABLE
+    assert component.get_editor_property('intensity_units')==u.LightUnits.LUMENS
+    guid=lambda binding:binding.get_id().export_text()
+    before={guid(b) for b in seq.get_bindings()}
+    fill=seq.add_possessable(component)
+    auto_parent=fill.get_parent()
+    found,expected,child=guid(auto_parent),guid(parent),guid(fill)
+    after={guid(b) for b in seq.get_bindings()}
+    diagnostic=dict(component=component.get_path_name(),registered_parent=found,expected_parent=expected,
+                    child=child,new_guids=sorted(after-before),existing_guids=sorted(before))
+    print('CATRUN_DEPARTURE_FILL_BINDING',diagnostic)
+    assert child not in before and expected in before,diagnostic
+    if found==expected:
+        assert after-before=={child},diagnostic
     else:
-        original=sequence.add_possessable(door)
-        original.tag_binding(DOOR_TAG)
-        proxy=sequence.add_spawnable_from_class(u.StaticMeshActor.static_class())
-        proxy.set_name(PROXY)
-    visibility(original,False)
-    component=proxy.get_object_template().static_mesh_component
-    component.set_mobility(u.ComponentMobility.MOVABLE)
-    component.set_static_mesh(door.static_mesh_component.get_editor_property('static_mesh'))
-    for i in range(door.static_mesh_component.get_num_materials()):
-        component.set_material(i,door.static_mesh_component.get_material(i))
-    component.set_collision_profile_name('NoCollision')
-    component.set_editor_property('generate_overlap_events',False)
-    spawn=h.property_section(proxy,u.MovieSceneSpawnTrack)
-    spawn.set_range(0,END)
-    spawn.set_completion_mode(RESTORE)
-    h.only(spawn.get_all_channels()).set_default(True)
-    move=h.property_section(proxy,u.MovieScene3DTransformTrack) if upgrade else proxy.add_track(u.MovieScene3DTransformTrack).add_section()
-    move.set_range(0,END)
-    move.set_completion_mode(RESTORE)
-    axes, closed=door_profile(door)
-    for i,ch in enumerate(h.transform_channels(move)):
-        ks=[]
-        if i==5:
-            for f in (0,15,20,25,30,35,40,45,50,54,END-1):
-                t=min(1.,max(0.,(f-15)/39))
-                ks.append((f,h.lerp(axes[5],closed,t*t*(3-2*t))))
-        h.write_keys(ch,ks,axes[i])
+        assert found not in before and after-before=={found,child},diagnostic
+        assert auto_parent.get_possessed_object_class()==portal.get_class(),diagnostic
+        assert {guid(b) for b in auto_parent.get_child_possessables()}=={child},diagnostic
+        fill.set_parent(parent)
+        assert not auto_parent.get_child_possessables(),diagnostic
+        auto_parent.remove()
+    fill.set_name(SOFT_FILL)
+    assert guid(fill.get_parent())==expected and {guid(b) for b in seq.get_bindings()}==before|{child},diagnostic
+    return fill
+
+
+def apply_lens_and_fill(seq,portal):
+    seq.modify()
+    h.CAMERAS=CAMERA_NAMES
+    parts=h.sequence_parts(seq)
+    for index,(part,component,curve,fov) in enumerate(zip(parts['camera_sections'],parts['camera_components'],CAMERAS,FOV)):
+        if index==3:
+            continue  # The portal reveal passed the rendered framing check.
+        part.modify()
+        axes(part,curve)
+        component.modify()
+        component.set_field_of_view(fov)
+        settings=component.get_editor_property('post_process_settings').copy()
+        settings.set_editor_property('depth_of_field_focal_distance',FOCUS[index])
+        component.set_editor_property('post_process_settings',settings)
+    fill=bind_fill(seq,portal,parts['bindings'][1])
+    track=fill.add_track(u.MovieSceneFloatTrack)
+    track.set_property_name_and_path('Intensity','Intensity')
+    intensity=track.add_section()
+    intensity.set_range(0,END)
+    intensity.set_completion_mode(RESTORE)
+    h.write_keys(h.only(intensity.get_all_channels()),FILL_KEYS)
+    # Parent transform has yaw 180 and 125% uniform scale. Neutral fill comes
+    # from the camera-facing side of the fur, the blue key comes from the opposite cheek.
+    fill_rows=[]
+    blue_rows=[]
+    for f in (0,39,WALK_START,96,138,WALK,STOP,SIDE,LIFT,266,280,AIR_END):
+        _,y,z=position(f)
+        def local(xw,yw,zw):
+            return ((101.-xw)/1.25,(PORTAL_Y-yw)/1.25,(zw+.8)/1.25,0.,0.,0.,1.,1.,1.)
+        fill_rows.append((f,local(49.,y-43.,z+57.)))
+        blue_rows.append((f,local(120.,y-41.,z+24.)))
+    axes(section(fill,u.MovieScene3DTransformTrack),fill_rows)
+    parts['light_transform'].modify()
+    axes(parts['light_transform'],blue_rows)
+    parts['light'].modify()
+    h.write_keys(h.only(parts['light'].get_all_channels()),LIGHT_KEYS)
 
 
 def verify_sequence(seq):
+    h.CAMERAS=CAMERA_NAMES
     s=h.describe_sequence(seq)
-    assert s['end']==END and tuple(s['cuts'])==CUTS, (s['end'],s['cuts'])
+    assert s['end']==END and tuple(s['cuts'])==CUTS,s['cuts']
     assert [x['clip'].split('.')[0] for x in s['animations']]==[CLIPS[0],CLIPS[1],CLIPS[2],CLIPS[2],CLIPS[2]]
     assert [tuple(x['range']) for x in s['animations']]==[(0,WALK+BLEND),(WALK,JUMP),(JUMP,LIFT),(LIFT,AIR_END),(AIR_END,END)]
-    for i,expected in enumerate((Y_KEYS,Z_KEYS),1):
-        keys=s['cat']['keys'][i]
-        assert len(keys)==len(expected) and all(abs(t-h.tick(f))<=1 and abs(v-w)<.001 for (t,v),(f,w) in zip(keys,expected))
     assert [c['fov'] for c in s['cameras']]==list(FOV)
+    assert s['cat']['ease_ticks']==h.tick(WALK)
+    assert not any(b.get_name()==PROXY for b in seq.get_bindings())
+    for tag,yaw in ((DOOR_TAG,-100.),(RIGHT_TAG,100.)):
+        b=h.only(b for b in seq.get_bindings() if tag in map(str,b.get_binding_tags()))
+        part=h.property_section(b,u.MovieScene3DTransformTrack)
+        assert part.get_completion_mode()==RESTORE and not b.find_tracks_by_type(u.MovieSceneVisibilityTrack)
+        keys=h.key_data(h.transform_channels(part)[5])
+        assert abs(keys[0][1]-yaw)<.01 and abs(keys[-1][1])<.01
+    assert all(abs(actual-v)<.01 and t==h.tick(f) for (t,actual),(f,v) in zip(s['light']['keys'],LIGHT_KEYS))
     parts=h.sequence_parts(seq)
-    assert parts['cat'].get_end_frame()==END and h.EASING.get_ease_in_duration(parts['cat'])==h.tick(WALK)
-    assert u.find_object(parts['cat'],'EaseInFunction').get_editor_property('type')==u.MovieSceneBuiltInEasing.LINEAR
-    heading=h.only(section for section in h.property_track(parts['bindings'][0],u.MovieScene3DTransformTrack).get_sections()
-                   if section!=parts['cat'])
-    assert all(not ch.has_default() and not ch.get_keys() for ch in h.transform_channels(heading)[:3])
-    assert all(not ch.has_default() and not ch.get_keys() for ch in h.transform_channels(parts['cat'])[3:])
-    assert h.EASING.get_ease_in_duration(heading)==h.tick(16)
-    one_door=h.only(b for b in seq.get_bindings() if DOOR_TAG in map(str,b.get_binding_tags()))
-    proxy=h.only(b for b in seq.get_bindings() if b.get_name()==PROXY)
-    assert 'NoCollision'==str(proxy.get_object_template().static_mesh_component.get_collision_profile_name())
-    assert h.property_section(one_door,u.MovieSceneVisibilityTrack).get_completion_mode()==RESTORE
-    assert str(h.property_track(one_door,u.MovieSceneVisibilityTrack).get_property_path())=='bHidden'
+    fill=fill_binding(seq)
+    assert fill and fill.get_parent().get_id().export_text()==parts['bindings'][1].get_id().export_text()
+    fill_keys=h.key_data(h.only(h.property_section(fill,u.MovieSceneFloatTrack).get_all_channels()))
+    assert fill_keys==[(h.tick(f),v) for f,v in FILL_KEYS],fill_keys
+    for part,curve in zip(parts['camera_sections'],CAMERAS):
+        for i,ch in enumerate(h.transform_channels(part)):
+            keys=h.key_data(ch)
+            assert len(keys)==len(curve) and all(t==h.tick(f) and abs(v-row[i])<.001
+                                                for (t,v),(f,row) in zip(keys,curve))
+    assert all(h.property_section(parts['bindings'][3+i],u.MovieScene3DAttachTrack).get_constraint_binding_id().export_text()
+               ==seq.get_binding_id(parts['bindings'][0]).export_text() for i in ATTACHED)
     return s

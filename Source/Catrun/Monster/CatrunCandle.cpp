@@ -103,10 +103,27 @@ void ACatrunCandle::AlignBodyToEyes()
 	UE_LOG(LogCatrunSound, Log, TEXT("%s: eyes look toward yaw %.0f with the body unturned, body turn set to %.0f."), *GetName(), Front.Rotation().Yaw, AutoBodyYaw);
 }
 
+float ACatrunCandle::GetSweepHalfAngle(const UCatrunSoundSettings& S) const
+{
+    return SweepHalfAngleOverride >= 0.f ? FMath::Clamp(SweepHalfAngleOverride, 0.f, 180.f)
+        : FMath::Max(0.f, (S.CandleTotalAngle - S.CandleConeAngle) * 0.5f);
+}
+
+void ACatrunCandle::ForgetCorridorCat()
+{
+    if (bTracking)
+        if (const UCatrunSoundSettings* Settings = GetSettings()) StopTracking(*Settings);
+    bCatInView = false;
+    if (ReactTimeLeft > 0.f) PlayAnimation(IdleAnim, true);
+    ReactTimeLeft = 0.f;
+    AlertMark->SetVisibility(false);
+    bTracking = false;
+}
+
 void ACatrunCandle::UpdateSweep(float DeltaSeconds, const UCatrunSoundSettings& S)
 {
 	// The cone stays inside the total range, so its middle can move this far from the candle's direction.
-	const float MaxOffset = FMath::Max(0.f, (S.CandleTotalAngle - S.CandleConeAngle) * 0.5f);
+	const float MaxOffset = GetSweepHalfAngle(S);
 
 	if (PauseLeft > 0.f)
 	{
@@ -124,7 +141,7 @@ void ACatrunCandle::UpdateSweep(float DeltaSeconds, const UCatrunSoundSettings& 
 
 void ACatrunCandle::TrackCat(float DeltaSeconds, const APawn& Cat, const UCatrunSoundSettings& S)
 {
-	const float MaxOffset = FMath::Max(0.f, (S.CandleTotalAngle - S.CandleConeAngle) * 0.5f);
+	const float MaxOffset = GetSweepHalfAngle(S);
 
 	// Direction of the cat as an angle away from the candle's own direction.
 	const FVector ToCat = Cat.GetActorLocation() - GetActorLocation();
@@ -132,7 +149,10 @@ void ACatrunCandle::TrackCat(float DeltaSeconds, const APawn& Cat, const UCatrun
 	const float WantedOffset = FMath::Clamp(FMath::FindDeltaAngleDegrees(GetActorRotation().Yaw, CatAngle), -MaxOffset, MaxOffset);
 
 	const float OldOffset = SweepOffset;
-	SweepOffset = FMath::FixedTurn(SweepOffset, WantedOffset, S.CandleTrackSpeed * DeltaSeconds);
+    if (SweepHalfAngleOverride >= 0.f)
+        SweepOffset = FMath::FInterpConstantTo(SweepOffset, WantedOffset, DeltaSeconds, S.CandleTrackSpeed);
+    else
+        SweepOffset = FMath::FixedTurn(SweepOffset, WantedOffset, S.CandleTrackSpeed * DeltaSeconds);
 	PauseLeft = 0.f;
 	if (!FMath::IsNearlyEqual(OldOffset, SweepOffset))
 	{
@@ -142,7 +162,7 @@ void ACatrunCandle::TrackCat(float DeltaSeconds, const APawn& Cat, const UCatrun
 
 void ACatrunCandle::StartTracking(APawn& Cat, const UCatrunSoundSettings& S)
 {
-	if (UCatrunPuzzleSuspension::IsSuspended(this)) return;
+	if (UCatrunPuzzleSuspension::IsSuspended(this) || UCatrunMarkSubsystem::IsExcludedFromPerception(&Cat)) return;
 	bTracking = true;
 	LoseSightTimer = 0.f;
 	LastTurnDirection = 0.f;
@@ -243,6 +263,7 @@ void ACatrunCandle::Tick(float DeltaSeconds)
 	// view the cone stays where it last saw the cat (the candle does not know where it went) until
 	// the candle gives up; then the sweep starts again from that place.
 	APawn* Cat = CatrunCat::Find(this);
+	if (UCatrunMarkSubsystem::IsExcludedFromPerception(Cat)) Cat = nullptr;
 	if (bTracking)
 	{
 		if (Cat && bCatInView)
