@@ -120,6 +120,7 @@ void ACatrunArmor::BeginPlay()
 	if (HasPatrol())
 	{
 		PatrolIndex = 0;
+		SkipEmptyPatrolSlots(); // slot 0 may be empty
 		bPatrolWaiting = true;
 		PatrolWaitLeft = 0.f;
 	}
@@ -207,7 +208,13 @@ void ACatrunArmor::OnSoundHeard_Implementation(const FCatrunSoundEvent& Event, f
 	// of a trip, or walking back to its post) is already alert: it goes straight to the new sound.
 	const bool bAtPost = FVector::Dist2D(GetActorLocation(), PostLocation) <= 50.f;
 	const bool bStandingAtPost = Action == EArmorAction::Idle && !bHasDestination && (bAtPost || bPatrolWaiting);
-	const bool bPlayReaction = bStandingAtPost && Event.Kind != ECatrunSoundKind::Footstep;
+	// A patrolling armor that walks between two points has not noticed anything yet either: the first
+	// sound makes it react (stop and look) before it runs. After that it stays alert (bPatrolAlerted)
+	// until it reaches a patrol point again.
+	const bool bPatrolWalking = HasPatrol() && !bPatrolAlerted && !bHasDestination && !bFollowingMark
+		&& bReturningToPost && (Action == EArmorAction::Walking || Action == EArmorAction::Turning);
+	const bool bPlayReaction = (bStandingAtPost || bPatrolWalking) && Event.Kind != ECatrunSoundKind::Footstep;
+	bPatrolAlerted = true;
 	bHasDestination = true;
 	bReturningToPost = false;
 	bRestorePostHeading = false;
@@ -215,6 +222,12 @@ void ACatrunArmor::OnSoundHeard_Implementation(const FCatrunSoundEvent& Event, f
 
 	if (bPlayReaction)
 	{
+		if (Action == EArmorAction::Turning)
+		{
+			// The turn on the spot is cut short: the body keeps the part already shown, then reacts.
+			CommitTurn(false);
+			TurnsRemaining = 0;
+		}
 		SetAction(EArmorAction::Reacting); // react first, then walk
 	}
 	else if (Action == EArmorAction::Walking || Action == EArmorAction::Idle || Action == EArmorAction::Looking)
@@ -549,8 +562,25 @@ bool ACatrunArmor::HasPatrol() const
 	return false;
 }
 
+bool ACatrunArmor::SkipEmptyPatrolSlots()
+{
+	const int32 Count = PatrolPoints.Num();
+	const int32 Start = FMath::Clamp(PatrolIndex, 0, FMath::Max(Count - 1, 0));
+	for (int32 Tries = 0; Tries < Count; ++Tries)
+	{
+		const int32 Index = (Start + Tries) % Count;
+		if (PatrolPoints[Index])
+		{
+			PatrolIndex = Index;
+			return true;
+		}
+	}
+	return false;
+}
+
 void ACatrunArmor::OnPatrolPointReached()
 {
+	bPatrolAlerted = false; // back on the route: the next sound is a new surprise
 	const ACatrunPatrolPoint* Point = PatrolPoints.IsValidIndex(PatrolIndex) ? PatrolPoints[PatrolIndex].Get() : nullptr;
 	const UCatrunSoundSettings* S = SoundManager.IsValid() ? SoundManager->GetSettings() : nullptr;
 	const float DefaultPause = S ? S->ArmorPatrolPause : 1.5f;
@@ -591,6 +621,11 @@ void ACatrunArmor::BeginPatrolLeg()
 	bAwaitingDoorReplan = false;
 	DoorReplanWait = 0.f;
 	TravelIntent = ETravelIntent::Patrol;
+	// An empty slot (a deleted point, a slot not filled in yet) is skipped; retrying it would wait for ever.
+	if (!PatrolPoints.IsValidIndex(PatrolIndex) || !PatrolPoints[PatrolIndex])
+	{
+		SkipEmptyPatrolSlots();
+	}
 	const ACatrunPatrolPoint* Point = PatrolPoints.IsValidIndex(PatrolIndex) ? PatrolPoints[PatrolIndex].Get() : nullptr;
 	if (!Point)
 	{

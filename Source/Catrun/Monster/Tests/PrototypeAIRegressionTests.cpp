@@ -1003,6 +1003,30 @@ bool FCatrunDynamicSightCoverageTest::RunTest(const FString&)
 	return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunArmorPatrolSlotsAndFirstSoundTest,"Catrun.PrototypeAI.PatrolSkipsEmptySlotsAndReactsToFirstSound",EAutomationTestFlags::EditorContext|EAutomationTestFlags::EngineFilter)
+bool FCatrunArmorPatrolSlotsAndFirstSoundTest::RunTest(const FString&)
+{
+	FPrototypeWorld F;
+	auto* Armor = F.Spawn<ACatrunArmor>(FVector(300,300,90));
+	auto* Point = F.Spawn<ACatrunPatrolPoint>(FVector(900,300,90));
+	Armor->PatrolPoints.Add(nullptr); // an empty first slot used to make the armor wait for ever
+	Armor->PatrolPoints.Add(Point);
+	Armor->DispatchBeginPlay();
+	TestEqual(TEXT("BeginPlay moves past the empty first slot"),Armor->PatrolIndex,1);
+	Armor->PatrolIndex=0; Armor->BeginPatrolLeg();
+	TestTrue(TEXT("A leg toward an empty slot walks to the next filled point"),Armor->PatrolIndex==1 && Armor->GetAction()==EArmorAction::Walking && !Armor->PathCorners.IsEmpty());
+
+	FCatrunSoundEvent Device; Device.Location=FVector(700,700,90); Device.Kind=ECatrunSoundKind::Device; Device.Size=ECatrunSoundSize::Medium;
+	Armor->OnSoundHeard_Implementation(Device,100.f);
+	TestEqual(TEXT("First sound on a patrol walk plays the reaction"),Armor->GetAction(),EArmorAction::Reacting);
+	Armor->Action=EArmorAction::Walking;
+	FCatrunSoundEvent Bell; Bell.Location=FVector(700,300,90); // louder, so it replaces the destination
+	Armor->OnSoundHeard_Implementation(Bell,100.f);
+	TestTrue(TEXT("The louder sound is accepted"),Armor->Destination.Equals(Bell.Location));
+	TestNotEqual(TEXT("An alerted armor runs to the next sound without reacting again"),Armor->GetAction(),EArmorAction::Reacting);
+	return true;
+}
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunArmorTravelSafetyTest,"Catrun.PrototypeAI.DoorReplansActivePatrolAndSweepsHandoff",EAutomationTestFlags::EditorContext|EAutomationTestFlags::EngineFilter)
 bool FCatrunArmorTravelSafetyTest::RunTest(const FString&)
 {
