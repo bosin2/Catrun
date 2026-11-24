@@ -6,6 +6,10 @@
 #include "Monster/Tests/CatrunCaptureCallbackProbe.h"
 #include "LevelFlow/CatrunLevelFlow.h"
 #include "Sound/CatrunSoundSettings.h"
+#include "Sound/CatrunNotice.h"
+#include "Components/TextBlock.h"
+#include "Slate/SObjectWidget.h"
+#include "UObject/UnrealType.h"
 #include "Camera/CameraActor.h"
 #include "Camera/PlayerCameraManager.h"
 #include "Components/BoxComponent.h"
@@ -123,6 +127,53 @@ struct FCaptureTravelFixture
         GEngine->DestroyWorldContext(World); World->DestroyWorld(false);
     }
 };
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunManualCaptureRestartTest, "Catrun.LevelFlow.ManualRestartDuringCaptureClearsOwnershipAndCheckpoint", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FCatrunManualCaptureRestartTest::RunTest(const FString&)
+{
+    FCaptureTravelFixture F;
+    const FString Package = F.World->GetOutermost()->GetName();
+    auto* Routes = GetMutableDefault<UCatrunLevelFlowSettings>();
+    TGuardValue<TArray<FCatrunStageRoute>> RestoreRoutes(Routes->Stages, TArray<FCatrunStageRoute>());
+    auto& Route = Routes->Stages.AddDefaulted_GetRef();
+    Route.StageId = TEXT("Stage2"); Route.Map = TSoftObjectPtr<UWorld>(FSoftObjectPath(Package));
+    auto* Restart = F.World->GetSubsystem<UCatrunRestartSubsystem>();
+    Restart->MarkStage2EntryCheckpointReached();
+    if (!TestTrue(TEXT("Capture reaches fade with a live checkpoint"), Restart->HasStage2EntryCheckpoint() && F.ReachFade())) return false;
+    auto* Flow = F.World->GetSubsystem<UCatrunLevelFlowSubsystem>();
+    auto* Context = GEngine->GetWorldContextFromWorld(F.World);
+    Context->TravelURL = TEXT("/Game/Maps/MainMenu");
+    TestFalse(TEXT("Foreign travel denies manual restart"), Flow->RestartStage());
+    TestTrue(TEXT("Rejected manual request leaves capture intact"), Restart->IsCatching());
+    Context->TravelURL.Reset();
+    if (!TestTrue(TEXT("Manual request during capture is admitted"), Flow->RestartStage())) return false;
+    TestEqual(TEXT("Manual request reloads this exact world"), Context->TravelURL, Package);
+    TestFalse(TEXT("Accepting travel releases capture before teardown"), Restart->IsCatching());
+    TestFalse(TEXT("Capture phase is inactive before teardown"), F.Armor->CapturePresentation->IsCapturing());
+    TestTrue(TEXT("Capture camera is released before teardown"), F.PC->GetViewTarget() == F.OriginalView);
+    TestFalse(TEXT("Capture fade is released before teardown"), F.PC->PlayerCameraManager->bEnableFading);
+    auto* Session = F.Instance->GetSubsystem<UCatrunFlowSession>();
+    Session->ResolveArrivalRestart(Package);
+    TestEqual(TEXT("Manual arrival skips intro in the current package"), Session->RestartIntent.MapPackage, Package);
+    TestFalse(TEXT("Manual restart discards capture checkpoint"), Session->RestartIntent.bRestoreStage2EntryCheckpoint);
+    AddExpectedError(TEXT("Travel failed; progress retained:"), EAutomationExpectedErrorFlags::Contains, 1);
+    auto* Notice = F.World->GetSubsystem<UCatrunNoticeSubsystem>();
+    auto* Widget = NewObject<UCatrunNoticeWidget>(F.World);
+    const auto* WidgetSlot = FindFProperty<FObjectPropertyBase>(Notice->GetClass(), TEXT("Widget"));
+    if (!TestNotNull(TEXT("Detached world can supply the notice widget"), WidgetSlot)) return false;
+    WidgetSlot->SetObjectPropertyValue_InContainer(Notice, Widget);
+    if (!TestTrue(TEXT("Detached world initializes the actual notice widget"), Widget->Initialize())) return false;
+    const auto SlateNotice = StaticCastSharedRef<SObjectWidget>(Widget->TakeWidget());
+    F.OriginalView->Tags.Add(TEXT("CatrunGameplayCamera"));
+    GEngine->OnTravelFailure().Broadcast(F.World, ETravelFailure::InvalidURL, TEXT("Manual restart failure after capture"));
+    F.CheckRestored(*this);
+    const auto* Message = Cast<UTextBlock>(Widget->GetWidgetFromName(TEXT("Text")));
+    TestTrue(TEXT("Late restart failure supplies the visible recovery instruction"), Message && Message->GetText().ToString().Contains(TEXT("다시 시작")));
+    SlateNotice->Tick(FGeometry(), 0., 0.f);
+    TestTrue(TEXT("After ownership clears the restart failure notice is readable"), Widget->IsVisible() && Widget->GetRenderOpacity() == 1.f);
+    Context->TravelURL.Reset();
+    return true;
 }
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunCaptureSingleOwnerTest, "Catrun.PrototypeAI.CaptureSingleOwnerSameFrameAndStaggeredWait", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)

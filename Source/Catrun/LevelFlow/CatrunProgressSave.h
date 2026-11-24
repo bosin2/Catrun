@@ -17,4 +17,5 @@ public:
 	UPROPERTY(SaveGame) bool bTutorialOnboardingCompleted = false;
 	bool IsSupported() const { return SchemaVersion == 1 || SchemaVersion == 2 || SchemaVersion == 3; }
 	bool HasCompletedOnboarding() const { return SchemaVersion >= 2 && bTutorialOnboardingCompleted; }
+	static const UCatrunProgressSave* Decode(const TArray<uint8>& Data);
 };

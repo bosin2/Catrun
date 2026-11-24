@@ -14,6 +14,7 @@
 #include "LevelFlow/CatrunLevelFlow.h"
 #include "Monster/CatrunRestartSubsystem.h"
 #include "Perception/CatrunCatStateComponent.h"
+#include "Perception/CatrunGroundSupport.h"
 #include "Sound/SoundGridManager.h"
 
 ACatrunStatuePuzzle::ACatrunStatuePuzzle()
@@ -137,10 +138,38 @@ bool ACatrunStatuePuzzle::CanMoveStatue(const FCatrunStatuePuzzleLink& Link, con
 bool ACatrunStatuePuzzle::MoveStatue(FCatrunStatuePuzzleLink& Link,const FVector& Delta,const AActor* Cat)
 {
 	if (Delta.IsNearlyZero()) return false;
-	if (!CanMoveStatue(Link,Delta,Cat)) { Link.PushVelocity=FVector::ZeroVector; return false; }
+	const ACharacter* Pusher = Link.LastPusher.Get();
+	if (!Pusher || !CanMoveStatue(Link,Delta,Cat) || !HasReversePushContact(Link,Delta,*Pusher))
+	{
+		Link.PushVelocity=FVector::ZeroVector;
+		return false;
+	}
 	Link.Statue->SetActorLocation(Link.Statue->GetActorLocation()+Delta,false);
 	NotifyObstaclesChanged();
 	return true;
+}
+bool ACatrunStatuePuzzle::HasReversePushContact(const FCatrunStatuePuzzleLink& Link, const FVector& Delta, const ACharacter& Cat) const
+{
+	const UCapsuleComponent* Capsule = Cat.GetCapsuleComponent();
+	const FVector Direction = Delta.GetSafeNormal2D();
+	const FVector Side(-Direction.Y, Direction.X, 0.);
+	const float Radius = Capsule->GetScaledCapsuleRadius();
+	const FVector Extent = Link.StatueExtent;
+	const double Half = FMath::Abs(FVector::DotProduct(Direction,Extent));
+	const double SideRange = FMath::Max(0., FMath::Abs(FVector::DotProduct(Side,Extent)) - Radius*.25);
+	const FVector Center = Link.Statue->GetActorLocation() + Link.StatueCenterOffset + Delta;
+	// Leave a little room to walk around the corner, inside the same contact band accepted by TryPushStatue.
+	FVector Face = Center + Direction*(Half + Radius + FMath::Clamp(Settings->ContactDistance*.5f,0.f,6.f));
+	Face.Z = Center.Z - Extent.Z + Capsule->GetScaledCapsuleHalfHeight() + 2.;
+	FCollisionQueryParams Params(SCENE_QUERY_STAT(StatueReverseContact),false,Link.Statue);
+	Params.AddIgnoredActor(&Cat);
+	for (const double Offset : {0., SideRange*.5, -SideRange*.5, SideRange, -SideRange})
+	{
+		FHitResult Floor;
+		FVector Standing;
+		if (CatrunGround::FindSupport(*Capsule,Face + Side*Offset,12.f,16.f,Params,Floor,Standing)) return true;
+	}
+	return false;
 }
 bool ACatrunStatuePuzzle::TryPushStatue(int32 Index,ACharacter* Cat,FVector Input,float DeltaSeconds)
 {
@@ -164,6 +193,7 @@ bool ACatrunStatuePuzzle::TryPushStatue(int32 Index,ACharacter* Cat,FVector Inpu
 	float Speed=FMath::Max(0.f,float(FVector::DotProduct(Link.PushVelocity,Direction)));
 	const float Distance=IntegratePushSpeed(Speed,FMath::Min(Settings->PushSpeed,UCatrunCatStateComponent::GetStatuePushSpeedLimit(*Cat)),Settings->PushAcceleration,DeltaSeconds);
 	Link.PushVelocity=Direction*Speed;
+	Link.LastPusher=Cat;
 	Link.bDrivenThisFrame=true;
 	return MoveStatue(Link,Direction*Distance,Cat);
 }

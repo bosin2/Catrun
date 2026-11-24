@@ -81,6 +81,7 @@ struct FCatrunStatuePuzzleLink
 	FVector SeatLocation = FVector::ZeroVector;
 	FVector SeatingAxis = FVector::ForwardVector;
 	FVector PushVelocity = FVector::ZeroVector;
+	TWeakObjectPtr<ACharacter> LastPusher;
 	bool bDrivenThisFrame = false;
 	bool bSeating = false;
 	bool bGateOpening = false;
@@ -133,6 +134,7 @@ public:
 private:
 	bool ResetStatues(const TArray<int32>& Indices);
 	bool CanMoveStatue(const FCatrunStatuePuzzleLink& Link, const FVector& Delta, const AActor* Cat) const;
+	bool HasReversePushContact(const FCatrunStatuePuzzleLink& Link, const FVector& Delta, const ACharacter& Cat) const;
 	bool IsGateClear(const FCatrunStatuePuzzleLink& Link, float NewOffset) const;
 	bool IsGameplayAvailable() const;
 	bool TrySeat(int32 Index);

@@ -24,6 +24,8 @@ bool FCatrunFlowRoutesTest::RunTest(const FString&)
 	TestEqual(TEXT("Configured map follows stage ordering"), Settings->FindStageIndex(TEXT("/Game/Maps/PlayableStage1")), 1);
 	TestEqual(TEXT("PIE map resolves to the same route"), Settings->FindStageIndex(TEXT("/Game/Maps/UEDPIE_0_PlayableStage1")), 1);
 	TestEqual(TEXT("Original art map alias remains usable"), Settings->FindStageIndex(TEXT("/Game/Maps/Stage1")), 1);
+	TestEqual(TEXT("PIE SoundTest mirror uses the canonical chapter"), Settings->FindStageIndex(TEXT("/Game/Maps/UEDPIE_3_SoundTest_Stage1")), 1);
+	TestEqual(TEXT("A similarly named unrelated map stays outside the flow"), Settings->FindStageIndex(TEXT("/Game/Other/SoundTest_Stage1")), INDEX_NONE);
 	TestEqual(TEXT("Unknown map cannot advance"), Settings->FindStageIndex(TEXT("/Game/Maps/Unknown")), INDEX_NONE);
 	TestEqual(TEXT("Menu is not a playable stage"), Settings->FindStageIndex(TEXT("/Game/Maps/MainMenu")), INDEX_NONE);
 	return true;

@@ -54,6 +54,8 @@ public:
 	void SaveArrivalCheckpoint(UWorld& World);
 	bool ConsumeArrivalTitle(const FString& Package);
 	int32 GetHighestUnlockedStageIndex();
+	bool IsProgressReadResolved() const { return bProgressLoaded; }
+	void RefreshMenuWithProgressSnapshot(TFunctionRef<void()> Refresh);
 	const UCatrunProgressSave* LoadSavedProgress() const;
 	UFUNCTION(BlueprintPure, Category="Catrun|Progress")
 	ECatrunCheckpointState GetCheckpointState() const { return CheckpointState; }
@@ -69,15 +71,18 @@ public:
 	void SetSaveBackendForTest(ISaveGameSystem* Backend);
 #endif
 private:
-	void EnsureProgressLoaded();
+	bool EnsureProgressLoaded();
+	void MergeSavedProgress(const UCatrunProgressSave& Save);
 	uint64 BeginCheckpoint(const FString& Package, bool bRetryOnce, TFunction<void(bool, const FString&)> Completion);
 	uint64 EnqueueCheckpoint(FName StageId, uint64 Generation, uint64 Request, bool bRetryOnce, TFunction<void(bool, const FString&)> Completion);
 	void OnCheckpointQueueIdle();
+	void OnCheckpointStarted();
 	TSharedPtr<FCatrunProgressWriter> Writer;
 	uint64 LatestSaveRequest = 0;
 	ECatrunCheckpointState CheckpointState = ECatrunCheckpointState::Idle;
 	ECatrunCheckpointState CompletedCheckpointState = ECatrunCheckpointState::Idle;
 	bool bProgressLoaded = false;
+	bool bDrawingProgressSnapshot = false;
 	FName HighestUnlockedStageId;
 	FString TitleIntentMap;
 	bool bRestoreCheckpointOnArrival = false;

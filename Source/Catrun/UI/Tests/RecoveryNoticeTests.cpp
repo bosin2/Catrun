@@ -133,4 +133,79 @@ bool FCatrunRecoveryNoticeTest::RunTest(const FString&)
 	return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunDeferredNoticeTest,
+	"Catrun.UI.Notice.DeferredGameplayCountsReadableTime",
+	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
+bool FCatrunDeferredNoticeTest::RunTest(const FString&)
+{
+	const auto Init = UWorld::InitializationValues().AllowAudioPlayback(false).CreatePhysicsScene(true)
+		.CreateNavigation(false).CreateAISystem(false);
+	UWorld* World = UWorld::CreateWorld(EWorldType::Game, false, NAME_None, nullptr, true, ERHIFeatureLevel::Num, &Init);
+	if (!TestNotNull(TEXT("Deferred notice world"), World)) return false;
+	GEngine->CreateNewWorldContext(EWorldType::Game).SetCurrentWorld(World);
+	ON_SCOPE_EXIT { GEngine->DestroyWorldContext(World); World->DestroyWorld(false); };
+	World->InitializeActorsForPlay(FURL());
+	auto* PC = World->SpawnActor<APlayerController>();
+	auto* Cat = World->SpawnActor<ACharacter>();
+	PC->Possess(Cat);
+	PC->SetViewTarget(Cat);
+	Cat->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+
+	auto* Notice = World->GetSubsystem<UCatrunNoticeSubsystem>();
+	Notice->Widget = NewObject<UCatrunNoticeWidget>(World);
+	auto* Widget = Notice->Widget.Get();
+	if (!TestTrue(TEXT("Native notice widget initializes"), Widget->Initialize())) return false;
+	const TSharedRef<SObjectWidget> SlateWidget = StaticCastSharedRef<SObjectWidget>(Widget->TakeWidget());
+	auto Step = [&](float Seconds)
+	{
+		++GFrameCounter;
+		World->GetTimerManager().Tick(Seconds);
+		SlateWidget->Tick(FGeometry(), 0.0, Seconds);
+	};
+	auto IsReadable = [Widget]
+	{
+		return Widget->GetVisibility() == ESlateVisibility::HitTestInvisible && Widget->GetRenderOpacity() > 0.f;
+	};
+
+	Notice->ShowNotice(INVTEXT("Checkpoint pending"), 2.f);
+	Step(0.f);
+	Notice->ShowNotice(INVTEXT("Checkpoint failed"), 5.f, ECatrunNoticePolicy::DeferredGameplay);
+	Step(0.f);
+	TestTrue(TEXT("A failure can be readable before a cinematic takes ownership"), IsReadable());
+	Step(1.f);
+	PC->SetIgnoreMoveInput(true);
+	Step(0.f);
+	Step(12.6f);
+	TestFalse(TEXT("Failure does not cover the arrival cinematic"), IsReadable());
+	PC->SetIgnoreMoveInput(false);
+	Step(2.f); // Elapsed time since the previous hidden frame.
+	TestTrue(TEXT("Failure is readable when gameplay presentation returns"), IsReadable());
+	Step(3.9f);
+	TestTrue(TEXT("The previously unread four seconds are available"), IsReadable());
+	Step(0.2f);
+	TestTrue(TEXT("Failure collapses after five readable seconds in total"), Widget->GetVisibility() == ESlateVisibility::Collapsed);
+
+	PC->bCinematicMode = true;
+	Notice->ShowNotice(INVTEXT("Checkpoint failed while hidden"), 5.f, ECatrunNoticePolicy::DeferredGameplay);
+	Step(0.f);
+	Step(13.f);
+	TestFalse(TEXT("A failure received while hidden stays hidden"), IsReadable());
+	PC->bCinematicMode = false;
+	Step(0.f);
+	TestTrue(TEXT("A failure received while hidden is readable at handoff"), IsReadable());
+	Step(4.9f);
+	TestTrue(TEXT("A failure received while hidden gets its full readable duration"), IsReadable());
+
+	PC->bCinematicMode = true;
+	Notice->ShowNotice(INVTEXT("Routine notice"), 2.f);
+	Step(0.f);
+	Step(2.1f);
+	PC->bCinematicMode = false;
+	Step(0.f);
+	TestTrue(TEXT("An expired ordinary prompt and the failure it replaced stay collapsed"),
+		Widget->GetVisibility() == ESlateVisibility::Collapsed);
+	return true;
+}
+
 #endif

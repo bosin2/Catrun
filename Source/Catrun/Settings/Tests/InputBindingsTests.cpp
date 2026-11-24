@@ -60,6 +60,21 @@ bool FCatrunReservedKeyboardKeysTest::RunTest(const FString&)
  return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunAltEnterMovementBindingsTest,"Catrun.Settings.AltEnterMovementBindings",
+ EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FCatrunAltEnterMovementBindingsTest::RunTest(const FString&)
+{
+ auto* Settings=NewObject<UCatrunUserSettings>();
+ FCatrunKeyboardBindings Draft;
+ Draft.Keys[static_cast<int32>(ECatrunInputSlot::Forward)]=EKeys::Enter;
+ Draft.Keys[static_cast<int32>(ECatrunInputSlot::Run)]=EKeys::LeftAlt;
+ FText Error;
+ TestTrue(TEXT("Enter forward and LeftAlt run can be applied together"),Settings->SetKeyboardBindings(Draft,Error));
+ TestTrue(TEXT("Both selected keys stay effective"),Settings->GetKeyboardBindings()==Draft);
+ TestFalse(TEXT("The viewport must not consume the configured movement chord"),GetDefault<UInputSettings>()->bAltEnterTogglesFullscreen);
+ return true;
+}
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunReservedBindingTransactionTest,"Catrun.Settings.ReservedBindingTransaction",
  EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 bool FCatrunReservedBindingTransactionTest::RunTest(const FString&)

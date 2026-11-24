@@ -2,6 +2,8 @@
 
 #if PLATFORM_WINDOWS
 #include "HAL/FileManager.h"
+#include "HAL/CriticalSection.h"
+#include "Misc/SecureHash.h"
 #include "Misc/Guid.h"
 #include "Misc/Paths.h"
 #include "Windows/WindowsHWrapper.h"
@@ -23,7 +25,37 @@ namespace
 	}
 }
 
+ISaveGameSystem::ESaveExistsResult FCatrunAtomicSaveGameSystem::DoesSaveGameExistWithResult(const TCHAR* Name, int32)
+{
+	const FString Path = ToWindowsCheckpointPath(IFileManager::Get().ConvertToAbsolutePathForExternalAppForRead(*GetSaveGamePath(Name)));
+	WIN32_FILE_ATTRIBUTE_DATA Attributes;
+	if (::GetFileAttributesExW(*Path, GetFileExInfoStandard, &Attributes))
+		return (Attributes.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) ? ESaveExistsResult::UnspecifiedError : ESaveExistsResult::OK;
+	const auto Error = ::GetLastError();
+	return (Error == ERROR_FILE_NOT_FOUND || Error == ERROR_PATH_NOT_FOUND) ? ESaveExistsResult::DoesNotExist : ESaveExistsResult::UnspecifiedError;
+}
+
+void FCatrunAtomicSaveGameSystem::CommitIfUnchangedAsync(FString Name, TSharedPtr<const TArray<uint8>> Expected,
+	TSharedRef<const TArray<uint8>> Data, TFunction<void(bool)> Completion)
+{
+	AsyncTaskPipe.Launch(UE_SOURCE_LOCATION, [this, Name = MoveTemp(Name), Expected = MoveTemp(Expected), Data, Completion = MoveTemp(Completion)]() mutable
+	{
+		const bool bOK = CommitIfUnchanged(*Name, Expected.Get(), *Data);
+		OnAsyncComplete([Completion = MoveTemp(Completion), bOK]() { Completion(bOK); });
+	}, UE::Tasks::ETaskPriority::Default, UE::Tasks::EExtendedTaskPriority::None, UE::Tasks::ETaskFlags::DoNotRunInsideBusyWait);
+}
+
+bool FCatrunAtomicSaveGameSystem::CommitIfUnchanged(const TCHAR* Name, const TArray<uint8>* Expected, const TArray<uint8>& Data)
+{
+	return Commit(Name, Data, Expected != nullptr, Expected);
+}
+
 bool FCatrunAtomicSaveGameSystem::SaveGame(bool, const TCHAR* Name, int32, const TArray<uint8>& Data)
+{
+	return Commit(Name, Data, true);
+}
+
+bool FCatrunAtomicSaveGameSystem::Commit(const TCHAR* Name, const TArray<uint8>& Data, bool bReplace, const TArray<uint8>* Expected)
 {
 	IFileManager& Files = IFileManager::Get();
 	const FString LogicalSlotPath = GetSaveGamePath(Name);
@@ -33,6 +65,17 @@ bool FCatrunAtomicSaveGameSystem::SaveGame(bool, const TCHAR* Name, int32, const
 	}
 
 	const FString SlotPath = Files.ConvertToAbsolutePathForExternalAppForWrite(*LogicalSlotPath);
+	FString CanonicalPath = FPaths::ConvertRelativePathToFull(SlotPath).ToLower();
+	FPaths::NormalizeFilename(CanonicalPath);
+	FPaths::CollapseRelativeDirectories(CanonicalPath);
+	const FString MutexName = TEXT("CatrunCheckpoint-") + FSHA1::HashBuffer(*CanonicalPath, CanonicalPath.Len() * sizeof(TCHAR)).ToString();
+	const FSystemWideCriticalSection SlotLock(MutexName, FTimespan::FromSeconds(5));
+	if (!SlotLock.IsValid()) return false;
+	if (Expected)
+	{
+		TArray<uint8> Current;
+		if (!LoadGame(false, Name, 0, Current) || Current != *Expected) return false;
+	}
 	const FString TemporaryName = TEXT("CatrunCheckpoint-") + FGuid::NewGuid().ToString(EGuidFormats::Digits) + TEXT(".tmp");
 	const FString TemporaryPath = ToWindowsCheckpointPath(FPaths::GetPath(SlotPath) / TemporaryName);
 	const FString DestinationPath = ToWindowsCheckpointPath(SlotPath);
@@ -48,7 +91,7 @@ bool FCatrunAtomicSaveGameSystem::SaveGame(bool, const TCHAR* Name, int32, const
 		&& BytesWritten == ByteCount && ::FlushFileBuffers(File);
 	const bool bClosed = ::CloseHandle(File) != 0;
 	// Commit through a same-volume rename, with cross-volume copy fallback disabled.
-	if (bComplete && bClosed && ::MoveFileExW(*TemporaryPath, *DestinationPath, MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH))
+	if (bComplete && bClosed && ::MoveFileExW(*TemporaryPath, *DestinationPath, MOVEFILE_WRITE_THROUGH | (bReplace ? MOVEFILE_REPLACE_EXISTING : 0)))
 	{
 		return true;
 	}

@@ -4,6 +4,7 @@
 #include "Components/BoxComponent.h"
 #include "Engine/World.h"
 #include "GameFramework/Character.h"
+#include "Interaction/CatrunBasketInteractionComponent.h"
 #include "Misc/ScopeExit.h"
 #include "Sound/CatrunBellComponent.h"
 #include "Sound/CatrunDoor.h"
@@ -50,6 +51,17 @@ bool FPlayerBellBudgetTest::RunTest(const FString&)
 	auto* Bell = NewObject<UCatrunBellComponent>(Cat);
 	Cat->AddInstanceComponent(Bell);
 	Bell->RegisterComponent();
+	auto* Basket = NewObject<UCatrunBasketInteractionComponent>(Cat);
+	Cat->AddInstanceComponent(Basket);
+	Basket->RegisterComponent();
+	for (const auto Phase : {ECatrunBasketPhase::Entering, ECatrunBasketPhase::Hidden, ECatrunBasketPhase::Exiting})
+	{
+		Basket->BasketPhase = Phase;
+		TestFalse(TEXT("A direct bell request is denied throughout the basket action"), Bell->TryRing());
+		TestEqual(TEXT("Denied bell consumes no cooldown"), Bell->GetCooldownRemaining(), 0.f);
+		TestEqual(TEXT("Denied bell emits no larger sound"), Manager->GetRemainingBudgetAt(Destination), -1.f);
+	}
+	Basket->BasketPhase = ECatrunBasketPhase::Outside;
 	TestTrue(TEXT("Player's bell rings"), Bell->TryRing());
 	TestEqual(TEXT("Actual bell reaches the destination with 75 cm remaining"), Manager->GetRemainingBudgetAt(Destination), 75.f);
 	float VisualBudget = 0.f;

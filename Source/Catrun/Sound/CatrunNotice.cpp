@@ -47,21 +47,31 @@ void UCatrunNoticeWidget::SetNoticeText(const FText& Text)
 void UCatrunNoticeWidget::NativeTick(const FGeometry& Geometry, float DeltaSeconds)
 {
 	Super::NativeTick(Geometry, DeltaSeconds);
-	RefreshPresentation();
+	const bool bReadable = RefreshPresentation() && IsVisible();
+	// A frame that restores presentation can still carry elapsed time from a hidden frame.
+	if (bReadable && bWasReadable && RemainingReadableSeconds > 0.f)
+	{
+		RemainingReadableSeconds -= DeltaSeconds;
+		if (RemainingReadableSeconds <= 0.f) SetVisibility(ESlateVisibility::Collapsed);
+	}
+	bWasReadable = bReadable;
 }
 
-void UCatrunNoticeWidget::SetNoticePolicy(ECatrunNoticePolicy Policy)
+void UCatrunNoticeWidget::SetNoticePolicy(ECatrunNoticePolicy Policy, float Duration)
 {
 	NoticePolicy = Policy;
+	RemainingReadableSeconds = Policy == ECatrunNoticePolicy::DeferredGameplay ? Duration : 0.f;
+	bWasReadable = false;
 	RefreshPresentation();
 }
 
-void UCatrunNoticeWidget::RefreshPresentation()
+bool UCatrunNoticeWidget::RefreshPresentation()
 {
 	const bool bHide = NoticePolicy == ECatrunNoticePolicy::BlockedRecovery
 		? UCatrunLevelFlowLibrary::ShouldHideRecoveryNotice(this)
 		: UCatrunLevelFlowLibrary::ShouldHideGameplayHUD(this);
 	SetRenderOpacity(bHide ? 0.f : 1.f);
+	return !bHide;
 }
 
 void UCatrunNoticeWidget::SetScreenAnchor(FVector2D Anchor)
@@ -126,11 +136,19 @@ void UCatrunNoticeSubsystem::ShowNotice(const FText& Text, float Duration, ECatr
 		}
 		Widget->AddToViewport(100);
 	}
+	const float NoticeDuration = FMath::Max(Duration, 0.1f);
 	Widget->SetNoticeText(Text);
-	Widget->SetNoticePolicy(Policy);
+	Widget->SetNoticePolicy(Policy, NoticeDuration);
 	Widget->SetVisibility(ESlateVisibility::HitTestInvisible);
 
-	World->GetTimerManager().SetTimer(HideTimer, this, &UCatrunNoticeSubsystem::HideNotice, FMath::Max(Duration, 0.1f), false);
+	if (Policy == ECatrunNoticePolicy::DeferredGameplay)
+	{
+		World->GetTimerManager().ClearTimer(HideTimer);
+	}
+	else
+	{
+		World->GetTimerManager().SetTimer(HideTimer, this, &UCatrunNoticeSubsystem::HideNotice, NoticeDuration, false);
+	}
 }
 
 void UCatrunNoticeSubsystem::HideNotice()

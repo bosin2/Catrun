@@ -22,8 +22,7 @@ bool IsStage2World(const UWorld& World)
 	const FString Package = UWorld::RemovePIEPrefix(World.GetOutermost()->GetName());
 	const auto* Settings = GetDefault<UCatrunLevelFlowSettings>();
 	const int32 Index = Settings->FindStageIndex(Package);
-	return (Settings->Stages.IsValidIndex(Index) && Settings->Stages[Index].StageId == TEXT("Stage2"))
-		|| Package == TEXT("/Game/Maps/SoundTest_Stage2");
+	return Settings->Stages.IsValidIndex(Index) && Settings->Stages[Index].StageId == TEXT("Stage2");
 }
 }
 

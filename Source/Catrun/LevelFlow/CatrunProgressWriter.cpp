@@ -12,17 +12,24 @@ namespace
 
 FCatrunProgressWriter::FCatrunProgressWriter()
 {
+	Backend = GetPlatformBackend(&bWritesAtomically);
+}
+
+ISaveGameSystem* FCatrunProgressWriter::GetPlatformBackend(bool* OutAtomic)
+{
 	IPlatformFeaturesModule& Features = IPlatformFeaturesModule::Get();
-	Backend = Features.GetSaveGameSystem();
+	auto* Result = Features.GetSaveGameSystem();
+	if (OutAtomic) *OutAtomic = false;
 #if PLATFORM_WINDOWS
 	// Only the generic platform backend uses the inherited local SaveGames path.
-	if (Backend == Features.IPlatformFeaturesModule::GetSaveGameSystem())
+	if (Result && Result == Features.IPlatformFeaturesModule::GetSaveGameSystem())
 	{
 		static FCatrunAtomicSaveGameSystem AtomicBackend;
-		Backend = &AtomicBackend;
-		bWritesAtomically = true;
+		Result = &AtomicBackend;
+		if (OutAtomic) *OutAtomic = true;
 	}
 #endif
+	return Result;
 }
 
 uint64 FCatrunProgressWriter::Enqueue(FPayload Payload, FResult Result)
@@ -39,14 +46,8 @@ void FCatrunProgressWriter::StartNext()
 	if (bBusy || Queue.IsEmpty()) return;
 	bBusy = true;
 	Active = MoveTemp(Queue[0]); Queue.RemoveAt(0);
-	TArray<uint8> Bytes;
-	if (!Backend || !Active.Payload(Bytes)) { Finish(false, TEXT("Checkpoint serialization or session eligibility failed.")); return; }
-	Active.Data = MakeShared<const TArray<uint8>>(MoveTemp(Bytes));
-	if (bWritesAtomically)
-	{
-		Write();
-		return;
-	}
+	OnStarted.ExecuteIfBound();
+	if (!Backend) { Finish(false, TEXT("Existing checkpoint cannot be inspected; no save backend.")); return; }
 	Backend->DoesSaveGameExistAsync(CatrunProgressSlotName, User(), [Self = AsShared()](const FString&, FPlatformUserId, ISaveGameSystem::ESaveExistsResult Result)
 	{
 		if (Result == ISaveGameSystem::ESaveExistsResult::DoesNotExist) { Self->Write(); return; }
@@ -63,14 +64,26 @@ void FCatrunProgressWriter::StartNext()
 
 void FCatrunProgressWriter::Write()
 {
-	Backend->SaveGameAsync(false, CatrunProgressSlotName, User(), Active.Data.ToSharedRef(), [Self = AsShared()](const FString&, FPlatformUserId, bool bOK)
+	TArray<uint8> Bytes;
+	if (!Active.Payload(Active.bHadPrevious ? &Active.Previous : nullptr, Bytes))
+	{
+		Finish(false, TEXT("Existing checkpoint or new payload could not be validated; no write attempted."));
+		return;
+	}
+	const auto NewData = MakeShared<const TArray<uint8>>(MoveTemp(Bytes));
+#if PLATFORM_WINDOWS
+	if (bWritesAtomically)
+	{
+		TSharedPtr<const TArray<uint8>> Expected;
+		if (Active.bHadPrevious) Expected = MakeShared<const TArray<uint8>>(MoveTemp(Active.Previous));
+		static_cast<FCatrunAtomicSaveGameSystem*>(Backend)->CommitIfUnchangedAsync(CatrunProgressSlotName, MoveTemp(Expected), NewData,
+			[Self = AsShared()](bool bOK) { Self->Finish(bOK, bOK ? FString() : TEXT("Checkpoint file could not be committed.")); });
+		return;
+	}
+#endif
+	Backend->SaveGameAsync(false, CatrunProgressSlotName, User(), NewData, [Self = AsShared()](const FString&, FPlatformUserId, bool bOK)
 	{
 		if (bOK) { Self->Finish(true, FString()); return; }
-		if (Self->bWritesAtomically)
-		{
-			Self->Finish(false, TEXT("Checkpoint file could not be committed."));
-			return;
-		}
 		auto RolledBack = [Self](const FString&, FPlatformUserId, bool bRestored)
 		{
 			Self->Finish(false, bRestored ? TEXT("Checkpoint write failed; prior bytes restored.") : TEXT("Checkpoint write AND rollback failed."));

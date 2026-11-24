@@ -9,12 +9,15 @@ class CATRUN_API FCatrunProgressWriter : public TSharedFromThis<FCatrunProgressW
 {
 public:
 	using FResult = TFunction<void(bool, const FString&)>;
-	using FPayload = TFunction<bool(TArray<uint8>&)>;
+	/** Previous is null only when the backend positively identified a missing slot. */
+	using FPayload = TFunction<bool(const TArray<uint8>* Previous, TArray<uint8>& Out)>;
 	FCatrunProgressWriter();
+	static ISaveGameSystem* GetPlatformBackend(bool* OutAtomic = nullptr);
 	explicit FCatrunProgressWriter(ISaveGameSystem* InBackend) : Backend(InBackend) {}
 	uint64 Enqueue(FPayload Payload, FResult Result);
 	bool IsBusy() const { return bBusy || !Queue.IsEmpty(); }
 	FSimpleDelegate OnIdle;
+	FSimpleDelegate OnStarted;
 private:
 	struct FOperation
 	{
@@ -22,7 +25,6 @@ private:
 		FPayload Payload;
 		FResult Result;
 		TArray<uint8> Previous;
-		TSharedPtr<const TArray<uint8>> Data;
 		bool bHadPrevious = false;
 	};
 	void StartNext();

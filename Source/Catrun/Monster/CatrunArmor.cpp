@@ -823,9 +823,9 @@ void ACatrunArmor::UpdateDetection()
 	APawn* Cat = CatrunCat::Find(this);
 	const bool bSees = Cat && !UCatrunMarkSubsystem::IsExcludedFromPerception(Cat) && !CatrunCat::IsSafeFromCatch(Cat) && Detection->CanSee(Cat->GetActorLocation(), S->CatSightRadius)
 		&& CatrunPerception::HasDirectSight(*this, *Cat, S->VisionTraceHeight)
-		&& HasClearCapturePath(*Cat);
+		&& HasBodyHeightSight(*Cat);
 
-	// Refresh the short-lived alert while the cat can be seen and reached.
+	// Refresh the short-lived alert as long as the cat is visible.
 	if (bSees)
 	{
 		AlertMark->Show(0.2f);
@@ -837,20 +837,36 @@ void ACatrunArmor::UpdateDetection()
 		{
 			UE_LOG(LogCatrunSound, Log, TEXT("%s noticed the cat."), *GetName());
 		}
-		StartCatch(*Cat);
+		if (HasClearCapturePath(*Cat))
+			StartCatch(*Cat);
 	}
 	bSeeingCat = bSees;
 }
 
-bool ACatrunArmor::HasClearCapturePath(const APawn& Cat) const
+bool ACatrunArmor::HasBodyHeightSight(const APawn& Cat) const
 {
 	const auto* Character = Cast<ACharacter>(&Cat);
 	const FVector Target = Character ? Character->GetCapsuleComponent()->GetComponentLocation() : Cat.GetActorLocation();
 	FVector Start = GetCapsuleComponent()->GetComponentLocation();
 	Start.Z = Target.Z;
-
 	const float Distance = FVector::Distance(Start, Target);
 	return CatrunPerception::SightDistance(*GetWorld(), Start, Target, this, &Cat) >= Distance - KINDA_SMALL_NUMBER;
+}
+
+bool ACatrunArmor::HasClearCapturePath(const APawn& Cat) const
+{
+	const auto* Body = Cast<UPrimitiveComponent>(Cat.GetRootComponent());
+	if (!Body) return false;
+	const FVector Target = Body->GetComponentLocation();
+	const auto* ArmorCapsule = GetCapsuleComponent();
+	FVector Start = ArmorCapsule->GetComponentLocation();
+	const FCollisionShape Shape = Body->GetCollisionShape();
+	// Carry the cat's footprint between the two standing positions, following the change in floor height.
+	Start.Z = ArmorCapsule->GetComponentLocation().Z - ArmorCapsule->GetScaledCapsuleHalfHeight() + Shape.GetExtent().Z;
+	FCollisionQueryParams Params(SCENE_QUERY_STAT(ArmorCaptureReach), false, this);
+	Params.AddIgnoredActor(&Cat);
+	return !GetWorld()->SweepTestByChannel(Start, Target, Body->GetComponentQuat(), Body->GetCollisionObjectType(),
+		Shape, Params, FCollisionResponseParams(Body->GetCollisionResponseToChannels()));
 }
 
 void ACatrunArmor::StartCatch(APawn& Cat)

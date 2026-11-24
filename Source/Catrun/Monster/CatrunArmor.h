@@ -348,6 +348,7 @@ private:
 
 	// Checks for a nearby cat with clear sight and a clear body-height capture path.
 	void UpdateDetection();
+	bool HasBodyHeightSight(const APawn& Cat) const;
 	bool HasClearCapturePath(const APawn& Cat) const;
 	bool bSeeingCat = false;
 

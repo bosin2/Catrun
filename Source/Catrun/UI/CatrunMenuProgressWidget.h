@@ -20,6 +20,9 @@ protected:
 private:
 	UFUNCTION()
 	void CheckpointChanged(ECatrunCheckpointState State);
+	void RetryProgressRead();
+	void RefreshMenu();
+	FTimerHandle ProgressReadTimer;
 
 	TWeakObjectPtr<UCatrunFlowSession> BoundSession;
 };

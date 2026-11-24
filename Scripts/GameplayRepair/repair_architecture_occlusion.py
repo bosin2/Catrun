@@ -313,17 +313,23 @@ def run():
         raise
 
 
-OUT.mkdir(parents=True, exist_ok=True)
-report = {"mode": "apply" if APPLY else "audit", "save_requested": SAVE,
-          "completed": False, "applied": False, "backups": [], "created": [],
-          "saved": [], "variants": [], "after": [], "output": str(OUT)}
-try:
-    run()
-    report["completed"] = True
-except Exception:
-    report["error"] = traceback.format_exc()
-    raise
-finally:
-    report["dirty_after"] = dirty()
-    (OUT / "report.json").write_text(json.dumps(report, indent=2, ensure_ascii=False), encoding="utf-8")
-    print("CATRUN_ARCHITECTURE_OCCLUSION_REPORT", str(OUT / "report.json"))
+def main():
+    global report
+    OUT.mkdir(parents=True, exist_ok=True)
+    report = {"mode": "apply" if APPLY else "audit", "save_requested": SAVE,
+              "completed": False, "applied": False, "backups": [], "created": [],
+              "saved": [], "variants": [], "after": [], "output": str(OUT)}
+    try:
+        run()
+        report["completed"] = True
+    except Exception:
+        report["error"] = traceback.format_exc()
+        raise
+    finally:
+        report["dirty_after"] = dirty()
+        (OUT / "report.json").write_text(json.dumps(report, indent=2, ensure_ascii=False), encoding="utf-8")
+        print("CATRUN_ARCHITECTURE_OCCLUSION_REPORT", str(OUT / "report.json"))
+
+
+if not globals().get("CATRUN_ARCH_OCCLUSION_LIBRARY_ONLY", False):
+    main()

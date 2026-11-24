@@ -11,13 +11,19 @@ namespace
         ESaveExistsResult Existence = ESaveExistsResult::OK;
         TArray<bool> WriteResults;
         TArray<TFunction<void()>> Pending;
-        int32 Writes = 0, Deletes = 0, Reads = 0;
+        int32 Writes = 0, Deletes = 0, Reads = 0, SyncReadFailuresRemaining = 0;
         bool PlatformHasNativeUI() override { return false; }
         bool DoesSaveSystemSupportMultipleUsers() override { return false; }
         bool DoesSaveGameExist(const TCHAR*, int32) override { checkNoEntry(); return false; }
-        ESaveExistsResult DoesSaveGameExistWithResult(const TCHAR*, int32) override { checkNoEntry(); return Existence; }
+        ESaveExistsResult DoesSaveGameExistWithResult(const TCHAR*, int32) override { return bExists ? Existence : ESaveExistsResult::DoesNotExist; }
         bool SaveGame(bool, const TCHAR*, int32, const TArray<uint8>&) override { checkNoEntry(); return false; }
-        bool LoadGame(bool, const TCHAR*, int32, TArray<uint8>& Out) override { if (!bExists || bReadFails) return false; Out = Bytes; return true; }
+        bool LoadGame(bool, const TCHAR*, int32, TArray<uint8>& Out) override
+        {
+            if (SyncReadFailuresRemaining > 0) { --SyncReadFailuresRemaining; return false; }
+            if (!bExists || bReadFails) return false;
+            Out = Bytes;
+            return true;
+        }
         bool DeleteGame(bool, const TCHAR*, int32) override { checkNoEntry(); return false; }
         void DoesSaveGameExistAsync(const TCHAR* Slot, FPlatformUserId User, FSaveGameAsyncExistsCallback Callback) override
         {

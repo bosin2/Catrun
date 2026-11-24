@@ -11,6 +11,7 @@ class UTextBlock;
 enum class ECatrunNoticePolicy : uint8
 {
 	Gameplay,
+	DeferredGameplay,
 	BlockedRecovery
 };
 
@@ -23,16 +24,17 @@ class CATRUN_API UCatrunNoticeWidget : public UUserWidget
 public:
 	void SetNoticeText(const FText& Text);
 	void SetScreenAnchor(FVector2D Anchor);
-	void SetNoticePolicy(ECatrunNoticePolicy Policy);
+	void SetNoticePolicy(ECatrunNoticePolicy Policy, float Duration);
 
 protected:
 	virtual TSharedRef<SWidget> RebuildWidget() override;
 	virtual void NativeTick(const FGeometry& Geometry, float DeltaSeconds) override;
 
 private:
-	friend class FCatrunRecoveryNoticeTest;
 	ECatrunNoticePolicy NoticePolicy = ECatrunNoticePolicy::Gameplay;
-	void RefreshPresentation();
+	bool RefreshPresentation();
+	float RemainingReadableSeconds = 0.f;
+	bool bWasReadable = false;
 	FText PendingText;
 	UPROPERTY(Transient)
 	TObjectPtr<UTextBlock> TextBlock;
@@ -47,7 +49,7 @@ class CATRUN_API UCatrunNoticeSubsystem : public UWorldSubsystem
 public:
 	static UCatrunNoticeSubsystem* Get(const UObject* WorldContextObject);
 
-	// Shows Text for Duration seconds (a new notice replaces the one on screen).
+	// A new notice replaces the one on screen. DeferredGameplay counts only readable time.
 	void ShowNotice(const FText& Text, float Duration, ECatrunNoticePolicy Policy = ECatrunNoticePolicy::Gameplay);
 	static FText BellDeniedText();
 
@@ -56,6 +58,7 @@ public:
 
 private:
 	friend class FCatrunRecoveryNoticeTest;
+	friend class FCatrunDeferredNoticeTest;
 	void HideNotice();
 
 	UPROPERTY(Transient)

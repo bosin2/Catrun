@@ -3,6 +3,7 @@
 #include "CatrunUserSettings.h"
 #include "Blueprint/WidgetTree.h"
 #include "Components/InputKeySelector.h"
+#include "Components/TextBlock.h"
 #include "EnhancedInputSubsystems.h"
 #include "Engine/LocalPlayer.h"
 #include "GameFramework/PlayerController.h"
@@ -78,8 +79,10 @@ void UCatrunSettingsWidget::DismissSettings()
 }
 bool UCatrunSettingsWidget::RestartFromSettings()
 {
- DismissSettings();
- return UCatrunLevelFlowLibrary::RestartCurrentStage(this);
+ if (UCatrunLevelFlowLibrary::RestartCurrentStage(this)) return true;
+ if (auto* Status=Cast<UTextBlock>(GetWidgetFromName(TEXT("SettingsStatus"))))
+  Status->SetText(NSLOCTEXT("Catrun","SettingsRestartUnavailable","지금은 다시 시작할 수 없습니다. 잠시 후 다시 시도하세요."));
+ return false;
 }
 bool UCatrunSettingsWidget::ReturnToMenuFromSettings()
 {

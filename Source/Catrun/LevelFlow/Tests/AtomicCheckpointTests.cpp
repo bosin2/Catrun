@@ -1,5 +1,7 @@
 #if WITH_DEV_AUTOMATION_TESTS && PLATFORM_WINDOWS
 #include "LevelFlow/CatrunAtomicSaveGame.h"
+#include "Async/Async.h"
+#include "HAL/Event.h"
 #include "HAL/FileManager.h"
 #include "Misc/AutomationTest.h"
 #include "Misc/FileHelper.h"
@@ -19,6 +21,13 @@ namespace
 		{
 			return Directory / (FString(Name) + TEXT(".sav"));
 		}
+		TFunction<void()> AfterRead;
+		bool LoadGame(bool bUI, const TCHAR* Name, int32 User, TArray<uint8>& Data) override
+		{
+			const bool bRead = FCatrunAtomicSaveGameSystem::LoadGame(bUI, Name, User, Data);
+			if (AfterRead) AfterRead();
+			return bRead;
+		}
 
 	private:
 		FString Directory;
@@ -30,6 +39,34 @@ namespace
 		FPaths::MakePlatformFilename(Result);
 		return Result;
 	}
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunConcurrentCheckpointTest, "Catrun.LevelFlow.ConcurrentCheckpointCommitRejectsStaleWriter", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FCatrunConcurrentCheckpointTest::RunTest(const FString&)
+{
+	const FString Directory = FPaths::ProjectSavedDir() / (TEXT("CatrunCheckpointTest-") + FGuid::NewGuid().ToString(EGuidFormats::Digits));
+	FTemporaryCheckpointSystem First(Directory), Second(Directory);
+	const TCHAR* Slot = TEXT("Checkpoint");
+	const TArray<uint8> Previous{0}, Higher{2}, Lower{1};
+	ON_SCOPE_EXIT { IFileManager::Get().Delete(*First.GetSaveGamePath(Slot)); IFileManager::Get().DeleteDirectory(*Directory); };
+	if (!TestTrue(TEXT("Seed isolated slot"), First.SaveGame(false, Slot, 0, Previous))) return false;
+	FEventRef FirstRead, ResumeFirst, SecondStarted;
+	First.AfterRead = [&]() { FirstRead->Trigger(); ResumeFirst->Wait(5000); };
+	auto FirstCommit = Async(EAsyncExecution::Thread, [&]() { return First.CommitIfUnchanged(Slot, &Previous, Higher); });
+	TestTrue(TEXT("First writer has compared the previous slot"), FirstRead->Wait(5000));
+	auto StaleCommit = Async(EAsyncExecution::Thread, [&]()
+	{
+		SecondStarted->Trigger();
+		return Second.CommitIfUnchanged(Slot, &Previous, Lower);
+	});
+	TestTrue(TEXT("Second independent writer enters while the first owns its comparison"), SecondStarted->Wait(5000));
+	TestFalse(TEXT("Second writer cannot commit between first comparison and rename"), StaleCommit.WaitFor(FTimespan::FromMilliseconds(200)));
+	ResumeFirst->Trigger();
+	TestTrue(TEXT("First checkpoint commits"), FirstCommit.Get());
+	TestFalse(TEXT("Stale lower checkpoint rejected after first commit"), StaleCommit.Get());
+	TArray<uint8> Actual;
+	TestTrue(TEXT("Higher checkpoint survives concurrent stale writer"), Second.LoadGame(false, Slot, 0, Actual) && Actual == Higher);
+	return true;
 }
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunAtomicCheckpointReplaceTest, "Catrun.LevelFlow.CheckpointCommitReplacesFile", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
@@ -98,6 +135,9 @@ bool FCatrunAtomicCheckpointFailureTest::RunTest(const FString&)
 	TestTrue(TEXT("Failed replacement cleans its own temporary file"), TemporaryFiles == TArray<FString>{AbandonedName});
 	TestTrue(TEXT("A retry commits after the lock is released"), Backend.SaveGame(false, SlotName, 0, Next));
 	TestTrue(TEXT("Retry makes the complete new payload visible"), Backend.LoadGame(false, SlotName, 0, Bytes) && Bytes == Next);
+	TestFalse(TEXT("A slot created after the missing-slot check is preserved"), Backend.CommitIfUnchanged(SlotName, nullptr, Previous));
+	TestFalse(TEXT("A slot changed after the backup read is preserved"), Backend.CommitIfUnchanged(SlotName, &Previous, Previous));
+	TestTrue(TEXT("Conflicting commits preserve all bytes"), Backend.LoadGame(false, SlotName, 0, Bytes) && Bytes == Next);
 	return true;
 }
 #endif
@@ -119,11 +159,11 @@ bool FCatrunCheckpointQueueIdleTest::RunTest(const FString&)
 		TestFalse(TEXT("Idle observers see the writer as available"), Writer->IsBusy());
 		Events.Add(3);
 	});
-	Writer->Enqueue([](TArray<uint8>& Bytes) { Bytes = {1}; return true; }, [this, &Writer, &Events](bool bSuccess, const FString&)
+	Writer->Enqueue([](const TArray<uint8>*, TArray<uint8>& Bytes) { Bytes = {1}; return true; }, [this, &Writer, &Events](bool bSuccess, const FString&)
 	{
 		TestTrue(TEXT("First write succeeds"), bSuccess);
 		Events.Add(1);
-		Writer->Enqueue([](TArray<uint8>& Bytes) { Bytes = {2}; return true; }, [this, &Events](bool bNextSuccess, const FString&)
+		Writer->Enqueue([](const TArray<uint8>*, TArray<uint8>& Bytes) { Bytes = {2}; return true; }, [this, &Events](bool bNextSuccess, const FString&)
 		{
 			TestTrue(TEXT("Write queued by the previous callback succeeds"), bNextSuccess);
 			Events.Add(2);

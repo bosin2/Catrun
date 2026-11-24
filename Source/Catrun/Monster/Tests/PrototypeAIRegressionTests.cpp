@@ -221,9 +221,31 @@ bool FCatrunArmorCaptureObstructionTest::RunTest(const FString&)
 	TestFalse(TEXT("The tall gate blocks the existing direct sight ray"),
 		CatrunPerception::HasDirectSight(*Armor, *F.Cat, F.Settings->VisionTraceHeight));
 	Armor->UpdateDetection();
-	TestFalse(TEXT("Closed gate prevents normal capture"), Armor->bSeeingCat || Capture->IsCapturing());
+	TestFalse(TEXT("An opaque closed gate prevents detection, alert and capture"),
+		Armor->bSeeingCat || Armor->AlertMark->IsVisible() || Capture->IsCapturing());
 
 	GateCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	// A ray through the opening clears both bars, but a 40 cm wide cat cannot pass.
+	auto* BarLeft = F.Box(FVector(32,-16,100), FVector(3,4,100));
+	auto* BarRight = F.Box(FVector(32,16,100), FVector(3,4,100));
+	TestTrue(TEXT("The slit has clear body-height sight"), FMath::IsNearlyEqual(
+		CatrunPerception::SightDistance(*F.World, ArmorCenter, CatCenter, Armor, F.Cat), float(FVector::Distance(ArmorCenter,CatCenter))));
+	TestFalse(TEXT("A sight slit too narrow for the cat prevents capture"), Armor->HasClearCapturePath(*F.Cat));
+	Armor->UpdateDetection();
+	TestTrue(TEXT("A visible cat behind narrow bars is detected and the alert is shown"),
+		Armor->bSeeingCat && Armor->AlertMark->IsVisible());
+	TestFalse(TEXT("Detection through the slit does not start a capture"), Capture->IsCapturing());
+	for (AActor* Bar : {BarLeft, BarRight})
+		CastChecked<UBoxComponent>(Bar->GetRootComponent())->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+	TestTrue(TEXT("Bars that allow pawn movement permit the reach"), Armor->HasClearCapturePath(*F.Cat));
+	Armor->UpdateDetection();
+	TestTrue(TEXT("Clearing physical access starts capture while the cat is still visible"),
+		Armor->bSeeingCat && Capture->IsCapturing());
+	Capture->AbortCapture();
+	Armor->TickCatching(0.f);
+	BarLeft->Destroy();
+	BarRight->Destroy();
+
 	auto* BasketActions = NewObject<UCatrunBasketInteractionComponent>(F.Cat);
 	BasketActions->RegisterComponent();
 	BasketActions->BasketPhase = ECatrunBasketPhase::Hidden;
@@ -236,6 +258,23 @@ bool FCatrunArmorCaptureObstructionTest::RunTest(const FString&)
 	TestTrue(TEXT("An exposed cat is seen and capture interrupts Looking"),
 		Armor->bSeeingCat && Armor->AlertMark->IsVisible() && Capture->IsCapturing() && Armor->IsCatching());
 	Capture->AbortCapture();
+
+	auto* Ramp = F.Box(FVector(500,0,140), FVector(180,90,10));
+	Ramp->SetActorRotation(FRotator(12,0,0));
+	FCollisionQueryParams SupportParams(SCENE_QUERY_STAT(CaptureSlopeFixture), false, Armor);
+	SupportParams.AddIgnoredActor(F.Cat);
+	for (ACharacter* Body : {static_cast<ACharacter*>(Armor), F.Cat})
+	{
+		const auto* Capsule = Body->GetCapsuleComponent();
+		const double X = Body == Armor ? 550. : 450.;
+		FHitResult Floor;
+		FVector Supported;
+		if (!TestTrue(TEXT("Each character stands on the ramp with its own capsule"), CatrunGround::FindSupport(
+			*Capsule, FVector(X,0,160.+Capsule->GetScaledCapsuleHalfHeight()), 60.f, 130.f,
+			SupportParams, Floor, Supported))) return false;
+		Body->SetActorLocation(Supported);
+	}
+	TestTrue(TEXT("Different capsule heights on an unobstructed slope permit a catch"), Armor->HasClearCapturePath(*F.Cat));
 	return true;
 }
 

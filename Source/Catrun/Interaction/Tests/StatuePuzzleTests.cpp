@@ -239,6 +239,53 @@ bool FStatuePushTest::RunTest(const FString&)
 	return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FStatueCornerTest, "Catrun.Stage2.WrongPushPreservesReverseContact",
+	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FStatueCornerTest::RunTest(const FString&)
+{
+	FStatueFixture F;
+	// The inside faces are at X=170 and Y=170. Neither blocks the initial statue.
+	F.Box(FVector(175,0,75), FVector(5,400,75));
+	F.Box(FVector(0,175,75), FVector(400,5,75));
+	auto Push = [&](const FVector& Direction)
+	{
+		F.Cat->SetActorLocation(F.Statue->GetActorLocation() - Direction*83. + FVector(0,0,26));
+		return F.Puzzle->TryPushStatue(0, F.Cat, Direction, .05f);
+	};
+	for (const FVector Direction : {FVector::ForwardVector, FVector::RightVector})
+	{
+		const FVector Start = F.Statue->GetActorLocation();
+		for (int32 Step = 0; Step < 50 && Push(Direction); ++Step) {}
+		const FVector End = F.Statue->GetActorLocation();
+		TestTrue(TEXT("Open space still permits ordinary progress"), FVector::DotProduct(End-Start,Direction) > 40.);
+		const double Gap = 170. - FVector::DotProduct(End,Direction) - 60.;
+		TestTrue(TEXT("Approaching a wall leaves room for the 40 cm cat"), Gap > 40.);
+	}
+	for (const FVector Direction : {-FVector::ForwardVector, -FVector::RightVector})
+	{
+		const FVector Contact = F.Statue->GetActorLocation() - Direction*82. + FVector(0,0,28);
+		const UCapsuleComponent* Capsule = F.Cat->GetCapsuleComponent();
+		FCollisionQueryParams Params(SCENE_QUERY_STAT(StatueReverseControl),false,F.Cat);
+		TestFalse(TEXT("The reverse push begins from a real capsule-clear position"),
+			F.World->OverlapBlockingTestByChannel(Contact,FQuat::Identity,Capsule->GetCollisionObjectType(),
+				Capsule->GetCollisionShape(),Params,FCollisionResponseParams(Capsule->GetCollisionResponseToChannels())));
+		F.Cat->SetActorLocation(Contact);
+		TestTrue(TEXT("The player can push back out on each axis"), F.Puzzle->TryPushStatue(0,F.Cat,Direction,.1f));
+	}
+	// A released statue must respect the same margin as a driven one.
+	F.Statue->SetActorLocation(FVector(0.,62.,0.));
+	F.Puzzle->Links[0].PushVelocity = FVector(0,100,0);
+	F.Cat->SetActorLocation(FVector(-300,0,26));
+	F.Puzzle->Tick(.25f);
+	TestTrue(TEXT("Coasting cannot consume the reverse contact space"), 170.-F.Statue->GetActorLocation().Y-60. > 40.);
+	TestTrue(TEXT("Blocked coast clears momentum"), F.Puzzle->Links[0].PushVelocity.IsNearlyZero());
+	// A narrow post covers the middle of a face but leaves usable side contacts.
+	F.Statue->SetActorLocation(FVector::ZeroVector);
+	F.Box(FVector(86,0,50),FVector(3,3,50));
+	TestTrue(TEXT("One accessible off-center reverse contact permits the push"), Push(FVector::ForwardVector));
+	return true;
+}
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FStatueResetTest,"Catrun.Stage2.ResetDoesNotTeleportOntoPlayer",EAutomationTestFlags::EditorContext|EAutomationTestFlags::EngineFilter)
 bool FStatueResetTest::RunTest(const FString&)
 {
@@ -561,7 +608,9 @@ bool FCatrunPuzzleSuspensionTest::RunTest(const FString&)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FStatueBusySeatTest,"Catrun.Stage2.CoastingBusySeatWaitsThenRevealsExactlyOnce",EAutomationTestFlags::EditorContext|EAutomationTestFlags::EngineFilter)
 bool FStatueBusySeatTest::RunTest(const FString&)
 {
-	FStatueFixture F; auto* PC=F.AddPlayer(); F.Cat->SetActorLocation(FVector(800,0,26));
+	FStatueFixture F; auto* PC=F.AddPlayer();
+	TestTrue(TEXT("A player push starts the coast"),F.Puzzle->TryPushStatue(0,F.Cat,FVector::RightVector,.05f));
+	F.Cat->SetActorLocation(FVector(800,0,26));
 	auto* Actions=NewObject<UCatrunBasketInteractionComponent>(F.Cat); Actions->RegisterComponent(); Actions->CatOwner=F.Cat; Actions->Busy=true;
 	auto* Probe=NewObject<UCatrunPuzzleCallbackProbe>(F.Puzzle); Probe->Puzzle=F.Puzzle;
 	F.Puzzle->OnPuzzleEvent.AddDynamic(Probe,&UCatrunPuzzleCallbackProbe::PuzzleEvent);

@@ -44,6 +44,88 @@ bool FCatrunChapterUnlockTest::RunTest(const FString&)
     return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunUnreadProgressTest, "Catrun.LevelFlow.UnreadProgressRecoversAndProtectsExistingSlot", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FCatrunUnreadProgressTest::RunTest(const FString&)
+{
+    const auto* Settings = GetDefault<UCatrunLevelFlowSettings>();
+    const FString Tutorial = Settings->Stages[0].Map.ToSoftObjectPath().GetLongPackageName();
+    auto* Old = NewObject<UCatrunProgressSave>();
+    Old->StageId = TEXT("Stage1");
+    Old->HighestUnlockedStageId = TEXT("Stage2");
+    Old->bTutorialOnboardingCompleted = true;
+    FCheckpointBackend Backend;
+    UGameplayStatics::SaveGameToMemory(Old, Backend.Bytes);
+    const TArray<uint8> Original = Backend.Bytes;
+    auto* Session = NewObject<UCatrunFlowSession>(NewObject<UGameInstance>());
+    Session->SetSaveBackendForTest(&Backend);
+    Backend.bReadFails = true;
+    TestEqual(TEXT("Unread first lookup exposes no saved chapters"), Session->GetHighestUnlockedStageIndex(), INDEX_NONE);
+    Backend.bReadFails = false;
+    TestEqual(TEXT("Same session recovers Stage2 immediately after unlock"), Session->GetHighestUnlockedStageIndex(), 2);
+
+    // A new run may begin with an unreadable slot, including a slot that became unreadable
+    // after a successful menu query. Never replace bytes that the write cannot validate.
+    Backend.bReadFails = true;
+    Session->AcceptTravel(Tutorial, true, true, ECatrunArrivalRestart::Clear, 0);
+    Session->Arrive(Tutorial);
+    AddExpectedError(TEXT("Existing checkpoint"), EAutomationExpectedErrorFlags::Contains, 1);
+    Session->SaveCurrentCheckpoint(Tutorial);
+    Backend.Drain();
+    TestEqual(TEXT("Unread slot rejects checkpoint"), Session->GetCheckpointState(), ECatrunCheckpointState::Failed);
+    TestTrue(TEXT("No destructive write occurs"), Backend.Writes == 0 && Original == Backend.Bytes);
+    Backend.bReadFails = false;
+    Session->SaveCurrentCheckpoint(Tutorial);
+    Backend.Drain();
+    const auto* Written = Cast<UCatrunProgressSave>(UGameplayStatics::LoadGameFromMemory(Backend.Bytes));
+    if (!TestNotNull(TEXT("Recovered checkpoint decodes"), Written)) return false;
+    TestEqual(TEXT("New game records Tutorial"), Written->StageId, FName(TEXT("Tutorial")));
+    TestEqual(TEXT("Recovered slot keeps Stage2"), Written->HighestUnlockedStageId, FName(TEXT("Stage2")));
+    TestFalse(TEXT("Recovered old onboarding does not override fresh run"), Written->HasCompletedOnboarding());
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunInvalidProgressTest, "Catrun.LevelFlow.InvalidOrFutureProgressIsPreserved", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FCatrunInvalidProgressTest::RunTest(const FString&)
+{
+    const FString Tutorial = GetDefault<UCatrunLevelFlowSettings>()->Stages[0].Map.ToSoftObjectPath().GetLongPackageName();
+    auto* Future = NewObject<UCatrunProgressSave>();
+    Future->SchemaVersion = 99;
+    Future->StageId = TEXT("Stage2");
+    TArray<uint8> FutureBytes;
+    UGameplayStatics::SaveGameToMemory(Future, FutureBytes);
+    Future->SchemaVersion = 3;
+    Future->StageId = TEXT("Tutorial");
+    Future->HighestUnlockedStageId = TEXT("Stage2");
+    TArray<uint8> Renamed;
+    UGameplayStatics::SaveGameToMemory(Future, Renamed);
+    const ANSICHAR HighWater[] = "HighestUnlockedStageId";
+    int32 FieldOffset = INDEX_NONE;
+    for (int32 Index = 0; Index + int32(sizeof(HighWater)) <= Renamed.Num(); ++Index)
+        if (!FMemory::Memcmp(Renamed.GetData() + Index, HighWater, sizeof(HighWater))) { FieldOffset = Index; break; }
+    if (!TestTrue(TEXT("Fixture contains the serialized high-water property"), FieldOffset != INDEX_NONE)) return false;
+    TArray<uint8> WrongType = Renamed;
+    WrongType[FieldOffset + sizeof(HighWater) + sizeof(int32)] = 'X'; // NameProperty -> XameProperty
+    Renamed[FieldOffset] = 'X';
+    AddExpectedError(TEXT("Existing checkpoint"), EAutomationExpectedErrorFlags::Contains, 5);
+    for (const TArray<uint8>& Original : {TArray<uint8>(), TArray<uint8>{1,2,3,4}, FutureBytes, Renamed, WrongType})
+    {
+        FCheckpointBackend Backend;
+        Backend.bExists = false;
+        auto* Session = NewObject<UCatrunFlowSession>(NewObject<UGameInstance>());
+        Session->SetSaveBackendForTest(&Backend);
+        Session->AcceptTravel(Tutorial, true, true, ECatrunArrivalRestart::Clear, 0);
+        Session->Arrive(Tutorial);
+        // Another process restored a slot after this session initially saw no save.
+        Backend.bExists = true;
+        Backend.Bytes = Original;
+        Session->SaveCurrentCheckpoint(Tutorial);
+        Backend.Drain();
+        TestEqual(TEXT("Unknown existing checkpoint fails safely"), Session->GetCheckpointState(), ECatrunCheckpointState::Failed);
+        TestTrue(TEXT("Every byte survives and writer is never invoked"), Original == Backend.Bytes && Backend.Writes == 0);
+    }
+    return true;
+}
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunChapterTitleIntentTest, "Catrun.LevelFlow.StageTitleRequiresActualMatchingArrival", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 bool FCatrunChapterTitleIntentTest::RunTest(const FString&)
 {
@@ -86,6 +168,19 @@ bool FCatrunChapterSelectionTest::RunTest(const FString&)
     auto* Save = NewObject<UCatrunProgressSave>(); Save->SchemaVersion = 2; Save->StageId = TEXT("Stage1");
     UGameplayStatics::SaveGameToMemory(Save, Backend.Bytes);
     auto* Session = Instance->GetSubsystem<UCatrunFlowSession>(); Session->SetSaveBackendForTest(&Backend);
+    // Match the two pure queries issued in sequence by the saved menu's RefreshContinue graph.
+    Backend.SyncReadFailuresRemaining = 1;
+    bool bContinue = true;
+    FText Label;
+    auto Draw = [&]() {
+        bContinue = UCatrunLevelFlowLibrary::HasContinueGame(World);
+        Label = UCatrunLevelFlowLibrary::GetContinueStageLabel(World);
+    };
+    Session->RefreshMenuWithProgressSnapshot(Draw);
+    TestTrue(TEXT("One failed read cannot split the button and label or suppress the menu retry"),
+        !bContinue && !Session->IsProgressReadResolved() && Label.ToString().Contains(TEXT("읽을 수 없습니다")));
+    Session->RefreshMenuWithProgressSnapshot(Draw);
+    TestTrue(TEXT("The next redraw resolves both controls together"), bContinue && Session->IsProgressReadResolved() && Label.ToString().Contains(TEXT("선택")));
     auto Chapters = UCatrunLevelFlowLibrary::GetChapters(World);
     TestEqual(TEXT("Menu exposes all three screenshot cards"), Chapters.Num(), 3);
     TestTrue(TEXT("Reached and earlier chapters are unlocked"), Chapters[0].bUnlocked && Chapters[1].bUnlocked);

@@ -16,9 +16,9 @@ bool FCatrunCheckpointRollbackTest::RunTest(const FString&)
     auto Writer = MakeShared<FCatrunProgressWriter>(&Backend);
     TArray<bool> Results;
     int32 Built = 0;
-    Writer->Enqueue([&Built](TArray<uint8>& Bytes) { ++Built; Bytes = {5,6}; return true; }, [&Results](bool OK, const FString&) { Results.Add(OK); });
-    Writer->Enqueue([&Built](TArray<uint8>& Bytes) { ++Built; Bytes = {7,8}; return true; }, [&Results](bool OK, const FString&) { Results.Add(OK); });
-    TestEqual(TEXT("Queued payload is not serialized before earlier transaction finishes"), Built, 1);
+    Writer->Enqueue([&Built](const TArray<uint8>*, TArray<uint8>& Bytes) { ++Built; Bytes = {5,6}; return true; }, [&Results](bool OK, const FString&) { Results.Add(OK); });
+    Writer->Enqueue([&Built](const TArray<uint8>*, TArray<uint8>& Bytes) { ++Built; Bytes = {7,8}; return true; }, [&Results](bool OK, const FString&) { Results.Add(OK); });
+    TestEqual(TEXT("Payload waits for the prior slot inspection"), Built, 0);
     Backend.Step(); Backend.Step(); Backend.Step();
     TestTrue(TEXT("Writer remains busy after failed write until rollback callback"), Writer->IsBusy());
     TestTrue(TEXT("Injected partial bytes exist before rollback"), Backend.Bytes == TArray<uint8>({99,0,99}));
@@ -45,7 +45,7 @@ bool FCatrunCheckpointBackupTest::RunTest(const FString&)
         if (!ReadFailure) Backend.Existence = ISaveGameSystem::ESaveExistsResult::UnspecifiedError;
         auto Writer = MakeShared<FCatrunProgressWriter>(&Backend);
         bool bCompleted = false;
-        Writer->Enqueue([](TArray<uint8>& Bytes) { Bytes = {42}; return true; }, [this,&bCompleted](bool OK, const FString&) { bCompleted = true; TestFalse(TEXT("Backup/inspection failure is reported"), OK); });
+        Writer->Enqueue([](const TArray<uint8>*, TArray<uint8>& Bytes) { Bytes = {42}; return true; }, [this,&bCompleted](bool OK, const FString&) { bCompleted = true; TestFalse(TEXT("Backup/inspection failure is reported"), OK); });
         Backend.Drain();
         TestTrue(TEXT("Backup failure finishes callback"), bCompleted);
         TestEqual(TEXT("Unreadable existing slot is never overwritten"), Backend.Writes, 0);
@@ -53,7 +53,7 @@ bool FCatrunCheckpointBackupTest::RunTest(const FString&)
     }
     FCheckpointBackend Backend; Backend.bExists = false; Backend.WriteResults = {false};
     auto Writer = MakeShared<FCatrunProgressWriter>(&Backend);
-    Writer->Enqueue([](TArray<uint8>& Bytes) { Bytes = {42}; return true; }, [this](bool OK, const FString&) { TestFalse(TEXT("New slot failure is not reported as saved"), OK); });
+    Writer->Enqueue([](const TArray<uint8>*, TArray<uint8>& Bytes) { Bytes = {42}; return true; }, [this](bool OK, const FString&) { TestFalse(TEXT("New slot failure is not reported as saved"), OK); });
     Backend.Drain();
     TestFalse(TEXT("A partially created new slot is removed"), Backend.bExists);
     TestEqual(TEXT("Exactly one owned partial slot cleanup"), Backend.Deletes, 1);
@@ -66,7 +66,7 @@ bool FCatrunCheckpointLifetimeTest::RunTest(const FString&)
     FCheckpointBackend Backend; Backend.Bytes = {1,4,9}; Backend.WriteResults = {false,true};
     TSharedPtr<FCatrunProgressWriter> Writer = MakeShared<FCatrunProgressWriter>(&Backend);
     bool bCompleted = false;
-    Writer->Enqueue([](TArray<uint8>& Bytes) { Bytes = {16}; return true; }, [&bCompleted](bool, const FString&) { bCompleted = true; });
+    Writer->Enqueue([](const TArray<uint8>*, TArray<uint8>& Bytes) { Bytes = {16}; return true; }, [&bCompleted](bool, const FString&) { bCompleted = true; });
     Backend.Step(); Backend.Step(); // original write is in flight
     Writer.Reset(); // analogous to session/world UI lifetime ending; platform write cannot be canceled
     Backend.Drain();

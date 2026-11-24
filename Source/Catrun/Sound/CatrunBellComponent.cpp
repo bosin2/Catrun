@@ -100,12 +100,7 @@ bool UCatrunBellComponent::IsCatHiding() const
 
 void UCatrunBellComponent::HandleBellRung()
 {
-	// The cat's own rules (cooldown, busy) already let this ring through. Hiding is checked
-	// again here because no bell may be heard from a hideout (design doc 5).
-	if (!IsCatHiding())
-	{
-		EmitBellSound();
-	}
+	EmitBellSound();
 }
 
 void UCatrunBellComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -155,7 +150,7 @@ bool UCatrunBellComponent::TryRing()
 
 bool UCatrunBellComponent::EmitBellSound()
 {
-	if (UCatrunPuzzleSuspension::IsSuspended(this)) return false;
+	if (UCatrunPuzzleSuspension::IsSuspended(this) || CatrunCat::IsHiding(Cast<APawn>(GetOwner())) || IsCatHiding()) return false;
 	if (!GetOwner())
 	{
 		return false;
