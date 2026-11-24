@@ -36,7 +36,7 @@ namespace
 
 bool CatrunArmorPath::CanStand(const FCatrunGridData& Grid, int32 Cell, float ClearanceRadius)
 {
-	return Grid.IsWalkable(Cell) && Grid.WallDistance[Cell] >= ClearanceRadius
+	return Grid.IsWalkable(Cell) && Grid.WallDistance.IsValidIndex(Cell) && Grid.WallDistance[Cell] >= ClearanceRadius
 		&& (!Grid.PuzzleClearance.IsValidIndex(Cell) || Grid.PuzzleClearance[Cell] >= ClearanceRadius);
 }
 
