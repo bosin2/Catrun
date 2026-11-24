@@ -1,0 +1,20 @@
+{
+  "success": true,
+  "frames_checked": 73,
+  "bones_checked": 78,
+  "max_world_matrix_element_error": 3.546476364135742e-06,
+  "worst": [
+    51,
+    "tail_04"
+  ],
+  "errors": [],
+  "actions": [
+    [
+      "ARM_BlackCat_Final|Scene",
+      [
+        1.0,
+        73.0
+      ]
+    ]
+  ]
+}

@@ -8,7 +8,7 @@
 class ACharacter;
 class UCatrunPuzzleRevealComponent;
 
-UENUM(BlueprintType)
+UENUM(BlueprintType, meta=(ScriptName="CatrunStatueEventKind"))
 enum class ECatrunStatueEvent : uint8 { SnapStarted, Seated, GateOpening, Completed, Reset };
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FCatrunStatueEvent, FName, PuzzleId, ECatrunStatueEvent, Event, int32, Revision);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCatrunPuzzleCheckpointRestored, FName, PuzzleId);
@@ -58,6 +58,8 @@ struct FCatrunStatuePuzzleLink
 	TObjectPtr<AActor> Gate;
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
 	bool bPressed = false;
+	/** Additional stage-local lock. Defaults open so all existing puzzles retain their behavior. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) bool bExternalGateUnlocked = true;
 	/** Optional world XY half extents of the contact base; zero derives from the actor bounds. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly) FVector2D ContactHalfExtent = FVector2D::ZeroVector;
 	/** Optional world cardinal seating axis. Zero derives from original statue -> plate. */
@@ -128,8 +130,6 @@ public:
 	static float IntegratePushSpeed(float& Speed, float Target, float Acceleration, float DeltaSeconds);
 	/** Current world boxes for both sound and armor routing. Fully recessed gates cease blocking. */
 	void GetObstacleBounds(TArray<FBox>& OutBounds) const;
-	/** Recreate the practice room solve on a capture restart without gameplay solve events. */
-	bool RestoreStage2EntryCheckpoint(FVector& OutGateLocation);
 
 private:
 	bool ResetStatues(const TArray<int32>& Indices);

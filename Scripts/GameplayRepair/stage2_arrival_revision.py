@@ -25,18 +25,21 @@ FIRST_LIGHTING_PEAKS = {'ArrivalCatKey':3600., 'ArrivalStatueKey':5600., 'Arriva
 # Positions, linear RGB, radius (cm), and peak lumens of three camera-side practical fills.
 FILLS = {
     'ArrivalCatKey': ([(0,(1292.,3825.,148.)),(14,(1292.,3825.,148.)),(53,(1292.,3632.,120.)),
-                       (78,(1292.,3632.,120.)),(128,(1292.,3586.,117.))], (.68,.80,1.), 375., 1400.),
-    'ArrivalStatueKey': ([(0,(1450.,3680.,159.))], (1.,.72,.49), 355., 1600.),
-    'ArrivalGateAndPlateKey': ([(0,(1290.,3365.,148.))], (.67,.78,1.), 440., 1900.),
+                       (78,(1292.,3632.,120.)),(128,(1292.,3586.,117.))], (.68,.80,1.), 375., 340.),
+    'ArrivalStatueKey': ([(0,(1450.,3680.,159.))], (1.,.72,.49), 355., 425.),
+    'ArrivalGateAndPlateKey': ([(0,(1290.,3365.,148.))], (.67,.78,1.), 440., 500.),
 }
 FILL_FADE_START = 286
 FILL_FADE_END = 336
-# Shots 4–6 share a continuous perspective camera. The face camera also owns the return move.
-CUTS = (('Entrance',0,80), ('RearWalk',80,128), ('Face',128,153), ('Puzzle',153,262), ('FaceReturn',262,END))
-SHOTS = (('emergence',0,80), ('shoulder',80,128), ('face',128,153), ('statue',153,185),
-         ('plate',185,224), ('gate',224,262), ('reaction',262,286), ('return',286,END))
+CUTS = (('Entrance',0,71), ('RearWalk',71,110), ('Face',110,140), ('Puzzle',140,246), ('FaceReturn',246,END))
+CUT_RANGES={name:(first,last) for name,first,last in CUTS}
+# Inclusive endpoint pairs, with pitch, yaw and horizontal FOV for each held cat-eye view.
+GAZE_HOLDS=(('statue',140,158,9.,-36.,70.),('plate',201,211,-4.,-108.,70.),('gate',233,245,7.,-92.,58.))
+HANDOFF_FRAME=336
+SHOTS = (('emergence',0,71),('shoulder',71,110),('face',110,140),('statue',140,164),
+         ('plate',164,211),('gate',211,246),('reaction and pullback',246,336),('gameplay hold',336,END))
 SPANS = {'JumpDown':(5,44), 'Landing':(44,80), 'Walk':(76,128), 'Idle':(124,END)}
-PERSPECTIVE = {'Entrance', 'RearWalk', 'Puzzle'}
+PERSPECTIVE = {'Entrance', 'RearWalk', 'Face', 'Puzzle'}
 
 
 def aim(frame, eye, subject, framing):
@@ -61,39 +64,46 @@ def gameplay_view(lens):
 
 
 def paths(gameplay):
-    gaze = [aim(f,eye,TARGETS[name],width) for f,eye,name,width in (
-        (153,EYE,'statue',87.), (175,EYE,'statue',73.), (184,EYE,'statue',73.),
-        (210,(1362.,3658.,43.),'plate',47.), (223,(1362.,3658.,43.),'plate',47.),
-        (249,(1352.,3607.,45.),'gate',56.), (261,(1352.,3607.,45.),'gate',56.))]
-    front = aim(262,(1382.,3593.,36.),(1375.,3689.,27.),81.)
-    returning = [front,(286,front[1],front[2])]
-    # Orbit about the cat, retaining its face in frame while the lens pulls out.
-    # The outgoing camera holds this pose while the native blend runs.
-    yaw0,pitch0=front[1][5],front[1][4]
+    # Keep the statue and plate just off centre. Their projected positions shorten
+    # the eye-level pan and leave both targets legible through the held poses.
+    def look(frame,pitch,yaw,fov):
+        return frame,[*EYE,0.,pitch,yaw,1.,1.,1.],fov
+    gaze=[look(f,pitch,yaw,fov) for _,first,last,pitch,yaw,fov in GAZE_HOLDS for f in (first,last)]
+    # A three-quarter reaction on the gameplay camera side shortens the return arc.
+    subject=(1375.,3690.,28.)
+    # Keep the statue camera-right of the cat. The former 153-degree bearing
+    # aligned its foreground muzzle with both eyes on the orthographic image.
+    first=CUT_RANGES['FaceReturn'][0]
+    front=aim(first,(1517.,3669.,84.),subject,210.)
     pitch1,yaw1,roll1=gameplay['pyr']
+    pitch0,yaw0=front[1][4:6]
     yaw1=yaw0+(yaw1-yaw0+180.)%360.-180.
+    start_radius=math.dist(subject[:2],front[1][:2])
     radius1=math.hypot(gameplay['xyz'][0]-1375.,gameplay['xyz'][1]-3700.)
     end_aim=[gameplay['xyz'][0]+radius1*math.cos(math.radians(yaw1)),
              gameplay['xyz'][1]+radius1*math.sin(math.radians(yaw1)),
              gameplay['xyz'][2]+radius1*math.tan(math.radians(pitch1))]
-    for frame in (*range(290,335,4),336):
-        t=(frame-286)/50.
+    returning=[front]
+    for frame in (*range(first+4,HANDOFF_FRAME,5),HANDOFF_FRAME):
+        t=(frame-first)/(HANDOFF_FRAME-first)
         s=t*t*(3.-2.*t)
         yaw,pitch=yaw0+(yaw1-yaw0)*s,pitch0+(pitch1-pitch0)*s
-        radius=math.hypot(7.,96.)*(1.-s)+radius1*s
-        cx,cy,cz=[a+(b-a)*s for a,b in zip((1375.,3689.,27.),end_aim)]
+        radius=start_radius+(radius1-start_radius)*s
+        cx,cy,cz=[a+(b-a)*s for a,b in zip(subject,end_aim)]
         eye=[cx-radius*math.cos(math.radians(yaw)),cy-radius*math.sin(math.radians(yaw)),
              cz-radius*math.tan(math.radians(pitch))]
-        returning.append((frame,[*eye,s*roll1,pitch,yaw,1.,1.,1.],81.*(gameplay['width']/81.)**s))
+        returning.append((frame,[*eye,s*roll1,pitch,yaw,1.,1.,1.],front[2]*(gameplay['width']/front[2])**s))
     return {
         'Entrance':[aim(0,(1430.,3554.,91.),(1375.,3939.,100.),52.),
                     aim(10,(1430.,3554.,91.),(1375.,3939.,100.),52.),
                     aim(28,(1417.,3550.,75.),(1375.,3848.,61.),52.),
                     aim(49,(1401.,3558.,62.),(1375.,3755.,36.),52.),
-                    aim(79,(1393.,3570.,54.),(1375.,3736.,30.),52.)],
-        'RearWalk':[aim(80,(1404.,3822.,57.),(1354.,3450.,46.),83.),
-                    aim(127,(1404.,3774.,57.),(1354.,3402.,46.),83.)],
-        'Face':[aim(128,(1378.,3590.,38.),(1375.,3689.,28.),84.)],
+                    aim(70,(1393.,3570.,54.),(1375.,3736.,30.),52.)],
+        'RearWalk':[aim(71,(1413.,3858.,62.),(1367.,3590.,36.),70.),
+                    aim(109,(1413.,3831.,62.),(1367.,3563.,36.),70.)],
+        'Face':[aim(110,(1392.,3598.,42.),(1375.,3701.,28.),64.),
+                aim(128,(1392.,3587.,42.),(1375.,3689.,28.),64.),
+                aim(139,(1392.,3587.,42.),(1375.,3689.,28.),64.)],
         'Puzzle':gaze, 'FaceReturn':returning}
 
 
@@ -189,11 +199,19 @@ def place_sequence(h,seq,portal,gameplay):
         v.add_key(u.FrameNumber(0),False)
     finally:
         h.ACTORS.destroy_actor(temp)
+    apply_cameras(seq,gameplay)
+
+
+def apply_cameras(seq,gameplay):
+    import stage2_arrival_shots as old
+    seq.modify()
+    bs=old.bindings(seq)
     master,=seq.get_tracks()
     cuts=sorted(master.get_sections(),key=lambda part:part.get_start_frame())
     shots=paths(gameplay)
     for part,(n,first,last) in zip(cuts,CUTS,strict=True):
         assert part.get_camera_binding_id().export_text()==seq.get_binding_id(bs[n]).export_text()
+        part.modify()
         part.set_range(first,last)
         cam=bs[n].get_object_template().get_editor_property('CameraComponent')
         cam.modify()
@@ -250,14 +268,13 @@ def light_sequence(h,seq):
         actor = h.ACTORS.spawn_actor_from_class(u.PointLight,u.Vector(),u.Rotator(),transient=True)
         try:
             bulb=old.component_binding(seq,binding,actor.get_editor_property('PointLightComponent'),name+'Bulb')
-            old.float_track(bulb,'Intensity',[(0,lumens),(FILL_FADE_START,lumens),(FILL_FADE_END,0.),(END-1,0.)],END)
+            old.float_track(bulb,'Intensity',fill_keys(name),END)
         finally:
             h.ACTORS.destroy_actor(actor)
 
 
 def retune_lights(seq):
     import stage2_arrival_shots as old
-    audit_lights(seq,FIRST_LIGHTING_PEAKS)
     bindings=old.bindings(seq)
     seq.modify()
     for name,(_,_,_,peak) in FILLS.items():
@@ -267,10 +284,16 @@ def retune_lights(seq):
         section=old.section(bindings[name+'Bulb'],u.MovieSceneFloatTrack)
         section.modify()
         channel,=section.get_channels_by_type(u.MovieSceneScriptingFloatChannel)
-        channel.set_default(peak)
-        for key in channel.get_keys():
-            if old.frameof(key) in (0,FILL_FADE_START):
-                key.set_value(peak)
+        old.set_curve(channel,fill_keys(name))
+
+
+def fill_keys(name):
+    peak=FILLS[name][3]
+    if name=='ArrivalStatueKey':
+        return [(0,65.),(110,65.),(142,peak),(171,peak),(202,85.),(286,85.),(336,0.),(END-1,0.)]
+    if name=='ArrivalGateAndPlateKey':
+        return [(0,65.),(161,65.),(198,peak),(244,peak),(270,110.),(286,110.),(336,0.),(END-1,0.)]
+    return [(0,peak),(FILL_FADE_START,peak),(FILL_FADE_END,0.),(END-1,0.)]
 
 
 def audit_lights(seq,peaks=None):
@@ -294,13 +317,42 @@ def audit_lights(seq,peaks=None):
         track,=bulb.find_tracks_by_type(u.MovieSceneFloatTrack)
         assert str(track.get_property_path())=='Intensity'
         channel,=old.section(bulb,u.MovieSceneFloatTrack).get_channels_by_type(u.MovieSceneScriptingFloatChannel)
-        assert abs(channel.get_default()-lumens)<.01
+        expected=fill_keys(name) if peaks is None else [(0,lumens),(FILL_FADE_START,lumens),(FILL_FADE_END,0.),(END-1,0.)]
+        assert abs(channel.get_default()-expected[0][1])<.01
         keys=[(old.frameof(k),k.get_value()) for k in channel.get_keys()]
-        assert keys==[(0,lumens),(FILL_FADE_START,lumens),(FILL_FADE_END,0.),(END-1,0.)]
+        assert keys==expected
         spawn=old.section(bs[name],u.MovieSceneSpawnTrack)
         assert (spawn.get_start_frame(),spawn.get_end_frame())==(0,END)
         settings[name]={'lumens':lumens,'radius':radius,'linear_color':[tinted.r,tinted.g,tinted.b],'intensity_keys':keys}
     return settings
+
+
+def audit_cameras(seq,gameplay):
+    import stage2_arrival_shots as old
+    bs=old.bindings(seq)
+    def curve(channel,expected):
+        assert all(old.frameof(k)==f and abs(k.get_value()-v)<.002 for k,(f,v) in zip(channel.get_keys(),expected,strict=True))
+    tr,=seq.get_tracks()
+    shot_paths=paths(gameplay)
+    for sec,(name,first,last) in zip(sorted(tr.get_sections(),key=lambda s:s.get_start_frame()),CUTS,strict=True):
+        assert (sec.get_start_frame(),sec.get_end_frame())==(first,last)
+        assert sec.get_camera_binding_id().export_text()==seq.get_binding_id(bs[name]).export_text()
+        shots=shot_paths[name]
+        channels=old.section(bs[name],u.MovieScene3DTransformTrack).get_channels_by_type(u.MovieSceneScriptingDoubleChannel)
+        for i,channel in enumerate(channels):
+            curve(channel,[(f,row[i]) for f,row,_ in shots])
+        lens=bs[name].get_object_template().get_editor_property('CameraComponent')
+        perspective=name in PERSPECTIVE
+        assert lens.projection_mode==(u.CameraProjectionMode.PERSPECTIVE if perspective else u.CameraProjectionMode.ORTHOGRAPHIC)
+        assert abs((lens.field_of_view if perspective else lens.ortho_width)-shots[0][2])<.01
+        if name=='FaceReturn':
+            assert abs(lens.field_of_view-gameplay['fov'])<.01 and abs(lens.aspect_ratio-gameplay['aspect'])<.001
+            assert math.dist(shots[-1][1][:3],gameplay['xyz'])<.02 and abs(shots[-1][2]-gameplay['width'])<.02
+        if name+'Lens' in bs:
+            tr,=bs[name+'Lens'].find_tracks_by_type(u.MovieSceneFloatTrack)
+            assert str(tr.get_property_path())==('FieldOfView' if perspective else 'OrthoWidth')
+            ch,=old.section(bs[name+'Lens'],u.MovieSceneFloatTrack).get_channels_by_type(u.MovieSceneScriptingFloatChannel)
+            curve(ch,[(f,lens) for f,_,lens in shots])
 
 
 def audit(h,seq,director,world,pawn,cam,gameplay):
@@ -340,25 +392,7 @@ def audit(h,seq,director,world,pawn,cam,gameplay):
     else:
         expected.append(('Idle',*SPANS['Idle']))
     assert sections==sorted(expected),sections
-    tr,=seq.get_tracks()
-    shot_paths=paths(gameplay)
-    for sec,(name,first,last) in zip(sorted(tr.get_sections(),key=lambda s:s.get_start_frame()),CUTS,strict=True):
-        assert (sec.get_start_frame(),sec.get_end_frame())==(first,last)
-        assert sec.get_camera_binding_id().export_text()==seq.get_binding_id(bs[name]).export_text()
-        shots=shot_paths[name]
-        transform(name,[(f,row) for f,row,_ in shots])
-        lens=bs[name].get_object_template().get_editor_property('CameraComponent')
-        perspective=name in PERSPECTIVE
-        assert lens.projection_mode==(u.CameraProjectionMode.PERSPECTIVE if perspective else u.CameraProjectionMode.ORTHOGRAPHIC)
-        assert abs((lens.field_of_view if perspective else lens.ortho_width)-shots[0][2])<.01
-        if name=='FaceReturn':
-            assert abs(lens.field_of_view-gameplay['fov'])<.01 and abs(lens.aspect_ratio-gameplay['aspect'])<.001
-            assert math.dist(shots[-1][1][:3],gameplay['xyz'])<.02 and abs(shots[-1][2]-gameplay['width'])<.02
-        if name+'Lens' in bs:
-            tr,=bs[name+'Lens'].find_tracks_by_type(u.MovieSceneFloatTrack)
-            assert str(tr.get_property_path())==('FieldOfView' if perspective else 'OrthoWidth')
-            ch,=old.section(bs[name+'Lens'],u.MovieSceneFloatTrack).get_channels_by_type(u.MovieSceneScriptingFloatChannel)
-            curve(ch,[(f,lens) for f,_,lens in shots])
+    audit_cameras(seq,gameplay)
     resolved,collision=old.verify_component_locators(h,world,seq,pawn)
     return {'structure':old.signature(seq),'director':revision_graph(director),'shots':SHOTS,
             'layout':layout(h,world),'locators':resolved,'spawnable_collision':collision,
@@ -400,6 +434,8 @@ def run(h,mode):
         before_seq=seq.get_playback_end()!=END
         has_lighting=any(name in guids or name+'Bulb' in guids for name in FILLS)
         first_lighting=report['before'][h.SEQUENCE]==FIRST_LIGHTING_SHA
+        installed_revision=report['before'][h.SEQUENCE]=='c5ed595207d4f7bd413b4c08eb568d5b4cbca14b665919fb6312225198e7ce30'
+        update_cameras=not before_seq and (installed_revision or first_lighting or not has_lighting)
         if mode=='revise':
             for pkg in (h.SEQUENCE,h.DIRECTOR):
                 target=dest/'Before'/paths_by_pkg[pkg].name
@@ -409,10 +445,12 @@ def run(h,mode):
             if before_seq:
                 assert report['before'][h.SEQUENCE]==SEQUENCE_SHA
                 place_sequence(h,seq,portal,gameplay)
+            elif update_cameras:
+                apply_cameras(seq,gameplay)
             if not has_lighting:
                 assert before_seq or report['before'][h.SEQUENCE]==UNLIT_REVISION_SHA, 'Unrecognized arrival sequence before lighting pass'
                 light_sequence(h,seq)
-            elif first_lighting:
+            elif first_lighting or installed_revision:
                 retune_lights(seq)
             revision_graph(director,apply=before_graph,unlock_blend=locked_blend)
         report['audit']=audit(h,seq,director,world,pawn,cam,gameplay)
@@ -425,7 +463,7 @@ def run(h,mode):
             assert report['before']==baseline['after'] and comparable_audit(report['audit'])==comparable_audit(baseline['audit'])
         if mode=='revise':
             assert h.dirty()<={h.SEQUENCE,h.DIRECTOR},h.dirty()
-            for needed,obj,pkg in ((before_seq or not has_lighting or first_lighting,seq,h.SEQUENCE),(before_graph or locked_blend,director,h.DIRECTOR)):
+            for needed,obj,pkg in ((before_seq or update_cameras,seq,h.SEQUENCE),(before_graph or locked_blend,director,h.DIRECTOR)):
                 if needed:
                     assert h.AS.save_loaded_asset(obj,False)
                     report['saved'].append(pkg)

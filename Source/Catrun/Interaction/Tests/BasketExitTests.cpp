@@ -68,6 +68,7 @@ namespace
 			Actions->CatOwner = Cat;
 			Actions->EnterAnimation = nullptr;
 			Actions->ExitAnimation = nullptr;
+			Actions->BeginPlay();
 		}
 		~FBasketCollisionFixture()
 		{
@@ -215,10 +216,11 @@ bool FCatrunBasketComplexSupportTest::RunTest(const FString&)
 	F.Basket->TryOccupy(F.Cat);
 	F.Actions->EnterBasket(F.Basket,Entry);
 	F.Actions->FinishEnter();
-	F.Keys({UCatrunInputBindings::GetEffectiveKey(ECatrunInputSlot::Back),UCatrunInputBindings::GetEffectiveKey(ECatrunInputSlot::Left)});
+	FMinimalViewInfo GroundView; GroundView.Rotation=FRotator(-55,0,0); F.PC->PlayerCameraManager->SetCameraCachePOV(GroundView);
+	F.Keys({UCatrunInputBindings::GetEffectiveKey(ECatrunInputSlot::Right)});
 	F.Actions->UpdateExitCandidate(true);
-	TestTrue(TEXT("Same AS semantic input selects world +Y under the explicit A-front"),F.Actions->ExitWorldDirection.Equals(FVector(0,1,0),.001));
-	TestTrue(TEXT("Actual complex-floor AS exit is available rather than seam-rejected"),F.Actions->CanExit);
+	TestTrue(TEXT("Single right key selects world +Y on the complex floor"),F.Actions->ExitWorldDirection.Equals(FVector(0,1,0),.001));
+	TestTrue(TEXT("Actual complex-floor single-key exit is available"),F.Actions->CanExit);
 	TestTrue(TEXT("Component commits the same shape-supported exact XY/Z"),F.Actions->ExitWorldLocation.Equals(Landing,.01));
 	TestTrue(TEXT("Preview landing stays centered despite an off-center support contact"),
 		FMath::IsNearlyEqual(F.Actions->FloorLocation.X,Reference.X,.001) && FMath::IsNearlyEqual(F.Actions->FloorLocation.Y,Reference.Y,.001));
@@ -336,14 +338,14 @@ bool FCatrunBasketProximityTest::RunTest(const FString&)
 	for (int32 Sector=0; Sector<8; ++Sector)
 	{
 		const FVector Direction=FRotator(0,Sector*45.f,0).Vector();
-		const bool bExpected=Sector<=2 || Sector>=6;
+		const bool bExpected=true;
 		for (const float Distance : {40.f, 100.f})
 		{
 			F.Cat->SetActorLocation(F.Basket->GetHiddenLocation()+Direction*Distance);
 			for (const float Yaw : {0.f,180.f})
 			{
 				F.Cat->SetActorRotation(FRotator(0,Yaw,0));
-				TestEqual(TEXT("Position decides front/side versus hinge rear; cat heading never does"),F.Actions->CanEnterNearbyBasket(),bExpected);
+				TestEqual(TEXT("All eight approach sides work regardless of cat facing"),F.Actions->CanEnterNearbyBasket(),bExpected);
 			}
 		}
 	}
@@ -391,6 +393,7 @@ bool FCatrunBasketExitTransitProfileTest::RunTest(const FString&)
 	F.Basket->TryOccupy(F.Cat);
 	F.Actions->EnterBasket(F.Basket,FVector(82,0,26));
 	F.Actions->FinishEnter();
+	F.Actions->ExitWorldDirection=FVector(-1,0,0); F.Actions->UpdateExitCandidate(true,false);
 	const FVector Origin(0,0,26), Landing(-82,0,26);
 	if (!TestTrue(TEXT("Clear custom-channel exit selects the exact supported landing"),
 		F.Actions->CanExit && F.Actions->ExitWorldLocation.Equals(Landing,.01))) return false;
@@ -455,103 +458,47 @@ IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunBasketCandidateRegressionTest, "Catrun.B
 	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 bool FCatrunBasketCandidateRegressionTest::RunTest(const FString&)
 {
-	auto* Settings = UCatrunUserSettings::GetCatrunUserSettings();
-	if (!TestNotNull(TEXT("Configured settings singleton"), Settings)) return false;
-	const FCatrunKeyboardBindings Saved = Settings->GetKeyboardBindings();
-	struct FRestoreBindings
-	{
-		UCatrunUserSettings* Settings;
-		FCatrunKeyboardBindings Saved;
-		~FRestoreBindings() { FText Error; Settings->SetKeyboardBindings(Saved, Error); }
-	} Restore{Settings, Saved};
-	FText Error;
-	Settings->SetKeyboardBindings(FCatrunKeyboardBindings(), Error);
-	FBasketCollisionFixture F;
-	// Reproduce the saved first-basket frame without changing any project map.
-	F.Basket->OpenDirectionLocal = FVector(0,-1,0);
-	F.Basket->TryOccupy(F.Cat);
-	F.Actions->EnterBasket(F.Basket, FVector(82,0,26));
-	F.Actions->FinishEnter();
-	F.Keys({EKeys::W,EKeys::A});
-	F.Actions->UpdateExitCandidate(true);
-	TestTrue(TEXT("Camera -135 WA selects world -X"), F.Actions->ExitWorldDirection.Equals(FVector(-1,0,0), .001));
-	TestTrue(TEXT("Supported clear WA landing is available"), F.Actions->CanExit);
-	TestTrue(TEXT("Landing uses floor + real capsule halfheight + 2"), F.Actions->ExitWorldLocation.Equals(FVector(-82,0,26), .01));
-	F.Keys({EKeys::A,EKeys::S});
-	TestTrue(TEXT("Effective default AS axes are back and left"),
-		UCatrunInputBindings::GetMovementInput([&](FKey Key) { return F.PC->IsInputKeyDown(Key); }).Equals(FVector2D(-1,-1)));
-	TestFalse(TEXT("At camera -135 the saved -Y front excludes AS world +Y"),
-		CatrunBasket::IsDirectionAllowed(FVector(0,1,0), F.Basket->GetOpenDirection(), -135.f));
-	F.Actions->UpdateExitCandidate(true);
-	TestTrue(TEXT("Excluded AS retains the selected WA rather than changing to +Y"),
-		F.Actions->ExitWorldDirection.Equals(FVector(-1,0,0),.001));
-	TestTrue(TEXT("Excluded AS keeps a physically safe retained exit available"), F.Actions->CanExit);
-	// The historical per-instance front is a candidate asset correction, not a global fan expansion.
-	F.Basket->OpenDirectionLocal = FVector(-1,1,0);
-	F.Actions->UpdateExitCandidate(true);
-	TestTrue(TEXT("The historical A-front lets the same AS input replace WA with world +Y"),
-		F.Actions->ExitWorldDirection.Equals(FVector(0,1,0),.001));
-	TestTrue(TEXT("The selected AS landing uses the same floor and capsule policy"),
-		F.Actions->CanExit && F.Actions->ExitWorldLocation.Equals(FVector(0,82,26),.01));
-	F.Keys({EKeys::W,EKeys::A});
-	F.Actions->UpdateExitCandidate(true);
-	F.Keys({EKeys::D});
-	F.Actions->UpdateExitCandidate(false);
-	TestTrue(TEXT("Rejected rear input preserves the previous safe exit availability"), F.Actions->CanExit);
-	TestTrue(TEXT("Rejected rear input retains the stored valid selection"), F.Actions->ExitWorldDirection.Equals(FVector(-1,0,0), .001));
-	F.Actions->UpdatePreview();
-	TestTrue(TEXT("Rejected input keeps the retained safe selection visible"), F.Actions->ExitPreview && F.Actions->ExitPreview->IsVisible());
-	auto* RetainedPathBlocker = F.Box(FVector(-41,0,26), FVector(2,25,24));
-	F.Actions->ExitBasket();
-	TestEqual(TEXT("Confirmation rechecks the retained path and refuses a new blocker"), F.Actions->BasketPhase, ECatrunBasketPhase::Hidden);
-	TestFalse(TEXT("Blocked retained selection loses its availability"), F.Actions->CanExit);
-	TestFalse(TEXT("Blocked retained selection hides its preview"), F.Actions->ExitPreview->IsVisible());
-	RetainedPathBlocker->Destroy();
-	F.Actions->ExitBasket();
-	TestEqual(TEXT("Rejected input can confirm the retained selection once physically clear"), F.Actions->BasketPhase, ECatrunBasketPhase::Exiting);
-	TestTrue(TEXT("Retained selection confirmation commits the previously selected landing"), F.Cat->GetActorLocation().Equals(FVector(-82,0,26),.01));
-	F.Actions->FinishExit();
-	TestEqual(TEXT("Safe retained-selection exit completes"), F.Actions->BasketPhase, ECatrunBasketPhase::Outside);
-	F.Keys({});
-	F.Basket->TryOccupy(F.Cat);
-	F.Actions->EnterBasket(F.Basket, FVector(82,0,26));
-	F.Actions->FinishEnter();
-	F.Actions->ExitWorldDirection = FVector(-1,0,0);
-	F.Actions->UpdateExitCandidate(false);
-	TestTrue(TEXT("Release preserves the retained supported selection"), F.Actions->CanExit);
-	F.Keys({EKeys::W,EKeys::S,EKeys::A,EKeys::D});
-	F.Actions->UpdateExitCandidate(true);
-	TestTrue(TEXT("Cancelling opposite axes retains the valid selection"), F.Actions->CanExit);
-	auto Remapped = FCatrunKeyboardBindings();
-	Remapped.Keys[0]=EKeys::I; Remapped.Keys[1]=EKeys::K; Remapped.Keys[2]=EKeys::J; Remapped.Keys[3]=EKeys::L;
-	TestTrue(TEXT("Temporary remap is accepted without saving"), Settings->SetKeyboardBindings(Remapped,Error));
-	F.Actions->ExitWorldDirection = F.Basket->GetOpenDirection();
-	F.Keys({EKeys::W,EKeys::A});
-	F.Actions->UpdateExitCandidate(true);
-	TestTrue(TEXT("Old WA cannot change the selection after remap"), F.Actions->ExitWorldDirection.Equals(FVector(-1,1,0).GetSafeNormal2D(),.001));
-	F.Keys({EKeys::I,EKeys::J});
-	F.Actions->UpdateExitCandidate(true);
-	TestTrue(TEXT("Rebound forward+left selects the same world -X"), F.Actions->ExitWorldDirection.Equals(FVector(-1,0,0),.001));
-	auto* Blocker = F.Box(FVector(-82,0,26), FVector(10,25,24));
-	F.Actions->UpdateExitCandidate(true);
-	TestTrue(TEXT("Endpoint probe actually hits the narrow blocker's top"), FMath::IsNearlyEqual(F.Actions->FloorLocation.Z,50.f,.01f));
-	TestFalse(TEXT("Blocked endpoint rejects WA"), F.Actions->CanExit);
-	Blocker->SetActorLocation(FVector(-41,0,26));
-	F.Actions->UpdateExitCandidate(true);
-	TestFalse(TEXT("Thin transit obstruction rejects a clear endpoint"), F.Actions->CanExit);
-	Blocker->Destroy();
-	F.Actions->UpdateExitCandidate(true);
-	TestTrue(TEXT("Removing the obstruction restores the supported landing"), F.Actions->CanExit);
-	// Destination floor remains present, but the hidden origin no longer has supporting floor.
-	Cast<UBoxComponent>(F.Floor->GetRootComponent())->SetBoxExtent(FVector(30,60,10));
-	F.Floor->SetActorLocation(FVector(-82,0,-10));
-	F.Actions->UpdateExitCandidate(true);
-	TestFalse(TEXT("A supported destination cannot enable an exit from an unsupported origin"), F.Actions->CanExit);
-	F.Floor->Destroy();
-	F.Actions->UpdateExitCandidate(true);
-	TestFalse(TEXT("Missing supporting floor rejects WA"), F.Actions->CanExit);
-	F.Actions->AbortBasket();
-	return true;
+ auto* Settings=UCatrunUserSettings::GetCatrunUserSettings();
+ if (!TestNotNull(TEXT("Settings"),Settings)) return false;
+ const auto Saved=Settings->GetKeyboardBindings();
+ struct FRestore { UCatrunUserSettings* S; FCatrunKeyboardBindings B; ~FRestore(){FText E;S->SetKeyboardBindings(B,E);} } Restore{Settings,Saved};
+ FText Error; Settings->SetKeyboardBindings(FCatrunKeyboardBindings(),Error);
+ FBasketCollisionFixture F;
+ FMinimalViewInfo View; View.Rotation=FRotator(-55,0,0); F.PC->PlayerCameraManager->SetCameraCachePOV(View);
+ F.Basket->OpenDirectionLocal=FVector(1,0,0);
+ F.Basket->TryOccupy(F.Cat); F.Actions->EnterBasket(F.Basket,FVector(82,0,26)); F.Actions->FinishEnter();
+ TestTrue(TEXT("Initial exit returns toward the approach side"),F.Actions->ExitWorldDirection.Equals(FVector(1,0,0),.001));
+ const FKey Keys[]={EKeys::W,EKeys::D,EKeys::S,EKeys::A};
+ for (int32 I=0;I<4;++I)
+ {
+  F.Keys({Keys[I]}); F.Actions->UpdateExitCandidate(true);
+  const FVector Direction=FRotator(0,I*90.f,0).Vector();
+  TestTrue(TEXT("Each single key selects a distinct supported exit"),F.Actions->CanExit && F.Actions->ExitWorldDirection.Equals(Direction,.001));
+  TestTrue(TEXT("The real capsule lands at floor plus 26cm"),F.Actions->ExitWorldLocation.Equals(Direction*82+FVector(0,0,26),.01));
+ }
+ F.Keys({EKeys::S}); F.Actions->UpdateExitCandidate(true);
+ F.Keys({}); TestFalse(TEXT("Unchanged selection avoids another physical query before 0.2s"),F.Actions->UpdateExitCandidate(false));
+ F.Keys({EKeys::W,EKeys::S,EKeys::A,EKeys::D}); F.Actions->UpdateExitCandidate(true);
+ TestTrue(TEXT("Opposing keys retain the selected exit"),F.Actions->ExitWorldDirection.Equals(FVector(-1,0,0),.001));
+ F.Keys({EKeys::S,EKeys::A}); F.Actions->UpdateExitCandidate(true);
+ TestTrue(TEXT("A chord retains its held single-key selection instead of producing a diagonal"),F.Actions->ExitWorldDirection.Equals(FVector(-1,0,0),.001));
+ auto Remap=FCatrunKeyboardBindings();Remap.Keys[0]=EKeys::I;Remap.Keys[1]=EKeys::K;Remap.Keys[2]=EKeys::J;Remap.Keys[3]=EKeys::L;
+ TestTrue(TEXT("Bindings can be remapped"),Settings->SetKeyboardBindings(Remap,Error));
+ F.Keys({EKeys::W});F.Actions->UpdateExitCandidate(true);
+ TestTrue(TEXT("Old keys do not select exits after remapping"),F.Actions->ExitWorldDirection.Equals(FVector(-1,0,0),.001));
+ F.Keys({EKeys::I});F.Actions->UpdateExitCandidate(true);
+ TestTrue(TEXT("Rebound single forward key works"),F.Actions->ExitWorldDirection.Equals(FVector(1,0,0),.001));
+ F.Keys({EKeys::K});F.Actions->UpdateExitCandidate(true);F.Actions->UpdatePreview();
+ auto* Blocker=F.Box(FVector(-41,0,26),FVector(2,25,24));
+ F.Actions->ExitBasket();
+ TestEqual(TEXT("Confirm immediately rechecks a new blocker"),F.Actions->BasketPhase,ECatrunBasketPhase::Hidden);
+ TestFalse(TEXT("Blocked selection cannot retain a green preview"),F.Actions->CanExit || F.Actions->ExitPreview->IsVisible());
+ Blocker->Destroy();F.Actions->UpdateExitCandidate(true);
+ TestTrue(TEXT("Removing the blocker makes the same selected exit available"),F.Actions->CanExit);
+ Cast<UBoxComponent>(F.Floor->GetRootComponent())->SetBoxExtent(FVector(30,60,10));F.Floor->SetActorLocation(FVector(-82,0,-10));
+ F.Actions->UpdateExitCandidate(true);TestFalse(TEXT("Supported landing cannot hide an unsupported origin"),F.Actions->CanExit);
+ F.Floor->Destroy();F.Actions->UpdateExitCandidate(true);TestFalse(TEXT("Absent floor rejects exit"),F.Actions->CanExit);
+ F.Actions->AbortBasket();return true;
 }
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunBasketRestoreRegressionTest, "Catrun.Basket.ExactLandingAndCancellation",
@@ -620,6 +567,24 @@ bool FCatrunBasketRestoreRegressionTest::RunTest(const FString&)
 	return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunBasketDestroyedInputTest, "Catrun.Basket.DestroyedBasketBeforeExitInput",
+	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FCatrunBasketDestroyedInputTest::RunTest(const FString&)
+{
+	FBasketCollisionFixture F;
+	const FTransform Entry=F.Cat->GetActorTransform();
+	F.Basket->TryOccupy(F.Cat);
+	F.Actions->EnterBasket(F.Basket,FVector(82,0,26));
+	F.Actions->FinishEnter();
+	F.Basket->Destroy();
+	// Input can precede the component tick that normally notices destruction.
+	F.Actions->TryInteract();
+	TestEqual(TEXT("Removed basket cancels safely on F"),F.Actions->BasketPhase,ECatrunBasketPhase::Outside);
+	TestFalse(TEXT("Cancellation clears hidden and busy flags"),F.Actions->IsHidden || F.Actions->Busy);
+	TestTrue(TEXT("Original clear location and collision are restored"),F.Cat->GetActorTransform().Equals(Entry,.001) && F.Cat->GetActorEnableCollision());
+	return true;
+}
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunBasketLateLandingSupportTest, "Catrun.Basket.ExitRechecksExactLandingSupport",
 	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 bool FCatrunBasketLateLandingSupportTest::RunTest(const FString&)
@@ -635,6 +600,7 @@ bool FCatrunBasketLateLandingSupportTest::RunTest(const FString&)
 	F.Basket->TryOccupy(F.Cat);
 	F.Actions->EnterBasket(F.Basket,FVector(82,0,26));
 	F.Actions->FinishEnter();
+	F.Actions->ExitWorldDirection=FVector(-1,0,0);
 	auto StartExit = [&]
 	{
 		F.Actions->ExitBasket();
@@ -667,21 +633,20 @@ bool FCatrunBasketLateLandingSupportTest::RunTest(const FString&)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FBasketDirectionTest, "Catrun.Basket.CameraInputAndBlockedBack",
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FBasketDirectionTest, "Catrun.Basket.SingleKeyCameraDirections",
 	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 bool FBasketDirectionTest::RunTest(const FString&)
 {
-	const FVector Front(1,0,0);
-	const FVector Right = CatrunBasket::SelectDirection(-45,0,1,Front,Front);
-	TestTrue(TEXT("D follows the quarter-view camera right axis"), Right.Equals(FVector(1,1,0).GetSafeNormal(),.001));
-	const FVector Diagonal = CatrunBasket::SelectDirection(-45,1,1,Front,Front);
-	TestTrue(TEXT("W+D combines into a normalized world direction"), Diagonal.Equals(Front,.001));
-	TestTrue(TEXT("Key release preserves selection"), CatrunBasket::SelectDirection(-45,0,0,Right,Front).Equals(Right));
-	TestTrue(TEXT("Back input cannot replace the last valid selection"), CatrunBasket::SelectDirection(0,-1,0,Right,Front).Equals(Right));
-	TestTrue(TEXT("Opposing keys preserve selection"), CatrunBasket::SelectDirection(0,0,0,Right,Front).Equals(Right));
-	const FVector RotatedFront(0,-1,0);
-	TestTrue(TEXT("A rotated basket rejects world +Y"), CatrunBasket::SelectDirection(0,0,1,RotatedFront,RotatedFront).Equals(RotatedFront));
-	return true;
+ const FVector Front(1,0,0);
+ const FVector W=CatrunBasket::SelectDirection(-45,1,0,Front,Front);
+ const FVector D=CatrunBasket::SelectDirection(-45,0,1,Front,Front);
+ TestTrue(TEXT("Single W follows camera forward"),W.Equals(FVector(1,-1,0).GetSafeNormal(),.001));
+ TestTrue(TEXT("Single D follows camera right"),D.Equals(FVector(1,1,0).GetSafeNormal(),.001));
+ TestTrue(TEXT("W+D keeps a held D selection"),CatrunBasket::SelectDirection(-45,1,1,D,Front).Equals(D,.001));
+ TestTrue(TEXT("New chord prefers forward instead of synthesizing a diagonal"),CatrunBasket::SelectDirection(-45,1,1,Front,Front).Equals(W,.001));
+ TestTrue(TEXT("Release retains selection"),CatrunBasket::SelectDirection(0,0,0,D,Front).Equals(D));
+ TestTrue(TEXT("S can select the former rear"),CatrunBasket::SelectDirection(0,-1,0,D,Front).Equals(-Front,.001));
+ return true;
 }
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FBasketArcTest, "Catrun.Basket.ArcEndpoints",
@@ -695,42 +660,28 @@ bool FBasketArcTest::RunTest(const FString&)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FBasketFiveDirectionsTest, "Catrun.Basket.PhysicalRearBlockedAtAnyCameraRotation",
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FBasketFiveDirectionsTest, "Catrun.Basket.AllSidesFourDistinctKeys",
 	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 bool FBasketFiveDirectionsTest::RunTest(const FString&)
 {
-	for (float CameraYaw : {-135.f, -45.f, 0.f, 17.f, 90.f})
-	{
-		for (int32 Yaw = -180; Yaw < 180; ++Yaw)
-		{
-			const FVector Opening = FRotator(0, Yaw, 0).Vector();
-			int32 Allowed = 0;
-			for (int32 Sector = 0; Sector < 8; ++Sector)
-			{
-				const FVector Direction = FRotator(0, CameraYaw + Sector * 45.f, 0).Vector();
-				const bool bAllowed=CatrunBasket::IsDirectionAllowed(Direction,Opening,CameraYaw);
-				Allowed += bAllowed ? 1 : 0;
-				TestFalse(TEXT("Camera quantization cannot admit the physical closed rear"),
-					bAllowed && FVector::DotProduct(Direction,Opening)<-.0001f);
-			}
-			if (Allowed < 4 || Allowed > 5)
-			{
-				AddError(FString::Printf(TEXT("Camera %.1f, basket %d: expected four or five front-side directions, got %d"), CameraYaw, Yaw, Allowed));
-				return false;
-			}
-			if (FMath::IsNearlyEqual(FMath::Fmod(FMath::Abs(Yaw-CameraYaw),45.f),0.f,.001f))
-				TestEqual(TEXT("Aligned front and exact sides retain five keyboard directions"),Allowed,5);
-			TestFalse(TEXT("Directly behind the opening is blocked"),
-				CatrunBasket::IsDirectionAllowed(-Opening, Opening, CameraYaw));
-			for (const float Offset : {-90.1f,-90.f,-89.9f,89.9f,90.f,90.1f})
-			{
-				const FVector Direction=FRotator(0,Yaw+Offset,0).Vector();
-				TestEqual(TEXT("Physical side boundary stays fixed while camera and basket rotate"),
-					CatrunBasket::IsDirectionAllowed(Direction,Opening,CameraYaw),FMath::Abs(Offset)<=90.f);
-			}
-		}
-	}
-	return true;
+ for (float CameraYaw:{-135.f,-45.f,0.f,17.f,90.f}) for (int32 Yaw=-180;Yaw<180;Yaw+=7)
+ {
+  const FVector Opening=FRotator(0,Yaw,0).Vector();
+  for (int32 I=0;I<8;++I) TestTrue(TEXT("All physical approach sides are admitted"),CatrunBasket::IsDirectionAllowed(FRotator(0,Yaw+I*45,0).Vector(),Opening,CameraYaw));
+  TArray<FVector> Directions;
+  for (const FVector2D Axis:{FVector2D(1,0),FVector2D(0,1),FVector2D(-1,0),FVector2D(0,-1)})
+  {
+   const FVector D=CatrunBasket::SelectDirection(CameraYaw,Axis.X,Axis.Y,Opening,Opening);
+   TestTrue(TEXT("Each key produces a unit planar direction"),FMath::IsNearlyEqual(D.Size(),1.,.001) && FMath::IsNearlyZero(D.Z));
+   const FRotationMatrix Camera(FRotator(0,CameraYaw,0));
+   const FVector Expected=Camera.GetUnitAxis(EAxis::X)*Axis.X+Camera.GetUnitAxis(EAxis::Y)*Axis.Y;
+   TestTrue(TEXT("Basket rotation cannot rotate or quantize screen-relative movement"),D.Equals(Expected,.001));
+   for (const FVector& Previous:Directions) TestFalse(TEXT("The four single keys never alias"),D.Equals(Previous,.001));
+   Directions.Add(D);
+  }
+ }
+ TestFalse(TEXT("Zero input is not a physical approach"),CatrunBasket::IsDirectionAllowed(FVector::ZeroVector,FVector::ForwardVector,0));
+ return true;
 }
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FBasketConfiguredDirectionTest, "Catrun.Basket.ExplicitDirectionOverridesCloth",
@@ -765,8 +716,8 @@ bool FBasketConfiguredDirectionTest::RunTest(const FString&)
 		TestTrue(TEXT("Explicit front does not follow the cloth bones or rotation"),
 			Basket->GetOpenDirection().Equals(ExpectedFront, .001));
 	}
-	// 현재 창고 바구니: 카메라 -135도에서 A가 정면이면 W/WA/A/AS/S를 허용한다.
-	const bool Allowed[8] = {true, false, false, false, true, true, true, true};
+	// Legacy front metadata remains readable; it no longer forbids any approach side.
+	const bool Allowed[8] = {true, true, true, true, true, true, true, true};
 	for (int32 Sector = 0; Sector < 8; ++Sector)
 	{
 		const FVector Direction = FRotator(0, -135 + Sector * 45.f, 0).Vector();
@@ -781,7 +732,7 @@ bool FBasketConfiguredDirectionTest::RunTest(const FString&)
 	TestTrue(TEXT("Rotating the basket rotates its configured front; size does not distort it"),
 		Basket->GetOpenDirection().Equals(FVector(-1, -1, 0).GetSafeNormal2D(), .001));
 	Basket->OpenDirectionLocal = FVector::ZeroVector;
-	TestFalse(TEXT("An unset direction cannot enable an exit"),
+	TestTrue(TEXT("An unset legacy opening does not prohibit a physical direction"),
 		CatrunBasket::IsDirectionAllowed(South, Basket->GetOpenDirection(), -135));
 	World->DestroyWorld(false);
 	return true;

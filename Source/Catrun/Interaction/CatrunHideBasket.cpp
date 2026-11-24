@@ -1,8 +1,11 @@
 #include "CatrunHideBasket.h"
 #include "Animation/AnimationAsset.h"
+#include "BasketExitMath.h"
 #include "Components/ArrowComponent.h"
 #include "Components/SceneComponent.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Engine/SkeletalMesh.h"
+#include "TimerManager.h"
 #include "UObject/ConstructorHelpers.h"
 
 ACatrunHideBasket::ACatrunHideBasket()
@@ -36,14 +39,14 @@ void ACatrunHideBasket::PostRegisterAllComponents()
 #if WITH_EDITOR
 void ACatrunHideBasket::RefreshDirectionGuide()
 {
-	// BP의 에디터 전용 화살표는 설정값을 보여주기만 한다. 판정 기준은 OpenDirectionLocal 하나다.
+	// Legacy hinge guide is only meaningful for the old single-opening presentation.
 	TInlineComponentArray<UArrowComponent*> Arrows(this);
 	for (UArrowComponent* Arrow : Arrows)
 	{
 		if (Arrow->GetFName() == TEXT("ExitDirectionGuide"))
 		{
 			const FVector Direction = GetOpenDirection();
-			Arrow->SetVisibility(!Direction.IsNearlyZero());
+			Arrow->SetVisibility(ClothEnterDirections.Num()!=8 && !Direction.IsNearlyZero());
 			Arrow->SetWorldRotation(Direction.Rotation());
 		}
 	}
@@ -61,6 +64,65 @@ void ACatrunHideBasket::PostInitializeComponents()
 		if (Component->GetFName() == TEXT("BasketCloth"))
 			LocalCloth = Cast<USkeletalMeshComponent>(Component);
 	}
+	InitializeCloth();
+}
+
+void ACatrunHideBasket::BeginPlay()
+{
+	Super::BeginPlay();
+	// External actors can finish their own component initialization later in the
+	// level's startup pass. Finalize once after that pass, never on a permanent tick.
+	GetWorldTimerManager().SetTimerForNextTick(FTimerDelegate::CreateWeakLambda(this,[this]
+	{
+		if (!Occupied) InitializeCloth();
+	}));
+}
+
+void ACatrunHideBasket::InitializeCloth()
+{
+	USkeletalMeshComponent* Cloth = IsValid(ExternalCloth) ? ExternalCloth.Get() : LocalCloth.Get();
+	if (Cloth && Cloth->GetSkeletalMeshAsset())
+	{
+		const FReferenceSkeleton& Ref = Cloth->GetSkeletalMeshAsset()->GetRefSkeleton();
+		auto RefDirection = [&Ref](FName Name)
+		{
+			int32 Bone = Ref.FindBoneIndex(Name);
+			if (Bone == INDEX_NONE) return FVector::ZeroVector;
+			FTransform Pose = Ref.GetRefBonePose()[Bone];
+			while ((Bone = Ref.GetParentIndex(Bone)) != INDEX_NONE) Pose *= Ref.GetRefBonePose()[Bone];
+			return Pose.GetLocation().GetSafeNormal2D();
+		};
+		const FVector Front = RefDirection(TEXT("Edge_F")), Right = RefDirection(TEXT("Edge_R"));
+		if (!Front.IsNearlyZero()) ClothReferenceForward = Front;
+		// FBX converts Blender's handedness. Read the imported reference frame once,
+		// so R/L clips stay correct without rotating the actual camera-relative exit.
+		ClothSectorSign = FVector::CrossProduct(Front,Right).Z < 0 ? -1.f : 1.f;
+	}
+	if (LocalCloth.IsValid() && LocalCloth.Get()!=Cloth)
+	{
+		LocalCloth->PrimaryComponentTick.bStartWithTickEnabled=false;
+		LocalCloth->SetComponentTickEnabled(false);
+	}
+	ClothIdle();
+}
+
+FVector ACatrunHideBasket::GetTraversalForward() const
+{
+	const USkeletalMeshComponent* Cloth = IsValid(ExternalCloth) ? ExternalCloth.Get() : LocalCloth.Get();
+	return Cloth && ClothEnterDirections.Num()==8
+		? Cloth->GetComponentTransform().TransformVectorNoScale(ClothReferenceForward).GetSafeNormal2D()
+		: GetOpenDirection();
+}
+
+FVector ACatrunHideBasket::SnapTraversalDirection(const FVector& Direction) const
+{
+	return CatrunBasket::SnapDirection(Direction, GetTraversalForward());
+}
+
+float ACatrunHideBasket::GetTraversalDistance(const FVector& Direction, float CardinalDistance) const
+{
+	const FVector Local = FRotator(0,GetTraversalForward().Rotation().Yaw,0).UnrotateVector(Direction.GetSafeNormal2D());
+	return CardinalDistance + (ClothEnterDirections.Num()==8 ? 24.f*FMath::Abs(Local.X*Local.Y) : 0.f);
 }
 
 FVector ACatrunHideBasket::GetHiddenLocation() const
@@ -92,16 +154,37 @@ void ACatrunHideBasket::Release(AActor* User)
 	}
 }
 
-void ACatrunHideBasket::PlayCloth(UAnimationAsset* Animation, bool bLoop)
+void ACatrunHideBasket::PlayCloth(UAnimationAsset* Animation, bool bFreeze, float PlayRate)
 {
 	USkeletalMeshComponent* Cloth = IsValid(ExternalCloth) ? ExternalCloth.Get() : LocalCloth.Get();
 	if (Cloth && Animation)
 	{
-		Cloth->PlayAnimation(Animation, bLoop);
-		Cloth->SetPlayRate(1.f);
+		Cloth->SetComponentTickEnabled(true);
+		Cloth->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
+		Cloth->PlayAnimation(Animation, false);
+		Cloth->SetPlayRate(FMath::Max(PlayRate,.01f));
+		if (bFreeze)
+		{
+			// An external SkeletalMeshActor may register its ticks after this basket.
+			Cloth->PrimaryComponentTick.bStartWithTickEnabled=false;
+			Cloth->SetPosition(0.f, false);
+			Cloth->TickAnimation(0.f, false);
+			Cloth->RefreshBoneTransforms();
+			Cloth->SetComponentTickEnabled(false);
+		}
 	}
 }
 
 void ACatrunHideBasket::ClothEnter() { PlayCloth(ClothEnterAnimation, false); }
 void ACatrunHideBasket::ClothExit() { PlayCloth(ClothExitAnimation, false); }
-void ACatrunHideBasket::ClothIdle() { PlayCloth(ClothIdleAnimation, true); }
+void ACatrunHideBasket::ClothIdle() { PlayCloth(Occupied && ClothHiddenAnimation ? ClothHiddenAnimation.Get() : ClothIdleAnimation.Get(), true); }
+
+void ACatrunHideBasket::PlayDirectionalCloth(bool bEntering, const FVector& OutwardDirection, float PlayRate)
+{
+	const auto& Clips = bEntering ? ClothEnterDirections : ClothExitDirections;
+	int32 Index = CatrunBasket::DirectionSector(OutwardDirection, GetTraversalForward().Rotation().Yaw);
+	if (ClothSectorSign<0) Index=(8-Index)%8;
+	UAnimationAsset* Animation = Clips.IsValidIndex(Index) ? Clips[Index].Get() : nullptr;
+	if (!Animation) Animation = bEntering ? ClothEnterAnimation.Get() : ClothExitAnimation.Get();
+	PlayCloth(Animation, false, PlayRate);
+}

@@ -13,4 +13,7 @@ public:
 	/** Finish queued meshes, textures and shaders before an offscreen capture. */
 	UFUNCTION(BlueprintCallable, Category="Catrun|Editor Authoring", meta=(DevelopmentOnly))
 	static bool FinishAssetCompilation();
+	/** Commandlets do not tick the editor's pending skylight capture queue. */
+	UFUNCTION(BlueprintCallable, Category="Catrun|Editor Authoring", meta=(DevelopmentOnly, WorldContext="WorldContext"))
+	static bool RefreshSkyLighting(const UObject* WorldContext);
 };

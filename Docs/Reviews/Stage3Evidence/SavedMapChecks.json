@@ -1,0 +1,192 @@
+{
+  "checks": [
+    {
+      "name": "CatrunArmor",
+      "passed": true,
+      "detail": 6
+    },
+    {
+      "name": "CatrunCandle",
+      "passed": true,
+      "detail": 5
+    },
+    {
+      "name": "CatrunStatuePuzzle",
+      "passed": true,
+      "detail": 1
+    },
+    {
+      "name": "CatrunStage3Objectives",
+      "passed": true,
+      "detail": 1
+    },
+    {
+      "name": "CatrunDoor",
+      "passed": true,
+      "detail": 1
+    },
+    {
+      "name": "CatrunStageExit",
+      "passed": true,
+      "detail": 1
+    },
+    {
+      "name": "CatrunNoBellZone",
+      "passed": true,
+      "detail": 3
+    },
+    {
+      "name": "Three connected releases",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Two connected statue gates",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "P2 external lock starts closed",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Saved perception grid",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Minimap authored",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "No missing/default static materials",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "H1 cat capsule passes",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "H1 armor capsule blocked",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "H2 cat capsule passes",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "H2 armor capsule blocked",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "H3 cat capsule passes",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "H3 armor capsule blocked",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "D1 closed gate blocks",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "D1 empty frame admits cat",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "D2 closed gate blocks",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "D2 empty frame admits cat",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Player start has floor",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "S3_Armor_LobbyPost supported spawn clearance",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "S3_Armor_LobbyPatrol supported spawn clearance",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "S3_Armor_CentralPost supported spawn clearance",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "S3_Armor_ControlPatrol supported spawn clearance",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "S3_Armor_GateLeft supported spawn clearance",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "S3_Armor_GateRight supported spawn clearance",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "S3_Candle_Exhibition supported spawn clearance",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "S3_Candle_WarehouseNorth supported spawn clearance",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "S3_Candle_WarehouseSouth supported spawn clearance",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "S3_Candle_GateLeft supported spawn clearance",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "S3_Candle_GateRight supported spawn clearance",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Statue1 clear push lane",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Statue2 clear push lane",
+      "passed": true,
+      "detail": null
+    }
+  ],
+  "scope": "Cold saved assets and physical collision traces; no claim of manual playthrough.",
+  "actor_count": 458,
+  "success": true
+}

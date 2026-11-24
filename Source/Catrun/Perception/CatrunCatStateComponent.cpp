@@ -4,6 +4,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 
 #include "Catrun.h"
+#include "Player/CatrunSprintComponent.h"
 #include "Sound/CatrunSoundSettings.h"
 #include "Sound/SoundGridManager.h"
 #include "GameFramework/Pawn.h"
@@ -21,6 +22,7 @@ void UCatrunCatStateComponent::BeginPlay()
 	{
 		Cat->GetCapsuleComponent()->SetCollisionObjectType(ECC_Pawn);
 		Cat->GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Block);
+		if (Cat->FindComponentByClass<UCatrunSprintComponent>()) AddTickPrerequisiteComponent(Cat->GetCharacterMovement());
 	}
 }
 
@@ -59,7 +61,11 @@ float UCatrunCatStateComponent::GetStatuePushSpeedLimit(const ACharacter& Cat)
 	if (!OffsetProperty || !OffsetProperty->IsFloatingPoint()) return Speed;
 
 	const double Offset = OffsetProperty->GetFloatingPointPropertyValue(OffsetProperty->ContainerPtrToValuePtr<void>(&Cat));
-	return FMath::IsFinite(Offset) && Offset > 0.0 ? static_cast<float>(FMath::Max(0.0, Speed - Offset)) : Speed;
+	if (!FMath::IsFinite(Offset) || Offset <= 0.0) return Speed;
+	const auto* Sprint = Cat.FindComponentByClass<UCatrunSprintComponent>();
+	// Preserve the 124 cm/s pre-stamina input cap and its authored 5 cm/s offset for pushes.
+	const double PushModeSpeed = Sprint && Sprint->IsRunInputHeld() ? 124.0 : Speed;
+	return static_cast<float>(FMath::Max(0.0, PushModeSpeed - Offset));
 }
 
 bool UCatrunCatStateComponent::ReadActionsBool(const TCHAR* VariableName) const
@@ -138,7 +144,8 @@ void UCatrunCatStateComponent::UpdateFootsteps(float DeltaTime)
 	}
 
 	const bool bSneaking = ReadCatBool(TEXT("IsSneaking"));
-	const bool bRunning = !bSneaking && ReadCatBool(TEXT("IsRunning"));
+	const auto* Sprint = Cat->FindComponentByClass<UCatrunSprintComponent>();
+	const bool bRunning = !bSneaking && (Sprint ? Sprint->IsSprinting() : ReadCatBool(TEXT("IsRunning")));
 	const int32 MoveMode = bSneaking ? 0 : (bRunning ? 2 : 1);
 	if (MoveMode != LastMoveMode)
 	{

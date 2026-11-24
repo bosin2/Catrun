@@ -1,0 +1,1200 @@
+{
+  "source": "Saved/Stage3Integration20261125/Automation_Final/Report/index.json",
+  "report_created_on": "2026.11.24-18.00.38",
+  "total": 159,
+  "succeeded": 149,
+  "succeeded_with_warnings": 10,
+  "failed": 0,
+  "tests": [
+    {
+      "name": "Catrun.Basket.AllSidesFourDistinctKeys",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.Basket.ArcEndpoints",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.Basket.CandidateInputAndCollision",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.Basket.CommonCapsuleSupportSafety",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.Basket.CommonRestoreFallbackOnComplexFloor",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.Basket.ComplexFloorEntryExitAndOrigin",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.Basket.DestroyedBasketBeforeExitInput",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.Basket.EntryRespectsPhysicalCapsuleProfile",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.Basket.ExactLandingAndCancellation",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.Basket.ExitRechecksExactLandingSupport",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.Basket.ExitRespectsCustomCapsuleChannel",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.Basket.ExplicitDirectionOverridesCloth",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.Basket.ProximityPromptMatchesReachableEntry",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.Basket.RestoreRespectsCustomCapsuleChannel",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.Basket.SingleKeyCameraDirections",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.Doors.AuthoredSeatSurvivesBothHinges",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.LevelFlow.ArrivalSaveRetriesOnceAndReportsFinalState",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.LevelFlow.CameraBaselineIsolation",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.LevelFlow.ChapterSelectionUsesFreshRouteAndPreservesLocks",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.LevelFlow.ChapterUnlocksSurviveNewGameAndSelection",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.LevelFlow.CheckpointBackupAndNewSlotFailure",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.LevelFlow.CheckpointCommitReplacesFile",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.LevelFlow.CheckpointIdleFollowsQueueCompletion",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.LevelFlow.CheckpointIOOutlivesPresentation",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.LevelFlow.CheckpointPreCommitFailurePreservesSlot",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.LevelFlow.CheckpointRollbackSerializesQueue",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.LevelFlow.CompletionBlocksCapture",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.LevelFlow.ConcurrentCheckpointCommitRejectsStaleWriter",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.LevelFlow.ExactBellDenial",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.LevelFlow.ExitCollisionQueriesNeverMovePawn",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.LevelFlow.ExitOwnerDestructionRestoresLivePlayer",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.LevelFlow.ExitQualificationNotifiesBlueprintOnly",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.LevelFlow.ExitRollbackDisarmsBeforeFirstPhysicalEntry",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.LevelFlow.ExitRollbackDoesNotReenterPresentation",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.LevelFlow.ExitSaveCallbackCancellationAndActualPending",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.LevelFlow.ExitSubjectLossRejectsLateSave",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.LevelFlow.ExitTeardownPreservesOnlyAcceptedArrival",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.LevelFlow.InvalidOrFutureProgressIsPreserved",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.LevelFlow.ManualRestartDuringCaptureReleasesCaptureOwnership",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.LevelFlow.PendingAtomicCheckpointFlushesOnShutdown",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.LevelFlow.PendingCheckpointIsVisibleToContinue",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.LevelFlow.PlainStage1CompletionOmitsPortalArrival",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.LevelFlow.PresentationTravelFailureReturnsToOwningBlueprint",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.LevelFlow.ReachedStageOnboardingAndAcceptedArrival",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.LevelFlow.RestartArrivalCancellationHonorsTravelToken",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.LevelFlow.RestartIntentConsumption",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.LevelFlow.RouteResolution",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.LevelFlow.SchemaMigrationAndContinueReason",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.LevelFlow.Stage1CorridorFreeWalk",
+      "state": "Success",
+      "warnings": [
+        {
+          "event": {
+            "type": "Warning",
+            "message": "LogCatrunSound: SoundGridManager has no Settings asset. Using default values.",
+            "context": "log",
+            "artifact": "00000000000000000000000000000000"
+          },
+          "filename": "",
+          "lineNumber": -1,
+          "timestamp": "2026.11.24-18.00.32"
+        },
+        {
+          "event": {
+            "type": "Warning",
+            "message": "LogCatrunSound: CatrunCandle_0: vision display could not be created. Sight remains active.",
+            "context": "log",
+            "artifact": "00000000000000000000000000000000"
+          },
+          "filename": "",
+          "lineNumber": -1,
+          "timestamp": "2026.11.24-18.00.32"
+        }
+      ]
+    },
+    {
+      "name": "Catrun.LevelFlow.Stage1CorridorStationaryReplacement",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.LevelFlow.Stage1PortalMarkAdmission",
+      "state": "Success",
+      "warnings": [
+        {
+          "event": {
+            "type": "Warning",
+            "message": "LogCatrunSound: SoundGridManager has no Settings asset. Using default values.",
+            "context": "log",
+            "artifact": "00000000000000000000000000000000"
+          },
+          "filename": "",
+          "lineNumber": -1,
+          "timestamp": "2026.11.24-18.00.32"
+        },
+        {
+          "event": {
+            "type": "Warning",
+            "message": "LogCatrunSound: CatrunCandle_0: vision display could not be created. Sight remains active.",
+            "context": "log",
+            "artifact": "00000000000000000000000000000000"
+          },
+          "filename": "",
+          "lineNumber": -1,
+          "timestamp": "2026.11.24-18.00.32"
+        }
+      ]
+    },
+    {
+      "name": "Catrun.LevelFlow.Stage2ArrivalTitleGate",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.LevelFlow.Stage2PortalArrivalRequiresExactMapAndFreshRoute",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.LevelFlow.Stage2TitleReadinessAbort",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.LevelFlow.StageCameraProfiles",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.LevelFlow.StageClockPausesAndOwnsTimeoutOnce",
+      "state": "Success",
+      "warnings": [
+        {
+          "event": {
+            "type": "Warning",
+            "message": "LogScript: Script Msg: No game viewport was found.",
+            "context": "log",
+            "artifact": "00000000000000000000000000000000"
+          },
+          "filename": "",
+          "lineNumber": -1,
+          "timestamp": "2026.11.24-18.00.33"
+        },
+        {
+          "event": {
+            "type": "Warning",
+            "message": "LogScript: Script Msg: No game viewport was found.",
+            "context": "log",
+            "artifact": "00000000000000000000000000000000"
+          },
+          "filename": "",
+          "lineNumber": -1,
+          "timestamp": "2026.11.24-18.00.33"
+        },
+        {
+          "event": {
+            "type": "Warning",
+            "message": "LogScript: Script Msg: No game viewport was found.",
+            "context": "log",
+            "artifact": "00000000000000000000000000000000"
+          },
+          "filename": "",
+          "lineNumber": -1,
+          "timestamp": "2026.11.24-18.00.33"
+        }
+      ]
+    },
+    {
+      "name": "Catrun.LevelFlow.StageProgressCrossProcess",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.LevelFlow.StageProgressPendingMenuAndShutdownDurability",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.LevelFlow.StageProgressSameChapterContinueNeedsNoWrite",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.LevelFlow.StageProgressShutdownRetriesPendingStage1Checkpoint",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.LevelFlow.StageProgressStage1ResetOrdering",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.LevelFlow.StageProgressStrictLegacyAndInvalidBytes",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.LevelFlow.StageTitleRequiresActualMatchingArrival",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.LevelFlow.TutorialExitBlueprintFailureRecoversAndRearms",
+      "state": "Success",
+      "warnings": [
+        {
+          "event": {
+            "type": "Warning",
+            "message": "LogScript: Script Msg called by: BP_LevelExit_C /Temp/Untitled_50.Untitled:PersistentLevel.BP_LevelExit_C_0",
+            "context": "log",
+            "artifact": "00000000000000000000000000000000"
+          },
+          "filename": "",
+          "lineNumber": -1,
+          "timestamp": "2026.11.24-18.00.33"
+        },
+        {
+          "event": {
+            "type": "Info",
+            "message": "Suppressed expected ('Warning') level log message or higher matching 'No game viewport was found.' 1 times.",
+            "context": "",
+            "artifact": "00000000000000000000000000000000"
+          },
+          "filename": "",
+          "lineNumber": 0,
+          "timestamp": "2026.11.24-18.00.33"
+        }
+      ]
+    },
+    {
+      "name": "Catrun.LevelFlow.UnreadProgressRecoversAndProtectsExistingSlot",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.Monsters.ArmorDoorFrameLanes",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.Monsters.CandleLocalSweepAppliesToTrackingAndPatrol",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.Monsters.CandleRemarksVisibleCat",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.Monsters.MarkCallRangeAndWalls",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.Monsters.ReleasedMarkFollowerAfterSuspension",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.Player.Bell.AcceptedBlueprintClockAndDenials",
+      "state": "Success",
+      "warnings": [
+        {
+          "event": {
+            "type": "Warning",
+            "message": "LogScript: Script Msg: No game viewport was found.",
+            "context": "log",
+            "artifact": "00000000000000000000000000000000"
+          },
+          "filename": "",
+          "lineNumber": -1,
+          "timestamp": "2026.11.24-18.00.33"
+        },
+        {
+          "event": {
+            "type": "Warning",
+            "message": "LogScript: Script Msg called by: BP_CatActions_C /Temp/Untitled_57.Untitled:PersistentLevel.BP_Cat_C_0.CatActions",
+            "context": "log",
+            "artifact": "00000000000000000000000000000000"
+          },
+          "filename": "",
+          "lineNumber": -1,
+          "timestamp": "2026.11.24-18.00.33"
+        }
+      ]
+    },
+    {
+      "name": "Catrun.Player.Sprint.CharacterMovementDrivesStaminaAndSpeedCap",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.Player.Sprint.StaminaAndRecovery",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.Player.Sprint.VoluntaryHorizontalTravel",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.PrototypeAI.ArmorCaptureRequiresClearBodyPath",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.PrototypeAI.ArmorDisplayUsesCatCenterBoundaryWithoutChangingPerception",
+      "state": "Success",
+      "warnings": [
+        {
+          "event": {
+            "type": "Warning",
+            "message": "LogCatrunSound: CatrunCandle_0: no eye bones found, body is not aligned automatically.",
+            "context": "log",
+            "artifact": "00000000000000000000000000000000"
+          },
+          "filename": "",
+          "lineNumber": -1,
+          "timestamp": "2026.11.24-18.00.34"
+        }
+      ]
+    },
+    {
+      "name": "Catrun.PrototypeAI.ArmorPathDiagnosticsRequireExplicitOptIn",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.PrototypeAI.AuthoredTurnCurveHandoffIsNonlinearAndOnceOnly",
+      "state": "Success",
+      "warnings": [
+        {
+          "event": {
+            "type": "Warning",
+            "message": "LogCatrunSound: CatrunArmor_0 turn has no matching playback; using native time for curve sample.",
+            "context": "log",
+            "artifact": "00000000000000000000000000000000"
+          },
+          "filename": "",
+          "lineNumber": -1,
+          "timestamp": "2026.11.24-18.00.34"
+        },
+        {
+          "event": {
+            "type": "Warning",
+            "message": "LogCatrunSound: CatrunArmor_0 turn has no matching playback; using native time for curve sample.",
+            "context": "log",
+            "artifact": "00000000000000000000000000000000"
+          },
+          "filename": "",
+          "lineNumber": -1,
+          "timestamp": "2026.11.24-18.00.34"
+        },
+        {
+          "event": {
+            "type": "Warning",
+            "message": "LogCatrunSound: CatrunArmor_0 turn has no matching playback; using native time for curve sample.",
+            "context": "log",
+            "artifact": "00000000000000000000000000000000"
+          },
+          "filename": "",
+          "lineNumber": -1,
+          "timestamp": "2026.11.24-18.00.34"
+        },
+        {
+          "event": {
+            "type": "Warning",
+            "message": "LogCatrunSound: CatrunArmor_0 turn has no matching playback; using native time for curve sample.",
+            "context": "log",
+            "artifact": "00000000000000000000000000000000"
+          },
+          "filename": "",
+          "lineNumber": -1,
+          "timestamp": "2026.11.24-18.00.34"
+        },
+        {
+          "event": {
+            "type": "Warning",
+            "message": "LogCatrunSound: CatrunArmor_0 turn has no matching playback; using native time for curve sample.",
+            "context": "log",
+            "artifact": "00000000000000000000000000000000"
+          },
+          "filename": "",
+          "lineNumber": -1,
+          "timestamp": "2026.11.24-18.00.34"
+        },
+        {
+          "event": {
+            "type": "Warning",
+            "message": "LogCatrunSound: CatrunArmor_0 turn has no matching playback; using native time for curve sample.",
+            "context": "log",
+            "artifact": "00000000000000000000000000000000"
+          },
+          "filename": "",
+          "lineNumber": -1,
+          "timestamp": "2026.11.24-18.00.34"
+        },
+        {
+          "event": {
+            "type": "Warning",
+            "message": "LogCatrunSound: CatrunArmor_0 turn has no matching playback; using native time for curve sample.",
+            "context": "log",
+            "artifact": "00000000000000000000000000000000"
+          },
+          "filename": "",
+          "lineNumber": -1,
+          "timestamp": "2026.11.24-18.00.34"
+        },
+        {
+          "event": {
+            "type": "Warning",
+            "message": "LogCatrunSound: CatrunArmor_0 turn has no matching playback; using native time for curve sample.",
+            "context": "log",
+            "artifact": "00000000000000000000000000000000"
+          },
+          "filename": "",
+          "lineNumber": -1,
+          "timestamp": "2026.11.24-18.00.34"
+        },
+        {
+          "event": {
+            "type": "Warning",
+            "message": "LogCatrunSound: CatrunArmor_0 turn has no matching playback; using native time for curve sample.",
+            "context": "log",
+            "artifact": "00000000000000000000000000000000"
+          },
+          "filename": "",
+          "lineNumber": -1,
+          "timestamp": "2026.11.24-18.00.34"
+        },
+        {
+          "event": {
+            "type": "Warning",
+            "message": "LogCatrunSound: CatrunArmor_0 turn has no matching playback; using native time for curve sample.",
+            "context": "log",
+            "artifact": "00000000000000000000000000000000"
+          },
+          "filename": "",
+          "lineNumber": -1,
+          "timestamp": "2026.11.24-18.00.34"
+        },
+        {
+          "event": {
+            "type": "Info",
+            "message": "Chain first yaw 90.072517548 remaining 1 committed 0 basis yaw 90.072517548 duration 0.750000060",
+            "context": "",
+            "artifact": "00000000000000000000000000000000"
+          },
+          "filename": "",
+          "lineNumber": -1,
+          "timestamp": "2026.11.24-18.00.34"
+        },
+        {
+          "event": {
+            "type": "Info",
+            "message": "Chain second yaw -179.854964904 remaining 0 committed 1 action 0 expected yaw -179.854964904 actual quaternion X=-0.000000000 Y=0.000000000 Z=-0.999999199 W=0.001265670 expected quaternion X=0.000000000 Y=0.000000000 Z=0.999999199 W=-0.001265670",
+            "context": "",
+            "artifact": "00000000000000000000000000000000"
+          },
+          "filename": "",
+          "lineNumber": -1,
+          "timestamp": "2026.11.24-18.00.34"
+        }
+      ]
+    },
+    {
+      "name": "Catrun.PrototypeAI.BasketEntryHeightKeepsCapsuleUpright",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.PrototypeAI.BasketTransitLateBlockerAndRestore",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.PrototypeAI.BellCaptureTransfersStableStateAndRejectsLateCallbacks",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.PrototypeAI.CandlePatrolUsesOffsetCapsuleAndFloor",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.PrototypeAI.CandleTouchRequiresActualLOS",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.PrototypeAI.CaptureAbortFindsClearPositionWhenOriginOccupied",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.PrototypeAI.CaptureCallbacksCanAbortOrReplaceSession",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.PrototypeAI.CaptureCarryRespectsActualCapsuleWhileCollisionDisabled",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.PrototypeAI.CaptureFailedStartRestoresWaitersAndAllowsRetry",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.PrototypeAI.CaptureFramingSmoothShortestYawAndCancel",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.PrototypeAI.CaptureGrabHeadingContinuity",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.PrototypeAI.CaptureInitialSetupRejectsReentrantRestart",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.PrototypeAI.CaptureOwnerRemovalCancelsOnlyItsQueuedRestart",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.PrototypeAI.CaptureOwnerRemovalReleasesWaiters",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.PrototypeAI.CaptureQueuedRestartCancelAndTravelTeardown",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.PrototypeAI.CaptureRestartRejectionRestoresOnlyOwnedState",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.PrototypeAI.CaptureRestartSameWorldFailureRestoresAndRetries",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.PrototypeAI.CaptureSessionAbortRestoresOwnedState",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.PrototypeAI.CaptureSingleOwnerSameFrameAndStaggeredWait",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.PrototypeAI.DoorReplansActivePatrolAndSweepsHandoff",
+      "state": "Success",
+      "warnings": [
+        {
+          "event": {
+            "type": "Warning",
+            "message": "LogCatrunSound: CatrunArmor_0 found no path to X=900.000 Y=300.000 Z=90.000.",
+            "context": "log",
+            "artifact": "00000000000000000000000000000000"
+          },
+          "filename": "",
+          "lineNumber": -1,
+          "timestamp": "2026.11.24-18.00.35"
+        },
+        {
+          "event": {
+            "type": "Warning",
+            "message": "LogCatrunSound: CatrunArmor_0 found no path to X=900.000 Y=300.000 Z=90.000.",
+            "context": "log",
+            "artifact": "00000000000000000000000000000000"
+          },
+          "filename": "",
+          "lineNumber": -1,
+          "timestamp": "2026.11.24-18.00.35"
+        },
+        {
+          "event": {
+            "type": "Warning",
+            "message": "LogCatrunSound: CatrunArmor_0 found no path to X=900.000 Y=300.000 Z=90.000.",
+            "context": "log",
+            "artifact": "00000000000000000000000000000000"
+          },
+          "filename": "",
+          "lineNumber": -1,
+          "timestamp": "2026.11.24-18.00.35"
+        },
+        {
+          "event": {
+            "type": "Warning",
+            "message": "LogCatrunSound: CatrunArmor_0 found no path to X=900.000 Y=300.000 Z=90.000.",
+            "context": "log",
+            "artifact": "00000000000000000000000000000000"
+          },
+          "filename": "",
+          "lineNumber": -1,
+          "timestamp": "2026.11.24-18.00.35"
+        },
+        {
+          "event": {
+            "type": "Warning",
+            "message": "LogCatrunSound: CatrunArmor_0 found no path to X=300.000 Y=300.000 Z=90.000.",
+            "context": "log",
+            "artifact": "00000000000000000000000000000000"
+          },
+          "filename": "",
+          "lineNumber": -1,
+          "timestamp": "2026.11.24-18.00.35"
+        },
+        {
+          "event": {
+            "type": "Warning",
+            "message": "LogCatrunSound: CatrunArmor_0 found no path to X=900.000 Y=300.000 Z=90.000.",
+            "context": "log",
+            "artifact": "00000000000000000000000000000000"
+          },
+          "filename": "",
+          "lineNumber": -1,
+          "timestamp": "2026.11.24-18.00.35"
+        },
+        {
+          "event": {
+            "type": "Warning",
+            "message": "LogCatrunSound: CatrunArmor_0 found no path to X=500.000 Y=900.000 Z=90.000.",
+            "context": "log",
+            "artifact": "00000000000000000000000000000000"
+          },
+          "filename": "",
+          "lineNumber": -1,
+          "timestamp": "2026.11.24-18.00.35"
+        }
+      ]
+    },
+    {
+      "name": "Catrun.PrototypeAI.DynamicSightMatchesFanAndIgnoresPawnBodies",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.PrototypeAI.EmergencyRecoveryRejectionRestoresSupportedStart",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.PrototypeAI.EmergencyRecoveryTravelFailureRestoresSupportedStart",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.PrototypeAI.ExhaustedRestoreQueuesSessionRestartAndHonorsTeardown",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.PrototypeAI.PatrolSkipsEmptySlotsAndReactsToFirstSound",
+      "state": "Success",
+      "warnings": [
+        {
+          "event": {
+            "type": "Warning",
+            "message": "LogCatrunSound: CatrunArmor_0 found no path to X=900.000 Y=300.000 Z=90.000.",
+            "context": "log",
+            "artifact": "00000000000000000000000000000000"
+          },
+          "filename": "",
+          "lineNumber": -1,
+          "timestamp": "2026.11.24-18.00.35"
+        },
+        {
+          "event": {
+            "type": "Warning",
+            "message": "LogCatrunSound: CatrunArmor_0 found no path to X=900.000 Y=300.000 Z=90.000.",
+            "context": "log",
+            "artifact": "00000000000000000000000000000000"
+          },
+          "filename": "",
+          "lineNumber": -1,
+          "timestamp": "2026.11.24-18.00.35"
+        }
+      ]
+    },
+    {
+      "name": "Catrun.PrototypeAI.RestoreRejectsUnsupportedAndThroughWallFallbacks",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.PrototypeAI.SoundSnapshotPriorityAndResume",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.PrototypeAI.SuspendedSoundPreservesDelayAndStableBoundedDrain",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.Settings.AltEnterMovementBindings",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.Settings.AtomicDraftAndCorruptFallback",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.Settings.EffectiveBasketAndBellKeys",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.Settings.FocusCaptureAndLockRestoration",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.Settings.KeyboardValidationAndBounds",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.Settings.LegacyTabBindingKeepsOtherKeys",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.Settings.NavigationFocusPresentation",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.Settings.RemapPreservesDirectionAndGamepad",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.Settings.ReservedBindingTransaction",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.Settings.ReservedKeyboardKeys",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.Settings.SavedMenuLayout",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.Settings.SourcePanelStateRestoration",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.Sound.GridBake.PreservesGridOnFailure",
+      "state": "Success",
+      "warnings": [
+        {
+          "event": {
+            "type": "Warning",
+            "message": "LogCatrunSound: Grid bake: floor Actor_2 has invalid collision bounds and is ignored.",
+            "context": "log",
+            "artifact": "00000000000000000000000000000000"
+          },
+          "filename": "",
+          "lineNumber": -1,
+          "timestamp": "2026.11.24-18.00.36"
+        },
+        {
+          "event": {
+            "type": "Warning",
+            "message": "LogCatrunSound: Grid bake: floor Actor_2 has invalid collision bounds and is ignored.",
+            "context": "log",
+            "artifact": "00000000000000000000000000000000"
+          },
+          "filename": "",
+          "lineNumber": -1,
+          "timestamp": "2026.11.24-18.00.36"
+        }
+      ]
+    },
+    {
+      "name": "Catrun.Sound.Propagation.CircularityAndBudget",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.Sound.Propagation.WallsAndDoors",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.Sound.FootstepsKeepCadenceAcrossMovementModes",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.Sound.PlayerBellBudgetAcrossOpenAndClosedPaths",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.Stage2.CalmRevealBlockedPathAndEightSecondGuard",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.Stage2.CalmRevealPreservesLiveFramingAndReturns",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.Stage2.CalmRevealPreservesProjectedOwnerOffsetAtHandoffs",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.Stage2.CalmRevealProbesRenderedOrthoOrigin",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.Stage2.CalmRevealReturnsToMovingGameplayComponent",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.Stage2.CoastingBusySeatWaitsThenRevealsExactlyOnce",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.Stage2.DynamicObstaclesAffectSoundAndArmor",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.Stage2.GateUsesActualHeightAndChecksBothDirections",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.Stage2.PendingRevealResetAndMissingPresentationFallback",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.Stage2.PlateGateAndSafeClosing",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.Stage2.PushContactCollisionAndBusy",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.Stage2.ResetDoesNotTeleportOntoPlayer",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.Stage2.RevealTimeoutResetCallbacksAndOwnedLocks",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.Stage2.RoomRecoveryIsLocalAndCollisionSafe",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.Stage2.SeatingThresholdAxisHeightAndBlockedSweep",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.Stage2.SeatsAfterCrossAxisCoast",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.Stage2.SnapCallbackResetCancelsOldRevision",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.Stage2.SolvesStayInCurrentAttemptAndArrivalsStartFresh",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.Stage2.SuspensionGuardsEventsTimersAndPlayerActions",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.Stage2.WeightedPushIsFrameIndependentAndDecelerates",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.Stage2.WrongPushPreservesReverseContact",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.Stage3.AllThreeLocksRequired",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.Stage3.ChapterUnlockRoundTrip",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.Stage3.ExternalLocksPreserveSeatingAndGateSafety",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.Stage3.FreshAttemptClock",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.Tuning.CanonicalLocomotion",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.UI.GameplayHUD.FollowsExistingPresentationOwners",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.UI.Minimap.CameraProjectionFitsAndRegisters",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.UI.Minimap.EnemyCacheFollowsWorldLifetime",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.UI.Minimap.HeldLayoutPreservesCornerPlacement",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.UI.Minimap.NavigationSourcesAndSilentRestore",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.UI.Minimap.NeighborhoodContainsGameplayViewAndRegisters",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.UI.Minimap.OffscreenPreview",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.UI.Minimap.ProjectionMatchesCapture",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.UI.Notice.BlockedRecoveryPreservesPresentationOwners",
+      "state": "Success",
+      "warnings": []
+    },
+    {
+      "name": "Catrun.UI.Notice.DeferredGameplayCountsReadableTime",
+      "state": "Success",
+      "warnings": []
+    }
+  ]
+}

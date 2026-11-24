@@ -124,9 +124,11 @@ TSharedRef<SWidget> UCatrunPlayHUD::RebuildWidget()
 		MenuBody = AddText(MenuBox,TEXT("MenuBody"),TEXT("게임이 일시정지되었습니다."),20,Ink);
 		UTextBlock* Label = nullptr;
 		AddButton(MenuBox,TEXT("ResumeButton"),TEXT("계속하기"),Label)->OnClicked.AddDynamic(this,&UCatrunPlayHUD::ResumePlay);
-		AddButton(MenuBox,TEXT("RestartButton"),TEXT("이 구간 처음부터"),Label)->OnClicked.AddDynamic(this,&UCatrunPlayHUD::RequestRestart);
+		ResumeLabel = Label;
+		AddButton(MenuBox,TEXT("RestartButton"),TEXT("스테이지 처음부터 다시 시작"),Label)->OnClicked.AddDynamic(this,&UCatrunPlayHUD::RequestRestart);
 		RestartLabel = Label;
-		AddButton(MenuBox,TEXT("MainMenuButton"),TEXT("시작 메뉴로"),Label)->OnClicked.AddDynamic(this,&UCatrunPlayHUD::ReturnToMenu);
+		MainMenuButton = AddButton(MenuBox,TEXT("MainMenuButton"),TEXT("시작 메뉴로"),Label);
+		MainMenuButton->OnClicked.AddDynamic(this,&UCatrunPlayHUD::ReturnToMenu);
 		PausePanel->SetVisibility(ESlateVisibility::Collapsed);
 	}
 	return Super::RebuildWidget();
@@ -208,10 +210,16 @@ void UCatrunPlayHUD::SetMenuOpen(bool bOpen)
 	PausePanel->SetVisibility(bOpen ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
 	MenuTitle->SetText(Copy(TEXT("잠깐, 숨 고르기")));
 	MenuBody->SetText(Copy(TEXT("게임이 일시정지되었습니다.")));
-	RestartLabel->SetText(Copy(TEXT("이 구간 처음부터")));
+	ResumeLabel->SetText(Copy(TEXT("계속하기")));
+	RestartLabel->SetText(Copy(TEXT("스테이지 처음부터 다시 시작")));
+	MainMenuButton->SetVisibility(ESlateVisibility::Visible);
 	if (bOpen) SetKeyboardFocus();
 }
-void UCatrunPlayHUD::ResumePlay() { if (auto* Flow=UCatrunLevelFlowSubsystem::Get(this)) Flow->SetPauseMenu(false); }
+void UCatrunPlayHUD::ResumePlay()
+{
+	if (bConfirmRestart) { SetMenuOpen(true); return; }
+	if (auto* Flow=UCatrunLevelFlowSubsystem::Get(this)) Flow->SetPauseMenu(false);
+}
 void UCatrunPlayHUD::RequestRestart()
 {
 	if (!bMenuOpen) return;
@@ -219,17 +227,25 @@ void UCatrunPlayHUD::RequestRestart()
 	{
 		bConfirmRestart=true;
 		MenuTitle->SetText(Copy(TEXT("처음부터 다시 할까요?")));
-		MenuBody->SetText(Copy(TEXT("이 구간의 동상·문·적·표식이 모두 초기화됩니다. 계속하기를 누르면 취소됩니다.")));
-		RestartLabel->SetText(Copy(TEXT("진행을 포기하고 다시 시작")));
+		MenuBody->SetText(Copy(TEXT("현재 스테이지의 퍼즐 진행과 남은 시간을 초기화합니다. 해금한 구역은 유지됩니다.")));
+		ResumeLabel->SetText(Copy(TEXT("취소")));
+		RestartLabel->SetText(Copy(TEXT("초기화하고 다시 시작")));
+		MainMenuButton->SetVisibility(ESlateVisibility::Collapsed);
+		if (auto* Cancel = GetWidgetFromName(TEXT("ResumeButton"))) Cancel->SetKeyboardFocus();
 	}
 	else if (auto* Flow=UCatrunLevelFlowSubsystem::Get(this))
 	{
-		if (!Flow->RestartStage()) { MenuBody->SetText(Copy(TEXT("지금은 재시작할 수 없어요. 계속하기로 돌아가세요."))); }
+		SetMenuOpen(true);
+		if (!Flow->RestartStage()) MenuBody->SetText(Copy(TEXT("지금은 다시 시작할 수 없습니다.")));
 	}
 }
 void UCatrunPlayHUD::ReturnToMenu() { if (auto* Flow=UCatrunLevelFlowSubsystem::Get(this)) Flow->ReturnToMenu(); }
 FReply UCatrunPlayHUD::NativeOnKeyDown(const FGeometry& Geometry, const FKeyEvent& Event)
 {
-	// Escape is owned by the shared settings subsystem in every playable map.
+	if (bMenuOpen && bConfirmRestart && Event.GetKey() == EKeys::Escape)
+	{
+		if (!Event.IsRepeat()) SetMenuOpen(true);
+		return FReply::Handled();
+	}
 	return Super::NativeOnKeyDown(Geometry,Event);
 }

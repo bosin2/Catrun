@@ -1,5 +1,8 @@
 #if WITH_DEV_AUTOMATION_TESTS && PLATFORM_WINDOWS
 #include "LevelFlow/CatrunAtomicSaveGame.h"
+#include "LevelFlow/CatrunLevelFlow.h"
+#include "LevelFlow/CatrunProgressSave.h"
+#include "Engine/GameInstance.h"
 #include "Async/Async.h"
 #include "HAL/Event.h"
 #include "HAL/FileManager.h"
@@ -138,6 +141,32 @@ bool FCatrunAtomicCheckpointFailureTest::RunTest(const FString&)
 	TestFalse(TEXT("A slot created after the missing-slot check is preserved"), Backend.CommitIfUnchanged(SlotName, nullptr, Previous));
 	TestFalse(TEXT("A slot changed after the backup read is preserved"), Backend.CommitIfUnchanged(SlotName, &Previous, Previous));
 	TestTrue(TEXT("Conflicting commits preserve all bytes"), Backend.LoadGame(false, SlotName, 0, Bytes) && Bytes == Next);
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunAtomicShutdownFlushTest, "Catrun.LevelFlow.PendingAtomicCheckpointFlushesOnShutdown", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FCatrunAtomicShutdownFlushTest::RunTest(const FString&)
+{
+	const FString Directory = FPaths::ProjectSavedDir() / (TEXT("CatrunCheckpointTest-") + FGuid::NewGuid().ToString(EGuidFormats::Digits));
+	FTemporaryCheckpointSystem Backend(Directory), Observer(Directory);
+	const TCHAR* Slot = TEXT("CatrunProgress");
+	ON_SCOPE_EXIT { IFileManager::Get().Delete(*Backend.GetSaveGamePath(Slot)); IFileManager::Get().DeleteDirectory(*Directory); };
+	auto* Session = NewObject<UCatrunFlowSession>(NewObject<UGameInstance>());
+	Session->SetSaveBackendForTest(&Backend, {}, true);
+	const FString Package(TEXT("/Game/Maps/Stage1"));
+	Session->AcceptTravel(Package, true, true, ECatrunArrivalRestart::Continue);
+	Session->Arrive(Package);
+	Session->SaveCurrentCheckpoint(Package);
+	TestTrue(TEXT("Atomic asynchronous checkpoint remains pending before shutdown"), Session->IsSavePending());
+	Session->AdvanceClock(17.125f);
+	const int32 ExpectedMs = FMath::RoundToInt32(double(Session->GetRemainingSeconds(TEXT("Stage1"))) * 1000.);
+	Session->Deinitialize();
+	TArray<uint8> Bytes;
+	if (!TestTrue(TEXT("Independent slot observer reads immediately after shutdown"), Observer.LoadGame(false, Slot, 0, Bytes))) return false;
+	const auto* Save = UCatrunProgressSave::Decode(Bytes);
+	if (!TestNotNull(TEXT("Disk contains a valid last checkpoint"), Save)) return false;
+	TestEqual(TEXT("Shutdown preserves the active chapter"), Save->StageId, FName(TEXT("Stage1")));
+	TestEqual(TEXT("Shutdown synchronizes latest Stage1 remaining time to disk"), Save->Stage1RemainingMs, ExpectedMs);
 	return true;
 }
 #endif

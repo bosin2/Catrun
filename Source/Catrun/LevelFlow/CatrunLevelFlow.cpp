@@ -31,6 +31,7 @@
 #include "Sound/CatrunNotice.h"
 #include "Perception/CatrunSafeRestore.h"
 #include "SaveGameSystem.h"
+#include "UI/CatrunPlayerStatusWidget.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogCatrunFlow, Log, All);
 
@@ -86,10 +87,9 @@ static TAutoConsoleVariable<int32> CVarDebugRestart(TEXT("catrun.DebugRestart"),
 	TEXT("Enable R quick restart in PIE only. Disabled by default."), ECVF_Cheat);
 #endif
 
-void FCatrunRestartIntent::Request(const FString& Package, float FadeDuration, bool bIsContinue, bool bRestoreCheckpoint)
+void FCatrunRestartIntent::Request(const FString& Package, float FadeDuration, bool bIsContinue)
 {
 	bContinue = bIsContinue;
-	bRestoreStage2EntryCheckpoint = bRestoreCheckpoint;
 	MapPackage = UWorld::RemovePIEPrefix(Package);
 	FadeInDuration = FMath::IsFinite(FadeDuration) ? FMath::Max(0.f, FadeDuration) : 0.f;
 }
@@ -97,7 +97,6 @@ void FCatrunRestartIntent::Request(const FString& Package, float FadeDuration, b
 void FCatrunRestartIntent::Clear()
 {
 	bContinue = false;
-	bRestoreStage2EntryCheckpoint = false;
 	MapPackage.Reset();
 	FadeInDuration = 0.f;
 }
@@ -110,10 +109,10 @@ bool FCatrunRestartIntent::Consume(const FString& Package, float& OutFadeDuratio
 	return bMatches;
 }
 
-uint64 UCatrunFlowSession::AcceptTravel(const FString& Package, bool bBeginProgress, bool bCheckpoint, ECatrunArrivalRestart Restart, int8 OnboardingOnArrival, float FadeInDuration, bool bRestoreStage2EntryCheckpoint)
+uint64 UCatrunFlowSession::AcceptTravel(const FString& Package, bool bBeginProgress, bool bCheckpoint, ECatrunArrivalRestart Restart, int8 OnboardingOnArrival, float FadeInDuration, ECatrunProgressArrival Progress)
 {
 	TitleIntentMap.Reset();
-	bRestoreCheckpointOnArrival = bRestoreStage2EntryCheckpoint;
+	ProgressOnArrival = Progress;
 	AcceptedOnboarding = OnboardingOnArrival;
 	AcceptedTravelMap = UWorld::RemovePIEPrefix(Package);
 	bBeginProgressOnArrival = bBeginProgress;
@@ -134,7 +133,7 @@ void UCatrunFlowSession::CancelTravel(uint64 ExpectedToken)
 	bCheckpointOnArrival = false;
 	ArrivalRestart = ECatrunArrivalRestart::Preserve;
 	ArrivalFadeInDuration = 0.f;
-	bRestoreCheckpointOnArrival = false;
+	ProgressOnArrival = ECatrunProgressArrival::Resume;
 }
 
 void UCatrunFlowSession::ResolveArrivalRestart(const FString& Package)
@@ -144,7 +143,7 @@ void UCatrunFlowSession::ResolveArrivalRestart(const FString& Package)
 		&& GetDefault<UCatrunLevelFlowSettings>()->FindStageIndex(AcceptedTravelMap) != INDEX_NONE)
 		TitleIntentMap = AcceptedTravelMap;
 	if (ArrivalRestart == ECatrunArrivalRestart::SkipIntro || ArrivalRestart == ECatrunArrivalRestart::Continue)
-		RestartIntent.Request(AcceptedTravelMap, ArrivalFadeInDuration, ArrivalRestart == ECatrunArrivalRestart::Continue, bRestoreCheckpointOnArrival);
+		RestartIntent.Request(AcceptedTravelMap, ArrivalFadeInDuration, ArrivalRestart == ECatrunArrivalRestart::Continue);
 	else if (ArrivalRestart == ECatrunArrivalRestart::Clear) RestartIntent.Clear();
 	ArrivalRestart = ECatrunArrivalRestart::Preserve;
 	ArrivalFadeInDuration = 0.f;
@@ -159,11 +158,17 @@ bool UCatrunFlowSession::HasRestartArrivalIntent(const FString& CleanPackage) co
 
 bool UCatrunFlowSession::Arrive(const FString& Package)
 {
-	EnsureProgressLoaded();
+	CaptureClock();
 	const FString CleanPackage = UWorld::RemovePIEPrefix(Package);
 	const bool bAccepted = !AcceptedTravelMap.IsEmpty() && AcceptedTravelMap == CleanPackage;
+	if (bAccepted && bBeginProgressOnArrival) EnsureProgressLoaded();
 	ResolveArrivalRestart(CleanPackage);
-	const bool bCheckpoint = bAccepted && bCheckpointOnArrival;
+	const auto* Settings = GetDefault<UCatrunLevelFlowSettings>();
+	const int32 Index = Settings->FindStageIndex(CleanPackage);
+	CurrentStage = Settings->Stages.IsValidIndex(Index) ? Settings->Stages[Index].StageId : NAME_None;
+	const bool bRefillStage1 = bAccepted && (ProgressOnArrival == ECatrunProgressArrival::NewRun
+		|| (CurrentStage == TEXT("Stage1") && ProgressOnArrival != ECatrunProgressArrival::Resume));
+	const bool bCheckpoint = bAccepted && (bCheckpointOnArrival || bRefillStage1);
 	if (bAccepted && bBeginProgressOnArrival)
 	{
 		++ProgressGeneration;
@@ -174,10 +179,12 @@ bool UCatrunFlowSession::Arrive(const FString& Package)
 	else if (ActiveProgressMap != CleanPackage) ActiveProgressMap.Reset();
 	if (bAccepted && IsTrackingWorld(CleanPackage))
 	{
-		const auto* Settings = GetDefault<UCatrunLevelFlowSettings>();
-		const int32 Index = Settings->FindStageIndex(CleanPackage);
+		LastTrackedStage = CurrentStage;
 		if (Index > FindStageId(HighestUnlockedStageId)) HighestUnlockedStageId = Settings->Stages[Index].StageId;
 	}
+	if (bRefillStage1) RefillStage1Clock();
+	if (CurrentStage == TEXT("Stage2")) Stage2Seconds = -1.;
+	if (CurrentStage == TEXT("Stage3")) Stage3Seconds = -1.;
 	if (!bAccepted) TitleIntentMap.Reset();
 	CancelTravel();
 	return bCheckpoint && !ActiveProgressMap.IsEmpty();
@@ -208,6 +215,14 @@ float UCatrunLevelFlowSettings::GetCameraDistanceScale(FName StageId) const
 		if (Profile.StageId == StageId && FMath::IsFinite(Profile.DistanceScale))
 			return FMath::Clamp(Profile.DistanceScale, 1.f, 3.f);
 	return 1.f;
+}
+
+float UCatrunLevelFlowSettings::GetClockBudget(FName StageId) const
+{
+	if (StageId == TEXT("Stage1")) return FMath::IsFinite(Stage1BudgetSeconds) ? FMath::Clamp(Stage1BudgetSeconds, 1.f, 86400.f) : 600.f;
+	if (StageId == TEXT("Stage2")) return FMath::IsFinite(Stage2BudgetSeconds) ? FMath::Clamp(Stage2BudgetSeconds, 1.f, 86400.f) : 900.f;
+	if (StageId == TEXT("Stage3")) return FMath::IsFinite(Stage3BudgetSeconds) ? FMath::Clamp(Stage3BudgetSeconds, 1.f, 86400.f) : 1200.f;
+	return 0.f;
 }
 
 int32 UCatrunLevelFlowSettings::FindStageIndex(const FString& PackageName) const
@@ -279,11 +294,14 @@ bool UCatrunLevelFlowSubsystem::IsMainMenuWorld() const
 void UCatrunLevelFlowSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 {
 	Super::OnWorldBeginPlay(InWorld);
+	const auto* Routes = GetDefault<UCatrunLevelFlowSettings>();
+	const int32 Index = Routes->FindStageIndex(InWorld.GetOutermost()->GetName());
+	if (Routes->Stages.IsValidIndex(Index)) PlayableStage = Routes->Stages[Index].StageId;
 	// Intro queries also resolve lazily, so subsystem initialization order cannot consume the token twice.
 	ResolveRestartIntent();
 	if (auto* Session = GetFlowSession(&InWorld))
 		if (Session->Arrive(InWorld.GetOutermost()->GetName()))
-			Session->SaveArrivalCheckpoint(InWorld);
+			Session->SaveArrivalCheckpoint(InWorld, bContinueArrival);
 	if (auto* Settings = UCatrunUserSettings::GetCatrunUserSettings()) Settings->ApplyAudioVolume(&InWorld);
 }
 
@@ -297,10 +315,8 @@ void UCatrunLevelFlowSubsystem::ResolveRestartIntent()
 			Session->ResolveArrivalRestart(GetWorld()->GetOutermost()->GetName());
 			bStageTitlePending = Session->ConsumeArrivalTitle(GetWorld()->GetOutermost()->GetName());
 			bContinueArrival = Session->RestartIntent.bContinue;
-			bRestoreStage2EntryCheckpoint = Session->RestartIntent.bRestoreStage2EntryCheckpoint;
 			bSkipStageIntro = Session->RestartIntent.Consume(GetWorld()->GetOutermost()->GetName(), RestartFadeInDuration);
 			bContinueArrival &= bSkipStageIntro;
-			bRestoreStage2EntryCheckpoint &= bSkipStageIntro;
 		}
 }
 
@@ -368,6 +384,8 @@ void UCatrunLevelFlowSubsystem::Deinitialize()
 	ExitReservation.Reset();
 	TravelFailureOwner.Reset(); TravelFailureCallback = {};
 	if (PlayHUD) PlayHUD->RemoveFromParent();
+	if (PlayerStatusHUD) PlayerStatusHUD->RemoveFromParent();
+	PlayerStatusHUD = nullptr;
 	Super::Deinitialize();
 }
 
@@ -376,15 +394,34 @@ TStatId UCatrunLevelFlowSubsystem::GetStatId() const
 	RETURN_QUICK_DECLARE_CYCLE_STAT(UCatrunLevelFlowSubsystem, STATGROUP_Tickables);
 }
 
-void UCatrunLevelFlowSubsystem::Tick(float)
+void UCatrunLevelFlowSubsystem::Tick(float DeltaSeconds)
 {
-	const auto* Settings = GetDefault<UCatrunLevelFlowSettings>();
-	const int32 StageIndex = Settings->FindStageIndex(GetWorld()->GetOutermost()->GetName());
-	if (IsTransitioning() || StageIndex == INDEX_NONE) return;
-	// The tutorial already owns its intro, key hints and cinematic input handling.
-	if (Settings->Stages[StageIndex].StageId == TEXT("Tutorial")) return;
+	if (PlayableStage.IsNone()) return;
+	const bool bAdvancing = IsGameplayTimeAdvancing();
+	if (auto* Session = GetFlowSession(GetWorld()); bAdvancing && Session && PlayableStage != TEXT("Tutorial"))
+	{
+		// Do not charge the delta spanning release of a presentation or arrival.
+		if (bGameplayWasAdvancing) Session->AdvanceClock(DeltaSeconds);
+		if (!bTimeoutAttempted && Session->GetRemainingSeconds(PlayableStage) <= 0.f)
+			if (auto* Restart = UCatrunRestartSubsystem::Get(this)) bTimeoutAttempted = Restart->BeginStageTimeout();
+	}
+	bGameplayWasAdvancing = bAdvancing;
+	if (IsTransitioning()) return;
 	APlayerController* PC = UGameplayStatics::GetPlayerController(this, 0);
 	if (!PC) return;
+	if (!bStatusClassResolved && PC->GetLocalPlayer() && PC->GetPawn())
+	{
+		bStatusClassResolved = true;
+		UClass* StatusClass = LoadClass<UCatrunPlayerStatusWidget>(nullptr,
+			TEXT("/Game/UI/Gameplay/WBP_PlayerStatus.WBP_PlayerStatus_C"));
+		if (StatusClass)
+		{
+			PlayerStatusHUD = CreateWidget<UCatrunPlayerStatusWidget>(PC, StatusClass);
+			if (PlayerStatusHUD) PlayerStatusHUD->AddToViewport(105);
+		}
+	}
+	// The tutorial already owns its intro, key hints and cinematic input handling.
+	if (PlayableStage == TEXT("Tutorial")) return;
 	if (!GameplayCamera.IsValid() && PC->GetPawn() && IsGameplayCameraOwner(PC->GetViewTarget(), PC->GetPawn()) && !PC->IsMoveInputIgnored())
 	{
 		const ACharacter* Character = Cast<ACharacter>(PC->GetPawn());
@@ -422,7 +459,7 @@ void UCatrunLevelFlowSubsystem::SetPauseMenu(bool bOpen)
 
 bool UCatrunLevelFlowSubsystem::TravelTo(const TSoftObjectPtr<UWorld>& Map, const FString& Options,
     bool bBeginProgress, bool bCheckpoint, ECatrunArrivalRestart Restart, UObject* ExitOwner, int8 Onboarding,
-    UObject* FailureOwner, TFunction<void(const FString&)> Failure, float FadeInDuration, bool bReloadCurrentWorld, bool bRestoreCheckpoint)
+    UObject* FailureOwner, TFunction<void(const FString&)> Failure, float FadeInDuration, bool bReloadCurrentWorld, ECatrunProgressArrival Progress)
 {
     if (bTransitioning || (ExitReservation.IsValid() && ExitReservation.Get() != ExitOwner)) return false;
     if (ExitOwner && ExitReservation.Get() != ExitOwner) return false;
@@ -453,7 +490,7 @@ bool UCatrunLevelFlowSubsystem::TravelTo(const TSoftObjectPtr<UWorld>& Map, cons
 	UE_LOG(LogCatrunFlow, Log, TEXT("Travel requested: %s -> %s [%s]"), *GetWorld()->GetOutermost()->GetName(), *Package, *Options);
 	// Existing level cinematics own their fades. Travel must not add another one.
 	if (auto* Session = GetFlowSession(GetWorld()))
-		PendingTravelToken = Session->AcceptTravel(PendingMap, bBeginProgress, bCheckpoint, Restart, Onboarding, FadeInDuration, bRestoreCheckpoint);
+		PendingTravelToken = Session->AcceptTravel(PendingMap, bBeginProgress, bCheckpoint, Restart, Onboarding, FadeInDuration, Progress);
 	FinishTravel();
 	return bTransitioning;
 }
@@ -466,22 +503,23 @@ void UCatrunLevelFlowSubsystem::FinishTravel()
 bool UCatrunLevelFlowSubsystem::StartGame()
 {
     const auto* Settings = GetDefault<UCatrunLevelFlowSettings>();
-    return Settings->Stages.Num() > 0 && TravelTo(Settings->Stages[0].Map, FString(), true, true, ECatrunArrivalRestart::Clear, nullptr, 0);
+    return Settings->Stages.Num() > 0 && TravelTo(Settings->Stages[0].Map, FString(), true, true,
+        ECatrunArrivalRestart::Clear, nullptr, 0, nullptr, {}, 0.f, false, ECatrunProgressArrival::NewRun);
 }
 
 bool UCatrunLevelFlowSubsystem::ContinueGame()
 {
     auto* Session = GetFlowSession(GetWorld());
-    const auto* Save = Session ? Session->LoadSavedProgress() : nullptr;
-    return Save && Save->IsSupported() && ContinueStage(Save->StageId);
+    return Session && !Session->IsSavePending() && ContinueStage(Session->GetContinueStageId());
 }
 
 bool UCatrunLevelFlowSubsystem::ContinueStage(FName StageId)
 {
     if (!UCatrunLevelFlowLibrary::CanContinueStage(this, StageId)) return false;
     auto* Session = GetFlowSession(GetWorld());
+    const bool bChapterChanged = Session->GetContinueStageId() != StageId;
     return TravelTo(GetDefault<UCatrunLevelFlowSettings>()->Stages[FindStageId(StageId)].Map,
-        FString(), true, true, ECatrunArrivalRestart::Continue, nullptr, Session->HasCompletedOnboarding() ? 1 : 0);
+        FString(), true, bChapterChanged, ECatrunArrivalRestart::Continue, nullptr, Session->HasCompletedOnboarding() ? 1 : 0);
 }
 
 bool UCatrunLevelFlowSubsystem::CompleteStage() { return CompleteStageInternal(nullptr); }
@@ -492,13 +530,14 @@ bool UCatrunLevelFlowSubsystem::CompleteStageWithFailure(UObject* Owner, TFuncti
     return CompleteStageInternal(ExitReservation.Get() == Owner ? Owner : nullptr, Owner, MoveTemp(Failure));
 }
 
-bool UCatrunLevelFlowSubsystem::RequestSameMapRestart(UObject* Owner, float FadeInDuration, TFunction<void(const FString&)> Failure, bool bRestoreCheckpoint)
+bool UCatrunLevelFlowSubsystem::RequestSameMapRestart(UObject* Owner, float FadeInDuration, TFunction<void(const FString&)> Failure, bool bFailureRestart)
 {
     if (!IsValid(Owner) || Owner->GetWorld() != GetWorld() || IsTransitioning() || bStageComplete) return false;
     // This low-level recovery path deliberately permits the current capture's catch reservation.
     const FString Package = UWorld::RemovePIEPrefix(GetWorld()->GetOutermost()->GetName());
     return TravelTo(TSoftObjectPtr<UWorld>(FSoftObjectPath(Package)), FString(), false, false,
-        ECatrunArrivalRestart::SkipIntro, nullptr, -1, Owner, MoveTemp(Failure), FadeInDuration, true, bRestoreCheckpoint);
+        ECatrunArrivalRestart::SkipIntro, nullptr, -1, Owner, MoveTemp(Failure), FadeInDuration, true,
+        bFailureRestart ? ECatrunProgressArrival::FailureRefill : ECatrunProgressArrival::Resume);
 }
 
 bool UCatrunLevelFlowSubsystem::CompleteStageInternal(UObject* ExitOwner, UObject* FailureOwner,
@@ -536,7 +575,9 @@ bool UCatrunLevelFlowSubsystem::CompleteStageInternal(UObject* ExitOwner, UObjec
 
 bool UCatrunLevelFlowSubsystem::ReturnToMenu()
 {
-    return TravelTo(GetDefault<UCatrunLevelFlowSettings>()->MainMenuMap);
+    if (!TravelTo(GetDefault<UCatrunLevelFlowSettings>()->MainMenuMap)) return false;
+    if (auto* Session = GetFlowSession(GetWorld())) Session->FlushTrackedProgress();
+    return true;
 }
 
 bool UCatrunLevelFlowSubsystem::RestartStage()
@@ -558,7 +599,7 @@ bool UCatrunLevelFlowSubsystem::RestartStage()
             if (auto* Notice = UCatrunNoticeSubsystem::Get(this))
                 Notice->ShowNotice(NSLOCTEXT("Catrun", "ManualRestartTravelFailed", "스테이지를 다시 시작하지 못했습니다. 설정에서 다시 시도하세요."),
                     5.f, ECatrunNoticePolicy::DeferredGameplay);
-        }, 0.f, true)) return false;
+        }, 0.f, true, ECatrunProgressArrival::ResetStage)) return false;
     // Travel now owns the world. Abort callbacks cannot reacquire a catch or replace this request.
     if (Capture.IsValid() && Restart->IsCatchOwner(Capture.Get())) Capture->AbortCapture();
     return true;
@@ -601,6 +642,37 @@ bool ShouldHideGameplayPresentation(const UObject* Context, bool bAllowBlockedRe
     return false;
 }
 }
+
+bool UCatrunLevelFlowSubsystem::IsGameplayTimeAdvancing() const
+{
+    const UWorld* World = GetWorld();
+    if (!World || PlayableStage.IsNone() || bStageComplete || ShouldHideGameplayPresentation(this, false)) return false;
+    const auto* Controller = UGameplayStatics::GetPlayerController(this, 0);
+    if (!Controller || !Controller->IsLocalController() || !Controller->PlayerCameraManager
+        || Controller->PlayerCameraManager->PendingViewTarget.Target) return false;
+    const auto* Context = GEngine ? GEngine->GetWorldContextFromWorld(World) : nullptr;
+    if (Context && (!Context->TravelURL.IsEmpty() || World->IsInSeamlessTravel())) return false;
+    if (IsStage2PortalArrival() && !bArrivalTitleReleased
+        && (ArrivalTitleOwner.IsValid() || World->GetTimeSeconds() <= 2.f)) return false;
+    if (const auto* Settings = World->GetSubsystem<UCatrunSettingsSubsystem>(); Settings && Settings->GetCurrentSettingsWidget()) return false;
+    const auto* Restart = World->GetSubsystem<UCatrunRestartSubsystem>();
+    return !Restart || (!Restart->HasRecoveryRestartPending() && !Restart->HasBlockedPawnRecovery());
+}
+
+FCatrunStageClockState UCatrunLevelFlowSubsystem::GetStageClockState() const
+{
+    const auto* Settings = GetDefault<UCatrunLevelFlowSettings>();
+    FCatrunStageClockState State;
+    State.BudgetSeconds = Settings->GetClockBudget(PlayableStage);
+    State.bTimed = State.BudgetSeconds > 0.f;
+    State.WarningFraction = FMath::Clamp(FMath::IsFinite(Settings->WarningFraction) ? Settings->WarningFraction : .3f, 0.f, 1.f);
+    State.UrgentFraction = FMath::Clamp(FMath::IsFinite(Settings->UrgentFraction) ? Settings->UrgentFraction : .15f, 0.f, State.WarningFraction);
+    const auto* Session = GetFlowSession(GetWorld());
+    State.RemainingSeconds = Session ? Session->GetRemainingSeconds(PlayableStage) : State.BudgetSeconds;
+    State.bRunning = State.bTimed && State.RemainingSeconds > 0.f && IsGameplayTimeAdvancing();
+    return State;
+}
+
 bool UCatrunLevelFlowLibrary::ShouldHideGameplayHUD(const UObject* Context)
 {
     return ShouldHideGameplayPresentation(Context, false);
@@ -901,6 +973,7 @@ bool UCatrunFlowSession::EnsureProgressLoaded()
         const auto* Save = LoadSavedProgress();
         if (!Save) return false;
         MergeSavedProgress(*Save);
+        ReadStageValues(*Save);
     }
     else if (Exists != ISaveGameSystem::ESaveExistsResult::DoesNotExist) return false;
     bProgressLoaded = true;
@@ -922,6 +995,66 @@ void UCatrunFlowSession::MergeSavedProgress(const UCatrunProgressSave& Save)
     // After a new run starts, its own onboarding choice wins over late disk recovery.
     if (!ProgressGeneration) bTutorialOnboardingCompleted = Save.HasCompletedOnboarding();
 }
+
+void UCatrunFlowSession::ReadStageValues(const UCatrunProgressSave& Save)
+{
+    if (LastTrackedStage.IsNone()) LastTrackedStage = Save.StageId;
+    if (bClockDirty) return;
+    // Stage2 uses chapter-start checkpoints. Old v4 fields are accepted by the reader
+    // for compatibility and never applied to the current attempt.
+    const int32 RemainingMs = Mutations.IsEmpty() ? Save.Stage1RemainingMs : Mutations.Last().RemainingMs;
+    Stage1Seconds = RemainingMs < 0 ? -1. : RemainingMs / 1000.;
+}
+
+FName UCatrunFlowSession::GetContinueStageId()
+{
+    return EnsureProgressLoaded() ? LastTrackedStage : NAME_None;
+}
+
+void UCatrunFlowSession::RefillStage1Clock()
+{
+    const bool bTracked = !ActiveProgressMap.IsEmpty();
+    const float Budget = GetDefault<UCatrunLevelFlowSettings>()->GetClockBudget(TEXT("Stage1"));
+    const int32 RemainingMs = FMath::RoundToInt32(double(Budget) * 1000.);
+    (bTracked ? Stage1Seconds : LocalStage1Seconds) = RemainingMs / 1000.;
+    if (bTracked) Mutations.Add({++MutationRevision, RemainingMs});
+}
+
+float UCatrunFlowSession::GetRemainingSeconds(FName StageId) const
+{
+    double Seconds = -1.;
+    if (StageId == TEXT("Stage1")) Seconds = ActiveProgressMap.IsEmpty() ? LocalStage1Seconds : Stage1Seconds;
+    else if (StageId == TEXT("Stage2")) Seconds = Stage2Seconds;
+    else if (StageId == TEXT("Stage3")) Seconds = Stage3Seconds;
+    return Seconds >= 0. ? float(Seconds) : GetDefault<UCatrunLevelFlowSettings>()->GetClockBudget(StageId);
+}
+
+void UCatrunFlowSession::AdvanceClock(float DeltaSeconds)
+{
+    if (DeltaSeconds <= 0.f || !FMath::IsFinite(DeltaSeconds)) return;
+    const bool bTracked = !ActiveProgressMap.IsEmpty();
+    const bool bStage1 = CurrentStage == TEXT("Stage1");
+    if (!bStage1 && CurrentStage != TEXT("Stage2") && CurrentStage != TEXT("Stage3")) return;
+    double& Seconds = bStage1 ? (bTracked ? Stage1Seconds : LocalStage1Seconds) : (CurrentStage == TEXT("Stage3") ? Stage3Seconds : Stage2Seconds);
+    if (Seconds == 0.) return;
+    if (Seconds < 0.) Seconds = GetDefault<UCatrunLevelFlowSettings>()->GetClockBudget(CurrentStage);
+    Seconds = FMath::Max(0., Seconds - DeltaSeconds);
+    bClockDirty |= bTracked && bStage1;
+}
+
+void UCatrunFlowSession::CaptureClock()
+{
+    if (!bClockDirty || ActiveProgressMap.IsEmpty()) return;
+    bClockDirty = false;
+    Mutations.Add({++MutationRevision, FMath::RoundToInt32(Stage1Seconds * 1000.)});
+}
+
+void UCatrunFlowSession::FlushTrackedProgress()
+{
+    if (bClockDirty || (!IsSavePending() && !Mutations.IsEmpty()))
+        BeginCheckpoint(ActiveProgressMap, true, {}, true);
+}
+
 int32 UCatrunFlowSession::GetHighestUnlockedStageIndex()
 {
     return EnsureProgressLoaded() ? FindStageId(HighestUnlockedStageId) : INDEX_NONE;
@@ -945,11 +1078,11 @@ uint64 UCatrunFlowSession::SaveCurrentCheckpoint(const FString& Package, TFuncti
 {
     return BeginCheckpoint(Package, false, MoveTemp(Completion));
 }
-void UCatrunFlowSession::SaveArrivalCheckpoint(UWorld& World)
+void UCatrunFlowSession::SaveArrivalCheckpoint(UWorld& World, bool bQuiet)
 {
-    BeginCheckpoint(World.GetOutermost()->GetName(), true, {});
+    BeginCheckpoint(World.GetOutermost()->GetName(), true, {}, bQuiet);
 }
-uint64 UCatrunFlowSession::BeginCheckpoint(const FString& Package, bool bRetryOnce, TFunction<void(bool, const FString&)> Completion)
+uint64 UCatrunFlowSession::BeginCheckpoint(const FString& Package, bool bRetryOnce, TFunction<void(bool, const FString&)> Completion, bool bQuiet)
 {
     const FString CleanPackage = UWorld::RemovePIEPrefix(Package);
     if (!IsTrackingWorld(CleanPackage)) return 0;
@@ -957,47 +1090,61 @@ uint64 UCatrunFlowSession::BeginCheckpoint(const FString& Package, bool bRetryOn
     const int32 StageIndex = Settings->FindStageIndex(CleanPackage);
     if (StageIndex == INDEX_NONE) return 0;
     const FName StageId = Settings->Stages[StageIndex].StageId;
+    CaptureClock();
     if (!Writer)
     {
         Writer = MakeShared<FCatrunProgressWriter>();
         Writer->OnIdle.BindUObject(this, &UCatrunFlowSession::OnCheckpointQueueIdle);
         Writer->OnStarted.BindUObject(this, &UCatrunFlowSession::OnCheckpointStarted);
     }
+    bShowCheckpointNotice |= !bQuiet;
     CompletedCheckpointState = ECatrunCheckpointState::Idle;
-    return EnqueueCheckpoint(StageId, ProgressGeneration, ++LatestSaveRequest, bRetryOnce, MoveTemp(Completion));
+    return EnqueueCheckpoint(StageId, ProgressGeneration, ++LatestSaveRequest, MutationRevision, bRetryOnce, MoveTemp(Completion));
 }
-uint64 UCatrunFlowSession::EnqueueCheckpoint(FName StageId, uint64 Generation, uint64 Request, bool bRetryOnce, TFunction<void(bool, const FString&)> Completion)
+uint64 UCatrunFlowSession::EnqueueCheckpoint(FName StageId, uint64 Generation, uint64 Request, uint64 Revision, bool bRetryOnce, TFunction<void(bool, const FString&)> Completion)
 {
     const auto KeepAlive = Writer.ToSharedRef();
     const TWeakObjectPtr<UCatrunFlowSession> Weak(this);
-    return KeepAlive->Enqueue([Weak, Generation, StageId](const TArray<uint8>* Previous, TArray<uint8>& Data)
+    const bool bOnboarding = bTutorialOnboardingCompleted;
+    return KeepAlive->Enqueue([Weak, StageId, Revision, bOnboarding](const TArray<uint8>* Previous, TArray<uint8>& Data)
     {
         auto* Session = Weak.Get();
-        if (!Session || Session->ProgressGeneration != Generation) return false;
+        if (!Session) return false;
+        auto* Save = NewObject<UCatrunProgressSave>();
         if (Previous)
         {
             const auto* Existing = DecodeProgress(*Previous);
             if (!Existing) return false;
             Session->MergeSavedProgress(*Existing);
+            if (!Session->bProgressLoaded) Session->ReadStageValues(*Existing);
+            Save->Stage1RemainingMs = Existing->Stage1RemainingMs;
         }
         Session->bProgressLoaded = true;
-        auto* Save = NewObject<UCatrunProgressSave>();
+        Save->SchemaVersion = UCatrunProgressSave::CurrentSchemaVersion;
         Save->StageId = StageId;
         Save->HighestUnlockedStageId = Session->HighestUnlockedStageId;
         Save->SavedAtUtc = FDateTime::UtcNow();
-        Save->bTutorialOnboardingCompleted = Session->bTutorialOnboardingCompleted;
+        Save->bTutorialOnboardingCompleted = bOnboarding;
+        for (const auto& Mutation : Session->Mutations)
+            if (Mutation.Revision <= Revision) Save->Stage1RemainingMs = Mutation.RemainingMs;
         return UGameplayStatics::SaveGameToMemory(Save, Data);
-    }, [Weak, StageId, Generation, Request, bRetryOnce, Completion = MoveTemp(Completion)](bool bOK, const FString& Error) mutable
+    }, [Weak, StageId, Generation, Request, Revision, bRetryOnce, Completion = MoveTemp(Completion)](bool bOK, const FString& Error) mutable
     {
-        if (auto* Session = Weak.Get(); Session && Session->ProgressGeneration == Generation && Session->LatestSaveRequest == Request)
+        if (auto* Session = Weak.Get())
         {
-            if (!bOK && bRetryOnce)
+            if (bOK) Session->Mutations.RemoveAll([Revision](const FStage1ClockMutation& Mutation) { return Mutation.Revision <= Revision; });
+            if (Session->ProgressGeneration == Generation && Session->LatestSaveRequest == Request)
             {
-                Session->EnqueueCheckpoint(StageId, Generation, Request, false, MoveTemp(Completion));
-                return;
+                const bool bCanRetry = Session->bFlushing ? !Session->bRetriedDuringShutdown : bRetryOnce;
+                if (!bOK && bCanRetry)
+                {
+                    Session->bRetriedDuringShutdown = Session->bFlushing;
+                    Session->EnqueueCheckpoint(StageId, Generation, Request, Revision, false, MoveTemp(Completion));
+                    return;
+                }
+                Session->CompletedCheckpointState = bOK ? ECatrunCheckpointState::Saved : ECatrunCheckpointState::Failed;
+                if (!bOK) UE_LOG(LogCatrunFlow, Error, TEXT("%s"), *Error);
             }
-            Session->CompletedCheckpointState = bOK ? ECatrunCheckpointState::Saved : ECatrunCheckpointState::Failed;
-            if (!bOK) UE_LOG(LogCatrunFlow, Error, TEXT("%s"), *Error);
         }
         if (Completion) Completion(bOK, Error);
     });
@@ -1006,16 +1153,21 @@ void UCatrunFlowSession::OnCheckpointStarted()
 {
     if (CheckpointState == ECatrunCheckpointState::Pending) return;
     CheckpointState = ECatrunCheckpointState::Pending;
+    if (bFlushing) return;
     OnCheckpointStateChanged.Broadcast(CheckpointState);
+    if (!bShowCheckpointNotice) return;
     if (auto* Instance = GetGameInstance()) if (auto* Notice = UCatrunNoticeSubsystem::Get(Instance->GetWorld()))
         Notice->ShowNotice(NSLOCTEXT("Catrun", "CheckpointSavePending", "진행을 저장하고 있습니다."), 2.f);
 }
 void UCatrunFlowSession::OnCheckpointQueueIdle()
 {
     CheckpointState = CompletedCheckpointState;
+    const bool bShowNotice = bShowCheckpointNotice;
+    bShowCheckpointNotice = false;
+    if (bFlushing) return;
     OnCheckpointStateChanged.Broadcast(CheckpointState);
     // Subscribers may begin another write. Do not overwrite its pending status or show a stale notice.
-    if (IsSavePending()) return;
+    if (IsSavePending() || !bShowNotice) return;
     if (auto* Instance = GetGameInstance()) if (auto* Notice = UCatrunNoticeSubsystem::Get(Instance->GetWorld()))
     {
         if (CheckpointState == ECatrunCheckpointState::Failed)
@@ -1026,6 +1178,9 @@ void UCatrunFlowSession::OnCheckpointQueueIdle()
 }
 void UCatrunFlowSession::Deinitialize()
 {
+    bFlushing = true;
+    FlushTrackedProgress();
+    if (Writer && !Writer->Flush()) UE_LOG(LogCatrunFlow, Error, TEXT("The checkpoint queue could not be drained during shutdown."));
     ++ProgressGeneration;
     if (Writer) { Writer->OnIdle.Unbind(); Writer->OnStarted.Unbind(); }
     Writer.Reset();
@@ -1041,13 +1196,15 @@ void UCatrunFlowSession::MarkOnboardingCompleted(const FString& Package)
     SaveCurrentCheckpoint(Package);
 }
 #if WITH_DEV_AUTOMATION_TESTS
-void UCatrunFlowSession::SetSaveBackendForTest(ISaveGameSystem* Backend)
+void UCatrunFlowSession::SetSaveBackendForTest(ISaveGameSystem* Backend, FSimpleDelegate DrainCallbacks, bool bUseAtomicIO)
 {
     check(!IsSavePending());
     SaveBackendForTest = Backend;
     bProgressLoaded = false;
     HighestUnlockedStageId = NAME_None;
-    Writer = MakeShared<FCatrunProgressWriter>(Backend);
+    LastTrackedStage = NAME_None;
+    Stage1Seconds = -1.;
+    Writer = MakeShared<FCatrunProgressWriter>(Backend, MoveTemp(DrainCallbacks), bUseAtomicIO);
     Writer->OnIdle.BindUObject(this, &UCatrunFlowSession::OnCheckpointQueueIdle);
     Writer->OnStarted.BindUObject(this, &UCatrunFlowSession::OnCheckpointStarted);
 }
@@ -1143,12 +1300,6 @@ bool UCatrunLevelFlowSubsystem::ConsumeStageTitle(FText& OutTitle)
     OutTitle = GetCurrentStageTitle();
     return !OutTitle.IsEmpty();
 }
-bool UCatrunLevelFlowSubsystem::ShouldRestoreStage2EntryCheckpoint()
-{
-    ResolveRestartIntent();
-    return bRestoreStage2EntryCheckpoint && bSkipStageIntro;
-}
-
 bool UCatrunLevelFlowSubsystem::ReserveExitTransition(UObject* Owner)
 {
     if (!IsValid(Owner) || Owner->GetWorld() != GetWorld() || IsTransitioning() || bStageComplete || GetWorld()->IsPaused()) return false;

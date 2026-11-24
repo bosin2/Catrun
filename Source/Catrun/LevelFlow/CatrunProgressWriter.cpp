@@ -2,6 +2,7 @@
 #include "CatrunAtomicSaveGame.h"
 #include "PlatformFeatures.h"
 #include "SaveGameSystem.h"
+#include "Async/Async.h"
 #include "HAL/PlatformMisc.h"
 
 namespace
@@ -48,6 +49,11 @@ void FCatrunProgressWriter::StartNext()
 	Active = MoveTemp(Queue[0]); Queue.RemoveAt(0);
 	OnStarted.ExecuteIfBound();
 	if (!Backend) { Finish(false, TEXT("Existing checkpoint cannot be inspected; no save backend.")); return; }
+	if (!bUseBackendCallbacks)
+	{
+		InspectWithBlockingBackend();
+		return;
+	}
 	Backend->DoesSaveGameExistAsync(CatrunProgressSlotName, User(), [Self = AsShared()](const FString&, FPlatformUserId, ISaveGameSystem::ESaveExistsResult Result)
 	{
 		if (Result == ISaveGameSystem::ESaveExistsResult::DoesNotExist) { Self->Write(); return; }
@@ -62,6 +68,69 @@ void FCatrunProgressWriter::StartNext()
 	});
 }
 
+void FCatrunProgressWriter::DispatchIO(TFunction<TFunction<void()>()> Work)
+{
+	// Generic Windows storage can execute off-thread. Platform-native backends
+	// may require their blocking entry points to be called on the game thread.
+	if (bFlushing || !bWritesAtomically)
+	{
+		Work()();
+		return;
+	}
+	PendingIO = Async(EAsyncExecution::ThreadPool, MoveTemp(Work));
+	IoTicker = FTSTicker::GetCoreTicker().AddTicker(FTickerDelegate::CreateLambda([Self = AsShared()](float)
+	{
+		if (!Self->PendingIO.IsReady()) return true;
+		Self->IoTicker.Reset();
+		Self->FinishIO();
+		return false;
+	}));
+}
+
+void FCatrunProgressWriter::FinishIO()
+{
+	TFunction<void()> Completion = PendingIO.Get();
+	// The completion can start the next operation and put a new future here.
+	PendingIO = {};
+	Completion();
+}
+
+bool FCatrunProgressWriter::Flush()
+{
+	check(IsInGameThread());
+	TGuardValue<bool> Flushing(bFlushing, true);
+	if (bUseBackendCallbacks && IsBusy()) DrainCallbacks.ExecuteIfBound();
+	if (PendingIO.IsValid())
+	{
+		FTSTicker::GetCoreTicker().RemoveTicker(IoTicker);
+		IoTicker.Reset();
+		FinishIO();
+	}
+	return !IsBusy();
+}
+
+void FCatrunProgressWriter::InspectWithBlockingBackend()
+{
+	DispatchIO([Self = AsShared()]() -> TFunction<void()>
+	{
+		ISaveGameSystem* Storage = Self->Backend;
+		const auto Exists = Storage->DoesSaveGameExistWithResult(CatrunProgressSlotName, 0);
+		if (Exists == ISaveGameSystem::ESaveExistsResult::DoesNotExist)
+			return [Self] { Self->Write(); };
+		if (Exists != ISaveGameSystem::ESaveExistsResult::OK)
+			return [Self] { Self->Finish(false, TEXT("Existing checkpoint cannot be inspected; no write attempted.")); };
+		TArray<uint8> Previous;
+		if (!Storage->LoadGame(false, CatrunProgressSlotName, 0, Previous))
+			return [Self] { Self->Finish(false, TEXT("Existing checkpoint backup failed; no write attempted.")); };
+		return [Self, Previous = MoveTemp(Previous)]() mutable
+		{
+			Self->Active.bHadPrevious = true;
+			Self->Active.Previous = MoveTemp(Previous);
+			Self->Write();
+		};
+	});
+}
+
 void FCatrunProgressWriter::Write()
 {
 	TArray<uint8> Bytes;
@@ -71,16 +140,28 @@ void FCatrunProgressWriter::Write()
 		return;
 	}
 	const auto NewData = MakeShared<const TArray<uint8>>(MoveTemp(Bytes));
-#if PLATFORM_WINDOWS
-	if (bWritesAtomically)
+	if (!bUseBackendCallbacks)
 	{
-		TSharedPtr<const TArray<uint8>> Expected;
-		if (Active.bHadPrevious) Expected = MakeShared<const TArray<uint8>>(MoveTemp(Active.Previous));
-		static_cast<FCatrunAtomicSaveGameSystem*>(Backend)->CommitIfUnchangedAsync(CatrunProgressSlotName, MoveTemp(Expected), NewData,
-			[Self = AsShared()](bool bOK) { Self->Finish(bOK, bOK ? FString() : TEXT("Checkpoint file could not be committed.")); });
+		DispatchIO([Self = AsShared(), NewData, bHadPrevious = Active.bHadPrevious,
+			Previous = MoveTemp(Active.Previous)]() -> TFunction<void()>
+		{
+			ISaveGameSystem* Storage = Self->Backend;
+#if PLATFORM_WINDOWS
+			if (Self->bWritesAtomically)
+			{
+				const bool bOK = static_cast<FCatrunAtomicSaveGameSystem*>(Storage)->CommitIfUnchanged(
+					CatrunProgressSlotName, bHadPrevious ? &Previous : nullptr, *NewData);
+				return [Self, bOK] { Self->Finish(bOK, bOK ? FString() : TEXT("Checkpoint file could not be committed.")); };
+			}
+#endif
+			if (Storage->SaveGame(false, CatrunProgressSlotName, 0, *NewData))
+				return [Self] { Self->Finish(true, FString()); };
+			const bool bRestored = bHadPrevious ? Storage->SaveGame(false, CatrunProgressSlotName, 0, Previous)
+				: Storage->DeleteGame(false, CatrunProgressSlotName, 0);
+			return [Self, bRestored] { Self->Finish(false, bRestored ? TEXT("Checkpoint write failed; prior bytes restored.") : TEXT("Checkpoint write AND rollback failed.")); };
+		});
 		return;
 	}
-#endif
 	Backend->SaveGameAsync(false, CatrunProgressSlotName, User(), NewData, [Self = AsShared()](const FString&, FPlatformUserId, bool bOK)
 	{
 		if (bOK) { Self->Finish(true, FString()); return; }

@@ -2,6 +2,8 @@
 #include "CatrunSettingsSubsystem.h"
 #include "CatrunUserSettings.h"
 #include "Blueprint/WidgetTree.h"
+#include "Components/Border.h"
+#include "Components/Button.h"
 #include "Components/InputKeySelector.h"
 #include "Components/TextBlock.h"
 #include "EnhancedInputSubsystems.h"
@@ -14,6 +16,10 @@ void UCatrunSettingsWidget::NativeConstruct()
  DraftBindings=Settings ? Settings->GetKeyboardBindings() : FCatrunKeyboardBindings();
  Super::NativeConstruct();
  SetIsFocusable(true);
+ bStageRestartPending = false;
+ if (RestartConfirmPanel) RestartConfirmPanel->SetVisibility(ESlateVisibility::Collapsed);
+ if (RestartAccept) RestartAccept->OnClicked.AddUniqueDynamic(this, &ThisClass::ConfirmStageRestart);
+ if (RestartCancel) RestartCancel->OnClicked.AddUniqueDynamic(this, &ThisClass::CancelStageRestart);
  if (WidgetTree)
   WidgetTree->ForEachWidget([](UWidget* Widget)
   {
@@ -79,10 +85,33 @@ void UCatrunSettingsWidget::DismissSettings()
 }
 bool UCatrunSettingsWidget::RestartFromSettings()
 {
- if (UCatrunLevelFlowLibrary::RestartCurrentStage(this)) return true;
+ if (!RestartConfirmPanel || !RestartAccept || !RestartCancel) return false;
+ if (bStageRestartPending) return true;
+ bStageRestartPending = true;
+ if (auto* Panel = GetWidgetFromName(TEXT("Panel_Setting")))
+ {
+  bSettingsWereEnabled = Panel->GetIsEnabled();
+  Panel->SetIsEnabled(false);
+ }
+ RestartConfirmPanel->SetVisibility(ESlateVisibility::Visible);
+ RestartCancel->SetKeyboardFocus();
+ return true;
+}
+void UCatrunSettingsWidget::CancelStageRestart()
+{
+ if (!bStageRestartPending) return;
+ bStageRestartPending = false;
+ RestartConfirmPanel->SetVisibility(ESlateVisibility::Collapsed);
+ if (auto* Panel = GetWidgetFromName(TEXT("Panel_Setting"))) Panel->SetIsEnabled(bSettingsWereEnabled);
+ if (auto* Restart = GetWidgetFromName(TEXT("RestartButton"))) Restart->SetKeyboardFocus();
+}
+void UCatrunSettingsWidget::ConfirmStageRestart()
+{
+ if (!bStageRestartPending) return;
+ CancelStageRestart();
+ if (UCatrunLevelFlowLibrary::RestartCurrentStage(this)) return;
  if (auto* Status=Cast<UTextBlock>(GetWidgetFromName(TEXT("SettingsStatus"))))
   Status->SetText(NSLOCTEXT("Catrun","SettingsRestartUnavailable","지금은 다시 시작할 수 없습니다. 잠시 후 다시 시도하세요."));
- return false;
 }
 bool UCatrunSettingsWidget::ReturnToMenuFromSettings()
 {
@@ -93,7 +122,11 @@ FReply UCatrunSettingsWidget::NativeOnPreviewKeyDown(const FGeometry& Geometry, 
 {
  if (Event.GetKey()==EKeys::Escape && !IsCapturingBinding())
  {
-  if (!Event.IsRepeat()) DismissSettings();
+  if (!Event.IsRepeat())
+  {
+   if (bStageRestartPending) CancelStageRestart();
+   else DismissSettings();
+  }
   return FReply::Handled();
  }
  return Super::NativeOnPreviewKeyDown(Geometry,Event);

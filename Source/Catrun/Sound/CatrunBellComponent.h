@@ -11,19 +11,46 @@ class UEnhancedInputLocalPlayerSubsystem;
 class UInputMappingContext;
 class UCatrunSoundSettings;
 class UWidgetComponent;
+class APawn;
+class ASoundGridManager;
+
+UENUM(BlueprintType)
+enum class ECatrunBellBlockReason : uint8
+{
+	None,
+	Cooldown,
+	Hidden,
+	Busy,
+	Airborne,
+	CatHole,
+	Cinematic
+};
+
+USTRUCT(BlueprintType)
+struct CATRUN_API FCatrunBellStatus
+{
+	GENERATED_BODY()
+	UPROPERTY(BlueprintReadOnly, Category = "Bell")
+	float CooldownSeconds = 0.f;
+	UPROPERTY(BlueprintReadOnly, Category = "Bell")
+	float RemainingSeconds = 0.f;
+	UPROPERTY(BlueprintReadOnly, Category = "Bell")
+	bool bCanRing = false;
+	UPROPERTY(BlueprintReadOnly, Category = "Bell")
+	ECatrunBellBlockReason Reason = ECatrunBellBlockReason::Cinematic;
+};
 
 /**
  * Turns the cat's bell into a sound the monsters can hear.
  *
  * The cat blueprint already has a component (BP_CatActions) that plays the bell animation and
  * sound and then calls its event dispatcher "OnBellRung". This component listens to that
- * dispatcher, so the existing blueprints stay untouched and their cooldown and "no bell while
- * hiding" rules apply automatically.
+ * dispatcher and reads the action's accepted timestamp and cooldown for presentation.
  *
  * If the cat has no such component (for example an older cat blueprint), the bell key below
  * is used instead.
  *
- * ASoundGridManager adds this component to the player pawn at runtime.
+ * The canonical BP_Cat owns a component, and ASoundGridManager supplies it for legacy pawns.
  */
 UCLASS(ClassGroup = (Catrun), meta = (BlueprintSpawnableComponent))
 class CATRUN_API UCatrunBellComponent : public UActorComponent
@@ -53,6 +80,15 @@ public:
 	float GetCooldownRemaining() const;
 
 	UFUNCTION(BlueprintPure, Category = "Bell")
+	float GetCooldownDuration() const;
+
+	UFUNCTION(BlueprintPure, Category = "Bell")
+	FCatrunBellStatus GetBellStatus() const;
+
+	// Shared by the playable bell action and its HUD status.
+	static bool IsBellActionContextBlocked(const APawn* Pawn);
+
+	UFUNCTION(BlueprintPure, Category = "Bell")
 	bool IsListeningToCatActions() const { return bListeningToCatActions; }
 
 private:
@@ -62,6 +98,10 @@ private:
 
 	// Finds the cat's BP_CatActions component and subscribes to OnBellRung.
 	bool BindToCatActions();
+	float GetFallbackCooldownDuration() const;
+	double GetAuthoritativeCooldownDuration() const;
+	float GetRemainingFor(double Duration, double AcceptedTime) const;
+	ECatrunBellBlockReason GetBellBlockReason(float RemainingSeconds) const;
 
 	// True when the cat's own hiding logic says it is hiding right now.
 	bool IsCatHiding() const;
@@ -100,9 +140,11 @@ private:
 	uint32 BlockBindingHandle = 0;
 	bool bBlockContextBuilt = false;
 	bool bBlockActive = false;
+	bool bInsideNoBellZone = false;
 	FDelegateHandle BindingsChangedHandle;
 
 	TWeakObjectPtr<UActorComponent> CatActions;
+	TWeakObjectPtr<ASoundGridManager> FallbackManager;
 	bool bListeningToCatActions = false;
 	double LastRingTime = -1000.0;
 };

@@ -6,6 +6,7 @@
 #include "Perception/CatrunSafeRestore.h"
 #include "Perception/CatrunGroundSupport.h"
 #include "CatrunHideBasket.h"
+#include "Sound/CatrunBellComponent.h"
 #include "Sound/CatrunNoBellZone.h"
 #include "Sound/CatrunNotice.h"
 #include "LevelFlow/CatrunLevelFlow.h"
@@ -30,6 +31,7 @@ UCatrunBasketInteractionComponent::UCatrunBasketInteractionComponent()
 	PrimaryComponentTick.bCanEverTick = true;
 	PrimaryComponentTick.bStartWithTickEnabled = true;
 	PrimaryComponentTick.bTickEvenWhenPaused = true;
+	PrimaryComponentTick.TickInterval = .15f;
 	static ConstructorHelpers::FObjectFinder<UAnimSequenceBase> Enter(TEXT("/Game/Characters/BlackCat/Final/Animations/AN_BlackCat_BasketEnter"));
 	static ConstructorHelpers::FObjectFinder<UAnimSequenceBase> Exit(TEXT("/Game/Systems/Interaction/Hiding/Animations/AN_Cat_BasketExit"));
 	EnterAnimation = Enter.Object;
@@ -40,6 +42,8 @@ void UCatrunBasketInteractionComponent::BeginPlay()
 {
 	Super::BeginPlay();
 	CatOwner = Cast<ACharacter>(GetOwner());
+	for (TActorIterator<ACatrunHideBasket> It(GetWorld()); It; ++It) TrackBasket(*It);
+	BasketSpawnHandle = GetWorld()->AddOnActorSpawnedHandler(FOnActorSpawned::FDelegate::CreateUObject(this, &UCatrunBasketInteractionComponent::TrackBasket));
 	SetComponentTickEnabled(true); // Outside queries are throttled; hidden directional input still updates each frame.
 }
 
@@ -51,16 +55,21 @@ void UCatrunBasketInteractionComponent::EndPlay(const EEndPlayReason::Type Reaso
 	if (IsValid(ActiveBasket)) ActiveBasket->Release(GetOwner());
 	if (ExitPreview) ExitPreview->DestroyComponent();
 	if (BasketPromptWidget) BasketPromptWidget->RemoveFromParent();
+	if (GetWorld()) GetWorld()->RemoveOnActorSpawnedHandler(BasketSpawnHandle);
+	NearbyBaskets.Reset();
 	Super::EndPlay(Reason);
+}
+
+void UCatrunBasketInteractionComponent::TrackBasket(AActor* Actor)
+{
+	if (ACatrunHideBasket* Basket = Cast<ACatrunHideBasket>(Actor)) NearbyBaskets.AddUnique(Basket);
 }
 
 bool UCatrunBasketInteractionComponent::BeginBellAction(float EmitDelay, float Duration)
 {
 	if (!IsValid(CatOwner) || !GetWorld() || GetWorld()->bIsTearingDown || Busy || IsHidden || bBellActive
 		|| BasketPhase != ECatrunBasketPhase::Outside || !CatOwner->GetCharacterMovement()->IsMovingOnGround()
-		|| UCatrunPuzzleSuspension::IsSuspended(this)) return false;
-	if (const auto* Restart = UCatrunRestartSubsystem::Get(this); Restart && Restart->IsCatching()) return false;
-	if (const auto* Flow = UCatrunLevelFlowSubsystem::Get(this); Flow && (Flow->IsTransitioning() || Flow->IsStageComplete())) return false;
+		|| UCatrunBellComponent::IsBellActionContextBlocked(CatOwner)) return false;
 	if (ACatrunNoBellZone::IsBellForbidden(*CatOwner)) { UCatrunNoticeLibrary::ShowBellDenied(this,2.f); return false; }
 	auto* Mesh = CatOwner->GetMesh();
 	auto* Move = CatOwner->GetCharacterMovement();
@@ -171,28 +180,25 @@ bool UCatrunBasketInteractionComponent::FindEntryCandidate(ACatrunHideBasket*& O
 	OutBasket=nullptr;
 	if (!IsInteractionAvailable() || IsHidden || BasketPhase!=ECatrunBasketPhase::Outside
 		|| !CatOwner->GetCharacterMovement()->IsMovingOnGround()) return false;
-	double Nearest = InteractionRange;
-	for (TActorIterator<ACatrunHideBasket> It(GetWorld()); It; ++It)
+	double NearestSquared = FMath::Square(InteractionRange);
+	for (const auto& WeakBasket : NearbyBaskets)
 	{
-		ACatrunHideBasket* Basket = *It;
-		if (Basket->Occupied || !Basket->HasHiddenPoint()) continue;
-		const double Distance = FVector::Distance(CatOwner->GetActorLocation(), Basket->GetHiddenLocation());
-		if (Distance >= Nearest) continue;
-		FVector Location;
-		if (TestEntry(Basket, Location))
+		ACatrunHideBasket* Basket = WeakBasket.Get();
+		if (!IsValid(Basket) || Basket->Occupied || !Basket->HasHiddenPoint()) continue;
+		const double DistanceSquared = FVector::DistSquared(CatOwner->GetActorLocation(), Basket->GetHiddenLocation());
+		if (DistanceSquared < NearestSquared)
 		{
 			OutBasket = Basket;
-			OutLocation = Location;
-			Nearest = Distance;
+			NearestSquared = DistanceSquared;
 		}
 	}
-	return OutBasket!=nullptr;
+	// Broad phase is cached actor positions only; one physical candidate per query.
+	return OutBasket && TestEntry(OutBasket, OutLocation);
 }
 
 void UCatrunBasketInteractionComponent::HideInteractionPrompt()
 {
 	if (BasketPromptWidget) BasketPromptWidget->SetPromptActive(false);
-	NextPromptCheck=0;
 }
 
 void UCatrunBasketInteractionComponent::UpdateInteractionPrompt()
@@ -201,9 +207,6 @@ void UCatrunBasketInteractionComponent::UpdateInteractionPrompt()
 		|| !CatOwner->GetCharacterMovement()->IsMovingOnGround()) { HideInteractionPrompt(); return; }
 	auto* PC=Cast<APlayerController>(CatOwner->GetController());
 	if (!PC || !PC->IsLocalController() || !BasketPromptWidgetClass) { HideInteractionPrompt(); return; }
-	const double Now=GetWorld()->GetTimeSeconds();
-	if (Now<NextPromptCheck) return;
-	NextPromptCheck=Now+.1;
 	const bool bShow=CanEnterNearbyBasket();
 	if (bShow && !BasketPromptWidget)
 	{
@@ -217,15 +220,9 @@ bool UCatrunBasketInteractionComponent::TestEntry(ACatrunHideBasket* Basket, FVe
 {
 	const FVector Center = Basket->GetHiddenLocation();
 	const FVector From = CatOwner->GetActorLocation();
-	const FVector Direction = (From-Center).GetSafeNormal2D();
-	const FVector Opening=Basket->GetOpenDirection();
-	const auto* PC=Cast<APlayerController>(CatOwner->GetController());
-	const float CameraYaw=PC && PC->PlayerCameraManager
-		? PC->PlayerCameraManager->GetCameraRotation().Yaw : Opening.Rotation().Yaw;
-	// Position relative to the authored opening decides entry, never cat facing.
-	// Apply the same physical hinge-rear rule used by exit before any shell ignore.
-	if (!CatrunBasket::IsDirectionAllowed(Direction,Opening,CameraYaw)) return false;
-	OutLocation = Center + Direction*EntryDistance;
+	const FVector Direction = Basket->SnapTraversalDirection(From-Center);
+	if (Direction.IsNearlyZero()) return false;
+	OutLocation = Center + Direction*Basket->GetTraversalDistance(Direction, EntryDistance);
 	const UCapsuleComponent* Capsule = CatOwner->GetCapsuleComponent();
 	FCollisionQueryParams Params(SCENE_QUERY_STAT(BasketEntry), false, CatOwner);
 	FHitResult Hit;
@@ -243,7 +240,7 @@ bool UCatrunBasketInteractionComponent::TestEntry(ACatrunHideBasket* Basket, FVe
 		return false;
 	if (GetWorld()->OverlapBlockingTestByChannel(OutLocation,Capsule->GetComponentQuat(),
 		Capsule->GetCollisionObjectType(),Capsule->GetCollisionShape(),Params,Responses)) return false;
-	// Only the deliberate allowed-side jump may pass this basket's shell. The
+	// Only the deliberate jump may pass this basket's shell. The
 	// approach and staging capsule above still collide with it normally.
 	Params.AddIgnoredActor(Basket);
 	if (IsValid(Basket->ExternalBody)) Params.AddIgnoredActor(Basket->ExternalBody);
@@ -261,6 +258,7 @@ void UCatrunBasketInteractionComponent::EnterBasket(ACatrunHideBasket* Basket, c
 	Busy = true;
 	HideInteractionPrompt();
 	BasketPhase = ECatrunBasketPhase::Entering;
+	SetComponentTickInterval(0.f);
 	SetComponentTickEnabled(true);
 	USkeletalMeshComponent* Mesh = CatOwner->GetMesh();
 	UCharacterMovementComponent* Movement = CatOwner->GetCharacterMovement();
@@ -295,7 +293,7 @@ void UCatrunBasketInteractionComponent::EnterBasket(ACatrunHideBasket* Basket, c
 	const FRotator EntryRotation(0.f,EntryHeading.IsNearlyZero() ? CatOwner->GetActorRotation().Yaw : EntryHeading.Rotation().Yaw,0.f);
 	CatOwner->SetActorLocationAndRotation(Location, EntryRotation,
 		false, nullptr, ETeleportType::TeleportPhysics);
-	Basket->ClothEnter();
+	Basket->PlayDirectionalCloth(true, Location-Basket->GetHiddenLocation(), AnimationPlayRate);
 	const float Duration = PlayCharacterAnimation(EnterAnimation);
 	GetWorld()->GetTimerManager().SetTimer(AnimationTimer, this,
 		&UCatrunBasketInteractionComponent::FinishEnter, Duration, false);
@@ -323,29 +321,34 @@ void UCatrunBasketInteractionComponent::FinishEnter()
 	Busy = false;
 	BasketPhase = ECatrunBasketPhase::Hidden;
 	ActiveBasket->ClothIdle();
-	ExitWorldDirection = ActiveBasket->GetOpenDirection();
+	const auto* PC = Cast<APlayerController>(CatOwner->GetController());
+	const float CameraYaw = PC && PC->PlayerCameraManager ? PC->PlayerCameraManager->GetCameraRotation().Yaw : 0.f;
+	const FVector Approach = FRotator(0,CameraYaw,0).UnrotateVector(SavedEntryTransform.GetLocation()-ActiveBasket->GetHiddenLocation());
+	const bool bForwardAxis = FMath::Abs(Approach.X)>=FMath::Abs(Approach.Y);
+	ExitWorldDirection = CatrunBasket::SelectDirection(CameraYaw,
+		bForwardAxis ? FMath::Sign(Approach.X) : 0.f, bForwardAxis ? 0.f : FMath::Sign(Approach.Y),
+		FRotator(0,CameraYaw,0).Vector(), ActiveBasket->GetTraversalForward());
 	BasketHiddenStateChanged();
-	UpdateExitCandidate(true);
-	UpdatePreview(); // 추가 키 입력 없이 열린 정면을 기본 방향으로 바로 표시한다.
+	UpdateExitCandidate(true, false);
+	UpdatePreview(); // 접근 방향에 가장 가까운 화면 기준 단일 키 방향을 기본 표시한다.
 }
 
 void UCatrunBasketInteractionComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* Tick)
 {
 	Super::TickComponent(DeltaTime, TickType, Tick);
-	UpdateInteractionPrompt();
+	if (BasketPhase==ECatrunBasketPhase::Outside) UpdateInteractionPrompt();
 	if (UCatrunPuzzleSuspension::IsSuspended(this) || GetWorld()->IsPaused() || BasketPhase==ECatrunBasketPhase::Outside) return;
 	if (!IsValid(CatOwner) || !IsValid(ActiveBasket)) { AbortBasket(); return; }
 	if (BasketPhase == ECatrunBasketPhase::Hidden)
 	{
-		UpdateExitCandidate(false);
-		UpdatePreview();
+		if (UpdateExitCandidate(false)) UpdatePreview();
 	}
 }
 
-void UCatrunBasketInteractionComponent::UpdateExitCandidate(bool bForce, bool bReadDirectionInput)
+bool UCatrunBasketInteractionComponent::UpdateExitCandidate(bool bForce, bool bReadDirectionInput)
 {
 	const FVector Origin = ActiveBasket->GetHiddenLocation();
-	const FVector Forward = ActiveBasket->GetOpenDirection();
+	const FVector Forward = ActiveBasket->GetTraversalForward();
 	const FVector Previous = ExitWorldDirection;
 	if (bReadDirectionInput)
 	{
@@ -356,8 +359,7 @@ void UCatrunBasketInteractionComponent::UpdateExitCandidate(bool bForce, bool bR
 		{
 			auto Down = [PC](const FKey& Key) { return PC->IsInputKeyDown(Key) || PC->WasInputKeyJustPressed(Key); };
 			const FVector2D Input=UCatrunInputBindings::GetMovementInput(Down);
-			// Rejected rear input and released/cancelling keys intentionally retain the last selection.
-			// Its geometry is still rechecked below; confirmation always forces that revalidation.
+			// Actual movement remains on the camera axes; only cloth clip selection uses sectors.
 			ExitWorldDirection = CatrunBasket::SelectDirection(CameraYaw,
 				Input.X, Input.Y,
 				ExitWorldDirection, Forward);
@@ -365,15 +367,16 @@ void UCatrunBasketInteractionComponent::UpdateExitCandidate(bool bForce, bool bR
 		if (!CatrunBasket::IsDirectionAllowed(ExitWorldDirection, Forward, CameraYaw)) ExitWorldDirection = Forward;
 	}
 	const double Now = GetWorld()->GetTimeSeconds();
-	// 입력이 없어도 움직이는 장애물을 0.1초마다 확인한다. 방향 변경과 F 확정은 즉시 검사한다.
+	// Only the occupied basket's selected exit is checked. Keys/F are immediate;
+	// dynamic blockers without input are sampled at 5Hz, and landing is rechecked.
 	if (!bForce && Previous.Equals(ExitWorldDirection,.001) && LastBasketOrigin.Equals(Origin,.1)
-		&& LastBasketForward.Equals(Forward,.001) && Now<NextObstacleCheck) return;
+		&& LastBasketForward.Equals(Forward,.001) && Now<NextObstacleCheck) return false;
 	LastBasketOrigin = Origin;
 	LastBasketForward = Forward;
-	NextObstacleCheck = Now+.1;
+	NextObstacleCheck = Now+.2;
 	CanExit = false;
-	const FVector Candidate = Origin + ExitWorldDirection*ExitDistance;
-	if (!FindExitSupport(Candidate, ExitWorldLocation)) return;
+	const FVector Candidate = Origin + ExitWorldDirection*ActiveBasket->GetTraversalDistance(ExitWorldDirection, ExitDistance);
+	if (!FindExitSupport(Candidate, ExitWorldLocation)) return true;
 	// Keep the guide centered on the selected landing, not the off-center capsule contact.
 	const UCapsuleComponent* Capsule = CatOwner->GetCapsuleComponent();
 	FloorLocation = ExitWorldLocation - FVector(0,0,Capsule->GetScaledCapsuleHalfHeight()+2.f);
@@ -382,6 +385,7 @@ void UCatrunBasketInteractionComponent::UpdateExitCandidate(bool bForce, bool bR
 	LandingTransform.SetRotation(ExitWorldDirection.Rotation().Quaternion());
 	CanExit = IsBasketExitPathClear(ExitWorldLocation)
 		&& (!bSavedCollision || CatrunRestore::IsPlacementClear(*CatOwner, LandingTransform));
+	return true;
 }
 
 bool UCatrunBasketInteractionComponent::FindExitSupport(const FVector& Reference, FVector& OutCenter) const
@@ -444,6 +448,8 @@ void UCatrunBasketInteractionComponent::UpdatePreview()
 
 void UCatrunBasketInteractionComponent::ExitBasket()
 {
+	// Input may arrive after the basket was removed, before this component's tick.
+	if (!IsValid(CatOwner) || !IsValid(ActiveBasket)) { AbortBasket(); return; }
 	UpdateExitCandidate(true);
 	if (!CanExit) { UpdatePreview(); return; }
 	Busy = true;
@@ -452,7 +458,7 @@ void UCatrunBasketInteractionComponent::ExitBasket()
 	CatOwner->SetActorLocationAndRotation(ExitWorldLocation, ExitWorldDirection.Rotation(),
 		false, nullptr, ETeleportType::TeleportPhysics);
 	CatOwner->GetMesh()->SetVisibility(true, true);
-	ActiveBasket->ClothExit();
+	ActiveBasket->PlayDirectionalCloth(false, ExitWorldDirection, AnimationPlayRate);
 	const float Duration = PlayCharacterAnimation(ExitAnimation);
 	GetWorld()->GetTimerManager().SetTimer(AnimationTimer, this,
 		&UCatrunBasketInteractionComponent::FinishExit, Duration, false);
@@ -513,6 +519,7 @@ void UCatrunBasketInteractionComponent::FinishExit()
 	Busy = false;
 	CanExit = false;
 	BasketPhase = ECatrunBasketPhase::Outside;
+	SetComponentTickInterval(.15f);
 	SetComponentTickEnabled(true);
 	BasketHiddenStateChanged();
 }
@@ -533,6 +540,7 @@ void UCatrunBasketInteractionComponent::AbortBasket()
 	Busy = false;
 	CanExit = false;
 	BasketPhase = ECatrunBasketPhase::Outside;
+	SetComponentTickInterval(.15f);
 	SetComponentTickEnabled(true);
 	BasketHiddenStateChanged();
 }

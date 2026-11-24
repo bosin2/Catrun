@@ -2,6 +2,7 @@
 #include "Settings/CatrunInputBindings.h"
 #include "Settings/CatrunUserSettings.h"
 #include "EnhancedPlayerInput.h"
+#include "Interaction/CatrunBasketInteractionComponent.h"
 #include "Interaction/CatrunPuzzleSuspension.h"
 #include "LevelFlow/CatrunLevelFlow.h"
 
@@ -18,6 +19,8 @@
 #include "Engine/World.h"
 #include "InputAction.h"
 #include "InputMappingContext.h"
+#include "GameFramework/Character.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerController.h"
 #include "Monster/CatrunRestartSubsystem.h"
@@ -26,10 +29,20 @@
 
 namespace
 {
-	// Names used by the cat's blueprint (read only, we never edit that blueprint).
+	// BP_CatActions owns its accepted time and the cooldown read by TryBell.
 	const TCHAR* CatActionsClassHint = TEXT("CatActions");
 	const FName BellRungDispatcher = TEXT("OnBellRung");
 	const FName IsHiddenVariable = TEXT("IsHidden");
+	const FName AcceptedTimeVariable = TEXT("LastBellTime");
+	const FName CooldownVariable = TEXT("BellCooldownSeconds");
+	constexpr float LegacyBlueprintCooldownSeconds = 5.f;
+
+	double ReadActionNumber(const UActorComponent& Actions, FName Name, double Default)
+	{
+		const auto* Property = FindFProperty<FNumericProperty>(Actions.GetClass(), Name);
+		return Property && Property->IsFloatingPoint()
+			? Property->GetFloatingPointPropertyValue(Property->ContainerPtrToValuePtr<void>(&Actions)) : Default;
+	}
 }
 
 UCatrunBellComponent::UCatrunBellComponent()
@@ -42,6 +55,7 @@ void UCatrunBellComponent::BeginPlay()
 	Super::BeginPlay();
 
 	bListeningToCatActions = BindToCatActions();
+	if (!bListeningToCatActions) FallbackManager = ASoundGridManager::Get(this);
 	BindingsChangedHandle=UCatrunUserSettings::OnKeyboardBindingsChanged.AddUObject(this,&UCatrunBellComponent::UpdateBellBlock);
 	// The tick watches the no-bell zones, and in key mode it also polls the key.
 	SetComponentTickEnabled(true);
@@ -123,23 +137,91 @@ void UCatrunBellComponent::TickComponent(float DeltaTime, ELevelTick TickType, F
 	}
 }
 
+float UCatrunBellComponent::GetFallbackCooldownDuration() const
+{
+	const ASoundGridManager* Manager = FallbackManager.Get();
+	const UCatrunSoundSettings* Settings = Manager ? Manager->GetSettings() : nullptr;
+	return Settings ? FMath::Max(0.f, Settings->BellCooldown) : 0.f;
+}
+
+float UCatrunBellComponent::GetCooldownDuration() const
+{
+	return static_cast<float>(GetAuthoritativeCooldownDuration());
+}
+
+double UCatrunBellComponent::GetAuthoritativeCooldownDuration() const
+{
+	if (const auto* Actions = CatActions.Get())
+		return FMath::Max(0., ReadActionNumber(*Actions, CooldownVariable, LegacyBlueprintCooldownSeconds));
+	return GetFallbackCooldownDuration();
+}
+
+float UCatrunBellComponent::GetRemainingFor(double Duration, double AcceptedTime) const
+{
+	const UWorld* World = GetWorld();
+	return World ? static_cast<float>(FMath::Max(0., Duration - (World->GetTimeSeconds() - AcceptedTime))) : 0.f;
+}
+
 float UCatrunBellComponent::GetCooldownRemaining() const
 {
-	const ASoundGridManager* Manager = ASoundGridManager::Get(this);
-	const UCatrunSoundSettings* Settings = Manager ? Manager->GetSettings() : nullptr;
-	if (!Settings || !GetWorld())
+	const auto* Actions = CatActions.Get();
+	return GetRemainingFor(GetAuthoritativeCooldownDuration(), Actions ? ReadActionNumber(*Actions, AcceptedTimeVariable, -100.) : LastRingTime);
+}
+
+FCatrunBellStatus UCatrunBellComponent::GetBellStatus() const
+{
+	const auto* Actions = CatActions.Get();
+	FCatrunBellStatus Status;
+	const double Duration = GetAuthoritativeCooldownDuration();
+	Status.CooldownSeconds = static_cast<float>(Duration);
+	Status.RemainingSeconds = GetRemainingFor(Duration,
+		Actions ? ReadActionNumber(*Actions, AcceptedTimeVariable, -100.) : LastRingTime);
+	Status.Reason = GetBellBlockReason(Status.RemainingSeconds);
+	Status.bCanRing = Status.Reason == ECatrunBellBlockReason::None;
+	return Status;
+}
+
+bool UCatrunBellComponent::IsBellActionContextBlocked(const APawn* Pawn)
+{
+	if (!IsValid(Pawn) || Pawn->IsActorBeingDestroyed()) return true;
+	const UWorld* World = Pawn->GetWorld();
+	if (!World || World->bIsTearingDown || World->IsPaused() || UCatrunPuzzleSuspension::IsSuspended(Pawn)) return true;
+	if (const auto* Restart = UCatrunRestartSubsystem::Get(Pawn); Restart && Restart->IsCatching()) return true;
+	if (const auto* Flow = UCatrunLevelFlowSubsystem::Get(Pawn); Flow && (Flow->IsTransitioning() || Flow->IsStageComplete())) return true;
+	const auto* Controller = Cast<APlayerController>(Pawn->GetController());
+	return Controller && (Controller->bCinematicMode || Controller->IsMoveInputIgnored());
+}
+
+ECatrunBellBlockReason UCatrunBellComponent::GetBellBlockReason(float RemainingSeconds) const
+{
+	const auto* Pawn = Cast<APawn>(GetOwner());
+	if (IsBellActionContextBlocked(Pawn)) return ECatrunBellBlockReason::Cinematic;
+	if (bInsideNoBellZone) return ECatrunBellBlockReason::CatHole;
+
+	if (const auto* Actions = Cast<UCatrunBasketInteractionComponent>(CatActions.Get()))
 	{
-		return 0.f;
+		if (Actions->IsHidden || Actions->BasketPhase == ECatrunBasketPhase::Hidden) return ECatrunBellBlockReason::Hidden;
+		if (Actions->Busy || Actions->bBellActive || Actions->BasketPhase != ECatrunBasketPhase::Outside) return ECatrunBellBlockReason::Busy;
+		const auto* Cat = Actions->CatOwner.Get();
+		if (!IsValid(Cat)) return ECatrunBellBlockReason::Busy;
+		if (!Cat->GetCharacterMovement()->IsMovingOnGround()) return ECatrunBellBlockReason::Airborne;
 	}
-	return FMath::Max(0.f, static_cast<float>(Settings->BellCooldown - (GetWorld()->GetTimeSeconds() - LastRingTime)));
+	else
+	{
+		if (IsCatHiding() || CatrunCat::IsHiding(Pawn)) return ECatrunBellBlockReason::Hidden;
+		if (!bListeningToCatActions && !bCanRing) return ECatrunBellBlockReason::Busy;
+	}
+	return RemainingSeconds > 0.f ? ECatrunBellBlockReason::Cooldown : ECatrunBellBlockReason::None;
 }
 
 bool UCatrunBellComponent::TryRing()
 {
-	if (!bCanRing || GetCooldownRemaining() > 0.f)
+	if (bListeningToCatActions || !bCanRing)
 	{
 		return false;
 	}
+	if (!FallbackManager.IsValid()) FallbackManager = ASoundGridManager::Get(this);
+	if (GetCooldownRemaining() > 0.f) return false;
 	if (EmitBellSound())
 	{
 		LastRingTime = GetWorld()->GetTimeSeconds();
@@ -283,6 +365,7 @@ void UCatrunBellComponent::BuildBlockContext()
 void UCatrunBellComponent::UpdateBellBlock()
 {
  const APawn* Pawn=Cast<APawn>(GetOwner());
+ bInsideNoBellZone=Pawn && ACatrunNoBellZone::IsBellForbidden(*Pawn);
  APlayerController* Controller=Pawn ? Cast<APlayerController>(Pawn->GetController()) : nullptr;
  ULocalPlayer* LocalPlayer=Controller ? Controller->GetLocalPlayer() : nullptr;
  auto* Input=LocalPlayer ? LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>() : nullptr;
@@ -294,7 +377,7 @@ void UCatrunBellComponent::UpdateBellBlock()
   bBlockActive=false;
  }
  if (bBlockActive && (!BlockContext || !Input->HasMappingContext(BlockContext))) bBlockActive=false;
- const bool bForbidden=ACatrunNoBellZone::IsBellForbidden(*Pawn) || UCatrunPuzzleSuspension::IsSuspended(this);
+ const bool bForbidden=bInsideNoBellZone || UCatrunPuzzleSuspension::IsSuspended(this);
  const bool bKeyChanged=!bBlockContextBuilt || CachedBlockBellKey!=UCatrunInputBindings::GetEffectiveKey(ECatrunInputSlot::Bell);
  if (bKeyChanged)
  {

@@ -50,6 +50,8 @@ private:
 	UPROPERTY(Transient) TObjectPtr<UTextBlock> MenuTitle;
 	UPROPERTY(Transient) TObjectPtr<UTextBlock> MenuBody;
 	UPROPERTY(Transient) TObjectPtr<UTextBlock> RestartLabel;
+	UPROPERTY(Transient) TObjectPtr<UTextBlock> ResumeLabel;
+	UPROPERTY(Transient) TObjectPtr<UButton> MainMenuButton;
 	UPROPERTY(Transient) TObjectPtr<UBorder> PausePanel;
 	UPROPERTY(Transient) TObjectPtr<UBorder> GuidePanel;
 	UPROPERTY(Transient) TObjectPtr<UBorder> StatePanel;

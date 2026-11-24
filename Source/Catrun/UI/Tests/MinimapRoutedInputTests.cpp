@@ -1,14 +1,18 @@
 #if WITH_DEV_AUTOMATION_TESTS
 
 #include "UI/CatrunMinimapWidget.h"
+#include "UI/CatrunPlayerStatusWidget.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "Components/CanvasPanel.h"
+#include "Components/Button.h"
+#include "Components/ProgressBar.h"
 #include "Engine/GameViewportClient.h"
 #include "Engine/LocalPlayer.h"
 #include "Engine/World.h"
 #include "Framework/Application/SlateApplication.h"
 #include "Framework/Application/SlateUser.h"
 #include "GameFramework/PlayerController.h"
+#include "GameFramework/Pawn.h"
 #include "HAL/FileManager.h"
 #include "HAL/PlatformTime.h"
 #include "Kismet/GameplayStatics.h"
@@ -17,6 +21,8 @@
 #include "Misc/AutomationTest.h"
 #include "Misc/CommandLine.h"
 #include "Misc/Paths.h"
+#include "Player/CatrunSprintComponent.h"
+#include "Sound/CatrunBellComponent.h"
 #include "Settings/CatrunSettingsSubsystem.h"
 #include "Settings/CatrunSettingsWidget.h"
 #include "Slate/SceneViewport.h"
@@ -50,6 +56,7 @@ namespace
 		TWeakObjectPtr<UWidget> Image;
 		TWeakObjectPtr<UCanvasPanel> Markers;
 		TWeakObjectPtr<UCatrunPlayHUD> HUD;
+		TWeakObjectPtr<UCatrunPlayerStatusWidget> Resources;
 		TWeakObjectPtr<UCatrunMinimapWidget> PreviousMap;
 		FVector2D CompactCorner;
 		FVector2D CompactLandmarkSize;
@@ -76,10 +83,11 @@ namespace
 			User = PC->GetLocalPlayer()->GetSlateUser()->GetUserIndex();
 			Map = FindPlayerWidget<UCatrunMinimapWidget>(PC);
 			HUD = FindPlayerWidget<UCatrunPlayHUD>(PC);
+			Resources = FindPlayerWidget<UCatrunPlayerStatusWidget>(PC);
 			Frame = Map.IsValid() ? Map->GetWidgetFromName(TEXT("MinimapFrame")) : nullptr;
 			Image = Map.IsValid() ? Map->GetWidgetFromName(TEXT("MapBackground")) : nullptr;
 			Markers = Map.IsValid() ? Cast<UCanvasPanel>(Map->GetWidgetFromName(TEXT("MarkerLayer"))) : nullptr;
-			if (!HUD.IsValid() || !Frame.IsValid() || !Cast<UCanvasPanelSlot>(Frame->Slot)
+			if (!HUD.IsValid() || !Resources.IsValid() || !Frame.IsValid() || !Cast<UCanvasPanelSlot>(Frame->Slot)
 				|| !Image.IsValid() || !Markers.IsValid() || Markers->GetChildrenCount() == 0
 				|| Map->GetCachedGeometry().GetLocalSize().GetMin() < 324.)
 				return false;
@@ -116,6 +124,8 @@ namespace
 			Test.TestTrue(Label + TEXT(" stays in upper right"), Layout.Anchors.Minimum == FVector2D(1., 0.)
 				&& Layout.Anchors.Maximum == FVector2D(1., 0.) && Layout.Alignment == FVector2D(1., 0.));
 			Test.TestEqual(Label + TEXT(" opacity"), Map->GetRenderOpacity(), bVisible ? 1.f : 0.f);
+			const bool bResourcesVisible = Resources.IsValid() && Resources->IsVisible() && Resources->GetRenderOpacity() > 0.f;
+			Test.TestEqual(Label + TEXT(" resource readout visibility"), bResourcesVisible, bVisible);
 			if (bVisible)
 				Test.TestTrue(Label + TEXT(" painted frame dimensions"), PaintedSize.Equals(FVector2D(Expected), .5));
 		}
@@ -245,6 +255,33 @@ bool FCatrunMinimapRoutedInput::RunTest(const FString&)
 			return true;
 		}, 90.f));
 		Step([](auto& S) { S.Check(TEXT("natural focus at entry"), 240.); S.CheckReveal(TEXT("compact"), false, true); S.Capture(TEXT("compact")); S.FocusViewport(); });
+		Step([](auto& S)
+		{
+			S.HUD->SetMenuOpen(true);
+			S.HUD->RequestRestart();
+			const FKeyEvent Escape(EKeys::Escape, FModifierKeysState(), S.User, false, 0, 0);
+			FSlateApplication::Get().ProcessKeyDownEvent(Escape);
+			FSlateApplication::Get().ProcessKeyUpEvent(Escape);
+			S.Test.TestTrue(TEXT("Escape returns fallback prompt to its pause menu"), S.HUD->bMenuOpen && !S.HUD->bConfirmRestart);
+			S.Test.TestNull(TEXT("Cancelling fallback does not open an overlapping options screen"), S.Settings()->GetCurrentSettingsWidget());
+			S.HUD->SetMenuOpen(false);
+			S.FocusViewport();
+		});
+		Step([](auto& S)
+		{
+			const auto* Stamina = Cast<UProgressBar>(S.Resources->GetWidgetFromName(TEXT("StaminaBar")));
+			const auto* BellBar = Cast<UProgressBar>(S.Resources->GetWidgetFromName(TEXT("BellProgress")));
+			const auto* Sprint = S.Player->GetPawn()->template FindComponentByClass<UCatrunSprintComponent>();
+			const auto* Bell = S.Player->GetPawn()->template FindComponentByClass<UCatrunBellComponent>();
+			S.Test.TestFalse(TEXT("Passive readout cannot take focus"), S.Resources->IsFocusable());
+			if (S.Test.TestTrue(TEXT("Both authored UMG bars and their gameplay owners exist"), Stamina && BellBar && Sprint && Bell))
+			{
+				S.Test.TestEqual(TEXT("Stamina readout samples its controller's pawn"), Stamina->GetPercent(), Sprint->GetStaminaNormalized());
+				const auto Live = Bell->GetBellStatus();
+				const float Expected = Live.CooldownSeconds > 0.f ? 1.f - Live.RemainingSeconds / Live.CooldownSeconds : 1.f;
+				S.Test.TestTrue(TEXT("Bell readout follows the accepted action timestamp"), FMath::IsNearlyEqual(BellBar->GetPercent(), Expected, .03f));
+			}
+		});
 		if (Package.EndsWith(TEXT("Stage2")))
 		{
 			Step([](auto& S) { S.Key(true, true); });
@@ -301,6 +338,27 @@ bool FCatrunMinimapRoutedInput::RunTest(const FString&)
 			auto* Panel = S.Settings()->GetCurrentSettingsWidget();
 			auto* Prev = Panel ? Panel->GetWidgetFromName(TEXT("RestartButton")) : nullptr;
 			S.Test.TestTrue(TEXT("Settings navigates backward with Shift+Tab"), Prev && Prev->HasUserFocus(S.Player.Get()));
+			if (Panel)
+			{
+				auto* Restart = Cast<UButton>(Prev);
+				auto* Cancel = Cast<UButton>(Panel->GetWidgetFromName(TEXT("RestartCancel")));
+				auto* Flow = UCatrunLevelFlowSubsystem::Get(Panel);
+				if (S.Test.TestTrue(TEXT("Actual restart and cancel buttons are bound"), Restart && Cancel && Flow))
+				{
+					const float TimeBefore = Flow->GetStageClockState().RemainingSeconds;
+					Restart->OnClicked.Broadcast();
+					S.Test.TestTrue(TEXT("One press opens a single confirmation without travel"), Panel->IsStageRestartPending() && !Flow->IsTransitioning());
+					Cancel->OnClicked.Broadcast();
+					S.Test.TestTrue(TEXT("Cancel keeps options open"), S.Settings()->GetCurrentSettingsWidget() == Panel && !Panel->IsStageRestartPending());
+					Restart->OnClicked.Broadcast();
+					const FKeyEvent Escape(EKeys::Escape, FModifierKeysState(), S.User, false, 0, 0);
+					FSlateApplication::Get().ProcessKeyDownEvent(Escape);
+					FSlateApplication::Get().ProcessKeyUpEvent(Escape);
+					S.Test.TestTrue(TEXT("One Escape cancels only confirmation"), S.Settings()->GetCurrentSettingsWidget() == Panel && !Panel->IsStageRestartPending());
+					S.Test.TestEqual(TEXT("Prompt, cancellation and Escape retain stage time"), Flow->GetStageClockState().RemainingSeconds, TimeBefore);
+					S.Test.TestFalse(TEXT("No restart before affirmation"), Flow->IsTransitioning());
+				}
+			}
 			S.Settings()->CloseSettings();
 			S.FocusViewport();
 			S.Key(true, true);

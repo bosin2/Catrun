@@ -129,7 +129,7 @@ struct FCaptureTravelFixture
 };
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunManualCaptureRestartTest, "Catrun.LevelFlow.ManualRestartDuringCaptureClearsOwnershipAndCheckpoint", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunManualCaptureRestartTest, "Catrun.LevelFlow.ManualRestartDuringCaptureReleasesCaptureOwnership", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 bool FCatrunManualCaptureRestartTest::RunTest(const FString&)
 {
     FCaptureTravelFixture F;
@@ -139,8 +139,7 @@ bool FCatrunManualCaptureRestartTest::RunTest(const FString&)
     auto& Route = Routes->Stages.AddDefaulted_GetRef();
     Route.StageId = TEXT("Stage2"); Route.Map = TSoftObjectPtr<UWorld>(FSoftObjectPath(Package));
     auto* Restart = F.World->GetSubsystem<UCatrunRestartSubsystem>();
-    Restart->MarkStage2EntryCheckpointReached();
-    if (!TestTrue(TEXT("Capture reaches fade with a live checkpoint"), Restart->HasStage2EntryCheckpoint() && F.ReachFade())) return false;
+    if (!TestTrue(TEXT("Capture reaches fade"), F.ReachFade())) return false;
     auto* Flow = F.World->GetSubsystem<UCatrunLevelFlowSubsystem>();
     auto* Context = GEngine->GetWorldContextFromWorld(F.World);
     Context->TravelURL = TEXT("/Game/Maps/MainMenu");
@@ -156,7 +155,6 @@ bool FCatrunManualCaptureRestartTest::RunTest(const FString&)
     auto* Session = F.Instance->GetSubsystem<UCatrunFlowSession>();
     Session->ResolveArrivalRestart(Package);
     TestEqual(TEXT("Manual arrival skips intro in the current package"), Session->RestartIntent.MapPackage, Package);
-    TestFalse(TEXT("Manual restart discards capture checkpoint"), Session->RestartIntent.bRestoreStage2EntryCheckpoint);
     AddExpectedError(TEXT("Travel failed; progress retained:"), EAutomationExpectedErrorFlags::Contains, 1);
     auto* Notice = F.World->GetSubsystem<UCatrunNoticeSubsystem>();
     auto* Widget = NewObject<UCatrunNoticeWidget>(F.World);

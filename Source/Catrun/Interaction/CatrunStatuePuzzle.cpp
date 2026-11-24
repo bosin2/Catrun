@@ -274,6 +274,7 @@ void ACatrunStatuePuzzle::UpdatePlatesAndGates(float DeltaSeconds)
 		if (!IsValid(Link.Statue) || !IsValid(Link.Plate) || !IsValid(Link.Gate)) continue;
 		TrySeat(Index);
 		if (!IsValid(this) || !IsGameplayAvailable()) { Reveal->CancelReveal(); break; }
+		if (Link.bPressed && !Link.bExternalGateUnlocked) continue;
 		const int32 Revision=Link.Revision;
 		if (Link.bPressed && Link.bRevealPending)
 		{
@@ -305,11 +306,7 @@ void ACatrunStatuePuzzle::UpdatePlatesAndGates(float DeltaSeconds)
 		{
 			Link.bCompleted=true;
 			if (Broadcast(Index,ECatrunStatueEvent::Completed,Revision) && Link.bCompleted)
-			{
-				if (Link.PuzzleId == TEXT("C"))
-					if (auto* Restart = UCatrunRestartSubsystem::Get(this)) Restart->MarkStage2EntryCheckpointReached();
 				Reveal->GateOpened(Link.PuzzleId);
-			}
 		}
 	}
 	if (Changed) NotifyObstaclesChanged();
@@ -319,26 +316,6 @@ bool ACatrunStatuePuzzle::IsPuzzleSeated(FName PuzzleId) const
 {
 	const auto* Link = Links.FindByPredicate([PuzzleId](const auto& Candidate) { return Candidate.PuzzleId == PuzzleId; });
 	return bInitialized && Link && Link->bPressed;
-}
-
-bool ACatrunStatuePuzzle::RestoreStage2EntryCheckpoint(FVector& OutGateLocation)
-{
-	InitializePuzzle();
-	auto* Link = Links.FindByPredicate([](const auto& Candidate) { return Candidate.PuzzleId == TEXT("C"); });
-	if (!Link || !IsValid(Link->Statue) || !IsValid(Link->Plate) || !IsValid(Link->Gate)
-		|| !Link->InitialGateBounds.IsValid || Link->RequiredGateTravel <= 0.f) return false;
-
-	Link->bPressed = Link->bCompleted = Link->bGateOpening = true;
-	Link->bSeating = Link->bRevealPending = false;
-	Link->PushVelocity = FVector::ZeroVector;
-	Link->GateOffset = -Link->RequiredGateTravel;
-	Link->Statue->SetActorLocation(Link->SeatLocation, false);
-	Link->Plate->SetActorLocation(Link->InitialPlate - FVector(0,0,Settings->PlateTravel), false);
-	Link->Gate->SetActorLocation(Link->InitialGate + FVector(0,0,Link->GateOffset), false);
-	NotifyObstaclesChanged();
-	OutGateLocation = Link->InitialGate;
-	OnCheckpointRestored.Broadcast(Link->PuzzleId);
-	return true;
 }
 
 bool ACatrunStatuePuzzle::ResetPuzzle()

@@ -15,6 +15,7 @@
 #include "GameFramework/PlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "LevelFlow/CatrunLevelFlow.h"
+#include "LevelFlow/CatrunPlayHUD.h"
 #include "Widgets/SViewport.h"
 #include "Widgets/Input/SButton.h"
 #include "Slate/SGameLayerManager.h"
@@ -256,11 +257,26 @@ bool UCatrunSettingsSubsystem::HandleEscape()
  if (CurrentSettings)
  {
   if (CurrentSettings->IsCapturingBinding()) return false; // SInputKeySelector consumes Escape key-up and cancels only capture.
+  if (CurrentSettings->IsStageRestartPending()) { CurrentSettings->CancelStageRestart(); return true; }
   CloseSettings();
   return true;
  }
  auto* PC=UGameplayStatics::GetPlayerController(this,0);
  if (!PC || !PC->IsLocalController()) return false;
+ // The fallback panel can own the gameplay viewport when explicitly opened.
+ // Cancel its prompt before the shared Escape preprocessor opens Settings over it.
+ TArray<UUserWidget*> HUDs;
+ UWidgetBlueprintLibrary::GetAllWidgetsOfClass(this,HUDs,UCatrunPlayHUD::StaticClass(),true);
+ for (UUserWidget* Widget : HUDs)
+ {
+  auto* HUD=CastChecked<UCatrunPlayHUD>(Widget);
+  if (HUD->GetOwningPlayer()==PC && HUD->bMenuOpen)
+  {
+   const bool bReturnToPauseMenu=HUD->bConfirmRestart;
+   HUD->SetMenuOpen(bReturnToPauseMenu);
+   return true;
+  }
+ }
  return OpenSettings(PC,FindMenuSourcePanel(PC))!=nullptr;
 }
 void UCatrunSettingsSubsystem::IgnoreHeldKeysUntilRelease()

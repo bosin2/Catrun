@@ -1,0 +1,37 @@
+{
+  "status": "passed",
+  "run_root": "C:\\Users\\whghk\\AppData\\Local\\Temp\\CatrunStageProgressProcess-f6ca0abbfa954ae1b6ac3707f4fc8a8b",
+  "slot": "C:\\Users\\whghk\\AppData\\Local\\Temp\\CatrunStageProgressProcess-f6ca0abbfa954ae1b6ac3707f4fc8a8b\\User\\Saved\\SaveGames\\CatrunProgress.sav",
+  "chapter_seed": "C:\\Users\\whghk\\AppData\\Local\\Temp\\CatrunStageProgressProcess-f6ca0abbfa954ae1b6ac3707f4fc8a8b\\chapter-seed.sav",
+  "chapter_seed_sha256": "AFA9FD3E7D3DE875EA3BDF6CE58BEE0E431BF3ACD46F982A82C94DA854AF54DA",
+  "phases": [
+    {
+      "phase": "write",
+      "process_id": 10636,
+      "report": "C:\\Users\\whghk\\AppData\\Local\\Temp\\CatrunStageProgressProcess-f6ca0abbfa954ae1b6ac3707f4fc8a8b\\write-report\\index.json",
+      "log": "C:\\Users\\whghk\\AppData\\Local\\Temp\\CatrunStageProgressProcess-f6ca0abbfa954ae1b6ac3707f4fc8a8b\\write.log",
+      "slot_sha256": "AFA9FD3E7D3DE875EA3BDF6CE58BEE0E431BF3ACD46F982A82C94DA854AF54DA"
+    },
+    {
+      "phase": "read",
+      "process_id": 22716,
+      "report": "C:\\Users\\whghk\\AppData\\Local\\Temp\\CatrunStageProgressProcess-f6ca0abbfa954ae1b6ac3707f4fc8a8b\\read-report\\index.json",
+      "log": "C:\\Users\\whghk\\AppData\\Local\\Temp\\CatrunStageProgressProcess-f6ca0abbfa954ae1b6ac3707f4fc8a8b\\read.log",
+      "slot_sha256": "AFA9FD3E7D3DE875EA3BDF6CE58BEE0E431BF3ACD46F982A82C94DA854AF54DA"
+    },
+    {
+      "phase": "reset",
+      "process_id": 16168,
+      "report": "C:\\Users\\whghk\\AppData\\Local\\Temp\\CatrunStageProgressProcess-f6ca0abbfa954ae1b6ac3707f4fc8a8b\\reset-report\\index.json",
+      "log": "C:\\Users\\whghk\\AppData\\Local\\Temp\\CatrunStageProgressProcess-f6ca0abbfa954ae1b6ac3707f4fc8a8b\\reset.log",
+      "slot_sha256": "AFA9FD3E7D3DE875EA3BDF6CE58BEE0E431BF3ACD46F982A82C94DA854AF54DA"
+    },
+    {
+      "phase": "readreset",
+      "process_id": 39756,
+      "report": "C:\\Users\\whghk\\AppData\\Local\\Temp\\CatrunStageProgressProcess-f6ca0abbfa954ae1b6ac3707f4fc8a8b\\readreset-report\\index.json",
+      "log": "C:\\Users\\whghk\\AppData\\Local\\Temp\\CatrunStageProgressProcess-f6ca0abbfa954ae1b6ac3707f4fc8a8b\\readreset.log",
+      "slot_sha256": "AFA9FD3E7D3DE875EA3BDF6CE58BEE0E431BF3ACD46F982A82C94DA854AF54DA"
+    }
+  ]
+}

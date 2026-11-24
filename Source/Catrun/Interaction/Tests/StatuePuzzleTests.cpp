@@ -20,8 +20,14 @@
 #include "Camera/CameraActor.h"
 #include "Engine/Engine.h"
 #include "Engine/GameInstance.h"
+#include "Engine/LocalPlayer.h"
 #include "GameFramework/PlayerController.h"
+#include "GameFramework/PlayerState.h"
+#include "GameFramework/WorldSettings.h"
 #include "LevelFlow/CatrunLevelFlow.h"
+#include "LevelFlow/CatrunProgressSave.h"
+#include "LevelFlow/Tests/CatrunCheckpointTestBackend.h"
+#include "Kismet/GameplayStatics.h"
 #include "UObject/UnrealType.h"
 #include "Components/BoxComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -120,75 +126,127 @@ namespace
 	};
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FStage2EntryCheckpointTest,"Catrun.Stage2.PracticeCheckpointCapturesOnlyCompletedSolveAndRestoresOnlyC",EAutomationTestFlags::EditorContext|EAutomationTestFlags::EngineFilter)
-bool FStage2EntryCheckpointTest::RunTest(const FString&)
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FStage2ChapterStartTest,"Catrun.Stage2.SolvesStayInCurrentAttemptAndArrivalsStartFresh",EAutomationTestFlags::EditorContext|EAutomationTestFlags::EngineFilter)
+bool FStage2ChapterStartTest::RunTest(const FString&)
 {
-	AddExpectedError(TEXT("Travel failed; progress retained:"), EAutomationExpectedErrorFlags::Contains, 1);
+	for (const auto Arrival : {ECatrunProgressArrival::Resume, ECatrunProgressArrival::FailureRefill, ECatrunProgressArrival::ResetStage})
 	{
+		FCheckpointBackend Backend;
+		auto* Legacy = NewObject<UCatrunProgressSave>();
+		Legacy->SchemaVersion = UCatrunProgressSave::CurrentSchemaVersion;
+		Legacy->StageId = Legacy->HighestUnlockedStageId = TEXT("Stage2");
+		Legacy->Stage2RemainingMs = 123456;
+		Legacy->Stage2SolvedMask = UCatrunProgressSave::AllPuzzleBits;
+		UGameplayStatics::SaveGameToMemory(Legacy, Backend.Bytes);
+		const TArray<uint8> Original = Backend.Bytes;
 		FStatueFixture F(246.f, true);
 		F.AddPlayer();
-		auto* Restart = F.World->GetSubsystem<UCatrunRestartSubsystem>();
 		auto* Session = F.World->GetGameInstance()->GetSubsystem<UCatrunFlowSession>();
+		Session->SetSaveBackendForTest(&Backend);
+		const FString Package = F.World->GetOutermost()->GetName();
+		Session->AcceptTravel(Package, true, false, ECatrunArrivalRestart::Continue);
+		TestFalse(TEXT("Tracking an existing Stage2 chapter needs no arrival write"), Session->Arrive(Package));
+		TestTrue(TEXT("Fixture has tracked chapter progress"), Session->IsTrackingWorld(Package));
 		F.Puzzle->Reveal->bEnabled = false;
-		TestFalse(TEXT("A fresh Stage2 world has no practice checkpoint"), Restart->HasStage2EntryCheckpoint());
 		F.Statue->SetActorLocation(FVector(0,200,0));
 		F.Puzzle->UpdatePlatesAndGates(.5f);
-		TestTrue(TEXT("The C plate is pressed before the gate completes"), F.Puzzle->Links[0].bPressed);
-		TestFalse(TEXT("A gate still opening does not set a checkpoint"), Restart->HasStage2EntryCheckpoint());
+		TestTrue(TEXT("C seats before its gate fully opens"), F.Puzzle->Links[0].bPressed);
+		TestFalse(TEXT("An opening gate has not completed the solve"), F.Puzzle->Links[0].bCompleted);
 		F.Puzzle->UpdatePlatesAndGates(3.f);
-		TestTrue(TEXT("The fully opened C gate sets the checkpoint"), Restart->HasStage2EntryCheckpoint());
-		TestTrue(TEXT("A capture can own the solved world"), Restart->TryBeginCatch());
-		TestTrue(TEXT("A capture requests owned same-map travel"), Restart->RestartLevel(0.f, [this, Restart](const FString&)
+		TestTrue(TEXT("The fully recessed C gate completes the local attempt"), F.Puzzle->Links[0].bCompleted);
+		TestTrue(TEXT("A live Stage2 solve enqueues no save"), !Session->IsSavePending() && Backend.Writes == 0 && Backend.Bytes == Original);
+		const float Budget = GetDefault<UCatrunLevelFlowSettings>()->GetClockBudget(TEXT("Stage2"));
+		Session->AdvanceClock(Budget * .25f);
+
+		auto* FreshPuzzle = F.World->SpawnActor<ACatrunStatuePuzzle>();
+		for (const FName PuzzleId : {FName(TEXT("A")), FName(TEXT("B")), FName(TEXT("C"))})
 		{
-			TestTrue(TEXT("Failed capture queues emergency recovery before releasing its catch"), Restart->ScheduleRecoveryRestart(0.f));
-			Restart->CancelCatch();
-		}, true));
-		const FString Package = F.World->GetOutermost()->GetName();
-		Session->ResolveArrivalRestart(Package);
-		TestTrue(TEXT("Capture carries a practice checkpoint for this destination"), Session->RestartIntent.bRestoreStage2EntryCheckpoint);
-		Session->RestartIntent.Clear();
-		GEngine->GetWorldContextFromWorld(F.World)->TravelURL.Reset();
-		GEngine->OnTravelFailure().Broadcast(F.World, ETravelFailure::InvalidURL, TEXT("Injected Stage2 capture travel failure"));
-		// Isolate recovery without the engine's default disconnect/fallback URL.
-		// A competing URL is covered by EmergencyRecoveryRejectionRestoresSupportedStart.
-		GEngine->GetWorldContextFromWorld(F.World)->TravelURL.Reset();
-		F.World->GetTimerManager().Tick(.01f);
-		Session->ResolveArrivalRestart(Package);
-		TestTrue(TEXT("Emergency reload also carries the checkpoint from the failed capture"), Session->RestartIntent.bRestoreStage2EntryCheckpoint);
-	}
-	for (const bool bCaptureArrival : {false, true})
-	{
-		FStatueFixture F(246.f, true);
-		F.AddPlayer();
-		auto* Session = F.World->GetGameInstance()->GetSubsystem<UCatrunFlowSession>();
-		auto* Probe = NewObject<UCatrunPuzzleCallbackProbe>(F.Puzzle);
-		Probe->Puzzle = F.Puzzle;
-		F.Puzzle->OnPuzzleEvent.AddDynamic(Probe, &UCatrunPuzzleCallbackProbe::PuzzleEvent);
-		F.Puzzle->OnCheckpointRestored.AddDynamic(Probe, &UCatrunPuzzleCallbackProbe::CheckpointRestored);
+			const double X = -950. - 350. * FreshPuzzle->Links.Num();
+			auto& Link = FreshPuzzle->Links.AddDefaulted_GetRef();
+			Link.PuzzleId = PuzzleId;
+			Link.Statue = F.Box(FVector(X,0,75), FVector(60,60,75));
+			Link.Plate = F.Box(FVector(X,200,5), FVector(65,65,1), false);
+			Link.Gate = F.Box(FVector(X,450,123), FVector(72,3,123));
+		}
+		// The fixture lacks a game mode to call actor BeginPlay automatically.
+		FreshPuzzle->InitializePuzzle();
+		auto* Probe = NewObject<UCatrunPuzzleCallbackProbe>(FreshPuzzle);
+		Probe->Puzzle = FreshPuzzle;
+		FreshPuzzle->OnPuzzleEvent.AddDynamic(Probe, &UCatrunPuzzleCallbackProbe::PuzzleEvent);
+		FreshPuzzle->OnCheckpointRestored.AddDynamic(Probe, &UCatrunPuzzleCallbackProbe::CheckpointRestored);
 		const FVector Start = F.Cat->GetActorLocation();
-		const FTransform LaterGate = F.Puzzle->Links[1].Gate->GetActorTransform();
-		Session->AcceptTravel(F.World->GetOutermost()->GetName(), false, false,
-			bCaptureArrival ? ECatrunArrivalRestart::SkipIntro : ECatrunArrivalRestart::Continue, -1, 0.f, bCaptureArrival);
+		const bool bContinue = Arrival == ECatrunProgressArrival::Resume;
+		Session->AcceptTravel(Package, bContinue, false,
+			bContinue ? ECatrunArrivalRestart::Continue : ECatrunArrivalRestart::SkipIntro, -1, 0.f, Arrival);
 		F.World->BeginPlay();
-		const auto& C = F.Puzzle->Links[0];
-		TestEqual(TEXT("Only the captured arrival restores C completion"), C.bCompleted, bCaptureArrival);
-		TestEqual(TEXT("Only the captured arrival restores the depressed plate"), C.bPressed, bCaptureArrival);
-		TestEqual(TEXT("Only the captured arrival restores the recessed gate"), C.GateOffset, bCaptureArrival ? -280.f : 0.f);
-		TestTrue(TEXT("The restored statue sits on C's plate"), F.Statue->GetActorLocation().Equals(
-			bCaptureArrival ? C.SeatLocation : C.InitialStatue.GetLocation()));
-		TestFalse(TEXT("The later puzzle stays unsolved"), F.Puzzle->Links[1].bCompleted);
-		TestTrue(TEXT("The later gate retains its authored location"), F.Puzzle->Links[1].Gate->GetActorTransform().Equals(LaterGate));
-		TestTrue(TEXT("Restore starts no reveal"), F.Puzzle->Reveal->Phase == ECatrunPuzzleRevealPhase::Inactive);
-		TestEqual(TEXT("Restore emits no gameplay completion event"), Probe->Counts[static_cast<int32>(ECatrunStatueEvent::Completed)], 0);
-		TestEqual(TEXT("Only capture restores persistent presentation"), Probe->CheckpointRestoreCount, bCaptureArrival ? 1 : 0);
-		TestEqual(TEXT("Checkpoint visual notification names only C"), Probe->RestoredPuzzleId, bCaptureArrival ? FName(TEXT("C")) : NAME_None);
-		TestEqual(TEXT("Presentation reads solved state during checkpoint notification"), Probe->bSeatedOnCheckpointRestore, bCaptureArrival);
-		const FVector Expected = bCaptureArrival ? FVector(500,-110,28) : Start;
-		TestTrue(TEXT("Captured spawn stands beyond Gate11 and Continue retains the original start"), F.Cat->GetActorLocation().Equals(Expected, .1));
-		TestTrue(TEXT("Arrival keeps normal pawn collision"), F.Cat->GetActorEnableCollision());
-		TestEqual(TEXT("A restored world can carry the same checkpoint on its next capture"),
-			F.World->GetSubsystem<UCatrunRestartSubsystem>()->HasStage2EntryCheckpoint(), bCaptureArrival);
+
+		for (int32 Index = 0; Index < FreshPuzzle->Links.Num(); ++Index)
+		{
+			const auto& Link = FreshPuzzle->Links[Index];
+			const double X = -950. - 350. * Index;
+			TestFalse(TEXT("Arrival leaves each link unsolved"), Link.bPressed || Link.bCompleted);
+			TestEqual(TEXT("Each statue remains at its authored start"), Link.Statue->GetActorLocation(), FVector(X,0,75));
+			TestEqual(TEXT("Each plate remains raised"), Link.Plate->GetActorLocation(), FVector(X,200,5));
+			TestEqual(TEXT("Each gate starts in its authored location"), Link.Gate->GetActorLocation(), FVector(X,450,123));
+		}
+		TestEqual(TEXT("Arrival grants the full Stage2 clock"), Session->GetRemainingSeconds(TEXT("Stage2")), Budget);
+		TestTrue(TEXT("Arrival preserves ordinary start and pawn collision"), F.Cat->GetActorLocation().Equals(Start, .1) && F.Cat->GetActorEnableCollision());
+		TestTrue(TEXT("Arrival emits no reveal, restore or solve event"), FreshPuzzle->Reveal->Phase == ECatrunPuzzleRevealPhase::Inactive
+			&& Probe->Counts[static_cast<int32>(ECatrunStatueEvent::Completed)] == 0 && Probe->CheckpointRestoreCount == 0);
+		TestTrue(TEXT("Arrival did not rewrite legacy bytes"), !Session->IsSavePending() && Backend.Writes == 0 && Backend.Bytes == Original);
 	}
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunStageClockAdmissionTest,"Catrun.LevelFlow.StageClockPausesAndOwnsTimeoutOnce",EAutomationTestFlags::EditorContext|EAutomationTestFlags::EngineFilter)
+bool FCatrunStageClockAdmissionTest::RunTest(const FString&)
+{
+	FStatueFixture F(246.f, true);
+	auto* PC = F.AddPlayer();
+	PC->SetPlayer(NewObject<ULocalPlayer>(GEngine));
+	if (!TestTrue(TEXT("The fixture controller owns a local player"), PC->GetLocalPlayer() && PC->IsLocalController())) return false;
+	F.World->BeginPlay();
+	auto* Flow = F.World->GetSubsystem<UCatrunLevelFlowSubsystem>();
+	auto* Restart = F.World->GetSubsystem<UCatrunRestartSubsystem>();
+	const float Budget = Flow->GetStageClockState().BudgetSeconds;
+	TestTrue(TEXT("Recognized Stage2 has a timed allocation"), Budget > 0.f);
+	PC->SetIgnoreMoveInput(true);
+	Flow->Tick(20.f);
+	TestEqual(TEXT("Arrival control lock freezes remaining time"), Flow->GetStageClockState().RemainingSeconds, Budget);
+	PC->SetIgnoreMoveInput(false);
+	Flow->Tick(20.f);
+	TestEqual(TEXT("First settled frame omits prior cinematic delta"), Flow->GetStageClockState().RemainingSeconds, Budget);
+	Flow->Tick(1.f);
+	TestEqual(TEXT("Ordinary control consumes elapsed game time"), Flow->GetStageClockState().RemainingSeconds, Budget - 1.f);
+
+	F.World->GetWorldSettings()->SetPauserPlayerState(F.World->SpawnActor<APlayerState>());
+	Flow->Tick(9.f);
+	TestEqual(TEXT("World pause freezes the stage clock"), Flow->GetStageClockState().RemainingSeconds, Budget - 1.f);
+	F.World->GetWorldSettings()->SetPauserPlayerState(nullptr);
+	auto* Suspension = F.World->GetSubsystem<UCatrunPuzzleSuspension>();
+	TestTrue(TEXT("Puzzle reveal can acquire suspension"), Suspension->Acquire(F.Puzzle));
+	Flow->Tick(9.f);
+	TestEqual(TEXT("Puzzle reveal freezes the stage clock"), Flow->GetStageClockState().RemainingSeconds, Budget - 1.f);
+	Suspension->Release(F.Puzzle);
+
+	TestTrue(TEXT("Exit can reserve before timeout"), Flow->ReserveExitTransition(F.Puzzle));
+	Flow->Tick(Budget + 1.f);
+	TestFalse(TEXT("Clock cannot take ownership from a qualified exit"), Restart->IsCatching());
+	Flow->ReleaseExitTransition(F.Puzzle);
+	TestTrue(TEXT("An armor catch can reserve before timeout"), Restart->TryBeginCatch(F.Puzzle));
+	Flow->Tick(Budget + 1.f);
+	TestTrue(TEXT("Clock cannot take ownership from an admitted capture"), Restart->IsCatchOwner(F.Puzzle));
+	Restart->CancelCatch(F.Puzzle);
+	Flow->Tick(.01f);
+	Flow->Tick(Budget + 1.f);
+	TestTrue(TEXT("Zero time acquires the same failure reservation"), Restart->IsCatchOwner(Restart));
+	TestEqual(TEXT("Time clamps to zero"), Flow->GetStageClockState().RemainingSeconds, 0.f);
+	TestFalse(TEXT("Capture cannot interrupt timeout"), Restart->TryBeginCatch(F.Puzzle));
+	TestFalse(TEXT("Exit cannot interrupt timeout"), Flow->ReserveExitTransition(F.Puzzle));
+	Restart->CancelCatch();
+	Flow->Tick(1.f);
+	TestFalse(TEXT("Same surviving world cannot replay timeout"), Restart->IsCatching());
+	TestFalse(TEXT("Timeout cleanup releases move and look locks"), PC->IsMoveInputIgnored() || PC->IsLookInputIgnored());
 	return true;
 }
 
@@ -659,6 +717,25 @@ bool FStatuePendingResetTest::RunTest(const FString&)
 	F.Puzzle->ResetPuzzle(); R->bEnabled=true; F.Statue->SetActorLocation(FVector(0,171,0)); F.Puzzle->UpdatePlatesAndGates(0);
 	R->TickComponent(20,LEVELTICK_All,nullptr); F.Puzzle->UpdatePlatesAndGates(3);
 	TestTrue(TEXT("Accepted reveal missing callbacks retains bounded fallback"),Link.bCompleted);
+	return true;
+}
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FStage3ExternalGateTest,"Catrun.Stage3.ExternalLocksPreserveSeatingAndGateSafety",EAutomationTestFlags::EditorContext|EAutomationTestFlags::EngineFilter)
+bool FStage3ExternalGateTest::RunTest(const FString&)
+{
+	FStatueFixture F;
+	F.Puzzle->Reveal->bEnabled=false;
+	auto& Link=F.Puzzle->Links[0];
+	TestTrue(TEXT("Existing maps default to unlocked"),Link.bExternalGateUnlocked);
+	Link.bExternalGateUnlocked=false;
+	F.Statue->SetActorLocation(FVector(0,200,0));
+	F.Puzzle->UpdatePlatesAndGates(10.f);
+	TestTrue(TEXT("A locked puzzle still latches the seated statue"),Link.bPressed);
+	TestFalse(TEXT("Seating alone cannot finish the locked gate"),Link.bCompleted);
+	TestEqual(TEXT("External lock keeps the gate shut"),Link.GateOffset,0.f);
+	Link.bExternalGateUnlocked=true;
+	F.Puzzle->UpdatePlatesAndGates(10.f);
+	TestTrue(TEXT("Releasing the locks opens an already seated puzzle"),Link.bCompleted);
+	TestTrue(TEXT("Normal safe downward travel is preserved"),Link.GateOffset<=-280.f);
 	return true;
 }
 #endif

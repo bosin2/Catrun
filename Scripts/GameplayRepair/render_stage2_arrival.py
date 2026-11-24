@@ -22,8 +22,12 @@ import stage2_arrival_revision as revision
 BASE = '/Game/Cinematics/Stage2/Arrival/'
 SEQUENCE = BASE + 'LS_Stage2_PortalArrival'
 MAP = '/Game/Maps/Stage2'
-FRAMES = (0,9,10,19,33,44,54,62,72,79,80,86,87,90,91,105,127,128,142,152,
-          153,167,175,184,196,210,223,237,249,261,262,275,285,286,306,326,342,360,377)
+# Include every cut boundary, held target and light-key endpoint. Portal and
+# landing frames also exercise the animated silhouette and actual floor contact.
+FRAMES = sorted({0,9,10,19,33,44,54,62,72,86,87,90,91,250,270,310,360,revision.END-1,
+                 *(f for _,a,b in revision.CUTS for f in (a,b-1)),
+                 *(f for _,a,b,*_ in revision.GAZE_HOLDS for f in (a,(a+b)//2,b)),
+                 *(f for name in revision.FILLS for f,_ in revision.fill_keys(name))})
 OUT = ROOT/'Saved/StageRevision20261123/ArrivalFrames'/datetime.datetime.now().strftime('%Y%m%d-%H%M%S-%f')
 OUT.mkdir(parents=True, exist_ok=False)
 
@@ -171,13 +175,19 @@ def main():
             spawned.update([visual.get_path_name(),camera.get_owner().get_path_name()])
             if portal: spawned.add(portal.get_path_name())
             fills={}
-            for name,(_,_,_,peak) in revision.FILLS.items():
+            for name in revision.FILLS:
                 light=helper.only(player.get_bound_objects(sequence.get_binding_id(lights[name])))
                 bulb=helper.only(player.get_bound_objects(sequence.get_binding_id(lights[name+'Bulb'])))
                 assert bulb==light.get_editor_property('PointLightComponent') and bulb.get_owner()==light,(frame,name,bulb,light)
                 intensity=bulb.get_editor_property('intensity')
-                if frame<=revision.FILL_FADE_START: assert abs(intensity-peak)<.1,(frame,name,intensity)
-                if frame>=revision.FILL_FADE_END: assert abs(intensity)<.1,(frame,name,intensity)
+                keys=revision.fill_keys(name)
+                keyed=dict(keys)
+                if frame in keyed:
+                    assert abs(intensity-keyed[frame])<.1,(frame,name,intensity,keyed[frame])
+                else:
+                    left,right=next((a,b) for a,b in zip(keys,keys[1:]) if a[0]<frame<b[0])
+                    lo,hi=sorted((left[1],right[1]))
+                    assert lo-.1<=intensity<=hi+.1,(frame,name,intensity,left,right)
                 fills[name]={'lumens':intensity,'location':helper.vector(light.get_actor_location())}
                 spawned.add(light.get_path_name())
             visual_mesh=visual.get_component_by_class(u.SkeletalMeshComponent)
@@ -212,14 +222,14 @@ def main():
             view=camera.get_camera_view(0.)
             name=next(n for n,f,t in revision.CUTS if f<=frame<t)
             assert (view.projection_mode==u.CameraProjectionMode.PERSPECTIVE)==(name in revision.PERSPECTIVE)
-            key=next((k for k,a,b in [('statue',175,184),('plate',210,223),('gate',249,261)] if a<=frame<=b),None)
+            key=next((k for k,a,b,*_ in revision.GAZE_HOLDS if a<=frame<=b),None)
             if key:
                 xyz=revision.TARGETS[key]
                 actor=actors[revision.LABELS[key]]
                 assert math.dist(helper.vector(actor.get_actor_location())[:2],xyz[:2])<.03
                 if key=='gate':
                     assert abs(actor.get_actor_location().z+20.)<.05 and actor.get_actor_enable_collision() and not helper.hidden(actor)
-            elif revision.REVEAL<=frame<153 or 262<=frame:
+            elif frame>=revision.REVEAL and name!='Puzzle':
                 xyz=row['head']
                 actor=visual
             else:
@@ -232,8 +242,11 @@ def main():
                             'occluder':hit.to_dict()['hit_actor'].get_actor_label() if hit else None}
             assert not hit,(frame,row['subject'])
             assert all(.015<coord<.985 for coord in screen),(frame,row['subject'])
-            if key: assert all(.47<coord<.53 for coord in screen),(frame,row['subject'])
-            if name in ('Face','FaceReturn') and frame<286:
+            if key:
+                # The eye-level wide shot places each objective on a different horizontal third.
+                expected_x={'statue':.68,'plate':.27,'gate':.53}[key]
+                assert abs(screen[0]-expected_x)<.07 and .40<screen[1]<.60,(frame,row['subject'])
+            if name in ('Face','FaceReturn') and frame<revision.HANDOFF_FRAME:
                 row['face_features']={n:screen_point(view,helper.vector(visual_mesh.get_socket_location(n)))
                                       for n in ('head','ear_tip_L','ear_tip_R')}
                 assert all(.03<v<.97 for xy in row['face_features'].values() for v in xy),(frame,row['face_features'])
@@ -254,7 +267,8 @@ def main():
                                                     False,[cat],u.DrawDebugTrace.NONE,False)
             assert not hit,(f,'camera obstruction',str(hit))
             last_cam,last_location=camera.get_owner(),view.location
-            if 153<=f<262:
+            first,last=revision.CUT_RANGES['Puzzle']
+            if first<=f<last:
                 assert 32.<view.location.z<47. and abs(view.rotation.roll)<.05
                 sample=[f,*helper.vector(view.location),view.rotation.pitch,view.rotation.yaw,view.fov]
                 if gaze:

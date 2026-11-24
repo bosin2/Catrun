@@ -1,0 +1,518 @@
+{
+  "SM_S3_Wall_200": {
+    "boxes": [
+      [
+        [
+          100.0,
+          -15.000009536743164,
+          150.0
+        ],
+        [
+          200.0,
+          30.000019073486328,
+          300.0
+        ]
+      ]
+    ],
+    "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_Wall_200.SM_S3_Wall_200"
+  },
+  "SM_S3_Wall_100": {
+    "boxes": [
+      [
+        [
+          49.99999869446651,
+          -15.000004774179835,
+          150.0
+        ],
+        [
+          100.00000261106698,
+          30.000009525126657,
+          300.0
+        ]
+      ]
+    ],
+    "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_Wall_100.SM_S3_Wall_100"
+  },
+  "SM_S3_Wall_50": {
+    "boxes": [
+      [
+        [
+          24.99999869565204,
+          -15.000002868016772,
+          150.0
+        ],
+        [
+          50.00000260869592,
+          30.000005708058254,
+          300.0
+        ]
+      ]
+    ],
+    "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_Wall_50.SM_S3_Wall_50"
+  },
+  "SM_S3_Wall_Corner": {
+    "boxes": [
+      [
+        [
+          14.999999649326355,
+          -15.000001914342455,
+          150.0
+        ],
+        [
+          30.000004516044555,
+          30.00000380070962,
+          300.0
+        ]
+      ]
+    ],
+    "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_Wall_Corner.SM_S3_Wall_Corner"
+  },
+  "SM_S3_Wall_BlindArch_200": {
+    "boxes": [
+      [
+        [
+          99.9999986913923,
+          -15.000009539477212,
+          150.0
+        ],
+        [
+          200.0000026172154,
+          30.000019068018233,
+          300.0
+        ]
+      ]
+    ],
+    "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_Wall_BlindArch_200.SM_S3_Wall_BlindArch_200"
+  },
+  "SM_S3_Floor_Octagon": {
+    "boxes": [
+      [
+        [
+          99.9999912647163,
+          -100.00000763638835,
+          2.5
+        ],
+        [
+          200.0000174705674,
+          200.00001524480143,
+          5.0
+        ]
+      ]
+    ],
+    "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_Floor_Octagon.SM_S3_Floor_Octagon"
+  },
+  "SM_S3_Floor_GatePlain": {
+    "boxes": [
+      [
+        [
+          99.9999912647163,
+          -100.00000763638835,
+          2.5
+        ],
+        [
+          200.0000174705674,
+          200.00001524480143,
+          5.0
+        ]
+      ]
+    ],
+    "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_Floor_GatePlain.SM_S3_Floor_GatePlain"
+  },
+  "SM_S3_Floor_GateAxis": {
+    "boxes": [
+      [
+        [
+          99.99998907914687,
+          -125.00000763638835,
+          2.5
+        ],
+        [
+          200.00002184170626,
+          250.00001524480143,
+          5.0
+        ]
+      ]
+    ],
+    "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_Floor_GateAxis.SM_S3_Floor_GateAxis"
+  },
+  "SM_S3_Floor_GateThreshold": {
+    "boxes": [
+      [
+        [
+          99.99997378015905,
+          -300.00000000699384,
+          2.5
+        ],
+        [
+          200.0000524396819,
+          599.9999999860123,
+          5.0
+        ]
+      ]
+    ],
+    "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_Floor_GateThreshold.SM_S3_Floor_GateThreshold"
+  },
+  "SM_S3_Floor_GateBorder": {
+    "boxes": [
+      [
+        [
+          99.99999891420907,
+          -12.50000859006267,
+          2.5
+        ],
+        [
+          200.00000217158185,
+          25.00001715215005,
+          5.0
+        ]
+      ]
+    ],
+    "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_Floor_GateBorder.SM_S3_Floor_GateBorder"
+  },
+  "SM_S3_Floor_GatePlain_Trim_100": {
+    "boxes": [
+      [
+        [
+          99.99999562970379,
+          -50.000007636388354,
+          2.5
+        ],
+        [
+          200.00000874059242,
+          100.00001524480142,
+          5.0
+        ]
+      ]
+    ],
+    "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_Floor_GatePlain_Trim_100.SM_S3_Floor_GatePlain_Trim_100"
+  },
+  "SM_S3_Floor_GatePlain_Trim_50": {
+    "boxes": [
+      [
+        [
+          99.99999781527299,
+          -25.000009543736986,
+          2.5
+        ],
+        [
+          200.00000436945402,
+          50.00001905949868,
+          5.0
+        ]
+      ]
+    ],
+    "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_Floor_GatePlain_Trim_50.SM_S3_Floor_GatePlain_Trim_50"
+  },
+  "SM_S3_Floor_Octagon_Trim_100": {
+    "boxes": [
+      [
+        [
+          99.99999562970379,
+          -50.000007636388354,
+          2.5
+        ],
+        [
+          200.00000874059242,
+          100.00001524480142,
+          5.0
+        ]
+      ]
+    ],
+    "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_Floor_Octagon_Trim_100.SM_S3_Floor_Octagon_Trim_100"
+  },
+  "SM_S3_Floor_Octagon_Trim_50": {
+    "boxes": [
+      [
+        [
+          99.99999781527299,
+          -25.000009543736986,
+          2.5
+        ],
+        [
+          200.00000436945402,
+          50.00001905949868,
+          5.0
+        ]
+      ]
+    ],
+    "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_Floor_Octagon_Trim_50.SM_S3_Floor_Octagon_Trim_50"
+  },
+  "SM_S3_ArmorDoor_Frame": {
+    "boxes": [
+      [
+        [
+          12.5,
+          -15,
+          150
+        ],
+        [
+          25.0,
+          30,
+          300
+        ]
+      ],
+      [
+        [
+          187.5,
+          -15,
+          150
+        ],
+        [
+          25.0,
+          30,
+          300
+        ]
+      ],
+      [
+        [
+          100,
+          -15,
+          270.0
+        ],
+        [
+          150,
+          30,
+          60
+        ]
+      ]
+    ],
+    "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_ArmorDoor_Frame.SM_S3_ArmorDoor_Frame"
+  },
+  "SM_S3_ArmorDoor_Leaf": {
+    "boxes": [
+      [
+        [
+          72.19999849796295,
+          -0.26346921920776367,
+          120.97000066595825
+        ],
+        [
+          151.99999690055847,
+          17.400097846984863,
+          241.940003550896
+        ]
+      ]
+    ],
+    "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_ArmorDoor_Leaf.SM_S3_ArmorDoor_Leaf"
+  },
+  "SM_S3_CatHoleWall": {
+    "boxes": [
+      [
+        [
+          35.0,
+          -15,
+          150
+        ],
+        [
+          70.0,
+          30,
+          300
+        ]
+      ],
+      [
+        [
+          165.0,
+          -15,
+          150
+        ],
+        [
+          70.0,
+          30,
+          300
+        ]
+      ],
+      [
+        [
+          100,
+          -15,
+          182.5
+        ],
+        [
+          60,
+          30,
+          235
+        ]
+      ]
+    ],
+    "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_CatHoleWall.SM_S3_CatHoleWall"
+  },
+  "SM_S3_PuzzleGate_Frame": {
+    "boxes": [
+      [
+        [
+          15.0,
+          -15,
+          150
+        ],
+        [
+          30.0,
+          30,
+          300
+        ]
+      ],
+      [
+        [
+          185.0,
+          -15,
+          150
+        ],
+        [
+          30.0,
+          30,
+          300
+        ]
+      ],
+      [
+        [
+          100,
+          -15,
+          270.0
+        ],
+        [
+          140,
+          30,
+          60
+        ]
+      ]
+    ],
+    "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_PuzzleGate_Frame.SM_S3_PuzzleGate_Frame"
+  },
+  "SM_S3_PuzzleGate_Bars": {
+    "boxes": [
+      [
+        [
+          0.0,
+          -1.2874603271484375e-05,
+          122.99999993063761
+        ],
+        [
+          144.0,
+          6.000015735626221,
+          246.00000013872477
+        ]
+      ]
+    ],
+    "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_PuzzleGate_Bars.SM_S3_PuzzleGate_Bars"
+  },
+  "SM_S3_FinalGate_LowerFrame": {
+    "boxes": [
+      [
+        [
+          -350,
+          0,
+          150
+        ],
+        [
+          100,
+          100,
+          300
+        ]
+      ],
+      [
+        [
+          350,
+          0,
+          150
+        ],
+        [
+          100,
+          100,
+          300
+        ]
+      ]
+    ],
+    "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_FinalGate_LowerFrame.SM_S3_FinalGate_LowerFrame"
+  },
+  "SM_S3_FinalGate_UpperFrame": {
+    "boxes": [
+      [
+        [
+          -350,
+          0,
+          250
+        ],
+        [
+          100,
+          100,
+          500
+        ]
+      ],
+      [
+        [
+          350,
+          0,
+          250
+        ],
+        [
+          100,
+          100,
+          500
+        ]
+      ],
+      [
+        [
+          0,
+          0,
+          599.6
+        ],
+        [
+          800,
+          100,
+          199.2
+        ]
+      ]
+    ],
+    "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_FinalGate_UpperFrame.SM_S3_FinalGate_UpperFrame"
+  },
+  "SM_S3_FinalGate_Leaf_L": {
+    "boxes": [
+      [
+        [
+          -150.89999437332153,
+          6.549921035766602,
+          398.0496506690979
+        ],
+        [
+          298.20001125335693,
+          51.100101470947266,
+          791.0993070602417
+        ]
+      ]
+    ],
+    "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_FinalGate_Leaf_L.SM_S3_FinalGate_Leaf_L"
+  },
+  "SM_S3_FinalGate_Leaf_R": {
+    "boxes": [
+      [
+        [
+          150.89999437332153,
+          6.549921035766602,
+          398.0496201515198
+        ],
+        [
+          298.20001125335693,
+          51.100101470947266,
+          791.0992460250854
+        ]
+      ]
+    ],
+    "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_FinalGate_Leaf_R.SM_S3_FinalGate_Leaf_R"
+  },
+  "SM_S3_GuardianStatue": {
+    "boxes": [
+      [
+        [
+          0.0,
+          0.0,
+          74.99999513274452
+        ],
+        [
+          120.00000762939453,
+          120.00000762939453,
+          150.00000973451097
+        ]
+      ]
+    ],
+    "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_GuardianStatue.SM_S3_GuardianStatue"
+  }
+}

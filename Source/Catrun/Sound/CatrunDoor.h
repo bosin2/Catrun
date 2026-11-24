@@ -106,6 +106,7 @@ private:
 
 	// Puts the hinge on the left or the right edge of the doorway. The closed door looks the same.
 	void SetHingeOnRight(bool bOnRight);
+	void ApplyLeafAngle(float Angle);
 
 	bool bIsOpen = false;
 
@@ -117,5 +118,8 @@ private:
 
 	// The door mesh as placed in the level (hinge on the left), remembered at BeginPlay.
 	FVector ClosedScale = FVector::OneVector;
-	float LeafWidth = 150.f;
+	FVector ClosedLocation = FVector::ZeroVector;
+	FQuat ClosedRotation = FQuat::Identity;
+	FVector OppositeHingeOffset = FVector::ZeroVector;
+	float CurrentLeafAngle = 0.f;
 };

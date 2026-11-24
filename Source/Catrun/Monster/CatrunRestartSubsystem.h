@@ -5,6 +5,7 @@
 #include "CatrunRestartSubsystem.generated.h"
 
 class APawn;
+class APlayerController;
 DECLARE_MULTICAST_DELEGATE_OneParam(FCatrunCatchOwnerChanged, UObject*);
 
 /**
@@ -42,8 +43,7 @@ public:
 	bool HasBlockedPawnRecovery(const APawn* Pawn) const;
 	void ReportBlockedPawnRecovery(APawn& Pawn);
 
-	void MarkStage2EntryCheckpointReached();
-	bool HasStage2EntryCheckpoint() const { return bStage2EntryCheckpointReached; }
+	bool BeginStageTimeout();
 
 	// Fades the screen of the cat's player to black (and keeps it black).
 	void FadeOut(APawn* Cat, float Duration);
@@ -56,11 +56,15 @@ public:
 
 private:
 	bool CanRecoverWorld() const;
-	void RestoreStage2EntryCheckpoint();
+	void StartTimeoutFade();
+	void CommitTimeoutRestart();
+	void ReleaseTimeoutPresentation();
 	bool bRecoveryScheduled = false;
 	FTimerHandle RecoveryTimer;
 	TWeakObjectPtr<APawn> BlockedRecoveryPawn;
 	bool bCatching = false;
 	TWeakObjectPtr<UObject> CatchOwner;
-	bool bStage2EntryCheckpointReached = false;
+	FTimerHandle TimeoutTimer;
+	TWeakObjectPtr<APlayerController> TimeoutController;
+	bool bTimeoutFadeStarted = false;
 };

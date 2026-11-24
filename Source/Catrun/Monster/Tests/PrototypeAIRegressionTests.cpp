@@ -299,14 +299,14 @@ bool FCatrunCanonicalLocomotionTuningTest::RunTest(const FString&)
 	auto* Movement = Cat->GetCharacterMovement();
 	Movement->SetMovementMode(MOVE_Walking);
 	struct FMode { bool bRun; bool bSneak; float Speed; float OriginalSpeed; };
-	for (const FMode& Mode : { FMode{false, false, 79.f, 74.f}, FMode{true, false, 124.f, 119.f},
+	for (const FMode& Mode : { FMode{false, false, 79.f, 74.f}, FMode{true, false, 134.f, 119.f},
 		FMode{true, true, 53.f, 48.f}, FMode{false, true, 53.f, 48.f}, FMode{false, false, 79.f, 74.f} })
 	{
 		Running->SetPropertyValue_InContainer(Cat, Mode.bRun);
 		Sneaking->SetPropertyValue_InContainer(Cat, Mode.bSneak);
 		Cat->ProcessEvent(UpdateSpeed, nullptr);
 		Cat->ProcessEvent(UpdateSpeed, nullptr);
-		TestEqual(TEXT("Each Blueprint mode writes its fixed +5 speed"), Movement->GetMaxSpeed(), Mode.Speed);
+		TestEqual(TEXT("The Blueprint selects the authored movement cap"), Movement->GetMaxSpeed(), Mode.Speed);
 		const float PushLimit = UCatrunCatStateComponent::GetStatuePushSpeedLimit(*Cat);
 		TestEqual(TEXT("Statue push uses the prior player locomotion limit"), PushLimit, Mode.OriginalSpeed);
 		TestEqual(TEXT("The effective puzzle push cap is preserved"), FMath::Min(PushSettings->PushSpeed, PushLimit),

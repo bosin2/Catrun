@@ -36,11 +36,12 @@ SPEED_PER_FRAME = .70
 WALK_Y = START_Y - SPEED_PER_FRAME * WALK
 INSPECT_Y = WALK_Y - SPEED_PER_FRAME * (STOP-WALK)/2
 PORTAL_Y, ENTRY_Y = INSPECT_Y - 72., INSPECT_Y - 150.
-CUTS = ((0,39), (39,WALK_START), (WALK_START,REAR), (REAR,SIDE), (SIDE,LIFT), (LIFT,END))
-CAMERA_NAMES = ('DoorFace','DoorGlance','FrontTracking','RearPortal','SidePreparation','JumpFollow')
-FOV = (72., 74., 76., 89., 82., 81.)
-FOCUS = (81.,125.,54.,275.,96.,135.)
-ATTACHED = frozenset((0,1,2))
+CUTS = ((0,WALK_START), (WALK_START,REAR), (REAR,SIDE), (SIDE,END))
+CAMERA_NAMES = ('DoorFace','FrontTracking','RearPortal','JumpFollow')
+PREVIOUS_CAMERAS = ('DoorFace','DoorGlance','FrontTracking','RearPortal','SidePreparation','JumpFollow')
+FOV = (72., 72., 89., 80.)
+FOCUS = (78.,61.,262.,119.)
+ATTACHED = frozenset((0,1))
 CLIPS = (h.CLIP_DIR+'AN_BlackCat_CautiousWalk', h.CLIP_DIR+'AN_BlackCat_Idle', h.CLIPS[2])
 RESTORE = u.MovieSceneCompletionMode.RESTORE_STATE
 PAWS = ('paw_f_l', 'paw_f_r', 'paw_h_l', 'paw_h_r')
@@ -90,30 +91,31 @@ def position(frame, arrival=(101.,START_Y,25.2)):
 
 
 def camera_curves():
-    # First three cameras ride the pawn root, keeping a side-entry cat in frame.
-    # Their coordinates are relative to the character's forward (+X) axis.
-    return [[h.camera_key(f,loc,aim) for f,loc,aim in rows] for rows in (
-        [(0,(94.,0.,0.),(11.,0.,-1.)),(39,(90.,0.,0.),(11.,0.,-1.))],
-        [(39,(105.,18.,30.),(-36.,0.,6.)),(57,(106.,15.,27.),(-36.,0.,6.))],
-        [(57,(67.,0.,4.),(11.,0.,-1.)),(177,(64.,0.,3.),(11.,0.,-1.)),
-         (189,(64.,0.,3.),(11.,0.,1.)),(195,(64.,0.,3.),(11.,0.,1.))],
-        [(195,(85.,PORTAL_Y+281.,13.),(101.,PORTAL_Y,102.)),
-         (231,(83.,PORTAL_Y+275.,13.),(101.,PORTAL_Y,102.))],
-        [(231,(13.,INSPECT_Y+23.,34.),(101.,INSPECT_Y+1.,22.)),
-         (255,(15.,INSPECT_Y+21.,33.),(101.,INSPECT_Y,22.))],
-        [(255,(19.,INSPECT_Y+29.,35.),(101.,INSPECT_Y-10.,26.)),
-         (266,(22.,INSPECT_Y+29.,50.),(101.,INSPECT_Y-31.,69.)),
-         (280,(30.,INSPECT_Y+49.,60.),(101.,PORTAL_Y,83.)),
-         (294,(41.,INSPECT_Y+65.,62.),(101.,PORTAL_Y,86.)),
-         (312,(43.,INSPECT_Y+67.,62.),(101.,PORTAL_Y,86.))]
+    # The door stays behind the face. A small rise shows its closure without reversing the axis.
+    # At the walking cut both pawn-relative cameras share the exact incoming pose and lens.
+    front=(85.,6.,7.)
+    eyes=(8.,0.,0.)
+    return [[h.camera_key(f,loc,target) for f,loc,target in rows] for rows in (
+        [(0,(88.,5.,2.),eyes),(26,(88.,5.,3.),eyes),
+         (42,(88.,9.,13.),(5.,0.,0.)),(WALK_START,front,eyes)],
+        [(WALK_START,front,eyes),(96,(80.,5.,6.),eyes),(WALK,(64.,3.,4.),eyes),
+         (STOP,(64.,3.,4.),eyes),(REAR,(64.,3.,4.),eyes)],
+        [(REAR,(85.,PORTAL_Y+281.,13.),(101.,PORTAL_Y,90.)),
+         (SIDE,(83.,PORTAL_Y+275.,13.),(101.,PORTAL_Y,90.))],
+        [(SIDE,(17.,INSPECT_Y+27.,35.),(101.,INSPECT_Y+1.,24.)),
+         (LIFT,(18.,INSPECT_Y+28.,36.),(101.,INSPECT_Y-5.,25.)),
+         (266,(22.,INSPECT_Y+31.,47.),(101.,INSPECT_Y-27.,61.)),
+         (280,(30.,INSPECT_Y+49.,59.),(101.,PORTAL_Y,80.)),
+         (AIR_END,(41.,INSPECT_Y+65.,62.),(101.,PORTAL_Y,84.)),
+         (END,(43.,INSPECT_Y+67.,62.),(101.,PORTAL_Y,84.))]
     )]
 
 
 CAMERAS=camera_curves()
-# The installed BlueLight uses Unreal's unitless inverse-square units (about 50 per lumen).
-LIGHT_KEYS=((0,1450.),(WALK_START,1600.),(96,5300.),(138,16400.),(WALK,36500.),(SIDE,36500.),(AIR_END,23000.))
+# Sequence-only values in the installed BlueLight's unitless scale and the fill's lumens.
+LIGHT_KEYS=((0,300.),(WALK_START,360.),(96,1150.),(138,3500.),(WALK,8000.),(SIDE,8000.),(AIR_END,4800.))
 SOFT_FILL='PortalApproachFill'
-FILL_KEYS=((0,1750.),(39,1750.),(WALK_START,800.),(WALK,450.),(SIDE,850.),(LIFT,850.),(AIR_END,430.))
+FILL_KEYS=((0,320.),(39,320.),(WALK_START,245.),(WALK,100.),(SIDE,180.),(LIFT,180.),(AIR_END,105.))
 PREVIOUS_SEQUENCE_SHA='3f132fbb7d40b8bba9757404a48aa6eef91a73b6116b775a4ba70a2faa688165'
 
 
@@ -200,7 +202,7 @@ def camera_tracks(seq,parts):
     for cut in list(cut_track.get_sections()):
         cut_track.remove_section(cut)
     for i,(name,curve,fov,(start,end)) in enumerate(zip(CAMERA_NAMES,CAMERAS,FOV,CUTS)):
-        if i<3:
+        if i<2:
             camera=parts['bindings'][3+i]
         else:
             camera=seq.add_spawnable_from_class(u.CameraActor.static_class())
@@ -318,27 +320,59 @@ def bind_fill(seq,portal,parent):
     return fill
 
 
-def apply_lens_and_fill(seq,portal):
+def apply_presentation(seq):
+    """Reframe existing cameras and lights, keeping every installed binding GUID."""
     seq.modify()
+    cut_track=h.only(t for t in seq.get_tracks() if isinstance(t,u.MovieSceneCameraCutTrack))
+    cameras={b.get_name():b for b in seq.get_bindings() if b.get_name() in PREVIOUS_CAMERAS}
+    ids={seq.get_binding_id(b).export_text():n for n,b in cameras.items()}
+    active={n:(first,last) for n,(first,last) in zip(CAMERA_NAMES,CUTS,strict=True)}
+    for cut in list(cut_track.get_sections()):
+        name=ids[cut.get_camera_binding_id().export_text()]
+        if name in active:
+            cut.modify()
+            cut.set_range(*active[name])
+        else:
+            cut_track.modify()
+            cut_track.remove_section(cut)
     h.CAMERAS=CAMERA_NAMES
     parts=h.sequence_parts(seq)
-    for index,(part,component,curve,fov) in enumerate(zip(parts['camera_sections'],parts['camera_components'],CAMERAS,FOV)):
-        if index==3:
-            continue  # The portal reveal passed the rendered framing check.
+    for i,(part,component,curve,fov) in enumerate(zip(parts['camera_sections'],parts['camera_components'],CAMERAS,FOV,strict=True)):
         part.modify()
-        axes(part,curve)
+        for axis,channel in enumerate(h.transform_channels(part)):
+            values=[(frame,row[axis]) for frame,row in curve]
+            for key in list(channel.get_keys()):
+                channel.remove_key(key)
+            channel.set_default(values[0][1])
+            for frame,value in values:
+                channel.add_key(u.FrameNumber(frame),value,0.,u.MovieSceneTimeUnit.DISPLAY_RATE,u.MovieSceneKeyInterpolation.AUTO)
         component.modify()
         component.set_field_of_view(fov)
         settings=component.get_editor_property('post_process_settings').copy()
-        settings.set_editor_property('depth_of_field_focal_distance',FOCUS[index])
+        for prop,value in (('bloom_intensity',.15),('depth_of_field_fstop',3.5 if i==0 else 8.),
+                           ('depth_of_field_focal_distance',FOCUS[i]),('motion_blur_amount',.06)):
+            settings.set_editor_property('override_'+prop,True)
+            settings.set_editor_property(prop,value)
         component.set_editor_property('post_process_settings',settings)
-    fill=bind_fill(seq,portal,parts['bindings'][1])
-    track=fill.add_track(u.MovieSceneFloatTrack)
-    track.set_property_name_and_path('Intensity','Intensity')
-    intensity=track.add_section()
-    intensity.set_range(0,END)
-    intensity.set_completion_mode(RESTORE)
-    h.write_keys(h.only(intensity.get_all_channels()),FILL_KEYS)
+        component.set_editor_property('post_process_blend_weight',1.)
+    for part,keys in ((parts['light'],LIGHT_KEYS),(h.property_section(fill_binding(seq),u.MovieSceneFloatTrack),FILL_KEYS)):
+        part.modify()
+        h.write_keys(h.only(part.get_all_channels()),keys,keys[0][1])
+
+
+def apply_lens_and_fill(seq,portal):
+    seq.modify()
+    parent=h.only(b for b in seq.get_bindings() if 'CatrunPortal' in map(str,b.get_binding_tags()))
+    fill=fill_binding(seq)
+    if not fill:
+        fill=bind_fill(seq,portal,parent)
+        track=fill.add_track(u.MovieSceneFloatTrack)
+        track.set_property_name_and_path('Intensity','Intensity')
+        intensity=track.add_section()
+        intensity.set_range(0,END)
+        intensity.set_completion_mode(RESTORE)
+    apply_presentation(seq)
+    parts=h.sequence_parts(seq)
     # Parent transform has yaw 180 and 125% uniform scale. Neutral fill comes
     # from the camera-facing side of the fur, the blue key comes from the opposite cheek.
     fill_rows=[]
@@ -371,12 +405,17 @@ def verify_sequence(seq):
         assert part.get_completion_mode()==RESTORE and not b.find_tracks_by_type(u.MovieSceneVisibilityTrack)
         keys=h.key_data(h.transform_channels(part)[5])
         assert abs(keys[0][1]-yaw)<.01 and abs(keys[-1][1])<.01
+    assert len(s['light']['keys'])==len(LIGHT_KEYS)
     assert all(abs(actual-v)<.01 and t==h.tick(f) for (t,actual),(f,v) in zip(s['light']['keys'],LIGHT_KEYS))
     parts=h.sequence_parts(seq)
     fill=fill_binding(seq)
     assert fill and fill.get_parent().get_id().export_text()==parts['bindings'][1].get_id().export_text()
     fill_keys=h.key_data(h.only(h.property_section(fill,u.MovieSceneFloatTrack).get_all_channels()))
     assert fill_keys==[(h.tick(f),v) for f,v in FILL_KEYS],fill_keys
+    for index,component in enumerate(parts['camera_components']):
+        settings=component.get_editor_property('post_process_settings')
+        assert settings.override_bloom_intensity and abs(settings.bloom_intensity-.15)<.001
+        assert abs(settings.depth_of_field_focal_distance-FOCUS[index])<.01
     for part,curve in zip(parts['camera_sections'],CAMERAS):
         for i,ch in enumerate(h.transform_channels(part)):
             keys=h.key_data(ch)

@@ -67,9 +67,10 @@ void UCatrunNoticeWidget::SetNoticePolicy(ECatrunNoticePolicy Policy, float Dura
 
 bool UCatrunNoticeWidget::RefreshPresentation()
 {
-	const bool bHide = NoticePolicy == ECatrunNoticePolicy::BlockedRecovery
-		? UCatrunLevelFlowLibrary::ShouldHideRecoveryNotice(this)
-		: UCatrunLevelFlowLibrary::ShouldHideGameplayHUD(this);
+	const bool bHide = NoticePolicy != ECatrunNoticePolicy::StageTimeout
+		&& (NoticePolicy == ECatrunNoticePolicy::BlockedRecovery
+			? UCatrunLevelFlowLibrary::ShouldHideRecoveryNotice(this)
+			: UCatrunLevelFlowLibrary::ShouldHideGameplayHUD(this));
 	SetRenderOpacity(bHide ? 0.f : 1.f);
 	return !bHide;
 }
@@ -118,7 +119,7 @@ void UCatrunNoticeLibrary::ShowBellDenied(const UObject* Context, float Duration
 void UCatrunNoticeSubsystem::ShowNotice(const FText& Text, float Duration, ECatrunNoticePolicy Policy)
 {
 	UWorld* World = GetWorld();
-	if (!World)
+	if (!World || (bStageTimeoutNotice && Policy != ECatrunNoticePolicy::StageTimeout))
 	{
 		return;
 	}
@@ -137,6 +138,7 @@ void UCatrunNoticeSubsystem::ShowNotice(const FText& Text, float Duration, ECatr
 		Widget->AddToViewport(100);
 	}
 	const float NoticeDuration = FMath::Max(Duration, 0.1f);
+	bStageTimeoutNotice = Policy == ECatrunNoticePolicy::StageTimeout;
 	Widget->SetNoticeText(Text);
 	Widget->SetNoticePolicy(Policy, NoticeDuration);
 	Widget->SetVisibility(ESlateVisibility::HitTestInvisible);
@@ -151,8 +153,16 @@ void UCatrunNoticeSubsystem::ShowNotice(const FText& Text, float Duration, ECatr
 	}
 }
 
+void UCatrunNoticeSubsystem::ClearStageTimeoutNotice()
+{
+	if (!bStageTimeoutNotice) return;
+	if (UWorld* World = GetWorld()) World->GetTimerManager().ClearTimer(HideTimer);
+	HideNotice();
+}
+
 void UCatrunNoticeSubsystem::HideNotice()
 {
+	bStageTimeoutNotice = false;
 	if (Widget)
 	{
 		Widget->SetVisibility(ESlateVisibility::Collapsed);

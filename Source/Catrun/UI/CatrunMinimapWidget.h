@@ -12,6 +12,8 @@ class ACatrunMinimapPresenter;
 class FCatrunMinimapTabInput;
 class UCanvasPanel;
 class UImage;
+class UMaterialInterface;
+class USceneComponent;
 class UTexture2D;
 class UWidget;
 struct FSceneViewProjectionData;
@@ -20,6 +22,23 @@ enum class ECatrunMinimapEnemyKind : uint8
 {
 	Armor,
 	Candle,
+};
+
+UENUM(BlueprintType)
+enum class ECatrunMapLandmark : uint8
+{
+	Exit,
+	ClosedDoor,
+	OpenDoor,
+	FixedOpening,
+	CatHole,
+};
+
+USTRUCT()
+struct FCatrunMapMarkerPool
+{
+	GENERATED_BODY()
+	UPROPERTY(Transient) TArray<TObjectPtr<UCanvasPanelSlot>> Slots;
 };
 
 namespace CatrunMinimap
@@ -54,6 +73,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category="Minimap") TSubclassOf<UUserWidget> EnemyMarkerClass;
 	UPROPERTY(EditDefaultsOnly, Category="Minimap") TSubclassOf<UUserWidget> ArmorMarkerClass;
 	UPROPERTY(EditDefaultsOnly, Category="Minimap") TSubclassOf<UUserWidget> CandleMarkerClass;
+	UPROPERTY(EditDefaultsOnly, Category="Minimap") TMap<ECatrunMapLandmark, TSubclassOf<UUserWidget>> LandmarkMarkerClasses;
+	/** Optional UI material with a Floorplan texture parameter. The original baked image supplies geometry and alpha. */
+	UPROPERTY(EditDefaultsOnly, Category="Minimap") TObjectPtr<UMaterialInterface> FloorplanMaterial;
 	UPROPERTY(EditDefaultsOnly, Category="Minimap", meta=(ClampMin="1.0"))
 	float HoldSizeMultiplier = 1.25f;
 	UPROPERTY(EditDefaultsOnly, Category="Minimap", meta=(ClampMin="1.0"))
@@ -86,6 +108,8 @@ private:
 	FVector2D GetFrameInnerSize(const FAnchorData& Layout) const;
 	void ApplyImageProjection() const;
 	void UpdateEnemyMarkers(ECatrunMinimapEnemyKind Kind, TConstArrayView<FVector2D> Positions);
+	void UpdateMarkerPool(TArray<TObjectPtr<UCanvasPanelSlot>>& Markers, TSubclassOf<UUserWidget> MarkerClass,
+		TConstArrayView<FVector2D> Positions, int32 ZOrder);
 	UCanvasPanelSlot* AddMarker(TSubclassOf<UUserWidget> MarkerClass, int32 ZOrder);
 	void UpdateMarker(UCanvasPanelSlot& MarkerSlot, const FVector2D* DisplayUV);
 
@@ -94,6 +118,7 @@ private:
 	UPROPERTY(Transient) TObjectPtr<UCanvasPanelSlot> PlayerMarker;
 	UPROPERTY(Transient) TArray<TObjectPtr<UCanvasPanelSlot>> ArmorMarkers;
 	UPROPERTY(Transient) TArray<TObjectPtr<UCanvasPanelSlot>> CandleMarkers;
+	UPROPERTY(Transient) TMap<ECatrunMapLandmark, FCatrunMapMarkerPool> LandmarkPools;
 	FAnchorData CompactFrameLayout;
 	FSlateRenderTransform MapProjection;
 	FSlateRenderTransform FallbackProjection;
@@ -137,11 +162,13 @@ private:
 	TSharedPtr<FCatrunMinimapTabInput> TabInput;
 #if WITH_DEV_AUTOMATION_TESTS
 	friend class FCatrunMinimapEnemyLifecycleTest;
+	friend class FCatrunMinimapNavigationTest;
 #endif
 
 	void StartTracking(UWorld& World);
-	void TrackEnemy(AActor* Actor);
-	UFUNCTION() void UntrackEnemy(AActor* Actor);
+	void TrackActor(AActor* Actor);
+	UFUNCTION() void UntrackActor(AActor* Actor);
+	void SampleLandmarks();
 	bool AttachWidget(APlayerController& Controller);
 	void DetachWidget();
 	void HideMinimap();
@@ -152,6 +179,9 @@ private:
 	UPROPERTY(Transient) TObjectPtr<UCatrunMinimapWidget> MinimapWidget;
 	TWeakObjectPtr<APlayerController> OwningController;
 	TMap<TWeakObjectPtr<AActor>, ECatrunMinimapEnemyKind> Enemies;
+	// Initial level actors and subsequent spawns share this registration path.
+	TMap<TWeakObjectPtr<AActor>, TWeakObjectPtr<USceneComponent>> Landmarks;
+	TMap<ECatrunMapLandmark, TArray<FVector2D>> LandmarkPositions;
 	TArray<FVector2D, TInlineAllocator<8>> ArmorPositions;
 	TArray<FVector2D, TInlineAllocator<8>> CandlePositions;
 	FDelegateHandle SpawnedHandle;

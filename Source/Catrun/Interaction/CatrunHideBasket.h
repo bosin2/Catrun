@@ -18,6 +18,7 @@ public:
 	virtual void OnConstruction(const FTransform& Transform) override;
 	virtual void PostRegisterAllComponents() override;
 	virtual void PostInitializeComponents() override;
+	virtual void BeginPlay() override;
 
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Basket|State")
 	bool Occupied = false;
@@ -40,6 +41,13 @@ public:
 	TObjectPtr<UAnimationAsset> ClothExitAnimation;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Basket|Animation")
 	TObjectPtr<UAnimationAsset> ClothIdleAnimation;
+	/** F, FR, R, BR, B, BL, L, FL in the cloth reference pose, shared by all skins. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Basket|Animation")
+	TArray<TObjectPtr<UAnimationAsset>> ClothEnterDirections;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Basket|Animation")
+	TArray<TObjectPtr<UAnimationAsset>> ClothExitDirections;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Basket|Animation")
+	TObjectPtr<UAnimationAsset> ClothHiddenAnimation;
 
 	UFUNCTION(BlueprintCallable, Category="Basket")
 	void ClothEnter();
@@ -47,6 +55,10 @@ public:
 	void ClothExit();
 	UFUNCTION(BlueprintCallable, Category="Basket")
 	void ClothIdle();
+	void PlayDirectionalCloth(bool bEntering, const FVector& OutwardDirection, float PlayRate);
+	FVector GetTraversalForward() const;
+	FVector SnapTraversalDirection(const FVector& Direction) const;
+	float GetTraversalDistance(const FVector& Direction, float CardinalDistance) const;
 
 	UFUNCTION(BlueprintPure, Category="Basket")
 	FVector GetHiddenLocation() const;
@@ -59,7 +71,10 @@ private:
 	TWeakObjectPtr<USceneComponent> HiddenAnchor;
 	TWeakObjectPtr<USkeletalMeshComponent> LocalCloth;
 	TWeakObjectPtr<AActor> Occupant;
-	void PlayCloth(UAnimationAsset* Animation, bool bLoop);
+	FVector ClothReferenceForward = FVector(0,-1,0);
+	float ClothSectorSign = 1.f;
+	void InitializeCloth();
+	void PlayCloth(UAnimationAsset* Animation, bool bFreeze, float PlayRate = 1.f);
 #if WITH_EDITOR
 	void RefreshDirectionGuide();
 #endif

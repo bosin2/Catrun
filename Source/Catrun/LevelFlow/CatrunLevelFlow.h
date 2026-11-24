@@ -12,6 +12,7 @@
 class UBoxComponent;
 class UCatrunNoticeWidget;
 class UCatrunPlayHUD;
+class UUserWidget;
 class UCameraComponent;
 class USpringArmComponent;
 class APlayerController;
@@ -27,13 +28,25 @@ struct CATRUN_API FCatrunRestartIntent
 	FString MapPackage;
 	float FadeInDuration = 0.f;
 	bool bContinue = false;
-	bool bRestoreStage2EntryCheckpoint = false;
-	void Request(const FString& Package, float FadeDuration, bool bIsContinue = false, bool bRestoreCheckpoint = false);
+	void Request(const FString& Package, float FadeDuration, bool bIsContinue = false);
 	void Clear();
 	bool Consume(const FString& Package, float& OutFadeDuration);
 };
 
 enum class ECatrunArrivalRestart : uint8 { Preserve, Clear, SkipIntro, Continue };
+enum class ECatrunProgressArrival : uint8 { Resume, FailureRefill, ResetStage, NewRun };
+
+USTRUCT(BlueprintType)
+struct CATRUN_API FCatrunStageClockState
+{
+	GENERATED_BODY()
+	UPROPERTY(BlueprintReadOnly) float RemainingSeconds = 0.f;
+	UPROPERTY(BlueprintReadOnly) float BudgetSeconds = 0.f;
+	UPROPERTY(BlueprintReadOnly) bool bTimed = false;
+	UPROPERTY(BlueprintReadOnly) bool bRunning = false;
+	UPROPERTY(BlueprintReadOnly) float WarningFraction = .3f;
+	UPROPERTY(BlueprintReadOnly) float UrgentFraction = .15f;
+};
 UENUM(BlueprintType)
 enum class ECatrunCheckpointState : uint8 { Idle, Pending, Saved, Failed };
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCatrunCheckpointStateChanged, ECatrunCheckpointState, State);
@@ -46,12 +59,12 @@ class CATRUN_API UCatrunFlowSession : public UGameInstanceSubsystem
 public:
 	virtual void Deinitialize() override;
 	FCatrunRestartIntent RestartIntent;
-	uint64 AcceptTravel(const FString& Package, bool bBeginProgress, bool bCheckpoint, ECatrunArrivalRestart Restart, int8 OnboardingOnArrival = -1, float FadeInDuration = 0.f, bool bRestoreStage2EntryCheckpoint = false);
+	uint64 AcceptTravel(const FString& Package, bool bBeginProgress, bool bCheckpoint, ECatrunArrivalRestart Restart, int8 OnboardingOnArrival = -1, float FadeInDuration = 0.f, ECatrunProgressArrival Progress = ECatrunProgressArrival::Resume);
 	void CancelTravel(uint64 ExpectedToken = 0);
 	void ResolveArrivalRestart(const FString& Package);
 	bool HasRestartArrivalIntent(const FString& CleanPackage) const;
 	bool Arrive(const FString& Package);
-	void SaveArrivalCheckpoint(UWorld& World);
+	void SaveArrivalCheckpoint(UWorld& World, bool bQuiet = false);
 	bool ConsumeArrivalTitle(const FString& Package);
 	int32 GetHighestUnlockedStageIndex();
 	bool IsProgressReadResolved() const { return bProgressLoaded; }
@@ -67,16 +80,39 @@ public:
 	bool HasCompletedOnboarding() const { return bTutorialOnboardingCompleted; }
 	void MarkOnboardingCompleted(const FString& Package);
 	bool IsSavePending() const;
+	float GetRemainingSeconds(FName StageId) const;
+	void AdvanceClock(float DeltaSeconds);
+	void FlushTrackedProgress();
+	FName GetContinueStageId();
 #if WITH_DEV_AUTOMATION_TESTS
-	void SetSaveBackendForTest(ISaveGameSystem* Backend);
+	void SetSaveBackendForTest(ISaveGameSystem* Backend, FSimpleDelegate DrainCallbacks = {}, bool bUseAtomicIO = false);
 #endif
 private:
 	bool EnsureProgressLoaded();
 	void MergeSavedProgress(const UCatrunProgressSave& Save);
-	uint64 BeginCheckpoint(const FString& Package, bool bRetryOnce, TFunction<void(bool, const FString&)> Completion);
-	uint64 EnqueueCheckpoint(FName StageId, uint64 Generation, uint64 Request, bool bRetryOnce, TFunction<void(bool, const FString&)> Completion);
+	uint64 BeginCheckpoint(const FString& Package, bool bRetryOnce, TFunction<void(bool, const FString&)> Completion, bool bQuiet = false);
+	uint64 EnqueueCheckpoint(FName StageId, uint64 Generation, uint64 Request, uint64 Revision, bool bRetryOnce, TFunction<void(bool, const FString&)> Completion);
 	void OnCheckpointQueueIdle();
 	void OnCheckpointStarted();
+	struct FStage1ClockMutation
+	{
+		uint64 Revision;
+		int32 RemainingMs;
+	};
+	void RefillStage1Clock();
+	void CaptureClock();
+	void ReadStageValues(const UCatrunProgressSave& Save);
+	TArray<FStage1ClockMutation> Mutations;
+	uint64 MutationRevision = 0;
+	double Stage1Seconds = -1.;
+	double LocalStage1Seconds = -1.;
+	double Stage2Seconds = -1.;
+	double Stage3Seconds = -1.;
+	FName CurrentStage, LastTrackedStage;
+	bool bClockDirty = false;
+	bool bFlushing = false;
+	bool bRetriedDuringShutdown = false;
+	bool bShowCheckpointNotice = false;
 	TSharedPtr<FCatrunProgressWriter> Writer;
 	uint64 LatestSaveRequest = 0;
 	ECatrunCheckpointState CheckpointState = ECatrunCheckpointState::Idle;
@@ -85,7 +121,7 @@ private:
 	bool bDrawingProgressSnapshot = false;
 	FName HighestUnlockedStageId;
 	FString TitleIntentMap;
-	bool bRestoreCheckpointOnArrival = false;
+	ECatrunProgressArrival ProgressOnArrival = ECatrunProgressArrival::Resume;
 #if WITH_DEV_AUTOMATION_TESTS
 	ISaveGameSystem* SaveBackendForTest = nullptr;
 #endif
@@ -146,6 +182,13 @@ public:
 	TArray<FCatrunStageRoute> Stages;
 	UPROPERTY(Config, EditAnywhere, Category="Camera")
 	TArray<FCatrunStageCameraProfile> CameraProfiles;
+	UPROPERTY(Config, EditAnywhere, Category="Stage Clock", meta=(ClampMin="1", ClampMax="86400")) float Stage1BudgetSeconds = 600.f;
+	UPROPERTY(Config, EditAnywhere, Category="Stage Clock", meta=(ClampMin="1", ClampMax="86400")) float Stage2BudgetSeconds = 900.f;
+	/** Initial Stage3 tuning; each attempt starts with the full budget. */
+	UPROPERTY(Config, EditAnywhere, Category="Stage Clock", meta=(ClampMin="1", ClampMax="86400")) float Stage3BudgetSeconds = 1200.f;
+	UPROPERTY(Config, EditAnywhere, Category="Stage Clock", meta=(ClampMin="0", ClampMax="1")) float WarningFraction = .3f;
+	UPROPERTY(Config, EditAnywhere, Category="Stage Clock", meta=(ClampMin="0", ClampMax="1")) float UrgentFraction = .15f;
+	float GetClockBudget(FName StageId) const;
 
 	int32 FindStageIndex(const FString& PackageName) const;
 	float GetCameraDistanceScale(FName StageId) const;
@@ -178,7 +221,7 @@ public:
 	/** The owner restores its own presentation after a same-world engine failure. Rejection returns false without invoking Failure. */
 	bool CompleteStageWithFailure(UObject* Owner, TFunction<void(const FString&)> Failure);
 	/** Same-map recovery also supports loaded development maps outside the canonical stage routes. */
-	bool RequestSameMapRestart(UObject* Owner, float FadeInDuration, TFunction<void(const FString&)> Failure = {}, bool bRestoreStage2EntryCheckpoint = false);
+	bool RequestSameMapRestart(UObject* Owner, float FadeInDuration, TFunction<void(const FString&)> Failure = {}, bool bFailureRestart = false);
 	/** Cancels only this surviving world's pending request belonging to Owner. Never invokes its failure callback. */
 	bool AbortOwnedTravel(const UObject* Owner);
 	bool ReserveExitTransition(UObject* Owner);
@@ -192,7 +235,10 @@ public:
 	bool ShouldSkipStageIntro();
 	bool IsStage2PortalArrival() const;
 	float GetRestartFadeInDuration();
-	bool ShouldRestoreStage2EntryCheckpoint();
+	UFUNCTION(BlueprintPure, Category="Catrun|Stage Clock")
+	FCatrunStageClockState GetStageClockState() const;
+	UFUNCTION(BlueprintPure, Category="Catrun|Stage Clock")
+	bool IsGameplayTimeAdvancing() const;
     bool IsTitleWindowOpen();
     bool ClaimArrivalTitleGate(UCatrunExitTransitionComponent& Owner);
     void ReleaseArrivalTitleGate(const UCatrunExitTransitionComponent& Owner);
@@ -214,7 +260,7 @@ public:
 private:
 	bool TravelTo(const TSoftObjectPtr<UWorld>& Map, const FString& Options = FString(), bool bBeginProgress = false,
 		bool bCheckpoint = false, ECatrunArrivalRestart Restart = ECatrunArrivalRestart::Clear, UObject* ExitOwner = nullptr, int8 Onboarding = -1,
-		UObject* FailureOwner = nullptr, TFunction<void(const FString&)> Failure = {}, float FadeInDuration = 0.f, bool bReloadCurrentWorld = false, bool bRestoreStage2EntryCheckpoint = false);
+		UObject* FailureOwner = nullptr, TFunction<void(const FString&)> Failure = {}, float FadeInDuration = 0.f, bool bReloadCurrentWorld = false, ECatrunProgressArrival Progress = ECatrunProgressArrival::Resume);
 	bool CompleteStageInternal(UObject* ExitOwner, UObject* FailureOwner = nullptr, TFunction<void(const FString&)> Failure = {},
 		const TCHAR* ArrivalOption = TEXT(""));
 	void ClearFailedTravel();
@@ -225,7 +271,10 @@ private:
 	bool bRestartIntentResolved = false;
 	bool bSkipStageIntro = false;
 	bool bContinueArrival = false;
-	bool bRestoreStage2EntryCheckpoint = false;
+	FName PlayableStage;
+	bool bGameplayWasAdvancing = false;
+	bool bTimeoutAttempted = false;
+	bool bStatusClassResolved = false;
     bool bStageTitlePending = false;
     bool bArrivalTitleReleased = false;
     TWeakObjectPtr<UCatrunExitTransitionComponent> ArrivalTitleOwner;
@@ -246,6 +295,7 @@ private:
 	FDelegateHandle TravelFailureHandle;
 	UPROPERTY(Transient)
 	TObjectPtr<UCatrunPlayHUD> PlayHUD;
+	UPROPERTY(Transient) TObjectPtr<UUserWidget> PlayerStatusHUD;
 };
 
 UCLASS()

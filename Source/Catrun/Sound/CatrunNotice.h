@@ -12,7 +12,8 @@ enum class ECatrunNoticePolicy : uint8
 {
 	Gameplay,
 	DeferredGameplay,
-	BlockedRecovery
+	BlockedRecovery,
+	StageTimeout
 };
 
 /** A line of text at the bottom of the screen. Built in code, so it needs no widget blueprint. */
@@ -51,6 +52,7 @@ public:
 
 	// A new notice replaces the one on screen. DeferredGameplay counts only readable time.
 	void ShowNotice(const FText& Text, float Duration, ECatrunNoticePolicy Policy = ECatrunNoticePolicy::Gameplay);
+	void ClearStageTimeoutNotice();
 	static FText BellDeniedText();
 
 	virtual bool ShouldCreateSubsystem(UObject* Outer) const override;
@@ -65,6 +67,7 @@ private:
 	TObjectPtr<UCatrunNoticeWidget> Widget;
 
 	FTimerHandle HideTimer;
+	bool bStageTimeoutNotice = false;
 };
 
 /** Available in the original tutorial without installing the replacement play HUD. */

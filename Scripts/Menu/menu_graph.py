@@ -12,7 +12,9 @@ def ui(method, *args):
     return UMG.call_method(method, args=args)
 
 def widgets(bp):
-    return {i.widget.get_name(): i.widget for i in ui('GetWidgets', bp).widgets}
+    # UE 5.8 includes null placeholders for unbound native BindWidget properties.
+    # They describe future slots, not widgets already authored in the tree.
+    return {i.widget.get_name(): i.widget for i in ui('GetWidgets', bp).widgets if i.widget}
 
 def properties(obj, **values):
     key = obj.get_class().get_path_name()

@@ -59,11 +59,15 @@ void ACatrunDoor::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// Remember how the leaf was placed (hinge on the left) and how wide it is.
+	// Preserve the authored seating pose, including a mesh pivot outside its bounds.
 	ClosedScale = DoorMesh->GetRelativeScale3D();
+	ClosedLocation = DoorMesh->GetRelativeLocation();
+	ClosedRotation = DoorMesh->GetRelativeRotation().Quaternion();
 	if (const UStaticMesh* Mesh = DoorMesh->GetStaticMesh())
 	{
-		LeafWidth = Mesh->GetBounds().BoxExtent.X * 2.f * FMath::Abs(ClosedScale.X);
+		// Reflect around the bounds' center, not their width: min X need not be zero.
+		// Width alone shifted the tutorial's -1.7 cm pivot overhang by 3.4 cm.
+		OppositeHingeOffset = ClosedRotation.RotateVector(FVector(2.f * Mesh->GetBounds().Origin.X * ClosedScale.X, 0.f, 0.f));
 	}
 
 	bIsOpen = bStartOpen;
@@ -78,13 +82,19 @@ void ACatrunDoor::BeginPlay()
 void ACatrunDoor::SetHingeOnRight(bool bOnRight)
 {
 	// Mirror the leaf around the middle of the doorway: same closed look, hinge on the other edge.
-	DoorMesh->SetRelativeLocation(FVector(bOnRight ? LeafWidth : 0.f, 0.f, 0.f));
+	DoorMesh->SetRelativeLocation(ClosedLocation + (bOnRight ? OppositeHingeOffset : FVector::ZeroVector));
 	DoorMesh->SetRelativeScale3D(FVector(bOnRight ? -ClosedScale.X : ClosedScale.X, ClosedScale.Y, ClosedScale.Z));
+}
+
+void ACatrunDoor::ApplyLeafAngle(float Angle)
+{
+	CurrentLeafAngle = Angle;
+	DoorMesh->SetRelativeRotation(ClosedRotation * FQuat(FVector::UpVector, FMath::DegreesToRadians(Angle)));
 }
 
 void ACatrunDoor::SnapToState()
 {
-	DoorMesh->SetRelativeRotation(FRotator(0.f, bIsOpen ? OpenYaw : 0.f, 0.f));
+	ApplyLeafAngle(bIsOpen ? OpenYaw : 0.f);
 	DoorMesh->SetCollisionEnabled(bIsOpen ? ECollisionEnabled::NoCollision : ECollisionEnabled::QueryAndPhysics);
 }
 
@@ -144,7 +154,7 @@ void ACatrunDoor::DriveWithPoint(const FVector& PointWorld)
 	// How far the hand has swung around the hinge since it took hold = how far the leaf turned.
 	const float Swung = FMath::FindDeltaAngleDegrees(HandReferenceAngle, Angle);
 	HandProgress = FMath::Max(HandProgress, FMath::Clamp(Swung / OpenYaw, 0.f, 1.f));
-	DoorMesh->SetRelativeRotation(FRotator(0.f, OpenYaw * HandProgress, 0.f));
+	ApplyLeafAngle(OpenYaw * HandProgress);
 }
 
 void ACatrunDoor::EndHandOpen()
@@ -179,9 +189,9 @@ void ACatrunDoor::Tick(float DeltaSeconds)
 
 	// Turn the leaf toward the target angle at a constant speed.
 	const float TargetYaw = bIsOpen ? OpenYaw : 0.f;
-	const float Speed = FMath::Abs(OpenYaw) / OpenDuration;
-	const float NewYaw = FMath::FInterpConstantTo(DoorMesh->GetRelativeRotation().Yaw, TargetYaw, DeltaSeconds, Speed);
-	DoorMesh->SetRelativeRotation(FRotator(0.f, NewYaw, 0.f));
+	const float Speed = FMath::Abs(OpenYaw) / FMath::Max(OpenDuration, .01f);
+	const float NewYaw = FMath::FInterpConstantTo(CurrentLeafAngle, TargetYaw, DeltaSeconds, Speed);
+	ApplyLeafAngle(NewYaw);
 
 	if (FMath::IsNearlyEqual(NewYaw, TargetYaw))
 	{

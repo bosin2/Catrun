@@ -12,9 +12,13 @@ import hashlib
 import json
 import math
 import time
+import sys
 import traceback
 from pathlib import Path
 import unreal as u
+
+sys.path.insert(0,str(Path(u.Paths.project_dir()).resolve()/'Scripts/GameplayRepair'))
+import stage2_arrival_revision as revision
 
 OUT=Path(u.Paths.project_saved_dir()).resolve()/'StageRevision20261123/ArrivalRuntime'/datetime.datetime.now().strftime('%Y%m%d-%H%M%S-%f')
 OUT.mkdir(parents=True,exist_ok=False)
@@ -25,9 +29,17 @@ if ED.get_editor_world().get_path_name().split('.')[0]!='/Game/Maps/Stage1':
     assert LEVEL.load_level('/Game/Maps/Stage1')
 STATE={'start':time.monotonic(),'phase':'stage1','samples':[],'events':[],
        'scope':'Offscreen PIE game backbuffer; frame images exclude Slate overlays. Widget visibility is recorded separately.'}
-SHOT_WINDOWS=(('emergence',10,38),('landing',44,79),('shoulder',80,127),('face',128,152),
-              ('statue',167,184),('pan',185,209),('plate',210,223),('gate',249,261),
-              ('reaction',262,285),('return',292,337),('blend',346,374))
+CUT_RANGES=revision.CUT_RANGES
+HOLDS={name:(a,b) for name,a,b,*_ in revision.GAZE_HOLDS}
+SHOT_WINDOWS=(('emergence',revision.REVEAL,revision.SPANS['Landing'][0]-1),
+              ('landing',revision.SPANS['Landing'][0],CUT_RANGES['Entrance'][1]-1),
+              ('shoulder',CUT_RANGES['RearWalk'][0],CUT_RANGES['RearWalk'][1]-1),
+              ('face',CUT_RANGES['Face'][0],CUT_RANGES['Face'][1]-1),
+              ('statue',*HOLDS['statue']),('pan',HOLDS['statue'][1]+1,HOLDS['plate'][0]-1),
+              ('plate',*HOLDS['plate']),('gate',*HOLDS['gate']),
+              ('reaction',CUT_RANGES['FaceReturn'][0],revision.FILL_FADE_START-1),
+              ('return',revision.FILL_FADE_START,revision.HANDOFF_FRAME-1),
+              ('blend',revision.HANDOFF_FRAME+8,revision.END-4))
 
 
 def persist(filename,checkpoint):
@@ -378,7 +390,7 @@ def tick(delta):
                             STATE['handoff_boundary_delta']=delta
                             assert delta['position_cm']<3. and delta['width_cm']<8. and max(delta['pitch_deg'],delta['yaw_deg'])<1.2,delta
                         blend.append(sample)
-                    elif f>=286:
+                    elif f>=CUT_RANGES['FaceReturn'][0]:
                         assert image['projection']=='orthographic'
                         STATE['before_native_blend']={'frame':f,'view_pos':image['view_pos'],'view_rot':image['view_rot'],
                                                       'width':image['projected_ortho_width']}
@@ -387,7 +399,8 @@ def tick(delta):
                     visuals=player.get_bound_objects(sequence.get_binding_id(visual_binding))
                     if visuals:
                         image['visual']=cat_image_state(visuals[0])
-                    if 153<=f<262:
+                    puzzle_first,puzzle_last=CUT_RANGES['Puzzle']
+                    if puzzle_first<=f<puzzle_last:
                         assert image.get('projection')=='perspective' and 32.<image['view_pos'][2]<47.,(f,image)
                         assert image['visual']['visible'] and not image['real']['visible'],(f,image)
                         pitch,yaw,roll=image['view_rot']

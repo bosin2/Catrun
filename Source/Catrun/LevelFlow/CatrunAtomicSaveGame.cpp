@@ -35,16 +35,6 @@ ISaveGameSystem::ESaveExistsResult FCatrunAtomicSaveGameSystem::DoesSaveGameExis
 	return (Error == ERROR_FILE_NOT_FOUND || Error == ERROR_PATH_NOT_FOUND) ? ESaveExistsResult::DoesNotExist : ESaveExistsResult::UnspecifiedError;
 }
 
-void FCatrunAtomicSaveGameSystem::CommitIfUnchangedAsync(FString Name, TSharedPtr<const TArray<uint8>> Expected,
-	TSharedRef<const TArray<uint8>> Data, TFunction<void(bool)> Completion)
-{
-	AsyncTaskPipe.Launch(UE_SOURCE_LOCATION, [this, Name = MoveTemp(Name), Expected = MoveTemp(Expected), Data, Completion = MoveTemp(Completion)]() mutable
-	{
-		const bool bOK = CommitIfUnchanged(*Name, Expected.Get(), *Data);
-		OnAsyncComplete([Completion = MoveTemp(Completion), bOK]() { Completion(bOK); });
-	}, UE::Tasks::ETaskPriority::Default, UE::Tasks::EExtendedTaskPriority::None, UE::Tasks::ETaskFlags::DoNotRunInsideBusyWait);
-}
-
 bool FCatrunAtomicSaveGameSystem::CommitIfUnchanged(const TCHAR* Name, const TArray<uint8>* Expected, const TArray<uint8>& Data)
 {
 	return Commit(Name, Data, Expected != nullptr, Expected);

@@ -2,10 +2,12 @@
 
 #include "Camera/PlayerCameraManager.h"
 #include "Components/Border.h"
+#include "Components/BoxComponent.h"
 #include "Components/CanvasPanel.h"
 #include "Components/CanvasPanelSlot.h"
 #include "Components/Image.h"
 #include "Components/SceneComponent.h"
+#include "Components/StaticMeshComponent.h"
 #include "Engine/Console.h"
 #include "Engine/GameInstance.h"
 #include "Engine/GameViewportClient.h"
@@ -19,13 +21,17 @@
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerController.h"
 #include "InputCoreTypes.h"
+#include "Interaction/CatrunStatuePuzzle.h"
 #include "LevelFlow/CatrunLevelFlow.h"
 #include "LevelFlow/CatrunPlayHUD.h"
 #include "Math/InverseRotationMatrix.h"
+#include "Materials/MaterialInstanceDynamic.h"
 #include "Monster/CatrunArmor.h"
 #include "Monster/CatrunCandle.h"
 #include "SceneView.h"
 #include "Settings/CatrunSettingsSubsystem.h"
+#include "Sound/CatrunDoor.h"
+#include "Sound/CatrunNoBellZone.h"
 #include "Slate/SceneViewport.h"
 #include "Slate/SObjectWidget.h"
 #include "Widgets/SViewport.h"
@@ -36,6 +42,9 @@ namespace
 	constexpr float DefaultHoldTransitionSeconds = .18f;
 	constexpr double MaxHeldWorldPixelScale = .90;
 	const FVector2D MapSurfaceCenter(.5, .5);
+	const FName ExitTag(TEXT("CatrunMapExit"));
+	const FName HoleTag(TEXT("CatrunMapCatHole"));
+	const FName FixedOpeningTag(TEXT("CatrunMapFixedOpening"));
 
 	UGameViewportClient* GetViewportClient(const APlayerController* Controller)
 	{
@@ -300,6 +309,12 @@ bool UCatrunMinimapWidget::InitializeMap(ACatrunMinimapPresenter& InPresenter)
 	SetIsFocusable(false);
 	SetVisibility(ESlateVisibility::HitTestInvisible);
 	MapBackground->SetBrushFromTexture(InPresenter.BackgroundTexture, false);
+	if (FloorplanMaterial)
+	{
+		MapBackground->SetBrushFromMaterial(FloorplanMaterial);
+		if (auto* Material = MapBackground->GetDynamicMaterial())
+			Material->SetTextureParameterValue(TEXT("Floorplan"), InPresenter.BackgroundTexture);
+	}
 	MapBackground->SetRenderTransformPivot(MapSurfaceCenter);
 	PlayerMarker = AddMarker(PlayerMarkerClass, 1);
 	return PlayerMarker != nullptr;
@@ -346,6 +361,13 @@ void UCatrunMinimapWidget::NativeTick(const FGeometry& Geometry, float DeltaSeco
 	}
 	UpdateEnemyMarkers(ECatrunMinimapEnemyKind::Armor, Map->ArmorPositions);
 	UpdateEnemyMarkers(ECatrunMinimapEnemyKind::Candle, Map->CandlePositions);
+	for (const auto& Style : LandmarkMarkerClasses)
+	{
+		const TArray<FVector2D>* Positions = Map->LandmarkPositions.Find(Style.Key);
+		const TConstArrayView<FVector2D> ViewPositions = Positions ? MakeArrayView(*Positions) : TConstArrayView<FVector2D>();
+		UpdateMarkerPool(LandmarkPools.FindOrAdd(Style.Key).Slots, Style.Value, ViewPositions,
+			Style.Key == ECatrunMapLandmark::Exit ? -1 : -2);
+	}
 }
 
 void UCatrunMinimapWidget::AdvanceHoldAnimation(bool bHeld, float DeltaSeconds)
@@ -499,7 +521,12 @@ void UCatrunMinimapWidget::UpdateEnemyMarkers(ECatrunMinimapEnemyKind Kind, TCon
 	TSubclassOf<UUserWidget> MarkerClass = bArmor ? ArmorMarkerClass : CandleMarkerClass;
 	if (!MarkerClass)
 		MarkerClass = EnemyMarkerClass;
+	UpdateMarkerPool(Markers, MarkerClass, Positions, 0);
+}
 
+void UCatrunMinimapWidget::UpdateMarkerPool(TArray<TObjectPtr<UCanvasPanelSlot>>& Markers,
+	TSubclassOf<UUserWidget> MarkerClass, TConstArrayView<FVector2D> Positions, int32 ZOrder)
+{
 	int32 Index = 0;
 	for (const FVector2D& Position : Positions)
 	{
@@ -508,7 +535,7 @@ void UCatrunMinimapWidget::UpdateEnemyMarkers(ECatrunMinimapEnemyKind Kind, TCon
 			continue;
 		if (Index == Markers.Num())
 		{
-			UCanvasPanelSlot* MarkerSlot = AddMarker(MarkerClass, 0);
+			UCanvasPanelSlot* MarkerSlot = MarkerClass ? AddMarker(MarkerClass, ZOrder) : nullptr;
 			if (!MarkerSlot)
 				break;
 			Markers.Add(MarkerSlot);
@@ -546,13 +573,11 @@ void ACatrunMinimapPresenter::StartTracking(UWorld& World)
 	if (SpawnedHandle.IsValid())
 		return;
 
-	SpawnedHandle = World.AddOnActorSpawnedHandler(FOnActorSpawned::FDelegate::CreateUObject(this, &ThisClass::TrackEnemy));
+	SpawnedHandle = World.AddOnActorSpawnedHandler(FOnActorSpawned::FDelegate::CreateUObject(this, &ThisClass::TrackActor));
 	if (auto* Settings = World.GetSubsystem<UCatrunSettingsSubsystem>())
 		Settings->OnSettingsOpened.AddUObject(this, &ThisClass::HideMinimap);
-	for (TActorIterator<ACatrunArmor> Armor(&World); Armor; ++Armor)
-		TrackEnemy(*Armor);
-	for (TActorIterator<ACatrunCandle> Candle(&World); Candle; ++Candle)
-		TrackEnemy(*Candle);
+	for (TActorIterator<AActor> It(&World); It; ++It)
+		TrackActor(*It);
 
 	FTimerManagerTimerParameters TimerParameters;
 	TimerParameters.bLoop = true;
@@ -574,29 +599,91 @@ void ACatrunMinimapPresenter::EndPlay(const EEndPlayReason::Type Reason)
 	for (const auto& Enemy : Enemies)
 	{
 		if (AActor* Actor = Enemy.Key.Get())
-			Actor->OnDestroyed.RemoveDynamic(this, &ThisClass::UntrackEnemy);
+			Actor->OnDestroyed.RemoveDynamic(this, &ThisClass::UntrackActor);
 	}
+	for (const auto& Landmark : Landmarks)
+		if (AActor* Actor = Landmark.Key.Get())
+			Actor->OnDestroyed.RemoveDynamic(this, &ThisClass::UntrackActor);
 	Enemies.Reset();
+	Landmarks.Reset();
+	LandmarkPositions.Reset();
 	DetachWidget();
 	Super::EndPlay(Reason);
 }
 
-void ACatrunMinimapPresenter::TrackEnemy(AActor* Actor)
+void ACatrunMinimapPresenter::TrackActor(AActor* Actor)
 {
 	if (!IsValid(Actor) || Actor->IsActorBeingDestroyed() || Actor->GetWorld() != GetWorld())
 		return;
 
 	const bool bArmor = Actor->IsA<ACatrunArmor>();
-	if (!bArmor && !Actor->IsA<ACatrunCandle>())
+	if (bArmor || Actor->IsA<ACatrunCandle>())
+		Enemies.Add(Actor, bArmor ? ECatrunMinimapEnemyKind::Armor : ECatrunMinimapEnemyKind::Candle);
+	else if (auto* Exit = Cast<ACatrunStageExit>(Actor))
+		Landmarks.Add(Actor, Exit->Trigger.Get());
+	else if (Actor->ActorHasTag(ExitTag))
+	{
+		if (auto* Trigger = Actor->FindComponentByClass<UBoxComponent>())
+			Landmarks.Add(Actor, Trigger);
+		else
+			return;
+	}
+	else if (auto* Zone = Cast<ACatrunNoBellZone>(Actor); Zone && Zone->ActorHasTag(HoleTag))
+		Landmarks.Add(Actor, Zone->Box.Get());
+	else if (Actor->IsA<ACatrunDoor>() || Actor->IsA<ACatrunStatuePuzzle>() || Actor->ActorHasTag(FixedOpeningTag))
+		Landmarks.Add(Actor, Actor->GetRootComponent());
+	else
 		return;
 
-	Enemies.Add(Actor, bArmor ? ECatrunMinimapEnemyKind::Armor : ECatrunMinimapEnemyKind::Candle);
-	Actor->OnDestroyed.AddUniqueDynamic(this, &ThisClass::UntrackEnemy);
+	Actor->OnDestroyed.AddUniqueDynamic(this, &ThisClass::UntrackActor);
 }
 
-void ACatrunMinimapPresenter::UntrackEnemy(AActor* Actor)
+void ACatrunMinimapPresenter::UntrackActor(AActor* Actor)
 {
 	Enemies.Remove(Actor);
+	Landmarks.Remove(Actor);
+}
+
+void ACatrunMinimapPresenter::SampleLandmarks()
+{
+	for (auto& Bucket : LandmarkPositions)
+		Bucket.Value.Reset();
+	const auto Add = [this](ECatrunMapLandmark Kind, const FVector& Location)
+	{
+		FVector2D UV;
+		if (CatrunMinimap::Project(FVector2D(Location), MapCenter, MapSize, CaptureYawDegrees, UV))
+			LandmarkPositions.FindOrAdd(Kind).Add(UV);
+	};
+	for (const auto& Item : Landmarks)
+	{
+		AActor* Actor = Item.Key.Get();
+		if (!Actor) continue;
+		if (const auto* Door = Cast<ACatrunDoor>(Actor))
+		{
+			const auto Kind = Door->ActorHasTag(FixedOpeningTag) ? ECatrunMapLandmark::FixedOpening :
+				(Door->IsOpen() ? ECatrunMapLandmark::OpenDoor : ECatrunMapLandmark::ClosedDoor);
+			Add(Kind, Door->GetDoorwayCenter());
+		}
+		else if (const auto* Puzzle = Cast<ACatrunStatuePuzzle>(Actor))
+		{
+			for (const auto& Link : Puzzle->Links)
+			{
+				if (!IsValid(Link.Gate) || !Link.InitialGateBounds.IsValid) continue;
+				// Reset can clear the solve latch before the physical bars rise through the floor.
+				const bool bRecessed = Link.InitialGateBounds.Max.Z + Link.GateOffset
+					<= Link.InitialGateBounds.Min.Z + Link.GateFloorOffset;
+				Add(Link.bCompleted || bRecessed ? ECatrunMapLandmark::OpenDoor : ECatrunMapLandmark::ClosedDoor,
+					Link.InitialGateBounds.GetCenter());
+			}
+		}
+		else if (const auto* Anchor = Item.Value.Get())
+		{
+			const auto Kind = Actor->ActorHasTag(FixedOpeningTag) ? ECatrunMapLandmark::FixedOpening :
+				(Actor->IsA<ACatrunNoBellZone>() ? ECatrunMapLandmark::CatHole : ECatrunMapLandmark::Exit);
+			const auto* FrameMesh = Cast<UStaticMeshComponent>(Anchor);
+			Add(Kind, FrameMesh ? FrameMesh->Bounds.Origin : Anchor->GetComponentLocation());
+		}
+	}
 }
 
 bool ACatrunMinimapPresenter::AttachWidget(APlayerController& Controller)
@@ -697,6 +784,7 @@ void ACatrunMinimapPresenter::UpdateMinimap()
 	ArmorPositions.Reset();
 	CandlePositions.Reset();
 	FVector2D UV;
+	SampleLandmarks();
 	for (const auto& Enemy : Enemies)
 	{
 		if (ProjectActor(Enemy.Key.Get(), UV))

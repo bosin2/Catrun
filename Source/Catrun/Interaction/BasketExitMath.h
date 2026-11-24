@@ -9,29 +9,35 @@ namespace CatrunBasket
 		return (FMath::FloorToInt((Angle + 22.5f) / 45.f) % 8 + 8) % 8;
 	}
 
-	// Entry and exit share the physical open half: exact sides are allowed, the
-	// hinge rear is never opened by camera-sector rounding. Aligned input retains
-	// five directions; off-grid rotations may expose four physically valid keys.
+	// The loose cover has no closed rear. Geometry, not a hinge sector, blocks travel.
 	inline bool IsDirectionAllowed(const FVector& Direction, const FVector& BasketForward, float CameraYaw)
 	{
-		const FVector FlatDirection=Direction.GetSafeNormal2D();
-		const FVector FlatForward=BasketForward.GetSafeNormal2D();
-		if (FlatDirection.IsNearlyZero() || FlatForward.IsNearlyZero()
-			|| FVector::DotProduct(FlatDirection,FlatForward)<-.0001f) return false;
-		const int32 Difference = FMath::Abs(DirectionSector(Direction, CameraYaw)
-			- DirectionSector(BasketForward, CameraYaw));
-		return FMath::Min(Difference, 8 - Difference) <= 2;
+		return !Direction.ContainsNaN() && !Direction.GetSafeNormal2D().IsNearlyZero();
 	}
 
-	// 카메라 기준 WASD. 키를 놓거나 뒤쪽 방향을 누르면 마지막 선택을 유지한다.
+	inline FVector SnapDirection(const FVector& Direction, const FVector& ReferenceForward)
+	{
+		if (Direction.GetSafeNormal2D().IsNearlyZero()) return FVector::ZeroVector;
+		const float Yaw = ReferenceForward.GetSafeNormal2D().Rotation().Yaw;
+		return FRotator(0, Yaw + DirectionSector(Direction, Yaw)*45.f, 0).Vector();
+	}
+
+	// One key per camera direction. Chords retain a held selection or prefer the
+	// forward/back axis; they never create a fifth diagonal input requirement.
 	inline FVector SelectDirection(float CameraYaw, float ForwardAxis, float RightAxis,
 		const FVector& Previous, const FVector& BasketForward)
 	{
 		const FRotationMatrix Camera(FRotator(0, CameraYaw, 0));
-		const FVector Desired = (Camera.GetUnitAxis(EAxis::X) * ForwardAxis
-			+ Camera.GetUnitAxis(EAxis::Y) * RightAxis).GetSafeNormal2D();
-		return IsDirectionAllowed(Desired, BasketForward, CameraYaw)
-			? Desired : Previous;
+		if (FMath::IsNearlyZero(ForwardAxis) && FMath::IsNearlyZero(RightAxis)) return Previous;
+		// The actual exit follows the screen/camera axes exactly, never the basket axes.
+		const FVector F = Camera.GetUnitAxis(EAxis::X)*FMath::Sign(ForwardAxis);
+		const FVector R = Camera.GetUnitAxis(EAxis::Y)*FMath::Sign(RightAxis);
+		if (!FMath::IsNearlyZero(ForwardAxis) && !FMath::IsNearlyZero(RightAxis))
+		{
+			if (Previous.Equals(F,.001) || Previous.Equals(R,.001)) return Previous;
+			return FMath::Abs(RightAxis)>FMath::Abs(ForwardAxis) ? R : F;
+		}
+		return FMath::IsNearlyZero(ForwardAxis) ? R : F;
 	}
 
 	inline FVector ArcPoint(const FVector& Start, const FVector& End, float Height, float T)

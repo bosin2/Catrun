@@ -1,0 +1,1667 @@
+{
+  "phase": "shutdown",
+  "events": [
+    {
+      "phase": "menu",
+      "wall": 3.3429999999934807
+    },
+    {
+      "phase": "continue_arrival",
+      "wall": 4.875
+    },
+    {
+      "phase": "sprint",
+      "wall": 5.655999999959022
+    },
+    {
+      "phase": "recovery",
+      "wall": 6.64000000001397,
+      "game": 1.706993117928505,
+      "readout": {
+        "game": 1.706993117928505,
+        "stamina": 81.86013793945312,
+        "sprinting": true,
+        "cap": 134.0,
+        "xyz": [
+          1375.0,
+          3595.590495159462,
+          26.2
+        ]
+      }
+    },
+    {
+      "phase": "options_paused",
+      "wall": 8.39000000001397,
+      "recovered": 100.0,
+      "game": 3.4508726187050343
+    },
+    {
+      "phase": "options_resumed",
+      "wall": 9.234000000054948,
+      "held": {
+        "RemainingSeconds": 896.9491577148438,
+        "BudgetSeconds": 900.0,
+        "bRunning": false,
+        "bTimed": true
+      }
+    },
+    {
+      "phase": "practice_push",
+      "wall": 9.64000000001397
+    },
+    {
+      "phase": "capture_admitted",
+      "wall": 21.09299999999348
+    },
+    {
+      "phase": "capture_reload",
+      "wall": 21.125,
+      "accepted": {
+        "armor": "Armor_02",
+        "phase": "<CatrunCapturePhase.FRAMING: 1>",
+        "session": 1
+      }
+    },
+    {
+      "phase": "reset_reload",
+      "wall": 30.75
+    },
+    {
+      "phase": "reset_verified",
+      "wall": 31.155999999959022
+    },
+    {
+      "phase": "timeout_arm",
+      "wall": 31.29599999997299
+    },
+    {
+      "phase": "natural_timeout",
+      "wall": 31.68700000003446,
+      "start": {
+        "RemainingSeconds": 6.0,
+        "BudgetSeconds": 6.0,
+        "bRunning": true,
+        "bTimed": true
+      }
+    },
+    {
+      "phase": "timeout_stable",
+      "wall": 39.75,
+      "clock": {
+        "RemainingSeconds": 6.0,
+        "BudgetSeconds": 6.0,
+        "bRunning": true,
+        "bTimed": true
+      }
+    }
+  ],
+  "readouts": [
+    {
+      "game": 0.800000011920929,
+      "stamina": 100.0,
+      "sprinting": false,
+      "cap": 79.0,
+      "xyz": [
+        1375.0,
+        3700.0,
+        26.2
+      ]
+    },
+    {
+      "game": 0.9740919172763824,
+      "stamina": 96.5181655883789,
+      "sprinting": true,
+      "cap": 134.0,
+      "xyz": [
+        1375.0,
+        3691.438120036858,
+        26.2
+      ]
+    },
+    {
+      "game": 1.0913704186677933,
+      "stamina": 94.17259216308594,
+      "sprinting": true,
+      "cap": 134.0,
+      "xyz": [
+        1375.0,
+        3678.0839368603974,
+        26.2
+      ]
+    },
+    {
+      "game": 1.2364554181694984,
+      "stamina": 91.27088928222656,
+      "sprinting": true,
+      "cap": 134.0,
+      "xyz": [
+        1375.0,
+        3658.642546927169,
+        26.2
+      ]
+    },
+    {
+      "game": 1.3346840180456638,
+      "stamina": 89.30632019042969,
+      "sprinting": true,
+      "cap": 134.0,
+      "xyz": [
+        1375.0,
+        3645.479914543763,
+        26.2
+      ]
+    },
+    {
+      "game": 1.4277250170707703,
+      "stamina": 87.44550323486328,
+      "sprinting": true,
+      "cap": 134.0,
+      "xyz": [
+        1375.0,
+        3633.0124206743985,
+        26.2
+      ]
+    },
+    {
+      "game": 1.515103816986084,
+      "stamina": 85.69792175292969,
+      "sprinting": true,
+      "cap": 134.0,
+      "xyz": [
+        1375.0,
+        3621.3036614857465,
+        26.2
+      ]
+    },
+    {
+      "game": 1.6184607185423374,
+      "stamina": 83.63078308105469,
+      "sprinting": true,
+      "cap": 134.0,
+      "xyz": [
+        1375.0,
+        3607.4538366772085,
+        26.2
+      ]
+    },
+    {
+      "game": 1.706993117928505,
+      "stamina": 81.86013793945312,
+      "sprinting": true,
+      "cap": 134.0,
+      "xyz": [
+        1375.0,
+        3595.590495159462,
+        26.2
+      ]
+    }
+  ],
+  "started": 788146.5,
+  "isolated_slot": "C:\\Users\\whghk\\Catrun\\Saved\\Stage3Integration20261125\\ExpansionUser\\Saved\\SaveGames\\CatrunProgress.sav",
+  "chapter_budget": 900.0,
+  "seed": {
+    "sha256": "200c09c4b714b0b2ee29e3e08df225488a1655ae8a828bea6d25b5a4fc47a3bc",
+    "write_ns": 1795534698361100200,
+    "schema": 4,
+    "stage1_ms": 586875,
+    "stage2_ms": 872250,
+    "mask": 7,
+    "onboarding": true
+  },
+  "background_throttle_override_requested": true,
+  "authored_links": {
+    "A": {
+      "bCompleted": false,
+      "bPressed": false,
+      "GateOffset": 0.0,
+      "RequiredGateTravel": 0.0,
+      "Statue": {
+        "actor": "S2_Prop_Statue_A",
+        "origin": [
+          2075.0,
+          2775.0,
+          0.1
+        ],
+        "center": [
+          2075.0,
+          2774.9999980926514,
+          75.09999237060546
+        ]
+      },
+      "Plate": {
+        "actor": "S2_Prop_Plate_A_Plate",
+        "origin": [
+          2075.0,
+          2555.0,
+          5.1
+        ],
+        "center": [
+          2075.0,
+          2555.0,
+          5.5999997615814205
+        ]
+      },
+      "Gate": {
+        "actor": "S2_Gate_02_Bars",
+        "origin": [
+          1525.0,
+          1260.0,
+          0.0
+        ],
+        "center": [
+          1525.0,
+          1259.9999803304672,
+          122.99999984603996
+        ]
+      }
+    },
+    "B": {
+      "bCompleted": false,
+      "bPressed": false,
+      "GateOffset": 0.0,
+      "RequiredGateTravel": 0.0,
+      "Statue": {
+        "actor": "S2_Prop_Statue_B",
+        "origin": [
+          650.0,
+          1560.0,
+          0.1
+        ],
+        "center": [
+          650.0,
+          1559.9999980926514,
+          75.09999237060546
+        ]
+      },
+      "Plate": {
+        "actor": "S2_Prop_Plate_B_Plate",
+        "origin": [
+          410.0,
+          1070.0,
+          5.1
+        ],
+        "center": [
+          410.0,
+          1070.0,
+          5.5999997615814205
+        ]
+      },
+      "Gate": {
+        "actor": "S2_Gate_05_Bars",
+        "origin": [
+          1900.0,
+          2260.0,
+          0.0
+        ],
+        "center": [
+          1900.0000196695328,
+          2260.0,
+          122.99999984603996
+        ]
+      }
+    },
+    "C": {
+      "bCompleted": false,
+      "bPressed": false,
+      "GateOffset": 0.0,
+      "RequiredGateTravel": 0.0,
+      "Statue": {
+        "actor": "S2_Prop_Statue_C",
+        "origin": [
+          1575.0,
+          3600.0,
+          0.1
+        ],
+        "center": [
+          1575.0,
+          3599.9999980926514,
+          75.09999237060546
+        ]
+      },
+      "Plate": {
+        "actor": "S2_Prop_Plate_C_Plate",
+        "origin": [
+          1195.0,
+          3430.0,
+          5.1
+        ],
+        "center": [
+          1195.0,
+          3430.0,
+          5.5999997615814205
+        ]
+      },
+      "Gate": {
+        "actor": "S2_Gate_11_Bars",
+        "origin": [
+          1375.0,
+          3210.0,
+          -20.0
+        ],
+        "center": [
+          1375.0,
+          3209.999980330467,
+          102.99999984603996
+        ]
+      }
+    }
+  },
+  "start_anchors": [
+    {
+      "actor": "BP_Cat_Player",
+      "class": "BP_Cat_C",
+      "xyz": [
+        1375.0,
+        3700.0,
+        26.2
+      ]
+    }
+  ],
+  "previous_capture_cvar": false,
+  "changed": 788188.843,
+  "unlocked_before": [
+    "Stage1",
+    "Stage2",
+    "Tutorial"
+  ],
+  "continue": {
+    "pawn": {
+      "path": "/Game/Maps/UEDPIE_0_Stage2.Stage2:PersistentLevel.BP_Cat_C_0",
+      "instance_hash": 3950490817
+    },
+    "world": {
+      "path": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "instance_hash": 345759767
+    },
+    "position": [
+      1375.0,
+      3700.0,
+      26.2
+    ],
+    "ordinary_start_xy_distance": 0.0,
+    "c_gate_xy_distance": 490.0,
+    "stamina": 100.0,
+    "clock": {
+      "RemainingSeconds": 900.0,
+      "BudgetSeconds": 900.0,
+      "bRunning": true,
+      "bTimed": true
+    },
+    "links": {
+      "A": {
+        "bCompleted": false,
+        "bPressed": false,
+        "GateOffset": 0.0,
+        "RequiredGateTravel": 280.0,
+        "Statue": {
+          "actor": "S2_Prop_Statue_A",
+          "origin": [
+            2075.0,
+            2775.0,
+            0.1
+          ],
+          "center": [
+            2075.0,
+            2774.9999980926514,
+            75.09999237060546
+          ]
+        },
+        "Plate": {
+          "actor": "S2_Prop_Plate_A_Plate",
+          "origin": [
+            2075.0,
+            2555.0,
+            5.1
+          ],
+          "center": [
+            2075.0,
+            2555.0,
+            5.5999997615814205
+          ]
+        },
+        "Gate": {
+          "actor": "S2_Gate_02_Bars",
+          "origin": [
+            1525.0,
+            1260.0,
+            0.0
+          ],
+          "center": [
+            1525.0,
+            1259.9999803304672,
+            122.99999984603996
+          ]
+        }
+      },
+      "B": {
+        "bCompleted": false,
+        "bPressed": false,
+        "GateOffset": 0.0,
+        "RequiredGateTravel": 280.0,
+        "Statue": {
+          "actor": "S2_Prop_Statue_B",
+          "origin": [
+            650.0,
+            1560.0,
+            0.1
+          ],
+          "center": [
+            650.0,
+            1559.9999980926514,
+            75.09999237060546
+          ]
+        },
+        "Plate": {
+          "actor": "S2_Prop_Plate_B_Plate",
+          "origin": [
+            410.0,
+            1070.0,
+            5.1
+          ],
+          "center": [
+            410.0,
+            1070.0,
+            5.5999997615814205
+          ]
+        },
+        "Gate": {
+          "actor": "S2_Gate_05_Bars",
+          "origin": [
+            1900.0,
+            2260.0,
+            0.0
+          ],
+          "center": [
+            1900.0000196695328,
+            2260.0,
+            122.99999984603996
+          ]
+        }
+      },
+      "C": {
+        "bCompleted": false,
+        "bPressed": false,
+        "GateOffset": 0.0,
+        "RequiredGateTravel": 280.0,
+        "Statue": {
+          "actor": "S2_Prop_Statue_C",
+          "origin": [
+            1575.0,
+            3600.0,
+            0.1
+          ],
+          "center": [
+            1575.0,
+            3599.9999980926514,
+            75.09999237060546
+          ]
+        },
+        "Plate": {
+          "actor": "S2_Prop_Plate_C_Plate",
+          "origin": [
+            1195.0,
+            3430.0,
+            5.1
+          ],
+          "center": [
+            1195.0,
+            3430.0,
+            5.5999997615814205
+          ]
+        },
+        "Gate": {
+          "actor": "S2_Gate_11_Bars",
+          "origin": [
+            1375.0,
+            3210.0,
+            -20.0
+          ],
+          "center": [
+            1375.0,
+            3209.999980330467,
+            102.99999984603996
+          ]
+        }
+      }
+    }
+  },
+  "direction": [
+    0,
+    -1,
+    0
+  ],
+  "last_move_frame": 3.4508726187050343,
+  "minimum_stamina": 81.86013793945312,
+  "pause_clock": 896.9491577148438,
+  "resumed_clock": {
+    "RemainingSeconds": 896.5227661132812,
+    "BudgetSeconds": 900.0,
+    "bRunning": true,
+    "bTimed": true
+  },
+  "practice_push": {
+    "cat_fixture": [
+      2075.0,
+      2859.000005722046,
+      25.999990439414972
+    ],
+    "direction": [
+      0.0,
+      -1.0,
+      0.0
+    ],
+    "statue_start": [
+      2075.0,
+      2775.0,
+      0.1
+    ],
+    "slot_before": {
+      "sha256": "200c09c4b714b0b2ee29e3e08df225488a1655ae8a828bea6d25b5a4fc47a3bc",
+      "write_ns": 1795534698361100200,
+      "schema": 4,
+      "stage1_ms": 586875,
+      "stage2_ms": 872250,
+      "mask": 7,
+      "onboarding": true
+    },
+    "samples": [
+      {
+        "game": 3.905370619148016,
+        "pressed": false,
+        "completed": false,
+        "statue": [
+          2075.0,
+          2775.0,
+          0.1
+        ],
+        "gate_offset": 0.0
+      },
+      {
+        "game": 4.312120120972395,
+        "pressed": false,
+        "completed": false,
+        "statue": [
+          2075.0,
+          2761.764388214797,
+          0.1
+        ],
+        "gate_offset": 0.0
+      },
+      {
+        "game": 4.747855518013239,
+        "pressed": false,
+        "completed": false,
+        "statue": [
+          2075.0,
+          2729.768618475646,
+          0.1
+        ],
+        "gate_offset": 0.0
+      },
+      {
+        "game": 5.1483343206346035,
+        "pressed": false,
+        "completed": false,
+        "statue": [
+          2075.0,
+          2700.133187305182,
+          0.1
+        ],
+        "gate_offset": 0.0
+      },
+      {
+        "game": 5.555619020015001,
+        "pressed": false,
+        "completed": false,
+        "statue": [
+          2075.0,
+          2669.9941191785038,
+          0.1
+        ],
+        "gate_offset": 0.0
+      },
+      {
+        "game": 5.980512920767069,
+        "pressed": false,
+        "completed": false,
+        "statue": [
+          2075.0,
+          2638.5519701354206,
+          0.1
+        ],
+        "gate_offset": 0.0
+      },
+      {
+        "game": 6.3965525180101395,
+        "pressed": false,
+        "completed": false,
+        "statue": [
+          2075.0,
+          2607.76504040882,
+          0.1
+        ],
+        "gate_offset": 0.0
+      },
+      {
+        "game": 6.832618020474911,
+        "pressed": true,
+        "completed": false,
+        "statue": [
+          2075.0,
+          2555.0000019073486,
+          0.1
+        ],
+        "gate_offset": 0.0
+      },
+      {
+        "game": 7.257163520902395,
+        "pressed": true,
+        "completed": false,
+        "statue": [
+          2075.0,
+          2555.0000019073486,
+          0.1
+        ],
+        "gate_offset": 0.0
+      },
+      {
+        "game": 7.683710120618343,
+        "pressed": true,
+        "completed": false,
+        "statue": [
+          2075.0,
+          2555.0000019073486,
+          0.1
+        ],
+        "gate_offset": 0.0
+      },
+      {
+        "game": 8.085492920130491,
+        "pressed": true,
+        "completed": false,
+        "statue": [
+          2075.0,
+          2555.0000019073486,
+          0.1
+        ],
+        "gate_offset": 0.0
+      },
+      {
+        "game": 8.48684161901474,
+        "pressed": true,
+        "completed": false,
+        "statue": [
+          2075.0,
+          2555.0000019073486,
+          0.1
+        ],
+        "gate_offset": 0.0
+      },
+      {
+        "game": 8.912015419453382,
+        "pressed": true,
+        "completed": false,
+        "statue": [
+          2075.0,
+          2555.0000019073486,
+          0.1
+        ],
+        "gate_offset": 0.0
+      },
+      {
+        "game": 9.318302620202303,
+        "pressed": true,
+        "completed": false,
+        "statue": [
+          2075.0,
+          2555.0000019073486,
+          0.1
+        ],
+        "gate_offset": 0.0
+      },
+      {
+        "game": 9.741108421236277,
+        "pressed": true,
+        "completed": false,
+        "statue": [
+          2075.0,
+          2555.0000019073486,
+          0.1
+        ],
+        "gate_offset": -8.18830680847168
+      },
+      {
+        "game": 10.144510321319103,
+        "pressed": true,
+        "completed": false,
+        "statue": [
+          2075.0,
+          2555.0000019073486,
+          0.1
+        ],
+        "gate_offset": -64.6645736694336
+      },
+      {
+        "game": 10.548249118030071,
+        "pressed": true,
+        "completed": false,
+        "statue": [
+          2075.0,
+          2555.0000019073486,
+          0.1
+        ],
+        "gate_offset": -121.1880111694336
+      },
+      {
+        "game": 10.956407617777586,
+        "pressed": true,
+        "completed": false,
+        "statue": [
+          2075.0,
+          2555.0000019073486,
+          0.1
+        ],
+        "gate_offset": -178.3302001953125
+      },
+      {
+        "game": 11.367873020470142,
+        "pressed": true,
+        "completed": false,
+        "statue": [
+          2075.0,
+          2555.0000019073486,
+          0.1
+        ],
+        "gate_offset": -235.9353485107422
+      },
+      {
+        "game": 11.784750618040562,
+        "pressed": true,
+        "completed": true,
+        "statue": [
+          2075.0,
+          2555.0000019073486,
+          0.1
+        ],
+        "gate_offset": -280.0
+      },
+      {
+        "game": 12.204655718058348,
+        "pressed": true,
+        "completed": true,
+        "statue": [
+          2075.0,
+          2555.0000019073486,
+          0.1
+        ],
+        "gate_offset": -280.0
+      },
+      {
+        "game": 12.617797020822763,
+        "pressed": true,
+        "completed": true,
+        "statue": [
+          2075.0,
+          2555.0000019073486,
+          0.1
+        ],
+        "gate_offset": -280.0
+      },
+      {
+        "game": 13.034075818955898,
+        "pressed": true,
+        "completed": true,
+        "statue": [
+          2075.0,
+          2555.0000019073486,
+          0.1
+        ],
+        "gate_offset": -280.0
+      },
+      {
+        "game": 13.442435018718243,
+        "pressed": true,
+        "completed": true,
+        "statue": [
+          2075.0,
+          2555.0000019073486,
+          0.1
+        ],
+        "gate_offset": -280.0
+      },
+      {
+        "game": 13.86157451942563,
+        "pressed": true,
+        "completed": true,
+        "statue": [
+          2075.0,
+          2555.0000019073486,
+          0.1
+        ],
+        "gate_offset": -280.0
+      },
+      {
+        "game": 14.270832818001509,
+        "pressed": true,
+        "completed": true,
+        "statue": [
+          2075.0,
+          2555.0000019073486,
+          0.1
+        ],
+        "gate_offset": -280.0
+      },
+      {
+        "game": 14.677139420062304,
+        "pressed": true,
+        "completed": true,
+        "statue": [
+          2075.0,
+          2555.0000019073486,
+          0.1
+        ],
+        "gate_offset": -280.0
+      },
+      {
+        "game": 15.10171901807189,
+        "pressed": true,
+        "completed": true,
+        "statue": [
+          2075.0,
+          2555.0000019073486,
+          0.1
+        ],
+        "gate_offset": -280.0
+      }
+    ],
+    "last_input": 15.321410920470953,
+    "completed_game": 14.320203218609095,
+    "final_links": {
+      "A": {
+        "bCompleted": true,
+        "bPressed": true,
+        "GateOffset": -280.0,
+        "RequiredGateTravel": 280.0,
+        "Statue": {
+          "actor": "S2_Prop_Statue_A",
+          "origin": [
+            2075.0,
+            2555.0000019073486,
+            0.1
+          ],
+          "center": [
+            2075.0,
+            2555.0,
+            75.09999237060546
+          ]
+        },
+        "Plate": {
+          "actor": "S2_Prop_Plate_A_Plate",
+          "origin": [
+            2075.0,
+            2555.0,
+            3.0999999999999996
+          ],
+          "center": [
+            2075.0,
+            2555.0,
+            3.5999997615814205
+          ]
+        },
+        "Gate": {
+          "actor": "S2_Gate_02_Bars",
+          "origin": [
+            1525.0,
+            1260.0,
+            -280.0
+          ],
+          "center": [
+            1525.0,
+            1259.9999803304672,
+            -157.00000015396006
+          ]
+        }
+      },
+      "B": {
+        "bCompleted": false,
+        "bPressed": false,
+        "GateOffset": 0.0,
+        "RequiredGateTravel": 280.0,
+        "Statue": {
+          "actor": "S2_Prop_Statue_B",
+          "origin": [
+            650.0,
+            1560.0,
+            0.1
+          ],
+          "center": [
+            650.0,
+            1559.9999980926514,
+            75.09999237060546
+          ]
+        },
+        "Plate": {
+          "actor": "S2_Prop_Plate_B_Plate",
+          "origin": [
+            410.0,
+            1070.0,
+            5.1
+          ],
+          "center": [
+            410.0,
+            1070.0,
+            5.5999997615814205
+          ]
+        },
+        "Gate": {
+          "actor": "S2_Gate_05_Bars",
+          "origin": [
+            1900.0,
+            2260.0,
+            0.0
+          ],
+          "center": [
+            1900.0000196695328,
+            2260.0,
+            122.99999984603996
+          ]
+        }
+      },
+      "C": {
+        "bCompleted": false,
+        "bPressed": false,
+        "GateOffset": 0.0,
+        "RequiredGateTravel": 280.0,
+        "Statue": {
+          "actor": "S2_Prop_Statue_C",
+          "origin": [
+            1575.0,
+            3600.0,
+            0.1
+          ],
+          "center": [
+            1575.0,
+            3599.9999980926514,
+            75.09999237060546
+          ]
+        },
+        "Plate": {
+          "actor": "S2_Prop_Plate_C_Plate",
+          "origin": [
+            1195.0,
+            3430.0,
+            5.1
+          ],
+          "center": [
+            1195.0,
+            3430.0,
+            5.5999997615814205
+          ]
+        },
+        "Gate": {
+          "actor": "S2_Gate_11_Bars",
+          "origin": [
+            1375.0,
+            3210.0,
+            -20.0
+          ],
+          "center": [
+            1375.0,
+            3209.999980330467,
+            102.99999984603996
+          ]
+        }
+      }
+    },
+    "slot_after": {
+      "sha256": "200c09c4b714b0b2ee29e3e08df225488a1655ae8a828bea6d25b5a4fc47a3bc",
+      "write_ns": 1795534698361100200,
+      "schema": 4,
+      "stage1_ms": 586875,
+      "stage2_ms": 872250,
+      "mask": 7,
+      "onboarding": true
+    }
+  },
+  "previous": {
+    "world_hash": 2348574156,
+    "pawn_hash": 4267234388
+  },
+  "armor_fixture": {
+    "actor": "Armor_02",
+    "original": [
+      2066.8737490655517,
+      2762.5957422680804,
+      102.14998626708984
+    ],
+    "placed": [
+      2147.0,
+      2665.228858214194,
+      101.99998483657836
+    ],
+    "pawn": [
+      2075.0,
+      2665.228858214194,
+      25.999990439414972
+    ]
+  },
+  "capture_owner": {
+    "armor": "Armor_02",
+    "phase": "<CatrunCapturePhase.FRAMING: 1>",
+    "session": 1
+  },
+  "capture": {
+    "pawn": {
+      "path": "/Game/Maps/UEDPIE_0_Stage2.Stage2:PersistentLevel.BP_Cat_C_0",
+      "instance_hash": 3339958346
+    },
+    "world": {
+      "path": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "instance_hash": 1085248376
+    },
+    "position": [
+      1375.0,
+      3700.0,
+      26.2
+    ],
+    "ordinary_start_xy_distance": 0.0,
+    "c_gate_xy_distance": 490.0,
+    "stamina": 100.0,
+    "clock": {
+      "RemainingSeconds": 900.0,
+      "BudgetSeconds": 900.0,
+      "bRunning": true,
+      "bTimed": true
+    },
+    "links": {
+      "A": {
+        "bCompleted": false,
+        "bPressed": false,
+        "GateOffset": 0.0,
+        "RequiredGateTravel": 280.0,
+        "Statue": {
+          "actor": "S2_Prop_Statue_A",
+          "origin": [
+            2075.0,
+            2775.0,
+            0.1
+          ],
+          "center": [
+            2075.0,
+            2774.9999980926514,
+            75.09999237060546
+          ]
+        },
+        "Plate": {
+          "actor": "S2_Prop_Plate_A_Plate",
+          "origin": [
+            2075.0,
+            2555.0,
+            5.1
+          ],
+          "center": [
+            2075.0,
+            2555.0,
+            5.5999997615814205
+          ]
+        },
+        "Gate": {
+          "actor": "S2_Gate_02_Bars",
+          "origin": [
+            1525.0,
+            1260.0,
+            0.0
+          ],
+          "center": [
+            1525.0,
+            1259.9999803304672,
+            122.99999984603996
+          ]
+        }
+      },
+      "B": {
+        "bCompleted": false,
+        "bPressed": false,
+        "GateOffset": 0.0,
+        "RequiredGateTravel": 280.0,
+        "Statue": {
+          "actor": "S2_Prop_Statue_B",
+          "origin": [
+            650.0,
+            1560.0,
+            0.1
+          ],
+          "center": [
+            650.0,
+            1559.9999980926514,
+            75.09999237060546
+          ]
+        },
+        "Plate": {
+          "actor": "S2_Prop_Plate_B_Plate",
+          "origin": [
+            410.0,
+            1070.0,
+            5.1
+          ],
+          "center": [
+            410.0,
+            1070.0,
+            5.5999997615814205
+          ]
+        },
+        "Gate": {
+          "actor": "S2_Gate_05_Bars",
+          "origin": [
+            1900.0,
+            2260.0,
+            0.0
+          ],
+          "center": [
+            1900.0000196695328,
+            2260.0,
+            122.99999984603996
+          ]
+        }
+      },
+      "C": {
+        "bCompleted": false,
+        "bPressed": false,
+        "GateOffset": 0.0,
+        "RequiredGateTravel": 280.0,
+        "Statue": {
+          "actor": "S2_Prop_Statue_C",
+          "origin": [
+            1575.0,
+            3600.0,
+            0.1
+          ],
+          "center": [
+            1575.0,
+            3599.9999980926514,
+            75.09999237060546
+          ]
+        },
+        "Plate": {
+          "actor": "S2_Prop_Plate_C_Plate",
+          "origin": [
+            1195.0,
+            3430.0,
+            5.1
+          ],
+          "center": [
+            1195.0,
+            3430.0,
+            5.5999997615814205
+          ]
+        },
+        "Gate": {
+          "actor": "S2_Gate_11_Bars",
+          "origin": [
+            1375.0,
+            3210.0,
+            -20.0
+          ],
+          "center": [
+            1375.0,
+            3209.999980330467,
+            102.99999984603996
+          ]
+        }
+      }
+    }
+  },
+  "reset": {
+    "pawn": {
+      "path": "/Game/Maps/UEDPIE_0_Stage2.Stage2:PersistentLevel.BP_Cat_C_0",
+      "instance_hash": 704612025
+    },
+    "world": {
+      "path": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "instance_hash": 2044876294
+    },
+    "position": [
+      1375.0,
+      3700.0,
+      26.2
+    ],
+    "ordinary_start_xy_distance": 0.0,
+    "c_gate_xy_distance": 490.0,
+    "stamina": 100.0,
+    "clock": {
+      "RemainingSeconds": 900.0,
+      "BudgetSeconds": 900.0,
+      "bRunning": true,
+      "bTimed": true
+    },
+    "links": {
+      "A": {
+        "bCompleted": false,
+        "bPressed": false,
+        "GateOffset": 0.0,
+        "RequiredGateTravel": 280.0,
+        "Statue": {
+          "actor": "S2_Prop_Statue_A",
+          "origin": [
+            2075.0,
+            2775.0,
+            0.1
+          ],
+          "center": [
+            2075.0,
+            2774.9999980926514,
+            75.09999237060546
+          ]
+        },
+        "Plate": {
+          "actor": "S2_Prop_Plate_A_Plate",
+          "origin": [
+            2075.0,
+            2555.0,
+            5.1
+          ],
+          "center": [
+            2075.0,
+            2555.0,
+            5.5999997615814205
+          ]
+        },
+        "Gate": {
+          "actor": "S2_Gate_02_Bars",
+          "origin": [
+            1525.0,
+            1260.0,
+            0.0
+          ],
+          "center": [
+            1525.0,
+            1259.9999803304672,
+            122.99999984603996
+          ]
+        }
+      },
+      "B": {
+        "bCompleted": false,
+        "bPressed": false,
+        "GateOffset": 0.0,
+        "RequiredGateTravel": 280.0,
+        "Statue": {
+          "actor": "S2_Prop_Statue_B",
+          "origin": [
+            650.0,
+            1560.0,
+            0.1
+          ],
+          "center": [
+            650.0,
+            1559.9999980926514,
+            75.09999237060546
+          ]
+        },
+        "Plate": {
+          "actor": "S2_Prop_Plate_B_Plate",
+          "origin": [
+            410.0,
+            1070.0,
+            5.1
+          ],
+          "center": [
+            410.0,
+            1070.0,
+            5.5999997615814205
+          ]
+        },
+        "Gate": {
+          "actor": "S2_Gate_05_Bars",
+          "origin": [
+            1900.0,
+            2260.0,
+            0.0
+          ],
+          "center": [
+            1900.0000196695328,
+            2260.0,
+            122.99999984603996
+          ]
+        }
+      },
+      "C": {
+        "bCompleted": false,
+        "bPressed": false,
+        "GateOffset": 0.0,
+        "RequiredGateTravel": 280.0,
+        "Statue": {
+          "actor": "S2_Prop_Statue_C",
+          "origin": [
+            1575.0,
+            3600.0,
+            0.1
+          ],
+          "center": [
+            1575.0,
+            3599.9999980926514,
+            75.09999237060546
+          ]
+        },
+        "Plate": {
+          "actor": "S2_Prop_Plate_C_Plate",
+          "origin": [
+            1195.0,
+            3430.0,
+            5.1
+          ],
+          "center": [
+            1195.0,
+            3430.0,
+            5.5999997615814205
+          ]
+        },
+        "Gate": {
+          "actor": "S2_Gate_11_Bars",
+          "origin": [
+            1375.0,
+            3210.0,
+            -20.0
+          ],
+          "center": [
+            1375.0,
+            3209.999980330467,
+            102.99999984603996
+          ]
+        }
+      }
+    }
+  },
+  "reset_slot": {
+    "sha256": "200c09c4b714b0b2ee29e3e08df225488a1655ae8a828bea6d25b5a4fc47a3bc",
+    "write_ns": 1795534698361100200,
+    "schema": 4,
+    "stage1_ms": 586875,
+    "stage2_ms": 872250,
+    "mask": 7,
+    "onboarding": true
+  },
+  "timeout_fixture": {
+    "original_budget": 900.0,
+    "test_budget": 6.0,
+    "reload_worlds": [
+      2236205494
+    ],
+    "samples": [
+      {
+        "game": 0.5380446016788483,
+        "remaining": 5.599999904632568
+      },
+      {
+        "game": 0.8464790023863316,
+        "remaining": 5.291565418243408
+      },
+      {
+        "game": 1.1483186036348343,
+        "remaining": 4.9897260665893555
+      },
+      {
+        "game": 1.468899805098772,
+        "remaining": 4.669144630432129
+      },
+      {
+        "game": 1.7771072052419186,
+        "remaining": 4.360937595367432
+      },
+      {
+        "game": 2.105314403772354,
+        "remaining": 4.0327301025390625
+      },
+      {
+        "game": 2.4363066032528877,
+        "remaining": 3.701737880706787
+      },
+      {
+        "game": 2.757707603275776,
+        "remaining": 3.3803369998931885
+      },
+      {
+        "game": 3.0825671032071114,
+        "remaining": 3.0554773807525635
+      },
+      {
+        "game": 3.387907702475786,
+        "remaining": 2.7501368522644043
+      },
+      {
+        "game": 3.7107460014522076,
+        "remaining": 2.4272985458374023
+      },
+      {
+        "game": 4.033828802406788,
+        "remaining": 2.1042158603668213
+      },
+      {
+        "game": 4.351806003600359,
+        "remaining": 1.7862385511398315
+      },
+      {
+        "game": 4.659380804747343,
+        "remaining": 1.4786638021469116
+      },
+      {
+        "game": 4.984993703663349,
+        "remaining": 1.1530508995056152
+      },
+      {
+        "game": 5.296992503106594,
+        "remaining": 0.8410521149635315
+      },
+      {
+        "game": 5.622545603662729,
+        "remaining": 0.5154989957809448
+      },
+      {
+        "game": 5.9299944043159485,
+        "remaining": 0.2080501914024353
+      },
+      {
+        "game": 6.1427988037467,
+        "remaining": 0.0
+      }
+    ],
+    "armor_capture_disabled": true,
+    "setup": "In-memory Stage2 budget followed by normal confirmed-reset entry point; config is never saved.",
+    "zero_time": 6.1427988037467,
+    "readable_notice": {
+      "text": "마왕이 깨어났다",
+      "widget": "/Engine/Transient.UnrealEdEngine_0:GameInstance_0.CatrunNoticeWidget_0",
+      "game": 6.1427988037467
+    },
+    "before_fade": {
+      "age_after_zero": 0.0,
+      "path_prefix": "before_fade_"
+    },
+    "during_fade": {
+      "age_after_zero": 1.4218283034861088,
+      "path_prefix": "during_fade_"
+    },
+    "fade_measurement": {
+      "before_luma": 21.506944444444443,
+      "during_luma": 12.348572530864198,
+      "frames": [
+        "C:\\Users\\whghk\\Catrun\\Saved\\GameplayExpansion20261124\\ExpansionPIE\\20261125-031427-290302\\before_fade_00000.png",
+        "C:\\Users\\whghk\\Catrun\\Saved\\GameplayExpansion20261124\\ExpansionPIE\\20261125-031427-290302\\during_fade_00000.png"
+      ]
+    },
+    "restored_budget": 900.0
+  },
+  "timeout": {
+    "pawn": {
+      "path": "/Game/Maps/UEDPIE_0_Stage2.Stage2:PersistentLevel.BP_Cat_C_0",
+      "instance_hash": 1873439997
+    },
+    "world": {
+      "path": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "instance_hash": 2236205494
+    },
+    "position": [
+      1375.0,
+      3700.0,
+      26.2
+    ],
+    "ordinary_start_xy_distance": 0.0,
+    "c_gate_xy_distance": 490.0,
+    "stamina": 100.0,
+    "clock": {
+      "RemainingSeconds": 6.0,
+      "BudgetSeconds": 6.0,
+      "bRunning": true,
+      "bTimed": true
+    },
+    "links": {
+      "A": {
+        "bCompleted": false,
+        "bPressed": false,
+        "GateOffset": 0.0,
+        "RequiredGateTravel": 280.0,
+        "Statue": {
+          "actor": "S2_Prop_Statue_A",
+          "origin": [
+            2075.0,
+            2775.0,
+            0.1
+          ],
+          "center": [
+            2075.0,
+            2774.9999980926514,
+            75.09999237060546
+          ]
+        },
+        "Plate": {
+          "actor": "S2_Prop_Plate_A_Plate",
+          "origin": [
+            2075.0,
+            2555.0,
+            5.1
+          ],
+          "center": [
+            2075.0,
+            2555.0,
+            5.5999997615814205
+          ]
+        },
+        "Gate": {
+          "actor": "S2_Gate_02_Bars",
+          "origin": [
+            1525.0,
+            1260.0,
+            0.0
+          ],
+          "center": [
+            1525.0,
+            1259.9999803304672,
+            122.99999984603996
+          ]
+        }
+      },
+      "B": {
+        "bCompleted": false,
+        "bPressed": false,
+        "GateOffset": 0.0,
+        "RequiredGateTravel": 280.0,
+        "Statue": {
+          "actor": "S2_Prop_Statue_B",
+          "origin": [
+            650.0,
+            1560.0,
+            0.1
+          ],
+          "center": [
+            650.0,
+            1559.9999980926514,
+            75.09999237060546
+          ]
+        },
+        "Plate": {
+          "actor": "S2_Prop_Plate_B_Plate",
+          "origin": [
+            410.0,
+            1070.0,
+            5.1
+          ],
+          "center": [
+            410.0,
+            1070.0,
+            5.5999997615814205
+          ]
+        },
+        "Gate": {
+          "actor": "S2_Gate_05_Bars",
+          "origin": [
+            1900.0,
+            2260.0,
+            0.0
+          ],
+          "center": [
+            1900.0000196695328,
+            2260.0,
+            122.99999984603996
+          ]
+        }
+      },
+      "C": {
+        "bCompleted": false,
+        "bPressed": false,
+        "GateOffset": 0.0,
+        "RequiredGateTravel": 280.0,
+        "Statue": {
+          "actor": "S2_Prop_Statue_C",
+          "origin": [
+            1575.0,
+            3600.0,
+            0.1
+          ],
+          "center": [
+            1575.0,
+            3599.9999980926514,
+            75.09999237060546
+          ]
+        },
+        "Plate": {
+          "actor": "S2_Prop_Plate_C_Plate",
+          "origin": [
+            1195.0,
+            3430.0,
+            5.1
+          ],
+          "center": [
+            1195.0,
+            3430.0,
+            5.5999997615814205
+          ]
+        },
+        "Gate": {
+          "actor": "S2_Gate_11_Bars",
+          "origin": [
+            1375.0,
+            3210.0,
+            -20.0
+          ],
+          "center": [
+            1375.0,
+            3209.999980330467,
+            102.99999984603996
+          ]
+        }
+      }
+    }
+  },
+  "after_timeout_slot": {
+    "sha256": "200c09c4b714b0b2ee29e3e08df225488a1655ae8a828bea6d25b5a4fc47a3bc",
+    "write_ns": 1795534698361100200,
+    "schema": 4,
+    "stage1_ms": 586875,
+    "stage2_ms": 872250,
+    "mask": 7,
+    "onboarding": true
+  },
+  "success": true,
+  "error": null,
+  "final_phase": "timeout_stable"
+}

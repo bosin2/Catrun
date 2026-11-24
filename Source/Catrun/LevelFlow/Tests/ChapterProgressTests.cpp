@@ -134,13 +134,11 @@ bool FCatrunChapterTitleIntentTest::RunTest(const FString&)
     const FString Package = GetDefault<UCatrunLevelFlowSettings>()->Stages[0].Map.ToSoftObjectPath().GetLongPackageName();
     for (auto Reason : {ECatrunArrivalRestart::Clear, ECatrunArrivalRestart::Continue, ECatrunArrivalRestart::SkipIntro})
     {
-        Session->AcceptTravel(Package, true, true, Reason, -1, .5f, true);
+        Session->AcceptTravel(Package, true, true, Reason, -1, .5f);
         TestFalse(TEXT("Requesting a stage never shows a title in old world"), Session->ConsumeArrivalTitle(Package));
         Session->ResolveArrivalRestart(Package);
         TestEqual(TEXT("Title admission excludes capture/manual restart"), Session->ConsumeArrivalTitle(Package), Reason != ECatrunArrivalRestart::SkipIntro);
         TestFalse(TEXT("Title is consumed once"), Session->ConsumeArrivalTitle(Package));
-        if (Reason != ECatrunArrivalRestart::Clear)
-            TestTrue(TEXT("Capture checkpoint flag reaches restart intent"), Session->RestartIntent.bRestoreStage2EntryCheckpoint);
         Session->CancelTravel();
     }
     Session->AcceptTravel(Package, true, true, ECatrunArrivalRestart::Clear); Session->CancelTravel(); Session->ResolveArrivalRestart(Package);
@@ -191,7 +189,9 @@ bool FCatrunChapterSelectionTest::RunTest(const FString&)
     TestEqual(TEXT("Chapter selection is a fresh map URL with no puzzle/world state"), Context->TravelURL, FString(TEXT("/Game/Maps/Tutorial")));
     Session->ResolveArrivalRestart(TEXT("/Game/Maps/Tutorial"));
     TestTrue(TEXT("Selected chapter requests title on arrival"), Session->ConsumeArrivalTitle(TEXT("/Game/Maps/Tutorial")));
-    TestFalse(TEXT("Chapter selection never carries the in-run capture checkpoint"), Session->RestartIntent.bRestoreStage2EntryCheckpoint);
+    TestTrue(TEXT("Chapter selection uses continue presentation at the normal spawn"), Session->RestartIntent.bContinue);
+    TestTrue(TEXT("A changed chapter is eligible for a quiet arrival checkpoint"), Session->Arrive(TEXT("/Game/Maps/Tutorial")));
+    TestEqual(TEXT("Changed chapter becomes the authoritative continue stage"), Session->GetContinueStageId(), FName(TEXT("Tutorial")));
     Context->TravelURL.Reset();
     Instance->Shutdown(); World->SetGameInstance(nullptr);
     GEngine->DestroyWorldContext(World); World->DestroyWorld(false);

@@ -1,0 +1,7875 @@
+{
+  "start": 786306.343,
+  "phase": "shutdown",
+  "events": [
+    {
+      "epoch": 1795542253.161775,
+      "name": "tutorial-playable",
+      "exit_waits_for_cinematic": true,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -95.0,
+        26.250000953674316
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C",
+      "intro_playing": false
+    },
+    {
+      "epoch": 1795542253.1642928,
+      "name": "checkpoint-clearance",
+      "label": "tutorial-stair-overlap",
+      "target": [
+        -130.0,
+        1548.0,
+        -69.65000009536743
+      ],
+      "blocking_hit": null,
+      "floor_point": [
+        -129.99999237060547,
+        1547.9999980926514,
+        -95.90000009536743
+      ]
+    },
+    {
+      "epoch": 1795542253.1642928,
+      "name": "api-checkpoint-placement",
+      "label": "tutorial-stair-overlap",
+      "actual": [
+        -130.0,
+        1548.0,
+        -69.65000009536743
+      ]
+    },
+    {
+      "epoch": 1795542260.1153812,
+      "name": "automatic-stage1-arrival",
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "stairs",
+      "cat": [
+        880.0,
+        2320.0,
+        24.933149218559265
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542265.126382,
+      "name": "stage1-playable",
+      "exit_actor": "BP_Stage1PortalExit_C_0",
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "stage1",
+      "cat": [
+        880.0,
+        2320.0,
+        24.933149218559265
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542265.126382,
+      "name": "checkpoint-clearance",
+      "label": "stage1-native-exit-overlap",
+      "target": [
+        100.0,
+        -315.0,
+        25.44999986517334
+      ],
+      "blocking_hit": null,
+      "floor_point": [
+        100.00000985515936,
+        -315.00000762939453,
+        -0.8000001348266599
+      ]
+    },
+    {
+      "epoch": 1795542265.1340106,
+      "name": "api-checkpoint-placement",
+      "label": "stage1-native-exit-overlap",
+      "actual": [
+        100.0,
+        -315.0,
+        25.44999986517334
+      ]
+    },
+    {
+      "epoch": 1795542276.7484932,
+      "name": "automatic-stage2-arrival",
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "wait-stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542289.4603813,
+      "name": "stage2-playable",
+      "exit_actor": "CatrunStageExit_0",
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542289.4618883,
+      "name": "checkpoint-clearance",
+      "label": "stage2-completion-overlap",
+      "target": [
+        715.0,
+        -80.0,
+        26.249989461899034
+      ],
+      "blocking_hit": null,
+      "floor_point": [
+        715.0,
+        -80.0,
+        -1.0538100966073216e-05
+      ]
+    },
+    {
+      "epoch": 1795542289.4629016,
+      "name": "api-checkpoint-placement",
+      "label": "stage2-completion-overlap",
+      "actual": [
+        715.0,
+        -80.0,
+        26.249989461899034
+      ]
+    },
+    {
+      "epoch": 1795542292.5564055,
+      "name": "native-stage1-to-stage2-to-stage3-confirmed",
+      "world": "/Game/Maps/UEDPIE_0_Stage3.Stage3",
+      "phase": "complete",
+      "cat": [
+        150.0,
+        110.0,
+        26.2
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    }
+  ],
+  "samples": [
+    {
+      "epoch": 1795542228.1545541,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "CineCameraActor_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542228.3330898,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "CineCameraActor_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542228.4369051,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "CineCameraActor_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542228.5597181,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "CineCameraActor_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542228.659606,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "CineCameraActor_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542228.7774813,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "CineCameraActor_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542228.8767543,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "CineCameraActor_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542228.9936445,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "CineCameraActor_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542229.0938046,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "CineCameraActor_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542229.2098768,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "CineCameraActor_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542229.3106124,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "CineCameraActor_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542229.4290395,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "CineCameraActor_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542229.5289555,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "CineCameraActor_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542229.6430538,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "CineCameraActor_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542229.7598925,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "CineCameraActor_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542229.8601894,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "CineCameraActor_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542229.9765742,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "CineCameraActor_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542230.0774658,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "CineCameraActor_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542230.1939917,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "CineCameraActor_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542230.3094049,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "CineCameraActor_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542230.4092782,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "CineCameraActor_3",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542230.5275376,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "CineCameraActor_3",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542230.6273124,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "CineCameraActor_3",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542230.7424853,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "CineCameraActor_3",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542230.8436568,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "CineCameraActor_3",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542230.9591947,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "CineCameraActor_3",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542231.059896,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "CineCameraActor_3",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542231.1771786,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "CineCameraActor_3",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542231.2936192,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "CineCameraActor_3",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542231.3938155,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "CineCameraActor_3",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542231.5098548,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "CineCameraActor_3",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542231.6097124,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "CineCameraActor_3",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542231.7280333,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "CineCameraActor_3",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542231.8293037,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "CineCameraActor_3",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542231.9429655,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "CineCameraActor_3",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542232.059715,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "CineCameraActor_3",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542232.159151,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "CineCameraActor_3",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542232.2782774,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "CineCameraActor_3",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542232.3793237,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        174.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "Cam_03_LookDemon_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542232.4934595,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        174.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "Cam_03_LookDemon_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542232.592712,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        174.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "Cam_03_LookDemon_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542232.7097123,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        174.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "Cam_03_LookDemon_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542232.8103924,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        174.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "Cam_03_LookDemon_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542232.925789,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        174.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "Cam_03_LookDemon_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542233.0426989,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        174.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "Cam_03_LookDemon_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542233.1440005,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        174.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "Cam_03_LookDemon_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542233.2594018,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        174.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "Cam_03_LookDemon_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542233.3600757,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        174.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "Cam_03_LookDemon_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542233.4766266,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        174.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "Cam_03_LookDemon_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542233.5758688,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        174.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "Cam_03_LookDemon_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542233.694043,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        174.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "Cam_03_LookDemon_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542233.809971,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        174.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "Cam_03_LookDemon_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542233.926015,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        174.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "Cam_03_LookDemon_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542234.0437815,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        174.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "Cam_03_LookDemon_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542234.1432104,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        174.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "Cam_03_LookDemon_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542234.2602916,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        174.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "Cam_03_LookDemon_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542234.3600886,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        174.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "Cam_03_LookDemon_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542234.480162,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        174.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "Cam_03B_CatFaceAfterDemon_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542234.57968,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        174.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "Cam_03B_CatFaceAfterDemon_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542234.693421,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        174.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "Cam_03B_CatFaceAfterDemon_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542234.8105175,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        174.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "Cam_03B_CatFaceAfterDemon_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542234.9093125,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        174.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "Cam_03B_CatFaceAfterDemon_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542235.0267892,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        174.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "Cam_03B_CatFaceAfterDemon_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542235.1291957,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        174.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "Cam_03B_CatFaceAfterDemon_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542235.2430387,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        174.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "Cam_03B_CatFaceAfterDemon_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542235.3429403,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        174.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "Cam_03B_CatFaceAfterDemon_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542235.4588597,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        174.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "Cam_03B_CatFaceAfterDemon_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542235.5601442,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        174.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "Cam_03B_CatFaceAfterDemon_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542235.6795292,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        174.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "Cam_03B_CatFaceAfterDemon_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542235.7798812,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        174.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "Cam_03B_CatFaceAfterDemon_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542235.8928826,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        174.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "Cam_03B_CatFaceAfterDemon_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542236.0106163,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        174.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "Cam_03B_CatFaceAfterDemon_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542236.1101296,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        174.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "Cam_03B_CatFaceAfterDemon_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542236.2272103,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        174.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "Cam_03B_CatFaceAfterDemon_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542236.327351,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        174.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "Cam_03B_CatFaceAfterDemon_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542236.4447432,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        174.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "Cam_03B_CatFaceAfterDemon_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542236.5595362,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        174.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "Cam_03B_CatFaceAfterDemon_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542236.6607144,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        174.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "Cam_03B_CatFaceAfterDemon_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542236.7786577,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        174.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "Cam_03B_CatFaceAfterDemon_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542236.8929286,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        174.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "Cam_03B_CatFaceAfterDemon_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542237.0102978,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        174.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "Cam_03B_CatFaceAfterDemon_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542237.109482,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        174.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "Cam_03B_CatFaceAfterDemon_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542237.2300277,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        174.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "Cam_03B_CatFaceAfterDemon_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542237.3302987,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        174.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "Cam_03B_CatFaceAfterDemon_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542237.442775,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        174.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "Cam_03B_CatFaceAfterDemon_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542237.5610595,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        174.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "Cam_03B_CatFaceAfterDemon_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542237.6795075,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        174.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "Cam_03B_CatFaceAfterDemon_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542237.7794232,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        174.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "Cam_03B_CatFaceAfterDemon_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542237.8939514,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "Cam_04_LookMonster_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542238.0101547,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "Cam_04_LookMonster_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542238.1102839,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "Cam_04_LookMonster_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542238.2299805,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "Cam_04_LookMonster_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542238.3285568,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "Cam_04_LookMonster_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542238.4429898,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "Cam_04_LookMonster_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542238.5613637,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "Cam_04_LookMonster_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542238.6769938,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "Cam_04_LookMonster_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542238.79489,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "Cam_04_LookMonster_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542238.911283,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "Cam_04_LookMonster_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542239.0268846,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "Cam_04_LookMonster_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542239.128217,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "Cam_04_LookMonster_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542239.2443535,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "Cam_04_LookMonster_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542239.3439422,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "Cam_04_LookMonster_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542239.461203,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "Cam_04_LookMonster_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542239.5609076,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "Cam_04_LookMonster_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542239.680119,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "Cam_04_LookMonster_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542239.7795506,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        126.25
+      ],
+      "move_ignored": false,
+      "view": "Cam_04_LookMonster_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542239.8959289,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        126.2618040283109
+      ],
+      "move_ignored": false,
+      "view": "Cam_05_MoveToEdge_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542240.011146,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        126.61618142295357
+      ],
+      "move_ignored": false,
+      "view": "Cam_05_MoveToEdge_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542240.1113796,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        127.20200326586215
+      ],
+      "move_ignored": false,
+      "view": "Cam_05_MoveToEdge_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542240.2307818,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        128.0367080178819
+      ],
+      "move_ignored": false,
+      "view": "Cam_05_MoveToEdge_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542240.3314867,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        128.73698469079645
+      ],
+      "move_ignored": false,
+      "view": "Cam_05_MoveToEdge_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542240.446899,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        129.46128727782835
+      ],
+      "move_ignored": false,
+      "view": "Cam_05_MoveToEdge_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542240.5448422,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        130.18293016450062
+      ],
+      "move_ignored": false,
+      "view": "Cam_05_MoveToEdge_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542240.6605158,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        131.0888971590541
+      ],
+      "move_ignored": false,
+      "view": "Cam_05_MoveToEdge_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542240.7799394,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        131.97106168370834
+      ],
+      "move_ignored": false,
+      "view": "Cam_05_MoveToEdge_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542240.8952627,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        132.7317212213857
+      ],
+      "move_ignored": false,
+      "view": "Cam_05_MoveToEdge_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542241.0114534,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        133.2733781505127
+      ],
+      "move_ignored": false,
+      "view": "Cam_05_MoveToEdge_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542241.1107612,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        133.48947502027684
+      ],
+      "move_ignored": false,
+      "view": "Cam_05_MoveToEdge_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542241.2305894,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        133.5
+      ],
+      "move_ignored": false,
+      "view": "Cam_05_MoveToEdge_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542241.3273873,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        133.5
+      ],
+      "move_ignored": false,
+      "view": "Cam_05_MoveToEdge_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542241.4447646,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        133.5
+      ],
+      "move_ignored": false,
+      "view": "Cam_05_MoveToEdge_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542241.5609803,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -215.0,
+        133.5
+      ],
+      "move_ignored": false,
+      "view": "Cam_05_MoveToEdge_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542241.6803164,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -213.87386814180056,
+        133.7032245373008
+      ],
+      "move_ignored": false,
+      "view": "Cam_05_MoveToEdge_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542241.7951727,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -211.5049346305117,
+        134.0740559770349
+      ],
+      "move_ignored": false,
+      "view": "Cam_05_MoveToEdge_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542241.8948343,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -209.06938593519376,
+        134.4543071552817
+      ],
+      "move_ignored": false,
+      "view": "Cam_05_MoveToEdge_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542242.010667,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -205.85201272018085,
+        134.53718124559984
+      ],
+      "move_ignored": false,
+      "view": "Cam_05_MoveToEdge_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542242.1114428,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -202.8188077566813,
+        133.9770592855471
+      ],
+      "move_ignored": false,
+      "view": "Cam_05_MoveToEdge_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542242.2309701,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -199.31671764974675,
+        132.35063679327516
+      ],
+      "move_ignored": false,
+      "view": "Cam_05_MoveToEdge_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542242.3309708,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -196.35355758028658,
+        128.00629828237524
+      ],
+      "move_ignored": false,
+      "view": "Cam_05_MoveToEdge_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542242.444625,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -192.57528846697886,
+        120.82379784642124
+      ],
+      "move_ignored": false,
+      "view": "Cam_05_MoveToEdge_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542242.5468202,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -189.0221271971498,
+        113.3900222819714
+      ],
+      "move_ignored": false,
+      "view": "Cam_05_MoveToEdge_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542242.6611805,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -183.97138795770337,
+        106.18775320172168
+      ],
+      "move_ignored": false,
+      "view": "Cam_05_MoveToEdge_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542242.7794728,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -178.6990467870002,
+        101.33878929689541
+      ],
+      "move_ignored": false,
+      "view": "Cam_05_MoveToEdge_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542242.894455,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -173.650455143455,
+        99.22641800464822
+      ],
+      "move_ignored": false,
+      "view": "Cam_06_Jump_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542243.0114784,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -173.0,
+        99.0
+      ],
+      "move_ignored": false,
+      "view": "Cam_06_Jump_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542243.1117651,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -173.0,
+        99.0
+      ],
+      "move_ignored": false,
+      "view": "Cam_06_Jump_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542243.230847,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -173.0,
+        99.0
+      ],
+      "move_ignored": false,
+      "view": "Cam_06_Jump_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542243.3286655,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -173.0,
+        99.0
+      ],
+      "move_ignored": false,
+      "view": "Cam_06_Jump_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542243.446328,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -173.0,
+        99.0
+      ],
+      "move_ignored": false,
+      "view": "Cam_06_Jump_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542243.5452979,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -173.0,
+        99.0
+      ],
+      "move_ignored": false,
+      "view": "Cam_06_Jump_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542243.6609373,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -173.0,
+        99.0
+      ],
+      "move_ignored": false,
+      "view": "Cam_06_Jump_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542243.7785184,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -173.0,
+        99.0
+      ],
+      "move_ignored": false,
+      "view": "Cam_06_Jump_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542243.8810642,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -173.0,
+        99.0
+      ],
+      "move_ignored": false,
+      "view": "Cam_06_Jump_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542243.9954221,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -173.0,
+        99.0
+      ],
+      "move_ignored": false,
+      "view": "Cam_06_Jump_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542244.0947242,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -173.0,
+        99.0
+      ],
+      "move_ignored": false,
+      "view": "Cam_06_Jump_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542244.2113092,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -173.0,
+        99.0
+      ],
+      "move_ignored": false,
+      "view": "Cam_06_Jump_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542244.3120697,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -173.0,
+        99.0
+      ],
+      "move_ignored": false,
+      "view": "Cam_06_Jump_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542244.4306083,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -173.0,
+        99.0
+      ],
+      "move_ignored": false,
+      "view": "Cam_06_Jump_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542244.5311308,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -173.0,
+        99.0
+      ],
+      "move_ignored": false,
+      "view": "Cam_06_Jump_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542244.6439285,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -173.0,
+        99.0
+      ],
+      "move_ignored": false,
+      "view": "Cam_06_Jump_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542244.760002,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -173.0,
+        99.0
+      ],
+      "move_ignored": false,
+      "view": "Cam_06_Jump_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542244.8612819,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -173.0,
+        99.0
+      ],
+      "move_ignored": false,
+      "view": "Cam_06_Jump_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542244.977997,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -173.0,
+        99.0
+      ],
+      "move_ignored": false,
+      "view": "Cam_06_Jump_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542245.0788188,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -173.0,
+        99.0
+      ],
+      "move_ignored": false,
+      "view": "Cam_06_Jump_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542245.194737,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -173.0,
+        99.0
+      ],
+      "move_ignored": false,
+      "view": "Cam_06_Jump_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542245.2944136,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -173.0,
+        99.0
+      ],
+      "move_ignored": false,
+      "view": "Cam_06_Jump_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542245.410946,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -172.97938736122512,
+        99.05220330965122
+      ],
+      "move_ignored": false,
+      "view": "Cam_06_Jump_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542245.530615,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -168.62287565386922,
+        106.53922398377442
+      ],
+      "move_ignored": false,
+      "view": "Cam_06_Jump_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542245.6447818,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -160.5626390210137,
+        108.0
+      ],
+      "move_ignored": false,
+      "view": "Cam_06_Jump_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542245.7613676,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -149.89753774117327,
+        108.0
+      ],
+      "move_ignored": false,
+      "view": "Cam_06_Jump_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542245.8618774,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -139.35262492305225,
+        101.98582963399663
+      ],
+      "move_ignored": false,
+      "view": "Cam_06_Jump_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542245.9779904,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -126.1715233357835,
+        85.97670489509555
+      ],
+      "move_ignored": false,
+      "view": "Cam_06_Jump_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542246.0780237,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -114.2456529738282,
+        69.7942455561823
+      ],
+      "move_ignored": false,
+      "view": "Cam_06_Jump_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542246.194873,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -103.19994313733272,
+        49.815449242777674
+      ],
+      "move_ignored": false,
+      "view": "Cam_06_Jump_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542246.295111,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -96.88619322191528,
+        30.50358028872587
+      ],
+      "move_ignored": false,
+      "view": "Cam_06_Jump_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542246.4116256,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -95.0,
+        23.5
+      ],
+      "move_ignored": false,
+      "view": "Cam_07_Landing_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542246.5286112,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -95.0,
+        23.5
+      ],
+      "move_ignored": false,
+      "view": "Cam_07_Landing_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542246.6290524,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -95.0,
+        23.5
+      ],
+      "move_ignored": false,
+      "view": "Cam_07_Landing_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542246.744522,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -95.0,
+        23.5
+      ],
+      "move_ignored": false,
+      "view": "Cam_07_Landing_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542246.8443995,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -95.0,
+        23.5
+      ],
+      "move_ignored": false,
+      "view": "Cam_07_Landing_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542246.9618368,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -95.0,
+        23.5
+      ],
+      "move_ignored": false,
+      "view": "Cam_07_Landing_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542247.061098,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -95.0,
+        23.5
+      ],
+      "move_ignored": false,
+      "view": "Cam_07_Landing_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542247.1811118,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -95.0,
+        23.5
+      ],
+      "move_ignored": false,
+      "view": "Cam_07_Landing_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542247.2798095,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -95.0,
+        23.5
+      ],
+      "move_ignored": false,
+      "view": "Cam_07_Landing_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542247.3946443,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -95.0,
+        23.5
+      ],
+      "move_ignored": false,
+      "view": "Cam_07_Landing_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542247.5124192,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -95.0,
+        23.5
+      ],
+      "move_ignored": false,
+      "view": "Cam_07_Landing_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542247.6115491,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -95.0,
+        23.5
+      ],
+      "move_ignored": false,
+      "view": "Cam_07_Landing_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542247.731051,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -95.0,
+        23.5
+      ],
+      "move_ignored": false,
+      "view": "Cam_07_Landing_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542247.8294322,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -95.0,
+        23.5
+      ],
+      "move_ignored": false,
+      "view": "Cam_07_Landing_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542247.9448192,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -95.0,
+        23.5
+      ],
+      "move_ignored": false,
+      "view": "Cam_07_Landing_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542248.0451324,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -95.0,
+        23.5
+      ],
+      "move_ignored": false,
+      "view": "Cam_07_Landing_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542248.1621604,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -95.0,
+        23.5
+      ],
+      "move_ignored": false,
+      "view": "Cam_07_Landing_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542248.2808938,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -95.0,
+        23.5
+      ],
+      "move_ignored": false,
+      "view": "Cam_07_Landing_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542248.3940136,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -95.0,
+        23.5
+      ],
+      "move_ignored": false,
+      "view": "Cam_07_Landing_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542248.5134692,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -95.0,
+        23.5
+      ],
+      "move_ignored": false,
+      "view": "Cam_07_Landing_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542248.6313396,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -95.0,
+        23.5
+      ],
+      "move_ignored": false,
+      "view": "Cam_07_Landing_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542248.7452013,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -95.0,
+        23.5
+      ],
+      "move_ignored": false,
+      "view": "Cam_07_Landing_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542248.845764,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -95.0,
+        23.5
+      ],
+      "move_ignored": false,
+      "view": "Cam_07_Landing_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542248.961356,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -95.0,
+        23.5
+      ],
+      "move_ignored": false,
+      "view": "Cam_07_Landing_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542249.0619557,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -95.0,
+        23.5
+      ],
+      "move_ignored": false,
+      "view": "Cam_07_Landing_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542249.181643,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -95.0,
+        23.5
+      ],
+      "move_ignored": false,
+      "view": "Cam_07_Landing_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542249.282328,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -95.0,
+        23.5
+      ],
+      "move_ignored": false,
+      "view": "Cam_07_Landing_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542249.3950372,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -95.0,
+        23.5
+      ],
+      "move_ignored": false,
+      "view": "Cam_07_Landing_0",
+      "anim_class": "AnimSequencerInstance",
+      "intro_playing": true
+    },
+    {
+      "epoch": 1795542249.510717,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -95.0,
+        26.250000953674316
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C",
+      "intro_playing": false
+    },
+    {
+      "epoch": 1795542249.6117334,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -95.0,
+        26.250000953674316
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C",
+      "intro_playing": false
+    },
+    {
+      "epoch": 1795542249.7317343,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -95.0,
+        26.250000953674316
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C",
+      "intro_playing": false
+    },
+    {
+      "epoch": 1795542249.8295755,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -95.0,
+        26.250000953674316
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C",
+      "intro_playing": false
+    },
+    {
+      "epoch": 1795542249.9453492,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -95.0,
+        26.250000953674316
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C",
+      "intro_playing": false
+    },
+    {
+      "epoch": 1795542250.045275,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -95.0,
+        26.250000953674316
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C",
+      "intro_playing": false
+    },
+    {
+      "epoch": 1795542250.162364,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -95.0,
+        26.250000953674316
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C",
+      "intro_playing": false
+    },
+    {
+      "epoch": 1795542250.2799919,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -95.0,
+        26.250000953674316
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C",
+      "intro_playing": false
+    },
+    {
+      "epoch": 1795542250.394805,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -95.0,
+        26.250000953674316
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C",
+      "intro_playing": false
+    },
+    {
+      "epoch": 1795542250.5142982,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -95.0,
+        26.250000953674316
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C",
+      "intro_playing": false
+    },
+    {
+      "epoch": 1795542250.630055,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -95.0,
+        26.250000953674316
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C",
+      "intro_playing": false
+    },
+    {
+      "epoch": 1795542250.7470934,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -95.0,
+        26.250000953674316
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C",
+      "intro_playing": false
+    },
+    {
+      "epoch": 1795542250.8460257,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -95.0,
+        26.250000953674316
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C",
+      "intro_playing": false
+    },
+    {
+      "epoch": 1795542250.96233,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -95.0,
+        26.250000953674316
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C",
+      "intro_playing": false
+    },
+    {
+      "epoch": 1795542251.0618005,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -95.0,
+        26.250000953674316
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C",
+      "intro_playing": false
+    },
+    {
+      "epoch": 1795542251.1805353,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -95.0,
+        26.250000953674316
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C",
+      "intro_playing": false
+    },
+    {
+      "epoch": 1795542251.2808404,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -95.0,
+        26.250000953674316
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C",
+      "intro_playing": false
+    },
+    {
+      "epoch": 1795542251.3960052,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -95.0,
+        26.250000953674316
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C",
+      "intro_playing": false
+    },
+    {
+      "epoch": 1795542251.5117886,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -95.0,
+        26.250000953674316
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C",
+      "intro_playing": false
+    },
+    {
+      "epoch": 1795542251.6116323,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -95.0,
+        26.250000953674316
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C",
+      "intro_playing": false
+    },
+    {
+      "epoch": 1795542251.72898,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -95.0,
+        26.250000953674316
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C",
+      "intro_playing": false
+    },
+    {
+      "epoch": 1795542251.8295534,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -95.0,
+        26.250000953674316
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C",
+      "intro_playing": false
+    },
+    {
+      "epoch": 1795542251.945055,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -95.0,
+        26.250000953674316
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C",
+      "intro_playing": false
+    },
+    {
+      "epoch": 1795542252.0460737,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -95.0,
+        26.250000953674316
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C",
+      "intro_playing": false
+    },
+    {
+      "epoch": 1795542252.1617332,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -95.0,
+        26.250000953674316
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C",
+      "intro_playing": false
+    },
+    {
+      "epoch": 1795542252.2791789,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -95.0,
+        26.250000953674316
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C",
+      "intro_playing": false
+    },
+    {
+      "epoch": 1795542252.3953385,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -95.0,
+        26.250000953674316
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C",
+      "intro_playing": false
+    },
+    {
+      "epoch": 1795542252.5128005,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -95.0,
+        26.250000953674316
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C",
+      "intro_playing": false
+    },
+    {
+      "epoch": 1795542252.611907,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -95.0,
+        26.250000953674316
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C",
+      "intro_playing": false
+    },
+    {
+      "epoch": 1795542252.728376,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -95.0,
+        26.250000953674316
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C",
+      "intro_playing": false
+    },
+    {
+      "epoch": 1795542252.8289676,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -95.0,
+        26.250000953674316
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C",
+      "intro_playing": false
+    },
+    {
+      "epoch": 1795542252.9459803,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -95.0,
+        26.250000953674316
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C",
+      "intro_playing": false
+    },
+    {
+      "epoch": 1795542253.0444915,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -95.0,
+        26.250000953674316
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C",
+      "intro_playing": false
+    },
+    {
+      "epoch": 1795542253.161775,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "intro",
+      "cat": [
+        170.0,
+        -95.0,
+        26.250000953674316
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C",
+      "intro_playing": false
+    },
+    {
+      "epoch": 1795542253.281389,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "stairs",
+      "cat": [
+        -130.0,
+        1548.0,
+        -69.65000009536743
+      ],
+      "move_ignored": true,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C",
+      "stairs_playing": false
+    },
+    {
+      "epoch": 1795542253.3959157,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "stairs",
+      "cat": [
+        -130.0,
+        1548.0,
+        -69.65000009536743
+      ],
+      "move_ignored": true,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C",
+      "stairs_playing": false
+    },
+    {
+      "epoch": 1795542253.513598,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "stairs",
+      "cat": [
+        -130.0,
+        1548.0,
+        -69.65000009536743
+      ],
+      "move_ignored": true,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C",
+      "stairs_playing": false
+    },
+    {
+      "epoch": 1795542253.6294987,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "stairs",
+      "cat": [
+        -130.0,
+        1548.0,
+        -69.65000009536743
+      ],
+      "move_ignored": true,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C",
+      "stairs_playing": false
+    },
+    {
+      "epoch": 1795542253.7341638,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "stairs",
+      "cat": [
+        -130.0,
+        1548.0,
+        -69.65000009536743
+      ],
+      "move_ignored": true,
+      "view": "CineCameraActor_1",
+      "anim_class": "ABP_Cat_Final_C",
+      "stairs_playing": true
+    },
+    {
+      "epoch": 1795542253.8477485,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "stairs",
+      "cat": [
+        -130.0,
+        1548.0,
+        -69.65000009536743
+      ],
+      "move_ignored": true,
+      "view": "CineCameraActor_1",
+      "anim_class": "ABP_Cat_Final_C",
+      "stairs_playing": true
+    },
+    {
+      "epoch": 1795542253.9634254,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "stairs",
+      "cat": [
+        -130.0,
+        1548.0,
+        -69.65000009536743
+      ],
+      "move_ignored": true,
+      "view": "CineCameraActor_1",
+      "anim_class": "ABP_Cat_Final_C",
+      "stairs_playing": true
+    },
+    {
+      "epoch": 1795542254.0623884,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "stairs",
+      "cat": [
+        -130.0,
+        1548.0,
+        -69.65000009536743
+      ],
+      "move_ignored": true,
+      "view": "CineCameraActor_1",
+      "anim_class": "ABP_Cat_Final_C",
+      "stairs_playing": true
+    },
+    {
+      "epoch": 1795542254.1823554,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "stairs",
+      "cat": [
+        -130.0,
+        1548.0,
+        -69.65000009536743
+      ],
+      "move_ignored": true,
+      "view": "CineCameraActor_1",
+      "anim_class": "ABP_Cat_Final_C",
+      "stairs_playing": true
+    },
+    {
+      "epoch": 1795542254.2820828,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "stairs",
+      "cat": [
+        -130.0,
+        1548.0,
+        -69.65000009536743
+      ],
+      "move_ignored": true,
+      "view": "CineCameraActor_1",
+      "anim_class": "ABP_Cat_Final_C",
+      "stairs_playing": true
+    },
+    {
+      "epoch": 1795542254.396575,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "stairs",
+      "cat": [
+        -130.0,
+        1548.0,
+        -69.65000009536743
+      ],
+      "move_ignored": true,
+      "view": "CineCameraActor_1",
+      "anim_class": "ABP_Cat_Final_C",
+      "stairs_playing": true
+    },
+    {
+      "epoch": 1795542254.5135357,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "stairs",
+      "cat": [
+        -130.0,
+        1548.0,
+        -69.65000009536743
+      ],
+      "move_ignored": true,
+      "view": "CineCameraActor_1",
+      "anim_class": "ABP_Cat_Final_C",
+      "stairs_playing": true
+    },
+    {
+      "epoch": 1795542254.630933,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "stairs",
+      "cat": [
+        -130.0,
+        1548.0,
+        -69.65000009536743
+      ],
+      "move_ignored": true,
+      "view": "CineCameraActor_1",
+      "anim_class": "ABP_Cat_Final_C",
+      "stairs_playing": true
+    },
+    {
+      "epoch": 1795542254.7474368,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "stairs",
+      "cat": [
+        -130.0,
+        1548.0,
+        -69.65000009536743
+      ],
+      "move_ignored": true,
+      "view": "CineCameraActor_1",
+      "anim_class": "ABP_Cat_Final_C",
+      "stairs_playing": true
+    },
+    {
+      "epoch": 1795542254.846257,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "stairs",
+      "cat": [
+        -130.0,
+        1548.0,
+        -69.65000009536743
+      ],
+      "move_ignored": true,
+      "view": "CineCameraActor_1",
+      "anim_class": "ABP_Cat_Final_C",
+      "stairs_playing": true
+    },
+    {
+      "epoch": 1795542254.9634075,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "stairs",
+      "cat": [
+        -130.0,
+        1548.0,
+        -69.65000009536743
+      ],
+      "move_ignored": true,
+      "view": "CineCameraActor_1",
+      "anim_class": "ABP_Cat_Final_C",
+      "stairs_playing": true
+    },
+    {
+      "epoch": 1795542255.0635624,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "stairs",
+      "cat": [
+        -130.0,
+        1548.0,
+        -69.65000009536743
+      ],
+      "move_ignored": true,
+      "view": "CineCameraActor_1",
+      "anim_class": "ABP_Cat_Final_C",
+      "stairs_playing": true
+    },
+    {
+      "epoch": 1795542255.1810174,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "stairs",
+      "cat": [
+        -130.0,
+        1548.0,
+        -69.65000009536743
+      ],
+      "move_ignored": true,
+      "view": "CineCameraActor_1",
+      "anim_class": "ABP_Cat_Final_C",
+      "stairs_playing": true
+    },
+    {
+      "epoch": 1795542255.2817323,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "stairs",
+      "cat": [
+        -130.0,
+        1548.0,
+        -69.65000009536743
+      ],
+      "move_ignored": true,
+      "view": "CineCameraActor_1",
+      "anim_class": "ABP_Cat_Final_C",
+      "stairs_playing": true
+    },
+    {
+      "epoch": 1795542255.3961678,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "stairs",
+      "cat": [
+        -130.0,
+        1548.0,
+        -69.65000009536743
+      ],
+      "move_ignored": true,
+      "view": "CineCameraActor_1",
+      "anim_class": "ABP_Cat_Final_C",
+      "stairs_playing": true
+    },
+    {
+      "epoch": 1795542255.5135515,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "stairs",
+      "cat": [
+        -130.0,
+        1548.0,
+        -69.65000009536743
+      ],
+      "move_ignored": true,
+      "view": "CineCameraActor_1",
+      "anim_class": "ABP_Cat_Final_C",
+      "stairs_playing": true
+    },
+    {
+      "epoch": 1795542255.6325452,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "stairs",
+      "cat": [
+        -130.0,
+        1548.0,
+        -69.65000009536743
+      ],
+      "move_ignored": true,
+      "view": "CineCameraActor_1",
+      "anim_class": "ABP_Cat_Final_C",
+      "stairs_playing": true
+    },
+    {
+      "epoch": 1795542255.7329638,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "stairs",
+      "cat": [
+        -130.0,
+        1548.0,
+        -69.65000009536743
+      ],
+      "move_ignored": true,
+      "view": "CineCameraActor_1",
+      "anim_class": "ABP_Cat_Final_C",
+      "stairs_playing": true
+    },
+    {
+      "epoch": 1795542255.8481884,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "stairs",
+      "cat": [
+        -130.0,
+        1548.0,
+        -69.65000009536743
+      ],
+      "move_ignored": true,
+      "view": "CineCameraActor_1",
+      "anim_class": "ABP_Cat_Final_C",
+      "stairs_playing": true
+    },
+    {
+      "epoch": 1795542255.9628358,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "stairs",
+      "cat": [
+        -130.0,
+        1548.0,
+        -69.65000009536743
+      ],
+      "move_ignored": true,
+      "view": "CineCameraActor_1",
+      "anim_class": "ABP_Cat_Final_C",
+      "stairs_playing": true
+    },
+    {
+      "epoch": 1795542256.0636466,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "stairs",
+      "cat": [
+        -130.0,
+        1548.0,
+        -69.65000009536743
+      ],
+      "move_ignored": true,
+      "view": "CineCameraActor_1",
+      "anim_class": "ABP_Cat_Final_C",
+      "stairs_playing": true
+    },
+    {
+      "epoch": 1795542256.1819558,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "stairs",
+      "cat": [
+        -130.0,
+        1548.0,
+        -69.65000009536743
+      ],
+      "move_ignored": true,
+      "view": "CineCameraActor_1",
+      "anim_class": "ABP_Cat_Final_C",
+      "stairs_playing": true
+    },
+    {
+      "epoch": 1795542256.2814288,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "stairs",
+      "cat": [
+        -130.0,
+        1548.0,
+        -69.65000009536743
+      ],
+      "move_ignored": true,
+      "view": "CineCameraActor_1",
+      "anim_class": "ABP_Cat_Final_C",
+      "stairs_playing": true
+    },
+    {
+      "epoch": 1795542256.397855,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "stairs",
+      "cat": [
+        -130.0,
+        1548.0,
+        -69.65000009536743
+      ],
+      "move_ignored": true,
+      "view": "CineCameraActor_1",
+      "anim_class": "ABP_Cat_Final_C",
+      "stairs_playing": true
+    },
+    {
+      "epoch": 1795542256.497939,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "stairs",
+      "cat": [
+        -130.0,
+        1548.0,
+        -69.65000009536743
+      ],
+      "move_ignored": true,
+      "view": "CineCameraActor_1",
+      "anim_class": "ABP_Cat_Final_C",
+      "stairs_playing": true
+    },
+    {
+      "epoch": 1795542256.612982,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "stairs",
+      "cat": [
+        -130.0,
+        1548.0,
+        -69.65000009536743
+      ],
+      "move_ignored": true,
+      "view": "CineCameraActor_1",
+      "anim_class": "ABP_Cat_Final_C",
+      "stairs_playing": true
+    },
+    {
+      "epoch": 1795542256.7311015,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "stairs",
+      "cat": [
+        -130.0,
+        1548.0,
+        -69.65000009536743
+      ],
+      "move_ignored": true,
+      "view": "CineCameraActor_1",
+      "anim_class": "ABP_Cat_Final_C",
+      "stairs_playing": true
+    },
+    {
+      "epoch": 1795542256.8317475,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "stairs",
+      "cat": [
+        -130.0,
+        1548.0,
+        -69.65000009536743
+      ],
+      "move_ignored": true,
+      "view": "CineCameraActor_1",
+      "anim_class": "ABP_Cat_Final_C",
+      "stairs_playing": true
+    },
+    {
+      "epoch": 1795542256.9473505,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "stairs",
+      "cat": [
+        -130.0,
+        1548.0,
+        -69.65000009536743
+      ],
+      "move_ignored": true,
+      "view": "CineCameraActor_1",
+      "anim_class": "ABP_Cat_Final_C",
+      "stairs_playing": true
+    },
+    {
+      "epoch": 1795542257.0465968,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "stairs",
+      "cat": [
+        -130.0,
+        1548.0,
+        -69.65000009536743
+      ],
+      "move_ignored": true,
+      "view": "CineCameraActor_1",
+      "anim_class": "ABP_Cat_Final_C",
+      "stairs_playing": true
+    },
+    {
+      "epoch": 1795542257.1626544,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "stairs",
+      "cat": [
+        -130.0,
+        1548.0,
+        -69.65000009536743
+      ],
+      "move_ignored": true,
+      "view": "CineCameraActor_1",
+      "anim_class": "ABP_Cat_Final_C",
+      "stairs_playing": true
+    },
+    {
+      "epoch": 1795542257.2633195,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "stairs",
+      "cat": [
+        -130.0,
+        1548.0,
+        -69.65000009536743
+      ],
+      "move_ignored": true,
+      "view": "CineCameraActor_1",
+      "anim_class": "ABP_Cat_Final_C",
+      "stairs_playing": true
+    },
+    {
+      "epoch": 1795542257.3798172,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "stairs",
+      "cat": [
+        -130.0,
+        1548.0,
+        -69.65000009536743
+      ],
+      "move_ignored": true,
+      "view": "CineCameraActor_1",
+      "anim_class": "ABP_Cat_Final_C",
+      "stairs_playing": true
+    },
+    {
+      "epoch": 1795542257.4959822,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "stairs",
+      "cat": [
+        -130.0,
+        1548.0,
+        -69.65000009536743
+      ],
+      "move_ignored": true,
+      "view": "CineCameraActor_1",
+      "anim_class": "ABP_Cat_Final_C",
+      "stairs_playing": true
+    },
+    {
+      "epoch": 1795542257.5970638,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "stairs",
+      "cat": [
+        -130.0,
+        1548.0,
+        -69.65000009536743
+      ],
+      "move_ignored": true,
+      "view": "CineCameraActor_1",
+      "anim_class": "ABP_Cat_Final_C",
+      "stairs_playing": true
+    },
+    {
+      "epoch": 1795542257.714533,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "stairs",
+      "cat": [
+        -130.0,
+        1548.0,
+        -69.65000009536743
+      ],
+      "move_ignored": true,
+      "view": "CineCameraActor_1",
+      "anim_class": "ABP_Cat_Final_C",
+      "stairs_playing": true
+    },
+    {
+      "epoch": 1795542257.8126836,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "stairs",
+      "cat": [
+        -130.0,
+        1548.0,
+        -69.65000009536743
+      ],
+      "move_ignored": true,
+      "view": "CineCameraActor_1",
+      "anim_class": "ABP_Cat_Final_C",
+      "stairs_playing": true
+    },
+    {
+      "epoch": 1795542257.9304683,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "stairs",
+      "cat": [
+        -130.0,
+        1548.0,
+        -69.65000009536743
+      ],
+      "move_ignored": true,
+      "view": "CineCameraActor_1",
+      "anim_class": "ABP_Cat_Final_C",
+      "stairs_playing": true
+    },
+    {
+      "epoch": 1795542258.0305455,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "stairs",
+      "cat": [
+        -130.0,
+        1548.0,
+        -69.65000009536743
+      ],
+      "move_ignored": true,
+      "view": "CineCameraActor_1",
+      "anim_class": "ABP_Cat_Final_C",
+      "stairs_playing": true
+    },
+    {
+      "epoch": 1795542258.1460676,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "stairs",
+      "cat": [
+        -130.0,
+        1548.0,
+        -69.65000009536743
+      ],
+      "move_ignored": true,
+      "view": "CineCameraActor_1",
+      "anim_class": "ABP_Cat_Final_C",
+      "stairs_playing": true
+    },
+    {
+      "epoch": 1795542258.2631345,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "stairs",
+      "cat": [
+        -130.0,
+        1548.0,
+        -69.65000009536743
+      ],
+      "move_ignored": true,
+      "view": "CineCameraActor_1",
+      "anim_class": "ABP_Cat_Final_C",
+      "stairs_playing": true
+    },
+    {
+      "epoch": 1795542258.383786,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "stairs",
+      "cat": [
+        -130.0,
+        1548.0,
+        -69.65000009536743
+      ],
+      "move_ignored": true,
+      "view": "CineCameraActor_1",
+      "anim_class": "ABP_Cat_Final_C",
+      "stairs_playing": true
+    },
+    {
+      "epoch": 1795542258.4827428,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "stairs",
+      "cat": [
+        -130.0,
+        1548.0,
+        -69.65000009536743
+      ],
+      "move_ignored": true,
+      "view": "CineCameraActor_1",
+      "anim_class": "ABP_Cat_Final_C",
+      "stairs_playing": true
+    },
+    {
+      "epoch": 1795542258.5957808,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "stairs",
+      "cat": [
+        -130.0,
+        1548.0,
+        -69.65000009536743
+      ],
+      "move_ignored": true,
+      "view": "CineCameraActor_1",
+      "anim_class": "ABP_Cat_Final_C",
+      "stairs_playing": true
+    },
+    {
+      "epoch": 1795542258.7127433,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "stairs",
+      "cat": [
+        -130.0,
+        1548.0,
+        -69.65000009536743
+      ],
+      "move_ignored": true,
+      "view": "CineCameraActor_1",
+      "anim_class": "ABP_Cat_Final_C",
+      "stairs_playing": true
+    },
+    {
+      "epoch": 1795542258.8135376,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "stairs",
+      "cat": [
+        -130.0,
+        1548.0,
+        -69.65000009536743
+      ],
+      "move_ignored": true,
+      "view": "CineCameraActor_1",
+      "anim_class": "ABP_Cat_Final_C",
+      "stairs_playing": true
+    },
+    {
+      "epoch": 1795542258.930179,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "stairs",
+      "cat": [
+        -130.0,
+        1548.0,
+        -69.65000009536743
+      ],
+      "move_ignored": true,
+      "view": "CineCameraActor_1",
+      "anim_class": "ABP_Cat_Final_C",
+      "stairs_playing": true
+    },
+    {
+      "epoch": 1795542259.0299568,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "stairs",
+      "cat": [
+        -130.0,
+        1548.0,
+        -69.65000009536743
+      ],
+      "move_ignored": true,
+      "view": "CineCameraActor_1",
+      "anim_class": "ABP_Cat_Final_C",
+      "stairs_playing": true
+    },
+    {
+      "epoch": 1795542259.1459162,
+      "world": "/Game/Maps/UEDPIE_0_Tutorial.Tutorial",
+      "phase": "stairs",
+      "cat": [
+        -130.0,
+        1548.0,
+        -69.65000009536743
+      ],
+      "move_ignored": true,
+      "view": "CineCameraActor_1",
+      "anim_class": "ABP_Cat_Final_C",
+      "stairs_playing": true
+    },
+    {
+      "epoch": 1795542260.1153812,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "stairs",
+      "cat": [
+        880.0,
+        2320.0,
+        24.933149218559265
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542260.2250388,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "stage1",
+      "cat": [
+        880.0,
+        2320.0,
+        24.933149218559265
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542260.34195,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "stage1",
+      "cat": [
+        880.0,
+        2320.0,
+        24.933149218559265
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542260.455158,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "stage1",
+      "cat": [
+        880.0,
+        2320.0,
+        24.933149218559265
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542260.5743406,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "stage1",
+      "cat": [
+        880.0,
+        2320.0,
+        24.933149218559265
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542260.6758976,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "stage1",
+      "cat": [
+        880.0,
+        2320.0,
+        24.933149218559265
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542260.7901921,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "stage1",
+      "cat": [
+        880.0,
+        2320.0,
+        24.933149218559265
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542260.8910382,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "stage1",
+      "cat": [
+        880.0,
+        2320.0,
+        24.933149218559265
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542261.0087783,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "stage1",
+      "cat": [
+        880.0,
+        2320.0,
+        24.933149218559265
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542261.1087863,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "stage1",
+      "cat": [
+        880.0,
+        2320.0,
+        24.933149218559265
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542261.2242527,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "stage1",
+      "cat": [
+        880.0,
+        2320.0,
+        24.933149218559265
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542261.3408864,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "stage1",
+      "cat": [
+        880.0,
+        2320.0,
+        24.933149218559265
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542261.441071,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "stage1",
+      "cat": [
+        880.0,
+        2320.0,
+        24.933149218559265
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542261.5571833,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "stage1",
+      "cat": [
+        880.0,
+        2320.0,
+        24.933149218559265
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542261.6577594,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "stage1",
+      "cat": [
+        880.0,
+        2320.0,
+        24.933149218559265
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542261.7750406,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "stage1",
+      "cat": [
+        880.0,
+        2320.0,
+        24.933149218559265
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542261.8773403,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "stage1",
+      "cat": [
+        880.0,
+        2320.0,
+        24.933149218559265
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542261.9901195,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "stage1",
+      "cat": [
+        880.0,
+        2320.0,
+        24.933149218559265
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542262.1082978,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "stage1",
+      "cat": [
+        880.0,
+        2320.0,
+        24.933149218559265
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542262.2258961,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "stage1",
+      "cat": [
+        880.0,
+        2320.0,
+        24.933149218559265
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542262.3259816,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "stage1",
+      "cat": [
+        880.0,
+        2320.0,
+        24.933149218559265
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542262.4417894,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "stage1",
+      "cat": [
+        880.0,
+        2320.0,
+        24.933149218559265
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542262.557946,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "stage1",
+      "cat": [
+        880.0,
+        2320.0,
+        24.933149218559265
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542262.656807,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "stage1",
+      "cat": [
+        880.0,
+        2320.0,
+        24.933149218559265
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542262.7768188,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "stage1",
+      "cat": [
+        880.0,
+        2320.0,
+        24.933149218559265
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542262.8774583,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "stage1",
+      "cat": [
+        880.0,
+        2320.0,
+        24.933149218559265
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542262.9902127,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "stage1",
+      "cat": [
+        880.0,
+        2320.0,
+        24.933149218559265
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542263.1075666,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "stage1",
+      "cat": [
+        880.0,
+        2320.0,
+        24.933149218559265
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542263.2350109,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "stage1",
+      "cat": [
+        880.0,
+        2320.0,
+        24.933149218559265
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542263.3415816,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "stage1",
+      "cat": [
+        880.0,
+        2320.0,
+        24.933149218559265
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542263.4586642,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "stage1",
+      "cat": [
+        880.0,
+        2320.0,
+        24.933149218559265
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542263.5784006,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "stage1",
+      "cat": [
+        880.0,
+        2320.0,
+        24.933149218559265
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542263.6917813,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "stage1",
+      "cat": [
+        880.0,
+        2320.0,
+        24.933149218559265
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542263.8103528,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "stage1",
+      "cat": [
+        880.0,
+        2320.0,
+        24.933149218559265
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542263.92563,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "stage1",
+      "cat": [
+        880.0,
+        2320.0,
+        24.933149218559265
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542264.0414126,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "stage1",
+      "cat": [
+        880.0,
+        2320.0,
+        24.933149218559265
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542264.141691,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "stage1",
+      "cat": [
+        880.0,
+        2320.0,
+        24.933149218559265
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542264.2575135,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "stage1",
+      "cat": [
+        880.0,
+        2320.0,
+        24.933149218559265
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542264.3580117,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "stage1",
+      "cat": [
+        880.0,
+        2320.0,
+        24.933149218559265
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542264.4769914,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "stage1",
+      "cat": [
+        880.0,
+        2320.0,
+        24.933149218559265
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542264.5764947,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "stage1",
+      "cat": [
+        880.0,
+        2320.0,
+        24.933149218559265
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542264.691515,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "stage1",
+      "cat": [
+        880.0,
+        2320.0,
+        24.933149218559265
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542264.8069007,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "stage1",
+      "cat": [
+        880.0,
+        2320.0,
+        24.933149218559265
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542264.9080682,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "stage1",
+      "cat": [
+        880.0,
+        2320.0,
+        24.933149218559265
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542265.0242374,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "stage1",
+      "cat": [
+        880.0,
+        2320.0,
+        24.933149218559265
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542265.126382,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "stage1",
+      "cat": [
+        880.0,
+        2320.0,
+        24.933149218559265
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542265.240659,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        100.01977595128119,
+        -314.64209078420635,
+        25.445056740839743
+      ],
+      "move_ignored": true,
+      "view": "DoorFace_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542265.3412557,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        100.03672179207206,
+        -314.33529575814293,
+        25.4408185104201
+      ],
+      "move_ignored": true,
+      "view": "DoorFace_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542265.456963,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        100.05649755522609,
+        -313.97738598932995,
+        25.43587533914785
+      ],
+      "move_ignored": true,
+      "view": "DoorFace_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542265.5751128,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        100.07627713680267,
+        -313.6193833583129,
+        25.4309306494517
+      ],
+      "move_ignored": true,
+      "view": "DoorFace_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542265.6780858,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        100.0932264328003,
+        -313.3126009973057,
+        25.4266933406688
+      ],
+      "move_ignored": true,
+      "view": "DoorFace_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542265.7903533,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        100.11299855262041,
+        -312.9546780104172,
+        25.421749200821143
+      ],
+      "move_ignored": true,
+      "view": "DoorFace_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542265.8908513,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        100.12994860112667,
+        -312.6478978614873,
+        25.41751207979288
+      ],
+      "move_ignored": true,
+      "view": "DoorFace_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542266.0080302,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        100.1497243642807,
+        -312.2899880926743,
+        25.412568908520626
+      ],
+      "move_ignored": true,
+      "view": "DoorFace_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542266.125811,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        100.16950012743473,
+        -311.93207832386133,
+        25.40762573724837
+      ],
+      "move_ignored": true,
+      "view": "DoorFace_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542266.2418807,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        100.18927589058876,
+        -311.57416855504835,
+        25.402682565976114
+      ],
+      "move_ignored": true,
+      "view": "DoorFace_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542266.3420675,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        100.20622518658638,
+        -311.26738619404114,
+        25.398445257193213
+      ],
+      "move_ignored": true,
+      "view": "DoorFace_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542266.456847,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        100.22599498927593,
+        -310.90945764976505,
+        25.393500568982756
+      ],
+      "move_ignored": true,
+      "view": "DoorFace_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542266.5789366,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        100.24577297270298,
+        -310.5515393589735,
+        25.388557594406482
+      ],
+      "move_ignored": true,
+      "view": "DoorFace_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542266.6896286,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        100.26554721593857,
+        -310.19359377074034,
+        25.38361329958799
+      ],
+      "move_ignored": true,
+      "view": "DoorFace_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542266.807425,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        100.28532141447067,
+        -309.8356806566171,
+        25.378669767707567
+      ],
+      "move_ignored": true,
+      "view": "DoorFace_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542266.9087033,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        100.30227902531624,
+        -309.5288111267646,
+        25.37443188374463
+      ],
+      "move_ignored": true,
+      "view": "DoorFace_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542267.0237658,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        100.32205039262772,
+        -309.17088592779874,
+        25.36948755614234
+      ],
+      "move_ignored": true,
+      "view": "FrontTracking_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542267.1245606,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        100.33899968862534,
+        -308.8641035667915,
+        25.365250247359437
+      ],
+      "move_ignored": true,
+      "view": "FrontTracking_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542267.2408824,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        100.35877695679665,
+        -308.5061982221332,
+        25.36030745159646
+      ],
+      "move_ignored": true,
+      "view": "FrontTracking_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542267.3567238,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        100.37854808568954,
+        -308.1482773385451,
+        25.355363183598598
+      ],
+      "move_ignored": true,
+      "view": "FrontTracking_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542267.4732945,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        100.39832228422165,
+        -307.79036422442186,
+        25.350419651718177
+      ],
+      "move_ignored": true,
+      "view": "FrontTracking_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542267.590126,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        100.41809955239296,
+        -307.43245887976354,
+        25.345476855955194
+      ],
+      "move_ignored": true,
+      "view": "FrontTracking_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542267.6907797,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        100.43504884839058,
+        -307.12567651875634,
+        25.341239547172293
+      ],
+      "move_ignored": true,
+      "view": "FrontTracking_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542267.807128,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        100.45482003688812,
+        -306.7677545563238,
+        25.336295264273325
+      ],
+      "move_ignored": true,
+      "view": "FrontTracking_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542267.906464,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        100.47176644206047,
+        -306.46096118931837,
+        25.332057174669664
+      ],
+      "move_ignored": true,
+      "view": "FrontTracking_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542268.022738,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        100.49154064059258,
+        -306.10304807519515,
+        25.327113642789243
+      ],
+      "move_ignored": true,
+      "view": "FrontTracking_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542268.1235883,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        100.50849282741547,
+        -305.79627672018614,
+        25.3228771148271
+      ],
+      "move_ignored": true,
+      "view": "FrontTracking_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542268.2423065,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        100.5282672047615,
+        -305.4383603695296,
+        25.31793353824336
+      ],
+      "move_ignored": true,
+      "view": "FrontTracking_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542268.3567607,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        100.54804140329361,
+        -305.0804472554064,
+        25.312990006362938
+      ],
+      "move_ignored": true,
+      "view": "FrontTracking_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542268.4561648,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        100.56499075889587,
+        -304.77366381555476,
+        25.30875268267893
+      ],
+      "move_ignored": true,
+      "view": "FrontTracking_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542268.5749536,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        100.58479112386703,
+        -304.4152770887249,
+        25.303802609212234
+      ],
+      "move_ignored": true,
+      "view": "FrontTracking_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542268.675297,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        100.60174036026001,
+        -304.10849580656213,
+        25.29956531533044
+      ],
+      "move_ignored": true,
+      "view": "FrontTracking_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542268.7919452,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        100.6215152144432,
+        -303.75057082515013,
+        25.294621619537835
+      ],
+      "move_ignored": true,
+      "view": "FrontTracking_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542268.8929863,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        100.63846457004547,
+        -303.4437873852985,
+        25.290384295853826
+      ],
+      "move_ignored": true,
+      "view": "FrontTracking_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542269.0074084,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        100.65823894739151,
+        -303.08587103464197,
+        25.285440719270085
+      ],
+      "move_ignored": true,
+      "view": "FrontTracking_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542269.107701,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        100.67518830299377,
+        -302.7790875947903,
+        25.281203395586076
+      ],
+      "move_ignored": true,
+      "view": "FrontTracking_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542269.2264075,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        100.69496238231659,
+        -302.421176638356,
+        25.27625989350787
+      ],
+      "move_ignored": true,
+      "view": "FrontTracking_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542269.342312,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        100.71473652124405,
+        -302.0632646030772,
+        25.271316376528556
+      ],
+      "move_ignored": true,
+      "view": "FrontTracking_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542269.4416277,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        100.73168593645096,
+        -301.7564800843811,
+        25.26707903794344
+      ],
+      "move_ignored": true,
+      "view": "FrontTracking_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542269.5562649,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        100.75146013498306,
+        -301.3985669702579,
+        25.262135506063018
+      ],
+      "move_ignored": true,
+      "view": "FrontTracking_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542269.6569707,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        100.76841676235199,
+        -301.09165191138527,
+        25.257896364443873
+      ],
+      "move_ignored": true,
+      "view": "FrontTracking_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542269.7772737,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        100.78819757699966,
+        -300.73361904552985,
+        25.2529511785405
+      ],
+      "move_ignored": true,
+      "view": "FrontTracking_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542269.8759224,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        100.80514681339264,
+        -300.4268377633671,
+        25.248713884658706
+      ],
+      "move_ignored": true,
+      "view": "FrontTracking_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542269.9912548,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        100.82492119073868,
+        -300.06892141271055,
+        25.24377030807496
+      ],
+      "move_ignored": true,
+      "view": "FrontTracking_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542270.1069467,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        100.84469974040985,
+        -299.71092954294363,
+        25.23882568841368
+      ],
+      "move_ignored": true,
+      "view": "FrontTracking_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542270.225999,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        100.86447393894196,
+        -299.3530164288204,
+        25.23388215653326
+      ],
+      "move_ignored": true,
+      "view": "FrontTracking_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542270.3426785,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        100.88424813747406,
+        -298.9951033146972,
+        25.228938624652837
+      ],
+      "move_ignored": true,
+      "view": "FrontTracking_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542270.4565532,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        100.90402233600616,
+        -298.63719020057397,
+        25.22399509277242
+      ],
+      "move_ignored": true,
+      "view": "FrontTracking_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542270.573138,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        100.92379653453827,
+        -298.27927708645075,
+        25.219051560891998
+      ],
+      "move_ignored": true,
+      "view": "FrontTracking_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542270.6757762,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        100.94074606895447,
+        -297.9724904100658,
+        25.214814192504665
+      ],
+      "move_ignored": true,
+      "view": "FrontTracking_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542270.789978,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        100.96052026748657,
+        -297.6145772959426,
+        25.209870660624244
+      ],
+      "move_ignored": true,
+      "view": "FrontTracking_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542270.8919444,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        100.97746962308884,
+        -297.30779385609094,
+        25.205633336940235
+      ],
+      "move_ignored": true,
+      "view": "FrontTracking_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542271.007685,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        100.99724382162094,
+        -296.9498807419677,
+        25.200689805059813
+      ],
+      "move_ignored": true,
+      "view": "FrontTracking_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542271.108722,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        101.0,
+        -298.4671618550783,
+        25.200000762939453
+      ],
+      "move_ignored": true,
+      "view": "FrontTracking_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542271.2239602,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        101.0,
+        -300.054011891596,
+        25.200000762939453
+      ],
+      "move_ignored": true,
+      "view": "FrontTracking_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542271.340359,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        101.0,
+        -300.9122496533091,
+        25.200000762939453
+      ],
+      "move_ignored": true,
+      "view": "FrontTracking_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542271.4423754,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        101.0,
+        -301.1000061035156,
+        25.200000762939453
+      ],
+      "move_ignored": true,
+      "view": "FrontTracking_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542271.5568502,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        101.0,
+        -301.1000061035156,
+        25.200000762939453
+      ],
+      "move_ignored": true,
+      "view": "FrontTracking_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542271.6570628,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        101.0,
+        -301.1000061035156,
+        25.200000762939453
+      ],
+      "move_ignored": true,
+      "view": "RearPortal_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542271.7750454,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        101.0,
+        -301.1000061035156,
+        25.200000762939453
+      ],
+      "move_ignored": true,
+      "view": "RearPortal_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542271.8765259,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        101.0,
+        -301.1000061035156,
+        25.200000762939453
+      ],
+      "move_ignored": true,
+      "view": "RearPortal_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542271.990709,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        101.0,
+        -301.1000061035156,
+        25.200000762939453
+      ],
+      "move_ignored": true,
+      "view": "RearPortal_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542272.107481,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        101.0,
+        -301.1000061035156,
+        25.200000762939453
+      ],
+      "move_ignored": true,
+      "view": "RearPortal_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542272.2239864,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        101.0,
+        -301.1000061035156,
+        25.200000762939453
+      ],
+      "move_ignored": true,
+      "view": "RearPortal_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542272.3426192,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        101.0,
+        -301.1000061035156,
+        25.200000762939453
+      ],
+      "move_ignored": true,
+      "view": "RearPortal_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542272.4569738,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        101.0,
+        -301.1000061035156,
+        25.200000762939453
+      ],
+      "move_ignored": true,
+      "view": "RearPortal_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542272.5764647,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        101.0,
+        -301.1000061035156,
+        25.200000762939453
+      ],
+      "move_ignored": true,
+      "view": "RearPortal_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542272.6905358,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        101.0,
+        -301.1000061035156,
+        25.200000762939453
+      ],
+      "move_ignored": true,
+      "view": "RearPortal_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542272.8062918,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        101.0,
+        -301.1000061035156,
+        25.200000762939453
+      ],
+      "move_ignored": true,
+      "view": "RearPortal_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542272.9069176,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        101.0,
+        -301.1000061035156,
+        25.200000762939453
+      ],
+      "move_ignored": true,
+      "view": "JumpFollow_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542273.0226352,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        101.0,
+        -301.1000061035156,
+        25.200000762939453
+      ],
+      "move_ignored": true,
+      "view": "JumpFollow_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542273.12605,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        101.0,
+        -301.1000061035156,
+        25.200000762939453
+      ],
+      "move_ignored": true,
+      "view": "JumpFollow_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542273.2411153,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        101.0,
+        -301.1000061035156,
+        25.200000762939453
+      ],
+      "move_ignored": true,
+      "view": "JumpFollow_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542273.3568027,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        101.0,
+        -301.1156025553492,
+        25.200000762939453
+      ],
+      "move_ignored": true,
+      "view": "JumpFollow_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542273.4762442,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        101.0,
+        -301.39655782217966,
+        25.200000762939453
+      ],
+      "move_ignored": true,
+      "view": "JumpFollow_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542273.5895119,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        101.0,
+        -302.0508403778076,
+        25.200000762939453
+      ],
+      "move_ignored": true,
+      "view": "JumpFollow_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542273.690909,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        101.0,
+        -303.6388744126135,
+        31.87662861714298
+      ],
+      "move_ignored": true,
+      "view": "JumpFollow_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542273.8075502,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        101.0,
+        -309.0690896793305,
+        47.35306901776746
+      ],
+      "move_ignored": true,
+      "view": "JumpFollow_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542273.9076283,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        101.0,
+        -316.5226681190839,
+        61.0215996532439
+      ],
+      "move_ignored": true,
+      "view": "JumpFollow_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542274.0238166,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        101.0,
+        -327.9530461604066,
+        75.00752593125942
+      ],
+      "move_ignored": true,
+      "view": "JumpFollow_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542274.1234741,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        101.0,
+        -339.65462610345014,
+        83.92701804261468
+      ],
+      "move_ignored": true,
+      "view": "JumpFollow_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542274.2424102,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        101.0,
+        -355.0127198296987,
+        89.59731822724414
+      ],
+      "move_ignored": true,
+      "view": "JumpFollow_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542274.343141,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        101.0,
+        -369.20818983122217,
+        89.95413441057546
+      ],
+      "move_ignored": true,
+      "view": "JumpFollow_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542274.4568756,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        101.0,
+        -386.44402387409303,
+        85.2296045597765
+      ],
+      "move_ignored": true,
+      "view": "JumpFollow_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542274.5733833,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        101.0,
+        -403.8586215297223,
+        75.75583108181127
+      ],
+      "move_ignored": true,
+      "view": "JumpFollow_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542274.6738117,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        101.0,
+        -418.461439306947,
+        65.05233567313208
+      ],
+      "move_ignored": true,
+      "view": "JumpFollow_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542274.7910743,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        101.0,
+        -434.60190635382196,
+        51.495720318410534
+      ],
+      "move_ignored": true,
+      "view": "JumpFollow_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542274.8917983,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        101.0,
+        -447.2474419506691,
+        41.32227790326471
+      ],
+      "move_ignored": true,
+      "view": "JumpFollow_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542275.005917,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        101.0,
+        -451.1000061035156,
+        39.20000076293945
+      ],
+      "move_ignored": true,
+      "view": "JumpFollow_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542275.124675,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        101.0,
+        -451.1000061035156,
+        39.20000076293945
+      ],
+      "move_ignored": true,
+      "view": "JumpFollow_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542275.2404535,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        101.0,
+        -451.1000061035156,
+        39.20000076293945
+      ],
+      "move_ignored": true,
+      "view": "JumpFollow_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542275.356618,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        101.0,
+        -451.1000061035156,
+        39.20000076293945
+      ],
+      "move_ignored": true,
+      "view": "JumpFollow_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542275.4558492,
+      "world": "/Game/Maps/UEDPIE_0_Stage1.Stage1",
+      "phase": "wait-stage2",
+      "cat": [
+        101.0,
+        -451.1000061035156,
+        39.20000076293945
+      ],
+      "move_ignored": true,
+      "view": "JumpFollow_0",
+      "anim_class": "AnimSequencerInstance"
+    },
+    {
+      "epoch": 1795542276.7484932,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "wait-stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542276.8672023,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "Entrance_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542276.9704583,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "Entrance_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542277.0847847,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "Entrance_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542277.1864188,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "Entrance_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542277.3037174,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "Entrance_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542277.4181118,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "Entrance_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542277.5192814,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "Entrance_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542277.63483,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "Entrance_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542277.7356114,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "Entrance_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542277.8518376,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "Entrance_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542277.9517267,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "Entrance_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542278.0695853,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "Entrance_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542278.1746826,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "Entrance_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542278.291428,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "Entrance_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542278.3921785,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "Entrance_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542278.5075321,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "Entrance_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542278.622993,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "Entrance_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542278.7404459,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "Entrance_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542278.8568726,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "Entrance_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542278.9747584,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "Entrance_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542279.090326,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "Entrance_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542279.190045,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "RearWalk_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542279.3082929,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "RearWalk_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542279.4083297,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "RearWalk_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542279.525635,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "RearWalk_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542279.6248,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "RearWalk_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542279.7419105,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "RearWalk_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542279.8582156,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "RearWalk_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542279.973408,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "RearWalk_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542280.0902898,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "RearWalk_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542280.1915183,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "RearWalk_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542280.3077874,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "RearWalk_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542280.4082887,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "RearWalk_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542280.5249772,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "Face_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542280.6245928,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "Face_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542280.7414103,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "Face_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542280.8416667,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "Face_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542280.9582198,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "Face_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542281.073712,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "Face_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542281.175325,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "Face_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542281.2909982,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "Face_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542281.3908727,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "Face_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542281.506877,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "Puzzle_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542281.6087334,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "Puzzle_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542281.7255275,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "Puzzle_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542281.8419025,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "Puzzle_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542281.958289,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "Puzzle_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542282.0741513,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "Puzzle_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542282.1757963,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "Puzzle_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542282.2930615,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "Puzzle_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542282.3903818,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "Puzzle_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542282.5074348,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "Puzzle_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542282.6082373,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "Puzzle_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542282.7262836,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "Puzzle_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542282.826187,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "Puzzle_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542282.9412231,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "Puzzle_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542283.0572543,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "Puzzle_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542283.157732,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "Puzzle_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542283.2765386,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "Puzzle_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542283.3764768,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "Puzzle_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542283.4910657,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "Puzzle_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542283.6075795,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "Puzzle_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542283.7257452,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "Puzzle_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542283.8258703,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "Puzzle_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542283.9428406,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "Puzzle_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542284.0584404,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "Puzzle_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542284.159067,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "Puzzle_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542284.2759948,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "Puzzle_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542284.3766453,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "Puzzle_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542284.4925184,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "Puzzle_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542284.5921006,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "Puzzle_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542284.7091606,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "Puzzle_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542284.8259947,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "Puzzle_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542284.9429605,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "Puzzle_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542285.0596113,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "FaceReturn_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542285.1583598,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "FaceReturn_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542285.277513,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "FaceReturn_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542285.3789492,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "FaceReturn_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542285.4928856,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "FaceReturn_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542285.5923457,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "FaceReturn_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542285.7093766,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "FaceReturn_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542285.8113604,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "FaceReturn_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542285.925642,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "FaceReturn_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542286.0439062,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "FaceReturn_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542286.1435254,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "FaceReturn_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542286.2603984,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "FaceReturn_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542286.3587658,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "FaceReturn_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542286.4773264,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "FaceReturn_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542286.5767887,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "FaceReturn_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542286.6926064,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "FaceReturn_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542286.8090231,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "FaceReturn_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542286.9082422,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "FaceReturn_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542287.0252151,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "FaceReturn_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542287.1274009,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "FaceReturn_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542287.2431955,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "FaceReturn_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542287.343305,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "FaceReturn_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542287.4595046,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "FaceReturn_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542287.576987,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "FaceReturn_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542287.6943243,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "FaceReturn_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542287.8105218,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "FaceReturn_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542287.9259195,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "FaceReturn_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542288.0433946,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "FaceReturn_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542288.141771,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "FaceReturn_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542288.2596166,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542288.3586411,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542288.4788938,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542288.577972,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542288.692842,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542288.8097699,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542288.9103303,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542289.0256484,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542289.128942,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542289.243332,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542289.3433,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": true,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542289.4603813,
+      "world": "/Game/Maps/UEDPIE_0_Stage2.Stage2",
+      "phase": "stage2",
+      "cat": [
+        1375.0,
+        3700.0,
+        26.2
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542289.9837766,
+      "world": "/Game/Maps/UEDPIE_0_Stage3.Stage3",
+      "phase": "complete",
+      "cat": [
+        150.0,
+        110.0,
+        26.2
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542290.1063159,
+      "world": "/Game/Maps/UEDPIE_0_Stage3.Stage3",
+      "phase": "complete",
+      "cat": [
+        150.0,
+        110.0,
+        26.2
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542290.2066393,
+      "world": "/Game/Maps/UEDPIE_0_Stage3.Stage3",
+      "phase": "complete",
+      "cat": [
+        150.0,
+        110.0,
+        26.2
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542290.3233724,
+      "world": "/Game/Maps/UEDPIE_0_Stage3.Stage3",
+      "phase": "complete",
+      "cat": [
+        150.0,
+        110.0,
+        26.2
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542290.4229171,
+      "world": "/Game/Maps/UEDPIE_0_Stage3.Stage3",
+      "phase": "complete",
+      "cat": [
+        150.0,
+        110.0,
+        26.2
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542290.5401871,
+      "world": "/Game/Maps/UEDPIE_0_Stage3.Stage3",
+      "phase": "complete",
+      "cat": [
+        150.0,
+        110.0,
+        26.2
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542290.6417353,
+      "world": "/Game/Maps/UEDPIE_0_Stage3.Stage3",
+      "phase": "complete",
+      "cat": [
+        150.0,
+        110.0,
+        26.2
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542290.7568936,
+      "world": "/Game/Maps/UEDPIE_0_Stage3.Stage3",
+      "phase": "complete",
+      "cat": [
+        150.0,
+        110.0,
+        26.2
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542290.873223,
+      "world": "/Game/Maps/UEDPIE_0_Stage3.Stage3",
+      "phase": "complete",
+      "cat": [
+        150.0,
+        110.0,
+        26.2
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542290.9901097,
+      "world": "/Game/Maps/UEDPIE_0_Stage3.Stage3",
+      "phase": "complete",
+      "cat": [
+        150.0,
+        110.0,
+        26.2
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542291.1084712,
+      "world": "/Game/Maps/UEDPIE_0_Stage3.Stage3",
+      "phase": "complete",
+      "cat": [
+        150.0,
+        110.0,
+        26.2
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542291.224061,
+      "world": "/Game/Maps/UEDPIE_0_Stage3.Stage3",
+      "phase": "complete",
+      "cat": [
+        150.0,
+        110.0,
+        26.2
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542291.3411462,
+      "world": "/Game/Maps/UEDPIE_0_Stage3.Stage3",
+      "phase": "complete",
+      "cat": [
+        150.0,
+        110.0,
+        26.2
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542291.4571025,
+      "world": "/Game/Maps/UEDPIE_0_Stage3.Stage3",
+      "phase": "complete",
+      "cat": [
+        150.0,
+        110.0,
+        26.2
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542291.5742729,
+      "world": "/Game/Maps/UEDPIE_0_Stage3.Stage3",
+      "phase": "complete",
+      "cat": [
+        150.0,
+        110.0,
+        26.2
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542291.674853,
+      "world": "/Game/Maps/UEDPIE_0_Stage3.Stage3",
+      "phase": "complete",
+      "cat": [
+        150.0,
+        110.0,
+        26.2
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542291.790953,
+      "world": "/Game/Maps/UEDPIE_0_Stage3.Stage3",
+      "phase": "complete",
+      "cat": [
+        150.0,
+        110.0,
+        26.2
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542291.890885,
+      "world": "/Game/Maps/UEDPIE_0_Stage3.Stage3",
+      "phase": "complete",
+      "cat": [
+        150.0,
+        110.0,
+        26.2
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542292.0077622,
+      "world": "/Game/Maps/UEDPIE_0_Stage3.Stage3",
+      "phase": "complete",
+      "cat": [
+        150.0,
+        110.0,
+        26.2
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542292.1090176,
+      "world": "/Game/Maps/UEDPIE_0_Stage3.Stage3",
+      "phase": "complete",
+      "cat": [
+        150.0,
+        110.0,
+        26.2
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542292.225774,
+      "world": "/Game/Maps/UEDPIE_0_Stage3.Stage3",
+      "phase": "complete",
+      "cat": [
+        150.0,
+        110.0,
+        26.2
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542292.3399498,
+      "world": "/Game/Maps/UEDPIE_0_Stage3.Stage3",
+      "phase": "complete",
+      "cat": [
+        150.0,
+        110.0,
+        26.2
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542292.4429033,
+      "world": "/Game/Maps/UEDPIE_0_Stage3.Stage3",
+      "phase": "complete",
+      "cat": [
+        150.0,
+        110.0,
+        26.2
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542292.5564055,
+      "world": "/Game/Maps/UEDPIE_0_Stage3.Stage3",
+      "phase": "complete",
+      "cat": [
+        150.0,
+        110.0,
+        26.2
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542292.6565673,
+      "world": "/Game/Maps/UEDPIE_0_Stage3.Stage3",
+      "phase": "finish",
+      "cat": [
+        150.0,
+        110.0,
+        26.2
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542292.7745364,
+      "world": "/Game/Maps/UEDPIE_0_Stage3.Stage3",
+      "phase": "finish",
+      "cat": [
+        150.0,
+        110.0,
+        26.2
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542292.8743382,
+      "world": "/Game/Maps/UEDPIE_0_Stage3.Stage3",
+      "phase": "finish",
+      "cat": [
+        150.0,
+        110.0,
+        26.2
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542292.9904664,
+      "world": "/Game/Maps/UEDPIE_0_Stage3.Stage3",
+      "phase": "finish",
+      "cat": [
+        150.0,
+        110.0,
+        26.2
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542293.1080606,
+      "world": "/Game/Maps/UEDPIE_0_Stage3.Stage3",
+      "phase": "finish",
+      "cat": [
+        150.0,
+        110.0,
+        26.2
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542293.2259002,
+      "world": "/Game/Maps/UEDPIE_0_Stage3.Stage3",
+      "phase": "finish",
+      "cat": [
+        150.0,
+        110.0,
+        26.2
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542293.3431313,
+      "world": "/Game/Maps/UEDPIE_0_Stage3.Stage3",
+      "phase": "finish",
+      "cat": [
+        150.0,
+        110.0,
+        26.2
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542293.4568737,
+      "world": "/Game/Maps/UEDPIE_0_Stage3.Stage3",
+      "phase": "finish",
+      "cat": [
+        150.0,
+        110.0,
+        26.2
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542293.5744984,
+      "world": "/Game/Maps/UEDPIE_0_Stage3.Stage3",
+      "phase": "finish",
+      "cat": [
+        150.0,
+        110.0,
+        26.2
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    },
+    {
+      "epoch": 1795542293.6745834,
+      "world": "/Game/Maps/UEDPIE_0_Stage3.Stage3",
+      "phase": "finish",
+      "cat": [
+        150.0,
+        110.0,
+        26.2
+      ],
+      "move_ignored": false,
+      "view": "BP_QuarterViewCamera_C_0",
+      "anim_class": "ABP_Cat_Final_C"
+    }
+  ],
+  "scope": "API checkpoint placement with Pawn-profile clearance; native overlaps/cinematics/travel",
+  "renderer": "NullRHI",
+  "last": 786372.89,
+  "saw_intro": true,
+  "changed": 786372.89,
+  "saw_stairs": true,
+  "stairs_shot": true,
+  "saw_stage2_arrival_presentation": true,
+  "error": null,
+  "success": true
+}

@@ -1,0 +1,11 @@
+# Stage2 character variant A applied
+
+Applied the approved navy/silver/brass armor and lavender/gold candle designs to `/Game/Maps/Stage2`: Armor_01 through Armor_04 and Candle_01 through Candle_03. Existing actor and mesh transforms, animation settings, skeleton references and gameplay Blueprints are preserved. Other gameplay maps and shared character assets were not edited by this change.
+
+New assets are under `/Game/Characters/Stage2/A`, with meshes `LivingArmor/Meshes/SK_LivingArmor_Stage2_A` and `CandleMonster/Meshes/SK_CandleMonster_Stage2_A`, 11 materials and 10 armor textures. The candle duplicates the existing engine mesh and changes materials only, preserving its existing nine-bone hierarchy including its import wrapper. Armor retains the existing 62-bone skeleton.
+
+The armor engine FBX is `C:/Users/whghk/Desktop/CastleKit/Stage2/Characters/LivingArmor/SK_LivingArmor_Stage2_A_UE.fbx`. Its export uses the original engine source's `Armature` object name and FBX_SCALE_NONE convention. The earlier generic FBX used a different wrapper/unit representation and is not the engine integration source.
+
+Verification: imported armor reference transforms exactly match the existing engine mesh; all seven actors retain their variant assets after saving and reloading Stage2; all assigned material slots resolve to the new folder; PIE actors retain the variant meshes, materials and valid original animation instances. Unreal evaluated all 16 existing animation clips at 48 sample times with exactly equal original/variant bone poses. Real-time motion could not be confirmed: both simulation and regular PIE reported game time 0 and did not advance poses. Temporary PIE animation/tick overrides were discarded by ending PIE; editor settings were verified again. This is not a completed gameplay playthrough or visual acceptance pass.
+
+Evidence and pre-application map backup: `Saved/Stage2CharactersA20261124/`. Key files: `import_report.json`, `material_slots_verified.json`, `application_report.json`, `reloaded_verification.json`, `animation_pose_verification.json`, `runtime_summary.json`. The original progress save was preserved. The editor is left on Stage2 with PIE stopped and no dirty map packages. Changes are local, not committed or pushed.

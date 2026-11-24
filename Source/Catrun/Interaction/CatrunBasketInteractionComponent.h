@@ -110,6 +110,7 @@ private:
 	friend class FCatrunBasketEntryTransitProfileTest;
 	friend class FCatrunBasketExitTransitProfileTest;
 	friend class FCatrunBasketLateLandingSupportTest;
+	friend class FCatrunBasketDestroyedInputTest;
 #endif
 	friend class FCatrunBasketCandidateRegressionTest;
 	friend class FCatrunBasketRestoreRegressionTest;
@@ -124,7 +125,7 @@ private:
 	void FinishEnter();
 	void ExitBasket();
 	void FinishExit();
-	void UpdateExitCandidate(bool bForce, bool bReadDirectionInput = true);
+	bool UpdateExitCandidate(bool bForce, bool bReadDirectionInput = true);
 	bool FindExitSupport(const FVector& Reference, FVector& OutCenter) const;
 	bool IsBasketExitPathClear(const FVector& Destination) const;
 	void UpdatePreview();
@@ -137,7 +138,9 @@ private:
 	TObjectPtr<UCatrunBasketExitPreview> ExitPreview;
 	UPROPERTY(Transient)
 	TObjectPtr<UCatrunBasketPromptWidget> BasketPromptWidget;
-	double NextPromptCheck = 0;
+	TArray<TWeakObjectPtr<ACatrunHideBasket>> NearbyBaskets;
+	FDelegateHandle BasketSpawnHandle;
+	void TrackBasket(AActor* Actor);
 	UPROPERTY(Transient)
 	TSubclassOf<UAnimInstance> SavedAnimClass;
 

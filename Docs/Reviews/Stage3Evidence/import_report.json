@@ -1,0 +1,1835 @@
+{
+  "meshes": {
+    "SM_S3_Wall_200": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_Wall_200.SM_S3_Wall_200",
+      "source": "Architecture/A01_SM_S3_Wall_200/SM_S3_Wall_200.fbx",
+      "id": "A01",
+      "bounds": [
+        [
+          0.0,
+          -30.000019073486328,
+          0.0
+        ],
+        [
+          200.0,
+          0.0,
+          300.0
+        ]
+      ],
+      "materials": [
+        "M_S3_mortar",
+        "M_S3_limestone",
+        "M_S3_dressed_stone"
+      ],
+      "convex": 0,
+      "simple": 1
+    },
+    "SM_S3_Wall_100": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_Wall_100.SM_S3_Wall_100",
+      "source": "Architecture/A02_SM_S3_Wall_100/SM_S3_Wall_100.fbx",
+      "id": "A02",
+      "bounds": [
+        [
+          -2.611066975077847e-06,
+          -30.000009536743164,
+          0.0
+        ],
+        [
+          100.0,
+          -1.161650686754001e-08,
+          300.0
+        ]
+      ],
+      "materials": [
+        "M_S3_mortar",
+        "M_S3_limestone",
+        "M_S3_dressed_stone"
+      ],
+      "convex": 0,
+      "simple": 1
+    },
+    "SM_S3_Wall_50": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_Wall_50.SM_S3_Wall_50",
+      "source": "Architecture/A03_SM_S3_Wall_50/SM_S3_Wall_50.fbx",
+      "id": "A03",
+      "bounds": [
+        [
+          -2.608695922390325e-06,
+          -30.0000057220459,
+          0.0
+        ],
+        [
+          50.0,
+          -1.3987644820190326e-08,
+          300.0
+        ]
+      ],
+      "materials": [
+        "M_S3_mortar",
+        "M_S3_limestone",
+        "M_S3_dressed_stone"
+      ],
+      "convex": 0,
+      "simple": 1
+    },
+    "SM_S3_Wall_Corner": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_Wall_Corner.SM_S3_Wall_Corner",
+      "source": "Architecture/A04_SM_S3_Wall_Corner/SM_S3_Wall_Corner.fbx",
+      "id": "A04",
+      "bounds": [
+        [
+          -2.608695922390325e-06,
+          -30.000003814697266,
+          0.0
+        ],
+        [
+          30.000001907348633,
+          -1.3987644820190326e-08,
+          300.0
+        ]
+      ],
+      "materials": [
+        "M_S3_dressed_stone",
+        "M_S3_limestone",
+        "M_S3_mortar"
+      ],
+      "convex": 0,
+      "simple": 1
+    },
+    "SM_S3_Wall_BlindArch_200": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_Wall_BlindArch_200.SM_S3_Wall_BlindArch_200",
+      "source": "Architecture/A05_SM_S3_Wall_BlindArch_200/SM_S3_Wall_BlindArch_200.fbx",
+      "id": "A05",
+      "bounds": [
+        [
+          -2.6172153866355075e-06,
+          -30.000019073486328,
+          0.0
+        ],
+        [
+          200.0,
+          -5.468095309879573e-09,
+          300.0
+        ]
+      ],
+      "materials": [
+        "M_S3_mortar",
+        "M_S3_limestone",
+        "M_S3_dressed_stone"
+      ],
+      "convex": 0,
+      "simple": 1
+    },
+    "SM_S3_WallPilaster": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_WallPilaster.SM_S3_WallPilaster",
+      "source": "Architecture/A06_SM_S3_WallPilaster/SM_S3_WallPilaster.fbx",
+      "id": "A06",
+      "bounds": [
+        [
+          -19.5,
+          -1.7047442497641896e-06,
+          0.0
+        ],
+        [
+          19.5,
+          19.5,
+          300.0
+        ]
+      ],
+      "materials": [
+        "M_S3_dressed_stone",
+        "M_S3_limestone"
+      ],
+      "convex": 0,
+      "simple": 0
+    },
+    "SM_S3_Floor_Octagon": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_Floor_Octagon.SM_S3_Floor_Octagon",
+      "source": "Floors/A07_SM_S3_Floor_Octagon/SM_S3_Floor_Octagon.fbx",
+      "id": "A07",
+      "bounds": [
+        [
+          -1.747056739986874e-05,
+          -200.00001525878906,
+          0.0
+        ],
+        [
+          200.0,
+          -1.398763060933561e-08,
+          5.0
+        ]
+      ],
+      "materials": [
+        "M_S3_mortar",
+        "M_S3_flagstone",
+        "M_S3_dark_stone"
+      ],
+      "convex": 0,
+      "simple": 1
+    },
+    "SM_S3_Floor_GatePlain": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_Floor_GatePlain.SM_S3_Floor_GatePlain",
+      "source": "Floors/A08_SM_S3_Floor_GatePlain/SM_S3_Floor_GatePlain.fbx",
+      "id": "A08",
+      "bounds": [
+        [
+          -1.747056739986874e-05,
+          -200.00001525878906,
+          0.0
+        ],
+        [
+          200.0,
+          -1.398763060933561e-08,
+          5.0
+        ]
+      ],
+      "materials": [
+        "M_S3_mortar",
+        "M_S3_flagstone",
+        "M_S3_mid_stone"
+      ],
+      "convex": 0,
+      "simple": 1
+    },
+    "SM_S3_Floor_GateAxis": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_Floor_GateAxis.SM_S3_Floor_GateAxis",
+      "source": "Floors/A09_SM_S3_Floor_GateAxis/SM_S3_Floor_GateAxis.fbx",
+      "id": "A09",
+      "bounds": [
+        [
+          -2.1841706256964244e-05,
+          -250.00001525878906,
+          0.0
+        ],
+        [
+          200.0,
+          -1.398763060933561e-08,
+          5.0
+        ]
+      ],
+      "materials": [
+        "M_S3_mortar",
+        "M_S3_mid_stone",
+        "M_S3_flagstone",
+        "M_S3_dark_stone"
+      ],
+      "convex": 0,
+      "simple": 1
+    },
+    "SM_S3_Floor_GateThreshold": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_Floor_GateThreshold.SM_S3_Floor_GateThreshold",
+      "source": "Floors/A10_SM_S3_Floor_GateThreshold/SM_S3_Floor_GateThreshold.fbx",
+      "id": "A10",
+      "bounds": [
+        [
+          -5.243968189461157e-05,
+          -600.0,
+          0.0
+        ],
+        [
+          200.0,
+          -1.3987687452754471e-08,
+          5.0
+        ]
+      ],
+      "materials": [
+        "M_S3_mortar",
+        "M_S3_mid_stone",
+        "M_S3_flagstone",
+        "M_S3_dark_stone"
+      ],
+      "convex": 0,
+      "simple": 1
+    },
+    "SM_S3_Floor_GateBorder": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_Floor_GateBorder.SM_S3_Floor_GateBorder",
+      "source": "Floors/A11_SM_S3_Floor_GateBorder/SM_S3_Floor_GateBorder.fbx",
+      "id": "A11",
+      "bounds": [
+        [
+          -2.1715818547818344e-06,
+          -25.000017166137695,
+          0.0
+        ],
+        [
+          200.0,
+          -1.3987644820190326e-08,
+          5.0
+        ]
+      ],
+      "materials": [
+        "M_S3_mortar",
+        "M_S3_flagstone",
+        "M_S3_mid_stone",
+        "M_S3_dark_stone"
+      ],
+      "convex": 0,
+      "simple": 1
+    },
+    "SM_S3_Pillar_Base": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_Pillar_Base.SM_S3_Pillar_Base",
+      "source": "Architecture/A12_SM_S3_Pillar_Base/SM_S3_Pillar_Base.fbx",
+      "id": "A12",
+      "bounds": [
+        [
+          -48.500003814697266,
+          -48.500003814697266,
+          0.0
+        ],
+        [
+          48.500003814697266,
+          48.500003814697266,
+          25.0
+        ]
+      ],
+      "materials": [
+        "M_S3_dressed_stone"
+      ],
+      "convex": 0,
+      "simple": 0
+    },
+    "SM_S3_Pillar_Shaft": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_Pillar_Shaft.SM_S3_Pillar_Shaft",
+      "source": "Architecture/A13_SM_S3_Pillar_Shaft/SM_S3_Pillar_Shaft.fbx",
+      "id": "A13",
+      "bounds": [
+        [
+          -37.5,
+          -37.5,
+          0.0
+        ],
+        [
+          37.5,
+          37.5,
+          250.0
+        ]
+      ],
+      "materials": [
+        "M_S3_limestone"
+      ],
+      "convex": 0,
+      "simple": 0
+    },
+    "SM_S3_Pillar_Capital": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_Pillar_Capital.SM_S3_Pillar_Capital",
+      "source": "Architecture/A14_SM_S3_Pillar_Capital/SM_S3_Pillar_Capital.fbx",
+      "id": "A14",
+      "bounds": [
+        [
+          -48.500003814697266,
+          -48.500003814697266,
+          0.0
+        ],
+        [
+          48.500003814697266,
+          48.500003814697266,
+          25.0
+        ]
+      ],
+      "materials": [
+        "M_S3_dressed_stone"
+      ],
+      "convex": 0,
+      "simple": 0
+    },
+    "SM_S3_GrandPillar_Base": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_GrandPillar_Base.SM_S3_GrandPillar_Base",
+      "source": "Architecture/A15_SM_S3_GrandPillar_Base/SM_S3_GrandPillar_Base.fbx",
+      "id": "A15",
+      "bounds": [
+        [
+          -75.00000762939453,
+          -75.00000762939453,
+          0.0
+        ],
+        [
+          75.00000762939453,
+          75.00000762939453,
+          40.0
+        ]
+      ],
+      "materials": [
+        "M_S3_dressed_stone"
+      ],
+      "convex": 0,
+      "simple": 0
+    },
+    "SM_S3_GrandPillar_ShaftLower": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_GrandPillar_ShaftLower.SM_S3_GrandPillar_ShaftLower",
+      "source": "Architecture/A16_SM_S3_GrandPillar_ShaftLower/SM_S3_GrandPillar_ShaftLower.fbx",
+      "id": "A16",
+      "bounds": [
+        [
+          -62.5,
+          -62.5,
+          0.0
+        ],
+        [
+          62.5,
+          62.5,
+          260.0
+        ]
+      ],
+      "materials": [
+        "M_S3_limestone"
+      ],
+      "convex": 0,
+      "simple": 0
+    },
+    "SM_S3_GrandPillar_ShaftUpper": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_GrandPillar_ShaftUpper.SM_S3_GrandPillar_ShaftUpper",
+      "source": "Architecture/A17_SM_S3_GrandPillar_ShaftUpper/SM_S3_GrandPillar_ShaftUpper.fbx",
+      "id": "A17",
+      "bounds": [
+        [
+          -62.5,
+          -62.5,
+          0.0
+        ],
+        [
+          62.5,
+          62.5,
+          540.0
+        ]
+      ],
+      "materials": [
+        "M_S3_limestone"
+      ],
+      "convex": 0,
+      "simple": 0
+    },
+    "SM_S3_GrandPillar_Capital": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_GrandPillar_Capital.SM_S3_GrandPillar_Capital",
+      "source": "Architecture/A18_SM_S3_GrandPillar_Capital/SM_S3_GrandPillar_Capital.fbx",
+      "id": "A18",
+      "bounds": [
+        [
+          -75.00000762939453,
+          -75.00000762939453,
+          0.0
+        ],
+        [
+          75.00000762939453,
+          75.00000762939453,
+          60.000003814697266
+        ]
+      ],
+      "materials": [
+        "M_S3_dressed_stone"
+      ],
+      "convex": 0,
+      "simple": 0
+    },
+    "SM_S3_Floor_GatePlain_Trim_100": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_Floor_GatePlain_Trim_100.SM_S3_Floor_GatePlain_Trim_100",
+      "source": "Floors/A19_SM_S3_Floor_GatePlain_Trim_100/SM_S3_Floor_GatePlain_Trim_100.fbx",
+      "id": "A19-GatePlain_Trim_100",
+      "bounds": [
+        [
+          -8.74059242050862e-06,
+          -100.00001525878906,
+          0.0
+        ],
+        [
+          200.0,
+          -1.3987644820190326e-08,
+          5.0
+        ]
+      ],
+      "materials": [
+        "M_S3_mortar",
+        "M_S3_flagstone",
+        "M_S3_mid_stone"
+      ],
+      "convex": 0,
+      "simple": 1
+    },
+    "SM_S3_Floor_GatePlain_Trim_50": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_Floor_GatePlain_Trim_50.SM_S3_Floor_GatePlain_Trim_50",
+      "source": "Floors/A19_SM_S3_Floor_GatePlain_Trim_50/SM_S3_Floor_GatePlain_Trim_50.fbx",
+      "id": "A19-GatePlain_Trim_50",
+      "bounds": [
+        [
+          -4.369454018160468e-06,
+          -50.00001907348633,
+          0.0
+        ],
+        [
+          200.0,
+          -1.3987644820190326e-08,
+          5.0
+        ]
+      ],
+      "materials": [
+        "M_S3_mortar",
+        "M_S3_flagstone",
+        "M_S3_mid_stone"
+      ],
+      "convex": 0,
+      "simple": 1
+    },
+    "SM_S3_Floor_Octagon_Trim_100": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_Floor_Octagon_Trim_100.SM_S3_Floor_Octagon_Trim_100",
+      "source": "Floors/A19_SM_S3_Floor_Octagon_Trim_100/SM_S3_Floor_Octagon_Trim_100.fbx",
+      "id": "A19-Octagon_Trim_100",
+      "bounds": [
+        [
+          -8.74059242050862e-06,
+          -100.00001525878906,
+          0.0
+        ],
+        [
+          200.0,
+          -1.3987644820190326e-08,
+          5.0
+        ]
+      ],
+      "materials": [
+        "M_S3_mortar",
+        "M_S3_flagstone",
+        "M_S3_dark_stone"
+      ],
+      "convex": 0,
+      "simple": 1
+    },
+    "SM_S3_Floor_Octagon_Trim_50": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_Floor_Octagon_Trim_50.SM_S3_Floor_Octagon_Trim_50",
+      "source": "Floors/A19_SM_S3_Floor_Octagon_Trim_50/SM_S3_Floor_Octagon_Trim_50.fbx",
+      "id": "A19-Octagon_Trim_50",
+      "bounds": [
+        [
+          -4.369454018160468e-06,
+          -50.00001907348633,
+          0.0
+        ],
+        [
+          200.0,
+          -1.3987644820190326e-08,
+          5.0
+        ]
+      ],
+      "materials": [
+        "M_S3_mortar",
+        "M_S3_flagstone",
+        "M_S3_dark_stone"
+      ],
+      "convex": 0,
+      "simple": 1
+    },
+    "SM_S3_ArmorDoor_Frame": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_ArmorDoor_Frame.SM_S3_ArmorDoor_Frame",
+      "source": "ArchitectureDoors/B01_SM_S3_ArmorDoor_Frame/SM_S3_ArmorDoor_Frame.fbx",
+      "id": "B01",
+      "bounds": [
+        [
+          0.0,
+          -30.000049591064453,
+          -4.881881523033371e-06
+        ],
+        [
+          200.0,
+          -5.739341446542312e-09,
+          300.0
+        ]
+      ],
+      "materials": [
+        "M_S3_mortar",
+        "M_S3_limestone",
+        "M_S3_dressed_stone",
+        "M_S3_iron",
+        "M_S3_steel"
+      ],
+      "convex": 0,
+      "simple": 3
+    },
+    "SM_S3_ArmorDoor_Leaf": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_ArmorDoor_Leaf.SM_S3_ArmorDoor_Leaf",
+      "source": "ArchitectureDoors/B02_SM_S3_ArmorDoor_Leaf/SM_S3_ArmorDoor_Leaf.fbx",
+      "id": "B02",
+      "bounds": [
+        [
+          -3.799999952316284,
+          -8.963518142700195,
+          -1.1094897445218521e-06
+        ],
+        [
+          148.1999969482422,
+          8.436579704284668,
+          241.94000244140625
+        ]
+      ],
+      "materials": [
+        "M_S3_iron",
+        "M_S3_steel",
+        "M_S3_brass"
+      ],
+      "convex": 0,
+      "simple": 1
+    },
+    "SM_S3_CatHoleWall": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_CatHoleWall.SM_S3_CatHoleWall",
+      "source": "Architecture/B03_SM_S3_CatHoleWall/SM_S3_CatHoleWall.fbx",
+      "id": "B03",
+      "bounds": [
+        [
+          -2.622325155243743e-06,
+          -30.000019073486328,
+          0.0
+        ],
+        [
+          200.0,
+          -3.5836578149428533e-10,
+          300.0
+        ]
+      ],
+      "materials": [
+        "M_S3_mortar",
+        "M_S3_limestone",
+        "M_S3_dressed_stone"
+      ],
+      "convex": 0,
+      "simple": 3
+    },
+    "SM_S3_CatHoleTrim": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_CatHoleTrim.SM_S3_CatHoleTrim",
+      "source": "Architecture/B04_SM_S3_CatHoleTrim/SM_S3_CatHoleTrim.fbx",
+      "id": "B04",
+      "bounds": [
+        [
+          -42.0,
+          -4.000003337860107,
+          0.0
+        ],
+        [
+          42.0,
+          3.6289197851147037e-06,
+          88.99073028564453
+        ]
+      ],
+      "materials": [
+        "M_S3_dressed_stone"
+      ],
+      "convex": 0,
+      "simple": 0
+    },
+    "SM_S3_PuzzleGate_Frame": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_PuzzleGate_Frame.SM_S3_PuzzleGate_Frame",
+      "source": "ArchitectureDoors/B05_SM_S3_PuzzleGate_Frame/SM_S3_PuzzleGate_Frame.fbx",
+      "id": "B05",
+      "bounds": [
+        [
+          0.0,
+          -30.000049591064453,
+          -4.824081315746298e-06
+        ],
+        [
+          200.0,
+          -1.4662859371128434e-08,
+          300.0
+        ]
+      ],
+      "materials": [
+        "M_S3_dressed_stone",
+        "M_S3_limestone",
+        "M_S3_mortar",
+        "M_S3_iron"
+      ],
+      "convex": 0,
+      "simple": 3
+    },
+    "SM_S3_PuzzleGate_Bars": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_PuzzleGate_Bars.SM_S3_PuzzleGate_Bars",
+      "source": "ArchitectureDoors/B06_SM_S3_PuzzleGate_Bars/SM_S3_PuzzleGate_Bars.fbx",
+      "id": "B06",
+      "bounds": [
+        [
+          -72.0,
+          -3.000020742416382,
+          -1.3872478632492857e-07
+        ],
+        [
+          72.0,
+          2.999994993209839,
+          246.0
+        ]
+      ],
+      "materials": [
+        "M_S3_iron",
+        "M_S3_steel"
+      ],
+      "convex": 0,
+      "simple": 1
+    },
+    "SM_S3_D2_BarKeeper": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_D2_BarKeeper.SM_S3_D2_BarKeeper",
+      "source": "Doors/SM_S3_GateLockHousing/D2_Receiver/SM_S3_D2_BarKeeper.fbx",
+      "id": "B07-D2-Receiver",
+      "bounds": [
+        [
+          -5.099999904632568,
+          -19.900001525878906,
+          -8.300000190734863
+        ],
+        [
+          1.600000023841858,
+          4.750000953674316,
+          8.300000190734863
+        ]
+      ],
+      "materials": [
+        "M_S3_steel",
+        "M_S3_iron"
+      ],
+      "convex": 0,
+      "simple": 0
+    },
+    "SM_S3_GateLockHousing": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_GateLockHousing.SM_S3_GateLockHousing",
+      "source": "Doors/SM_S3_GateLockHousing/SM_S3_GateLockHousing.fbx",
+      "id": "B07",
+      "bounds": [
+        [
+          -12.5,
+          -6.900005340576172,
+          -1.0589843668640242e-06
+        ],
+        [
+          12.5,
+          4.999998569488525,
+          35.0
+        ]
+      ],
+      "materials": [
+        "M_S3_iron"
+      ],
+      "convex": 0,
+      "simple": 0
+    },
+    "SM_S3_GateLockBolt": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_GateLockBolt.SM_S3_GateLockBolt",
+      "source": "Doors/SM_S3_GateLockBolt/SM_S3_GateLockBolt.fbx",
+      "id": "B08",
+      "bounds": [
+        [
+          -6.0,
+          -3.0000011920928955,
+          -4.3988580955556245e-07
+        ],
+        [
+          6.0,
+          3.0,
+          30.000001907348633
+        ]
+      ],
+      "materials": [
+        "M_S3_steel"
+      ],
+      "convex": 0,
+      "simple": 0
+    },
+    "SM_S3_FinalGate_LowerFrame": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_FinalGate_LowerFrame.SM_S3_FinalGate_LowerFrame",
+      "source": "Doors/SM_S3_FinalGate_LowerFrame/SM_S3_FinalGate_LowerFrame.fbx",
+      "id": "C01",
+      "bounds": [
+        [
+          -400.0,
+          -50.00004959106445,
+          -8.015697858354542e-06
+        ],
+        [
+          400.0,
+          50.0,
+          300.0
+        ]
+      ],
+      "materials": [
+        "M_S3_limestone",
+        "M_S3_dressed_stone"
+      ],
+      "convex": 0,
+      "simple": 2
+    },
+    "SM_S3_FinalGate_UpperFrame": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_FinalGate_UpperFrame.SM_S3_FinalGate_UpperFrame",
+      "source": "Doors/SM_S3_FinalGate_UpperFrame/SM_S3_FinalGate_UpperFrame.fbx",
+      "id": "C02",
+      "bounds": [
+        [
+          -400.0,
+          -50.000099182128906,
+          -7.950528924993705e-06
+        ],
+        [
+          400.0,
+          49.4999885559082,
+          699.2489013671875
+        ]
+      ],
+      "materials": [
+        "M_S3_limestone",
+        "M_S3_dressed_stone"
+      ],
+      "convex": 0,
+      "simple": 3
+    },
+    "SM_S3_FinalGate_Leaf_L": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_FinalGate_Leaf_L.SM_S3_FinalGate_Leaf_L",
+      "source": "Doors/SM_S3_FinalGate_Leaf_L/SM_S3_FinalGate_Leaf_L.fbx",
+      "id": "C03",
+      "bounds": [
+        [
+          -300.0,
+          -19.00012969970703,
+          2.499997138977051
+        ],
+        [
+          -1.7999887466430664,
+          32.099971771240234,
+          793.5993041992188
+        ]
+      ],
+      "materials": [
+        "M_S3_iron",
+        "M_S3_brass"
+      ],
+      "convex": 0,
+      "simple": 1
+    },
+    "SM_S3_FinalGate_Leaf_R": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_FinalGate_Leaf_R.SM_S3_FinalGate_Leaf_R",
+      "source": "Doors/SM_S3_FinalGate_Leaf_R/SM_S3_FinalGate_Leaf_R.fbx",
+      "id": "C04",
+      "bounds": [
+        [
+          1.7999887466430664,
+          -19.00012969970703,
+          2.499997138977051
+        ],
+        [
+          300.0,
+          32.099971771240234,
+          793.5992431640625
+        ]
+      ],
+      "materials": [
+        "M_S3_iron",
+        "M_S3_brass"
+      ],
+      "convex": 0,
+      "simple": 1
+    },
+    "SM_S3_GuardianStatue": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_GuardianStatue.SM_S3_GuardianStatue",
+      "source": "Puzzles/D01_ReferenceRebuild/SM_S3_GuardianStatue.fbx",
+      "id": "D01",
+      "bounds": [
+        [
+          -60.000003814697266,
+          -60.000003814697266,
+          -9.73451096797362e-06
+        ],
+        [
+          60.000003814697266,
+          60.000003814697266,
+          150.0
+        ]
+      ],
+      "materials": [
+        "M_S3_Guardian_FineLimestone"
+      ],
+      "convex": 0,
+      "simple": 1
+    },
+    "SM_S3_StatuePlate_Frame": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_StatuePlate_Frame.SM_S3_StatuePlate_Frame",
+      "source": "Puzzles/SM_S3_StatuePlate_Frame/SM_S3_StatuePlate_Frame.fbx",
+      "id": "D02",
+      "bounds": [
+        [
+          -75.0,
+          -75.0,
+          -5.000012397766113
+        ],
+        [
+          75.0,
+          75.0,
+          1.2213980880915187e-05
+        ]
+      ],
+      "materials": [
+        "M_S3_dressed_stone"
+      ],
+      "convex": 0,
+      "simple": 0
+    },
+    "SM_S3_StatuePlate_Plate": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_StatuePlate_Plate.SM_S3_StatuePlate_Plate",
+      "source": "Puzzles/SM_S3_StatuePlate_Plate/SM_S3_StatuePlate_Plate.fbx",
+      "id": "D03",
+      "bounds": [
+        [
+          -65.0,
+          -65.0,
+          -1.0000104904174805
+        ],
+        [
+          65.0,
+          65.0,
+          2.0000104904174805
+        ]
+      ],
+      "materials": [
+        "M_S3_iron",
+        "M_S3_brass"
+      ],
+      "convex": 0,
+      "simple": 0
+    },
+    "SM_S3_ReleaseHousing": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_ReleaseHousing.SM_S3_ReleaseHousing",
+      "source": "Puzzles/SM_S3_ReleaseHousing/SM_S3_ReleaseHousing.fbx",
+      "id": "D04",
+      "bounds": [
+        [
+          -40.0,
+          -30.00001335144043,
+          -4.806160177395213e-06
+        ],
+        [
+          40.0,
+          30.000001907348633,
+          99.97635650634766
+        ]
+      ],
+      "materials": [
+        "M_S3_dressed_stone",
+        "M_S3_limestone",
+        "M_S3_iron",
+        "M_S3_steel"
+      ],
+      "convex": 0,
+      "simple": 0
+    },
+    "SM_S3_ReleasePin": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_ReleasePin.SM_S3_ReleasePin",
+      "source": "Puzzles/SM_S3_ReleasePin/SM_S3_ReleasePin.fbx",
+      "id": "D05",
+      "bounds": [
+        [
+          -13.0,
+          -2.6000001430511475,
+          -6.400000095367432
+        ],
+        [
+          12.5,
+          4.200000286102295,
+          2.6000006198883057
+        ]
+      ],
+      "materials": [
+        "M_S3_steel",
+        "M_S3_iron"
+      ],
+      "convex": 0,
+      "simple": 0
+    },
+    "SM_S3_ReleaseRing": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_ReleaseRing.SM_S3_ReleaseRing",
+      "source": "Puzzles/SM_S3_ReleaseRing/SM_S3_ReleaseRing.fbx",
+      "id": "D06",
+      "bounds": [
+        [
+          -7.400000095367432,
+          -0.900001049041748,
+          -7.400000095367432
+        ],
+        [
+          7.400000095367432,
+          0.900001049041748,
+          7.400000095367432
+        ]
+      ],
+      "materials": [
+        "M_S3_brass"
+      ],
+      "convex": 0,
+      "simple": 0
+    },
+    "SM_S3_ChainLink": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_ChainLink.SM_S3_ChainLink",
+      "source": "Puzzles/SM_S3_ChainLink/SM_S3_ChainLink.fbx",
+      "id": "D07",
+      "bounds": [
+        [
+          -4.000000476837158,
+          -0.8000009059906006,
+          -6.200000286102295
+        ],
+        [
+          4.000000476837158,
+          0.8000009059906006,
+          6.200000286102295
+        ]
+      ],
+      "materials": [
+        "M_S3_iron"
+      ],
+      "convex": 0,
+      "simple": 0
+    },
+    "SM_S3_ChainPulley": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_ChainPulley.SM_S3_ChainPulley",
+      "source": "Puzzles/SM_S3_ChainPulley/SM_S3_ChainPulley.fbx",
+      "id": "D08",
+      "bounds": [
+        [
+          -12.5,
+          -6.500000476837158,
+          -12.500000953674316
+        ],
+        [
+          12.5,
+          6.500000476837158,
+          12.500000953674316
+        ]
+      ],
+      "materials": [
+        "M_S3_brass",
+        "M_S3_iron"
+      ],
+      "convex": 0,
+      "simple": 0
+    },
+    "SM_S3_ChainConduit": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_ChainConduit.SM_S3_ChainConduit",
+      "source": "Puzzles/SM_S3_ChainConduit/SM_S3_ChainConduit.fbx",
+      "id": "D09",
+      "bounds": [
+        [
+          0.0,
+          -1.2000012397766113,
+          -7.500000476837158
+        ],
+        [
+          100.0,
+          7.451449394226074,
+          7.500000476837158
+        ]
+      ],
+      "materials": [
+        "M_S3_iron"
+      ],
+      "convex": 0,
+      "simple": 0
+    },
+    "SM_S3_ReleaseIndicator": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_ReleaseIndicator.SM_S3_ReleaseIndicator",
+      "source": "Puzzles/SM_S3_ReleaseIndicator/SM_S3_ReleaseIndicator.fbx",
+      "id": "D10",
+      "bounds": [
+        [
+          -5.0,
+          -2.5000016689300537,
+          -3.747175583157514e-07
+        ],
+        [
+          5.0,
+          2.6999995708465576,
+          10.000000953674316
+        ]
+      ],
+      "materials": [
+        "M_S3_iron",
+        "M_S3_brass"
+      ],
+      "convex": 0,
+      "simple": 0
+    },
+    "SM_S3_ReleaseIndicator_2": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_ReleaseIndicator_2.SM_S3_ReleaseIndicator_2",
+      "source": "Puzzles/SM_S3_ReleaseIndicator_2/SM_S3_ReleaseIndicator_2.fbx",
+      "id": "D10-II",
+      "bounds": [
+        [
+          -5.0,
+          -2.5000016689300537,
+          -3.747175583157514e-07
+        ],
+        [
+          5.0,
+          2.6999995708465576,
+          10.000000953674316
+        ]
+      ],
+      "materials": [
+        "M_S3_iron",
+        "M_S3_brass"
+      ],
+      "convex": 0,
+      "simple": 0
+    },
+    "SM_S3_ReleaseIndicator_3": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_ReleaseIndicator_3.SM_S3_ReleaseIndicator_3",
+      "source": "Puzzles/SM_S3_ReleaseIndicator_3/SM_S3_ReleaseIndicator_3.fbx",
+      "id": "D10-III",
+      "bounds": [
+        [
+          -5.0,
+          -2.5000016689300537,
+          -3.747175583157514e-07
+        ],
+        [
+          5.0,
+          2.6999995708465576,
+          10.000000953674316
+        ]
+      ],
+      "materials": [
+        "M_S3_iron",
+        "M_S3_brass"
+      ],
+      "convex": 0,
+      "simple": 0
+    },
+    "SM_S3_WeaponDisplay": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_WeaponDisplay.SM_S3_WeaponDisplay",
+      "source": "Props/SM_S3_WeaponDisplay/SM_S3_WeaponDisplay.fbx",
+      "id": "E01",
+      "bounds": [
+        [
+          -125.0,
+          -50.0,
+          -7.234330041683279e-06
+        ],
+        [
+          125.0,
+          50.0,
+          111.87791442871094
+        ]
+      ],
+      "materials": [
+        "M_S3_dressed_stone",
+        "M_S3_iron",
+        "M_S3_steel",
+        "M_S3_leather",
+        "M_S3_brass"
+      ],
+      "convex": 0,
+      "simple": 0
+    },
+    "SM_S3_WeaponDisplay_Joint": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_WeaponDisplay_Joint.SM_S3_WeaponDisplay_Joint",
+      "source": "Props/SM_S3_WeaponDisplay_Joint/SM_S3_WeaponDisplay_Joint.fbx",
+      "id": "E01-Joint",
+      "bounds": [
+        [
+          -5.650000095367432,
+          -49.970001220703125,
+          -7.245082542794989e-06
+        ],
+        [
+          5.650000095367432,
+          49.970001220703125,
+          79.29998779296875
+        ]
+      ],
+      "materials": [
+        "M_S3_dressed_stone",
+        "M_S3_iron"
+      ],
+      "convex": 0,
+      "simple": 0
+    },
+    "SM_S3_WeaponRack": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_WeaponRack.SM_S3_WeaponRack",
+      "source": "Props/SM_S3_WeaponRack/SM_S3_WeaponRack.fbx",
+      "id": "E02",
+      "bounds": [
+        [
+          -75.0,
+          -30.0,
+          -4.8468900786247104e-06
+        ],
+        [
+          75.0,
+          29.999998092651367,
+          180.0
+        ]
+      ],
+      "materials": [
+        "M_S3_wood",
+        "M_S3_iron",
+        "M_S3_steel",
+        "M_S3_leather",
+        "M_S3_brass"
+      ],
+      "convex": 0,
+      "simple": 0
+    },
+    "SM_S3_ShieldRack": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_ShieldRack.SM_S3_ShieldRack",
+      "source": "Props/SM_S3_ShieldRack/SM_S3_ShieldRack.fbx",
+      "id": "E03",
+      "bounds": [
+        [
+          -75.0,
+          -37.5,
+          -6.068795300961938e-06
+        ],
+        [
+          75.0,
+          37.5,
+          140.0
+        ]
+      ],
+      "materials": [
+        "M_S3_wood",
+        "M_S3_iron",
+        "M_S3_steel",
+        "M_S3_leather"
+      ],
+      "convex": 0,
+      "simple": 0
+    },
+    "SM_S3_GuardBench": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_GuardBench.SM_S3_GuardBench",
+      "source": "Props/SM_S3_GuardBench/SM_S3_GuardBench.fbx",
+      "id": "E04",
+      "bounds": [
+        [
+          -87.5,
+          -29.955007553100586,
+          -4.256140073266579e-06
+        ],
+        [
+          87.5,
+          29.954992294311523,
+          50.58100509643555
+        ]
+      ],
+      "materials": [
+        "M_S3_dressed_stone",
+        "M_S3_wood"
+      ],
+      "convex": 0,
+      "simple": 0
+    },
+    "SM_S3_EquipmentCabinet": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_EquipmentCabinet.SM_S3_EquipmentCabinet",
+      "source": "Props/SM_S3_EquipmentCabinet/SM_S3_EquipmentCabinet.fbx",
+      "id": "E05",
+      "bounds": [
+        [
+          -62.5,
+          -37.500022888183594,
+          -5.269669145491207e-06
+        ],
+        [
+          62.5,
+          37.710472106933594,
+          150.0
+        ]
+      ],
+      "materials": [
+        "M_S3_wood",
+        "M_S3_iron",
+        "M_S3_steel",
+        "M_S3_brass"
+      ],
+      "convex": 0,
+      "simple": 0
+    },
+    "SM_S3_ArmorPartsRack": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_ArmorPartsRack.SM_S3_ArmorPartsRack",
+      "source": "Props/SM_S3_ArmorPartsRack/SM_S3_ArmorPartsRack.fbx",
+      "id": "E06",
+      "bounds": [
+        [
+          -75.0,
+          -37.5,
+          -6.068795300961938e-06
+        ],
+        [
+          75.0,
+          37.5,
+          140.0
+        ]
+      ],
+      "materials": [
+        "M_S3_wood",
+        "M_S3_leather",
+        "M_S3_steel",
+        "M_S3_iron",
+        "M_S3_brass"
+      ],
+      "convex": 0,
+      "simple": 0
+    },
+    "SM_S3_SupplyBox_L": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_SupplyBox_L.SM_S3_SupplyBox_L",
+      "source": "Props/SM_S3_SupplyBox_L/SM_S3_SupplyBox_L.fbx",
+      "id": "E07",
+      "bounds": [
+        [
+          -62.5,
+          -50.28951644897461,
+          -7.2387615546176676e-06
+        ],
+        [
+          62.5,
+          50.886985778808594,
+          122.51790618896484
+        ]
+      ],
+      "materials": [
+        "M_S3_wood",
+        "M_S3_iron",
+        "M_S3_steel",
+        "M_S3_brass"
+      ],
+      "convex": 0,
+      "simple": 0
+    },
+    "SM_S3_GateControlConsole": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_GateControlConsole.SM_S3_GateControlConsole",
+      "source": "Props/SM_S3_GateControlConsole/SM_S3_GateControlConsole.fbx",
+      "id": "E08",
+      "bounds": [
+        [
+          -100.0,
+          -40.0000114440918,
+          -5.857487394678174e-06
+        ],
+        [
+          100.0,
+          39.99998474121094,
+          109.50908660888672
+        ]
+      ],
+      "materials": [
+        "M_S3_dressed_stone",
+        "M_S3_iron",
+        "M_S3_steel",
+        "M_S3_brass"
+      ],
+      "convex": 0,
+      "simple": 0
+    },
+    "SM_S3_WeaponSet": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_WeaponSet.SM_S3_WeaponSet",
+      "source": "Props/SM_S3_WeaponSet/SM_S3_WeaponSet.fbx",
+      "id": "E09",
+      "bounds": [
+        [
+          -52.172054290771484,
+          -3.0300073623657227,
+          -2.443810274144198e-07
+        ],
+        [
+          67.49999237060547,
+          4.326351165771484,
+          144.0
+        ]
+      ],
+      "materials": [
+        "M_S3_wood",
+        "M_S3_steel",
+        "M_S3_iron",
+        "M_S3_leather",
+        "M_S3_brass"
+      ],
+      "convex": 0,
+      "simple": 0
+    },
+    "SM_S3_WeaponSet_Axe": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_WeaponSet_Axe.SM_S3_WeaponSet_Axe",
+      "source": "Props/SM_S3_WeaponSet/SM_S3_WeaponSet_Axe.fbx",
+      "id": "E09",
+      "bounds": [
+        [
+          -2.0999999046325684,
+          -2.100013494491577,
+          -2.443810274144198e-07
+        ],
+        [
+          12.299999237060547,
+          2.0999860763549805,
+          98.99999237060547
+        ]
+      ],
+      "materials": [
+        "M_S3_wood",
+        "M_S3_steel",
+        "M_S3_iron"
+      ],
+      "convex": 0,
+      "simple": 0
+    },
+    "SM_S3_WeaponSet_Shield": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_WeaponSet_Shield.SM_S3_WeaponSet_Shield",
+      "source": "Props/SM_S3_WeaponSet/SM_S3_WeaponSet_Shield.fbx",
+      "id": "E09",
+      "bounds": [
+        [
+          -18.500003814697266,
+          -3.0300073623657227,
+          -1.4988702901064244e-07
+        ],
+        [
+          18.4999942779541,
+          4.326351165771484,
+          74.0
+        ]
+      ],
+      "materials": [
+        "M_S3_iron",
+        "M_S3_steel",
+        "M_S3_leather"
+      ],
+      "convex": 0,
+      "simple": 0
+    },
+    "SM_S3_WeaponSet_Spear": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_WeaponSet_Spear.SM_S3_WeaponSet_Spear",
+      "source": "Props/SM_S3_WeaponSet/SM_S3_WeaponSet_Spear.fbx",
+      "id": "E09",
+      "bounds": [
+        [
+          -3.327366828918457,
+          -1.5400192737579346,
+          -2.1179687337280484e-07
+        ],
+        [
+          3.327366828918457,
+          1.5399805307388306,
+          144.0
+        ]
+      ],
+      "materials": [
+        "M_S3_wood",
+        "M_S3_iron",
+        "M_S3_steel"
+      ],
+      "convex": 0,
+      "simple": 0
+    },
+    "SM_S3_WeaponSet_Sword": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_WeaponSet_Sword.SM_S3_WeaponSet_Sword",
+      "source": "Props/SM_S3_WeaponSet/SM_S3_WeaponSet_Sword.fbx",
+      "id": "E09",
+      "bounds": [
+        [
+          -10.172054290771484,
+          -1.8850131034851074,
+          -2.971673040974565e-08
+        ],
+        [
+          10.172051429748535,
+          1.8849866390228271,
+          83.8499984741211
+        ]
+      ],
+      "materials": [
+        "M_S3_steel",
+        "M_S3_leather",
+        "M_S3_brass"
+      ],
+      "convex": 0,
+      "simple": 0
+    },
+    "SM_S3_MaintenanceBench": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_MaintenanceBench.SM_S3_MaintenanceBench",
+      "source": "Props/SM_S3_MaintenanceBench/SM_S3_MaintenanceBench.fbx",
+      "id": "E10",
+      "bounds": [
+        [
+          -87.5,
+          -37.455013275146484,
+          -0.4824064075946808
+        ],
+        [
+          87.5,
+          37.45499038696289,
+          90.0
+        ]
+      ],
+      "materials": [
+        "M_S3_wood",
+        "M_S3_iron",
+        "M_S3_dressed_stone",
+        "M_S3_steel"
+      ],
+      "convex": 0,
+      "simple": 0
+    },
+    "SM_S3_StrategyTable": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_StrategyTable.SM_S3_StrategyTable",
+      "source": "Props/SM_S3_StrategyTable/SM_S3_StrategyTable.fbx",
+      "id": "E11",
+      "bounds": [
+        [
+          -87.5,
+          -49.955013275146484,
+          -0.4461117386817932
+        ],
+        [
+          87.5,
+          49.95499038696289,
+          84.65999603271484
+        ]
+      ],
+      "materials": [
+        "M_S3_wood",
+        "M_S3_iron",
+        "M_S3_watch_plan",
+        "M_S3_paper",
+        "M_S3_leather",
+        "M_S3_brass"
+      ],
+      "convex": 0,
+      "simple": 0
+    },
+    "SM_S3_GuardBanner": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_GuardBanner.SM_S3_GuardBanner",
+      "source": "Decor/SM_S3_GuardBanner/SM_S3_GuardBanner.fbx",
+      "id": "F01",
+      "bounds": [
+        [
+          -50.0,
+          -2.2799994945526123,
+          -220.0
+        ],
+        [
+          50.0,
+          1.9000009298324585,
+          -0.009999069385230541
+        ]
+      ],
+      "materials": [
+        "M_S3_guard_pennon",
+        "M_S3_cloth"
+      ],
+      "convex": 0,
+      "simple": 0
+    },
+    "SM_S3_GrandBanner": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_GrandBanner.SM_S3_GrandBanner",
+      "source": "Decor/SM_S3_GrandBanner/SM_S3_GrandBanner.fbx",
+      "id": "F02",
+      "bounds": [
+        [
+          -75.0,
+          -2.3577773571014404,
+          -450.0
+        ],
+        [
+          75.0,
+          2.4106669425964355,
+          -0.009999307803809643
+        ]
+      ],
+      "materials": [
+        "M_S3_grand_pennon",
+        "M_S3_cloth"
+      ],
+      "convex": 0,
+      "simple": 0
+    },
+    "SM_S3_BannerHanger": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_BannerHanger.SM_S3_BannerHanger",
+      "source": "Decor/SM_S3_BannerHanger/SM_S3_BannerHanger.fbx",
+      "id": "F03",
+      "bounds": [
+        [
+          -59.999996185302734,
+          -9.365216442347446e-07,
+          -5.898730278015137
+        ],
+        [
+          59.999996185302734,
+          10.59999942779541,
+          5.893158912658691
+        ]
+      ],
+      "materials": [
+        "M_S3_iron",
+        "M_S3_steel",
+        "M_S3_brass"
+      ],
+      "convex": 0,
+      "simple": 0
+    },
+    "SM_S3_WallSconce": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_WallSconce.SM_S3_WallSconce",
+      "source": "Decor/SM_S3_WallSconce/SM_S3_WallSconce.fbx",
+      "id": "F04",
+      "bounds": [
+        [
+          -12.459900856018066,
+          -9.734510058478918e-06,
+          0.14829981327056885
+        ],
+        [
+          12.459900856018066,
+          29.949993133544922,
+          59.999996185302734
+        ]
+      ],
+      "materials": [
+        "M_S3_iron",
+        "M_S3_steel",
+        "M_S3_flame",
+        "M_S3_wax"
+      ],
+      "convex": 0,
+      "simple": 0
+    },
+    "SM_S3_FloorCandelabrum": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_FloorCandelabrum.SM_S3_FloorCandelabrum",
+      "source": "Decor/SM_S3_FloorCandelabrum/SM_S3_FloorCandelabrum.fbx",
+      "id": "F05",
+      "bounds": [
+        [
+          -27.5,
+          -27.500001907348633,
+          -4.284813712729374e-06
+        ],
+        [
+          27.5,
+          27.5,
+          139.63499450683594
+        ]
+      ],
+      "materials": [
+        "M_S3_iron",
+        "M_S3_steel",
+        "M_S3_brass",
+        "M_S3_flame",
+        "M_S3_wax"
+      ],
+      "convex": 0,
+      "simple": 0
+    },
+    "SM_S3_GrandWallLantern": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_GrandWallLantern.SM_S3_GrandWallLantern",
+      "source": "Decor/SM_S3_GrandWallLantern/SM_S3_GrandWallLantern.fbx",
+      "id": "F06",
+      "bounds": [
+        [
+          -29.786762237548828,
+          -1.6194300769711845e-05,
+          4.666391760110855e-06
+        ],
+        [
+          29.786762237548828,
+          50.00139236450195,
+          120.0
+        ]
+      ],
+      "materials": [
+        "M_S3_iron",
+        "M_S3_steel",
+        "M_S3_flame",
+        "M_S3_wax"
+      ],
+      "convex": 0,
+      "simple": 0
+    },
+    "SM_S3_LightCandle": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_LightCandle.SM_S3_LightCandle",
+      "source": "Decor/SM_S3_LightCandle/SM_S3_LightCandle.fbx",
+      "id": "F07",
+      "bounds": [
+        [
+          -5.152273654937744,
+          -5.19860315322876,
+          -7.716466825513635e-07
+        ],
+        [
+          5.247725963592529,
+          5.201396942138672,
+          25.105010986328125
+        ]
+      ],
+      "materials": [
+        "M_S3_wax",
+        "M_S3_iron"
+      ],
+      "convex": 0,
+      "simple": 0
+    },
+    "SM_S3_LightFlame": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_LightFlame.SM_S3_LightFlame",
+      "source": "Decor/SM_S3_LightFlame/SM_S3_LightFlame.fbx",
+      "id": "F08",
+      "bounds": [
+        [
+          -2.794654130935669,
+          -2.576664447784424,
+          0.0
+        ],
+        [
+          3.2876360416412354,
+          2.5027222633361816,
+          12.0
+        ]
+      ],
+      "materials": [
+        "M_S3_flame"
+      ],
+      "convex": 0,
+      "simple": 0
+    },
+    "SM_S3_GrandGateRunner_Center": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_GrandGateRunner_Center.SM_S3_GrandGateRunner_Center",
+      "source": "Floors/Runner_SM_S3_GrandGateRunner_Center/SM_S3_GrandGateRunner_Center.fbx",
+      "id": "Runner-Center",
+      "bounds": [
+        [
+          -100.00000762939453,
+          -125.00000762939453,
+          0.0
+        ],
+        [
+          100.00000762939453,
+          125.00000762939453,
+          1.0
+        ]
+      ],
+      "materials": [
+        "M_S3_GrandGateRunner_Center"
+      ],
+      "convex": 0,
+      "simple": 0
+    },
+    "SM_S3_GrandGateRunner_End": {
+      "path": "/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_GrandGateRunner_End.SM_S3_GrandGateRunner_End",
+      "source": "Floors/Runner_SM_S3_GrandGateRunner_End/SM_S3_GrandGateRunner_End.fbx",
+      "id": "Runner-End",
+      "bounds": [
+        [
+          -100.00000762939453,
+          -125.00000762939453,
+          0.0
+        ],
+        [
+          100.00000762939453,
+          125.00000762939453,
+          1.0
+        ]
+      ],
+      "materials": [
+        "M_S3_GrandGateRunner_End"
+      ],
+      "convex": 0,
+      "simple": 0
+    }
+  },
+  "materials": {
+    "M_S3_brass": "/Game/Environment/Stage3/FinalGuard/Materials/M_S3_brass.M_S3_brass",
+    "M_S3_cloth": "/Game/Environment/Stage3/FinalGuard/Materials/M_S3_cloth.M_S3_cloth",
+    "M_S3_dark_stone": "/Game/Environment/Stage3/FinalGuard/Materials/M_S3_dark_stone.M_S3_dark_stone",
+    "M_S3_dressed_stone": "/Game/Environment/Stage3/FinalGuard/Materials/M_S3_dressed_stone.M_S3_dressed_stone",
+    "M_S3_flagstone": "/Game/Environment/Stage3/FinalGuard/Materials/M_S3_flagstone.M_S3_flagstone",
+    "M_S3_flame": "/Game/Environment/Stage3/FinalGuard/Materials/M_S3_flame.M_S3_flame",
+    "M_S3_iron": "/Game/Environment/Stage3/FinalGuard/Materials/M_S3_iron.M_S3_iron",
+    "M_S3_leather": "/Game/Environment/Stage3/FinalGuard/Materials/M_S3_leather.M_S3_leather",
+    "M_S3_limestone": "/Game/Environment/Stage3/FinalGuard/Materials/M_S3_limestone.M_S3_limestone",
+    "M_S3_mid_stone": "/Game/Environment/Stage3/FinalGuard/Materials/M_S3_mid_stone.M_S3_mid_stone",
+    "M_S3_mortar": "/Game/Environment/Stage3/FinalGuard/Materials/M_S3_mortar.M_S3_mortar",
+    "M_S3_paper": "/Game/Environment/Stage3/FinalGuard/Materials/M_S3_paper.M_S3_paper",
+    "M_S3_steel": "/Game/Environment/Stage3/FinalGuard/Materials/M_S3_steel.M_S3_steel",
+    "M_S3_wax": "/Game/Environment/Stage3/FinalGuard/Materials/M_S3_wax.M_S3_wax",
+    "M_S3_wood": "/Game/Environment/Stage3/FinalGuard/Materials/M_S3_wood.M_S3_wood",
+    "M_S3_wood_end": "/Game/Environment/Stage3/FinalGuard/Materials/M_S3_wood_end.M_S3_wood_end",
+    "M_S3_Guardian_FineLimestone": "/Game/Environment/Stage3/FinalGuard/Materials/M_S3_Guardian_FineLimestone.M_S3_Guardian_FineLimestone",
+    "M_S3_watch_plan": "/Game/Environment/Stage3/FinalGuard/Materials/M_S3_watch_plan.M_S3_watch_plan",
+    "M_S3_guard_pennon": "/Game/Environment/Stage3/FinalGuard/Materials/M_S3_guard_pennon.M_S3_guard_pennon",
+    "M_S3_grand_pennon": "/Game/Environment/Stage3/FinalGuard/Materials/M_S3_grand_pennon.M_S3_grand_pennon",
+    "M_S3_GrandGateRunner_Center": "/Game/Environment/Stage3/FinalGuard/Materials/M_S3_GrandGateRunner_Center.M_S3_GrandGateRunner_Center",
+    "M_S3_woven_runner": "/Game/Environment/Stage3/FinalGuard/Materials/M_S3_woven_runner.M_S3_woven_runner",
+    "M_S3_GrandGateRunner_End": "/Game/Environment/Stage3/FinalGuard/Materials/M_S3_GrandGateRunner_End.M_S3_GrandGateRunner_End"
+  },
+  "textures": {
+    "T_S3_brass_BaseColor": "/Game/Environment/Stage3/FinalGuard/Textures/T_S3_brass_BaseColor.T_S3_brass_BaseColor",
+    "T_S3_brass_Normal_DX": "/Game/Environment/Stage3/FinalGuard/Textures/T_S3_brass_Normal_DX.T_S3_brass_Normal_DX",
+    "T_S3_brass_ORM": "/Game/Environment/Stage3/FinalGuard/Textures/T_S3_brass_ORM.T_S3_brass_ORM",
+    "T_S3_cloth_BaseColor": "/Game/Environment/Stage3/FinalGuard/Textures/T_S3_cloth_BaseColor.T_S3_cloth_BaseColor",
+    "T_S3_cloth_Normal_DX": "/Game/Environment/Stage3/FinalGuard/Textures/T_S3_cloth_Normal_DX.T_S3_cloth_Normal_DX",
+    "T_S3_cloth_ORM": "/Game/Environment/Stage3/FinalGuard/Textures/T_S3_cloth_ORM.T_S3_cloth_ORM",
+    "T_S3_dark_stone_BaseColor": "/Game/Environment/Stage3/FinalGuard/Textures/T_S3_dark_stone_BaseColor.T_S3_dark_stone_BaseColor",
+    "T_S3_dark_stone_Normal_DX": "/Game/Environment/Stage3/FinalGuard/Textures/T_S3_dark_stone_Normal_DX.T_S3_dark_stone_Normal_DX",
+    "T_S3_dark_stone_ORM": "/Game/Environment/Stage3/FinalGuard/Textures/T_S3_dark_stone_ORM.T_S3_dark_stone_ORM",
+    "T_S3_dressed_stone_BaseColor": "/Game/Environment/Stage3/FinalGuard/Textures/T_S3_dressed_stone_BaseColor.T_S3_dressed_stone_BaseColor",
+    "T_S3_dressed_stone_Normal_DX": "/Game/Environment/Stage3/FinalGuard/Textures/T_S3_dressed_stone_Normal_DX.T_S3_dressed_stone_Normal_DX",
+    "T_S3_dressed_stone_ORM": "/Game/Environment/Stage3/FinalGuard/Textures/T_S3_dressed_stone_ORM.T_S3_dressed_stone_ORM",
+    "T_S3_flagstone_BaseColor": "/Game/Environment/Stage3/FinalGuard/Textures/T_S3_flagstone_BaseColor.T_S3_flagstone_BaseColor",
+    "T_S3_flagstone_Normal_DX": "/Game/Environment/Stage3/FinalGuard/Textures/T_S3_flagstone_Normal_DX.T_S3_flagstone_Normal_DX",
+    "T_S3_flagstone_ORM": "/Game/Environment/Stage3/FinalGuard/Textures/T_S3_flagstone_ORM.T_S3_flagstone_ORM",
+    "T_S3_flame_BaseColor": "/Game/Environment/Stage3/FinalGuard/Textures/T_S3_flame_BaseColor.T_S3_flame_BaseColor",
+    "T_S3_flame_Normal_DX": "/Game/Environment/Stage3/FinalGuard/Textures/T_S3_flame_Normal_DX.T_S3_flame_Normal_DX",
+    "T_S3_flame_ORM": "/Game/Environment/Stage3/FinalGuard/Textures/T_S3_flame_ORM.T_S3_flame_ORM",
+    "T_S3_iron_BaseColor": "/Game/Environment/Stage3/FinalGuard/Textures/T_S3_iron_BaseColor.T_S3_iron_BaseColor",
+    "T_S3_iron_Normal_DX": "/Game/Environment/Stage3/FinalGuard/Textures/T_S3_iron_Normal_DX.T_S3_iron_Normal_DX",
+    "T_S3_iron_ORM": "/Game/Environment/Stage3/FinalGuard/Textures/T_S3_iron_ORM.T_S3_iron_ORM",
+    "T_S3_leather_BaseColor": "/Game/Environment/Stage3/FinalGuard/Textures/T_S3_leather_BaseColor.T_S3_leather_BaseColor",
+    "T_S3_leather_Normal_DX": "/Game/Environment/Stage3/FinalGuard/Textures/T_S3_leather_Normal_DX.T_S3_leather_Normal_DX",
+    "T_S3_leather_ORM": "/Game/Environment/Stage3/FinalGuard/Textures/T_S3_leather_ORM.T_S3_leather_ORM",
+    "T_S3_limestone_BaseColor": "/Game/Environment/Stage3/FinalGuard/Textures/T_S3_limestone_BaseColor.T_S3_limestone_BaseColor",
+    "T_S3_limestone_Normal_DX": "/Game/Environment/Stage3/FinalGuard/Textures/T_S3_limestone_Normal_DX.T_S3_limestone_Normal_DX",
+    "T_S3_limestone_ORM": "/Game/Environment/Stage3/FinalGuard/Textures/T_S3_limestone_ORM.T_S3_limestone_ORM",
+    "T_S3_mid_stone_BaseColor": "/Game/Environment/Stage3/FinalGuard/Textures/T_S3_mid_stone_BaseColor.T_S3_mid_stone_BaseColor",
+    "T_S3_mid_stone_Normal_DX": "/Game/Environment/Stage3/FinalGuard/Textures/T_S3_mid_stone_Normal_DX.T_S3_mid_stone_Normal_DX",
+    "T_S3_mid_stone_ORM": "/Game/Environment/Stage3/FinalGuard/Textures/T_S3_mid_stone_ORM.T_S3_mid_stone_ORM",
+    "T_S3_mortar_BaseColor": "/Game/Environment/Stage3/FinalGuard/Textures/T_S3_mortar_BaseColor.T_S3_mortar_BaseColor",
+    "T_S3_mortar_Normal_DX": "/Game/Environment/Stage3/FinalGuard/Textures/T_S3_mortar_Normal_DX.T_S3_mortar_Normal_DX",
+    "T_S3_mortar_ORM": "/Game/Environment/Stage3/FinalGuard/Textures/T_S3_mortar_ORM.T_S3_mortar_ORM",
+    "T_S3_paper_BaseColor": "/Game/Environment/Stage3/FinalGuard/Textures/T_S3_paper_BaseColor.T_S3_paper_BaseColor",
+    "T_S3_paper_Normal_DX": "/Game/Environment/Stage3/FinalGuard/Textures/T_S3_paper_Normal_DX.T_S3_paper_Normal_DX",
+    "T_S3_paper_ORM": "/Game/Environment/Stage3/FinalGuard/Textures/T_S3_paper_ORM.T_S3_paper_ORM",
+    "T_S3_steel_BaseColor": "/Game/Environment/Stage3/FinalGuard/Textures/T_S3_steel_BaseColor.T_S3_steel_BaseColor",
+    "T_S3_steel_Normal_DX": "/Game/Environment/Stage3/FinalGuard/Textures/T_S3_steel_Normal_DX.T_S3_steel_Normal_DX",
+    "T_S3_steel_ORM": "/Game/Environment/Stage3/FinalGuard/Textures/T_S3_steel_ORM.T_S3_steel_ORM",
+    "T_S3_wax_BaseColor": "/Game/Environment/Stage3/FinalGuard/Textures/T_S3_wax_BaseColor.T_S3_wax_BaseColor",
+    "T_S3_wax_Normal_DX": "/Game/Environment/Stage3/FinalGuard/Textures/T_S3_wax_Normal_DX.T_S3_wax_Normal_DX",
+    "T_S3_wax_ORM": "/Game/Environment/Stage3/FinalGuard/Textures/T_S3_wax_ORM.T_S3_wax_ORM",
+    "T_S3_wood_BaseColor": "/Game/Environment/Stage3/FinalGuard/Textures/T_S3_wood_BaseColor.T_S3_wood_BaseColor",
+    "T_S3_wood_Normal_DX": "/Game/Environment/Stage3/FinalGuard/Textures/T_S3_wood_Normal_DX.T_S3_wood_Normal_DX",
+    "T_S3_wood_ORM": "/Game/Environment/Stage3/FinalGuard/Textures/T_S3_wood_ORM.T_S3_wood_ORM",
+    "T_S3_wood_end_BaseColor": "/Game/Environment/Stage3/FinalGuard/Textures/T_S3_wood_end_BaseColor.T_S3_wood_end_BaseColor",
+    "T_S3_wood_end_Normal_DX": "/Game/Environment/Stage3/FinalGuard/Textures/T_S3_wood_end_Normal_DX.T_S3_wood_end_Normal_DX",
+    "T_S3_wood_end_ORM": "/Game/Environment/Stage3/FinalGuard/Textures/T_S3_wood_end_ORM.T_S3_wood_end_ORM",
+    "T_S3_Guardian_FineLimestone_BaseColor": "/Game/Environment/Stage3/FinalGuard/Textures/T_S3_Guardian_FineLimestone_BaseColor.T_S3_Guardian_FineLimestone_BaseColor",
+    "T_S3_Guardian_FineLimestone_Normal_DX": "/Game/Environment/Stage3/FinalGuard/Textures/T_S3_Guardian_FineLimestone_Normal_DX.T_S3_Guardian_FineLimestone_Normal_DX",
+    "T_S3_Guardian_FineLimestone_ORM": "/Game/Environment/Stage3/FinalGuard/Textures/T_S3_Guardian_FineLimestone_ORM.T_S3_Guardian_FineLimestone_ORM",
+    "T_S3_watch_plan_BaseColor": "/Game/Environment/Stage3/FinalGuard/Textures/T_S3_watch_plan_BaseColor.T_S3_watch_plan_BaseColor",
+    "T_S3_watch_plan_Normal_DX": "/Game/Environment/Stage3/FinalGuard/Textures/T_S3_watch_plan_Normal_DX.T_S3_watch_plan_Normal_DX",
+    "T_S3_watch_plan_ORM": "/Game/Environment/Stage3/FinalGuard/Textures/T_S3_watch_plan_ORM.T_S3_watch_plan_ORM",
+    "T_S3_guard_pennon_BaseColor": "/Game/Environment/Stage3/FinalGuard/Textures/T_S3_guard_pennon_BaseColor.T_S3_guard_pennon_BaseColor",
+    "T_S3_guard_pennon_Normal_DX": "/Game/Environment/Stage3/FinalGuard/Textures/T_S3_guard_pennon_Normal_DX.T_S3_guard_pennon_Normal_DX",
+    "T_S3_guard_pennon_ORM": "/Game/Environment/Stage3/FinalGuard/Textures/T_S3_guard_pennon_ORM.T_S3_guard_pennon_ORM",
+    "T_S3_grand_pennon_BaseColor": "/Game/Environment/Stage3/FinalGuard/Textures/T_S3_grand_pennon_BaseColor.T_S3_grand_pennon_BaseColor",
+    "T_S3_grand_pennon_Normal_DX": "/Game/Environment/Stage3/FinalGuard/Textures/T_S3_grand_pennon_Normal_DX.T_S3_grand_pennon_Normal_DX",
+    "T_S3_grand_pennon_ORM": "/Game/Environment/Stage3/FinalGuard/Textures/T_S3_grand_pennon_ORM.T_S3_grand_pennon_ORM",
+    "T_S3_GrandGateRunner_Center_BaseColor": "/Game/Environment/Stage3/FinalGuard/Textures/T_S3_GrandGateRunner_Center_BaseColor.T_S3_GrandGateRunner_Center_BaseColor",
+    "T_S3_GrandGateRunner_Center_Normal_DX": "/Game/Environment/Stage3/FinalGuard/Textures/T_S3_GrandGateRunner_Center_Normal_DX.T_S3_GrandGateRunner_Center_Normal_DX",
+    "T_S3_GrandGateRunner_Center_ORM": "/Game/Environment/Stage3/FinalGuard/Textures/T_S3_GrandGateRunner_Center_ORM.T_S3_GrandGateRunner_Center_ORM",
+    "T_S3_woven_runner_BaseColor": "/Game/Environment/Stage3/FinalGuard/Textures/T_S3_woven_runner_BaseColor.T_S3_woven_runner_BaseColor",
+    "T_S3_woven_runner_Normal_DX": "/Game/Environment/Stage3/FinalGuard/Textures/T_S3_woven_runner_Normal_DX.T_S3_woven_runner_Normal_DX",
+    "T_S3_woven_runner_ORM": "/Game/Environment/Stage3/FinalGuard/Textures/T_S3_woven_runner_ORM.T_S3_woven_runner_ORM",
+    "T_S3_GrandGateRunner_End_BaseColor": "/Game/Environment/Stage3/FinalGuard/Textures/T_S3_GrandGateRunner_End_BaseColor.T_S3_GrandGateRunner_End_BaseColor",
+    "T_S3_GrandGateRunner_End_Normal_DX": "/Game/Environment/Stage3/FinalGuard/Textures/T_S3_GrandGateRunner_End_Normal_DX.T_S3_GrandGateRunner_End_Normal_DX",
+    "T_S3_GrandGateRunner_End_ORM": "/Game/Environment/Stage3/FinalGuard/Textures/T_S3_GrandGateRunner_End_ORM.T_S3_GrandGateRunner_End_ORM"
+  },
+  "errors": [],
+  "previous_attempt_errors": [
+    "Traceback (most recent call last):\n  File \"C:/Users/whghk/Catrun/Scripts/Stage3/import_assets.py\", line 153, in <module>\n    try: main()\n         ^^^^^^\n  File \"C:/Users/whghk/Catrun/Scripts/Stage3/import_assets.py\", line 127, in main\n    if body and SM.get_convex_collision_count(mesh)==0 and SM.get_simple_collision_count(mesh)==0:\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAttributeError: 'NoneType' object has no attribute 'get_convex_collision_count'\n"
+  ],
+  "animation": {
+    "path": "/Game/Environment/Stage3/FinalGuard/Animations/AN_BlackCat_ReleaseRing.AN_BlackCat_ReleaseRing",
+    "seconds": 2.4000000953674316,
+    "skeleton": "/Game/Characters/BlackCat/Final/Skeletons/SKEL_BlackCat_Final.SKEL_BlackCat_Final"
+  },
+  "success": true
+}

@@ -28,6 +28,13 @@ public:
 	FCatrunProgressArchive(FArchive& Reader, const TArray<uint8>& Bytes)
 		: FObjectAndNameAsStringProxyArchive(Reader, false), Data(Bytes) {}
 
+	bool HasStageFields() const
+	{
+		return Seen.Contains(GET_MEMBER_NAME_CHECKED(UCatrunProgressSave, Stage1RemainingMs))
+			|| Seen.Contains(GET_MEMBER_NAME_CHECKED(UCatrunProgressSave, Stage2RemainingMs))
+			|| Seen.Contains(GET_MEMBER_NAME_CHECKED(UCatrunProgressSave, Stage2SolvedMask));
+	}
+
 	FArchive& operator<<(FName& Name) override
 	{
 		const bool bFieldName = !bFinishedTags && Tell() >= NextTag;
@@ -87,7 +94,7 @@ private:
 
 const UCatrunProgressSave* UCatrunProgressSave::Decode(const TArray<uint8>& Data)
 {
-	// Catrun schemas 1-3 all use the UE5 GVAS v3 envelope. The generic loader
+	// Catrun schemas 1-4 all use the UE5 GVAS v3 envelope. The generic loader
 	// can return a partially deserialized object and accepts arbitrary class paths.
 	FCatrunSaveReader Reader(Data);
 	uint32 Tag = 0;
@@ -116,5 +123,14 @@ const UCatrunProgressSave* UCatrunProgressSave::Decode(const TArray<uint8>& Data
 	auto* Save = NewObject<UCatrunProgressSave>();
 	FCatrunProgressArchive Archive(Reader, Data);
 	Save->Serialize(Archive);
+	if (Save->SchemaVersion < CurrentSchemaVersion && Archive.HasStageFields()) return nullptr;
 	return !Reader.IsError() && !Archive.IsError() && Reader.AtEnd() && Save->IsSupported() ? Save : nullptr;
+}
+
+bool UCatrunProgressSave::IsSupported() const
+{
+	if (SchemaVersion < 1 || SchemaVersion > CurrentSchemaVersion) return false;
+	return Stage1RemainingMs >= -1 && Stage1RemainingMs <= MaxRemainingMs
+		&& Stage2RemainingMs >= -1 && Stage2RemainingMs <= MaxRemainingMs
+		&& (Stage2SolvedMask & ~AllPuzzleBits) == 0;
 }

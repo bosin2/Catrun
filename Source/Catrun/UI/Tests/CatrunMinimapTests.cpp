@@ -7,6 +7,7 @@
 #endif
 #include "Camera/CameraTypes.h"
 #include "Components/Border.h"
+#include "Components/BoxComponent.h"
 #include "Components/Image.h"
 #include "Engine/Engine.h"
 #include "Engine/Texture2D.h"
@@ -15,6 +16,8 @@
 #include "Framework/Application/SlateApplication.h"
 #include "HAL/FileManager.h"
 #include "ImageUtils.h"
+#include "Interaction/CatrunStatuePuzzle.h"
+#include "LevelFlow/CatrunLevelFlow.h"
 #include "Layout/Geometry.h"
 #include "Math/InverseRotationMatrix.h"
 #include "Misc/App.h"
@@ -27,6 +30,8 @@
 #include "Monster/CatrunCandle.h"
 #include "SceneView.h"
 #include "Settings/CatrunSettingsSubsystem.h"
+#include "Sound/CatrunDoor.h"
+#include "Sound/CatrunNoBellZone.h"
 #include "Slate/WidgetRenderer.h"
 #include "Widgets/Layout/SBorder.h"
 
@@ -324,6 +329,83 @@ bool FCatrunMinimapEnemyLifecycleTest::RunTest(const FString&)
 	TestFalse(TEXT("Leaving the level removes the settings callback"), Settings->OnSettingsOpened.IsBoundToObject(Presenter));
 	World->SpawnActor<ACatrunCandle>();
 	TestEqual(TEXT("Leaving the level clears cache and removes spawn hook"), Presenter->Enemies.Num(), 0);
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunMinimapNavigationTest, "Catrun.UI.Minimap.NavigationSourcesAndSilentRestore",
+	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
+bool FCatrunMinimapNavigationTest::RunTest(const FString&)
+{
+	const auto Init = UWorld::InitializationValues().AllowAudioPlayback(false).CreatePhysicsScene(true)
+		.CreateNavigation(false).CreateAISystem(false);
+	UWorld* World = UWorld::CreateWorld(EWorldType::Game, false, NAME_None, nullptr, true, ERHIFeatureLevel::Num, &Init);
+	if (!TestNotNull(TEXT("Detached navigation world"), World)) return false;
+	GEngine->CreateNewWorldContext(EWorldType::Game).SetCurrentWorld(World);
+	ON_SCOPE_EXIT { GEngine->DestroyWorldContext(World); World->DestroyWorld(false); };
+	World->InitializeActorsForPlay(FURL());
+	auto* Map = World->SpawnActor<ACatrunMinimapPresenter>();
+	Map->MapSize = FVector2D(2000, 2000);
+	auto* Hole = World->SpawnActor<ACatrunNoBellZone>();
+	Hole->Tags.Add(TEXT("CatrunMapCatHole"));
+	Hole->Box->SetWorldLocation(FVector(40, 120, 45));
+	World->SpawnActor<ACatrunNoBellZone>(); // An unrelated no-bell volume is not a passage.
+	auto* Exit = World->SpawnActor<ACatrunStageExit>();
+	Exit->Trigger->SetWorldLocation(FVector(320, -150, 0));
+	Map->StartTracking(*World);
+	auto* Door = World->SpawnActor<ACatrunDoor>();
+	auto* Puzzle = World->SpawnActor<ACatrunStatuePuzzle>();
+	const auto Box = [World](FVector Location)
+	{
+		auto* Actor = World->SpawnActor<AActor>();
+		auto* Component = NewObject<UBoxComponent>(Actor);
+		Actor->SetRootComponent(Component);
+		Component->SetBoxExtent(FVector(20));
+		Component->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		Component->RegisterComponent();
+		Actor->SetActorLocation(Location);
+		return Actor;
+	};
+	for (int32 Index = 0; Index < 2; ++Index)
+	{
+		auto& Link = Puzzle->Links.AddDefaulted_GetRef();
+		Link.PuzzleId = Index == 0 ? TEXT("A") : TEXT("B");
+		Link.Statue = Box(FVector(300 * Index, 150, 40));
+		Link.Plate = Box(FVector(300 * Index, 250, 5));
+		Link.Gate = Box(FVector(300 * Index, 350, 180));
+	}
+	Puzzle->InitializePuzzle();
+	Map->SampleLandmarks();
+	const auto Count = [Map](ECatrunMapLandmark Kind)
+	{
+		const auto* Found = Map->LandmarkPositions.Find(Kind);
+		return Found ? Found->Num() : 0;
+	};
+	const auto At = [Map](ECatrunMapLandmark Kind, const FVector& Expected)
+	{
+		FVector2D UV;
+		const auto* Found = Map->LandmarkPositions.Find(Kind);
+		return Found && CatrunMinimap::Project(FVector2D(Expected), Map->MapCenter, Map->MapSize, Map->CaptureYawDegrees, UV)
+			&& Found->ContainsByPredicate([&](const FVector2D& Value) { return Value.Equals(UV, 1.e-6); });
+	};
+	TestEqual(TEXT("Only an authored cat hole appears"), Count(ECatrunMapLandmark::CatHole), 1);
+	TestTrue(TEXT("Hole uses the volume center"), At(ECatrunMapLandmark::CatHole, Hole->Box->GetComponentLocation()));
+	TestTrue(TEXT("Exit uses the travel trigger"), At(ECatrunMapLandmark::Exit, Exit->Trigger->GetComponentLocation()));
+	TestEqual(TEXT("New swing door and both unsolved links are closed"), Count(ECatrunMapLandmark::ClosedDoor), 3);
+	Door->SetOpen(true);
+	// This fixture exercises marker sampling from the live puzzle owner, not persistence.
+	Puzzle->Links[0].bCompleted = true;
+	Map->SampleLandmarks();
+	TestTrue(TEXT("Open swing door stays at its doorway"), At(ECatrunMapLandmark::OpenDoor, Door->GetDoorwayCenter()));
+	TestTrue(TEXT("Completed gate appears open at original threshold"), At(ECatrunMapLandmark::OpenDoor, Puzzle->Links[0].InitialGateBounds.GetCenter()));
+	TestTrue(TEXT("Unsolved gate remains closed"), At(ECatrunMapLandmark::ClosedDoor, Puzzle->Links[1].InitialGateBounds.GetCenter()));
+	World->DestroyActor(Exit);
+	World->DestroyActor(Puzzle);
+	Map->SampleLandmarks();
+	TestEqual(TEXT("Destroyed exit removed"), Count(ECatrunMapLandmark::Exit), 0);
+	TestEqual(TEXT("Destroyed puzzle owner removes both links"), Count(ECatrunMapLandmark::ClosedDoor), 0);
+	Map->EndPlay(EEndPlayReason::LevelTransition);
+	TestEqual(TEXT("World travel clears landmark sources"), Map->Landmarks.Num(), 0);
 	return true;
 }
 
