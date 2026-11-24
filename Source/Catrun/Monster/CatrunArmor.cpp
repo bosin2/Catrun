@@ -40,6 +40,8 @@
 
 namespace
 {
+	constexpr float PatrolPointArrivalDistance = 50.f;
+
 	// Global opt-in also gates old BP/map overrides serialized with bDebugDrawPath=true.
 	TAutoConsoleVariable<int32> CVarArmorPaths(TEXT("catrun.DebugArmorPaths"),0,
 		TEXT("Show cyan armor routes/magenta targets for actors with DebugDrawPath enabled. 0: normal play, 1: diagnostic opt-in."),ECVF_Cheat);
@@ -207,18 +209,14 @@ void ACatrunArmor::OnSoundHeard_Implementation(const FCatrunSoundEvent& Event, f
 	UE_LOG(LogCatrunSound, Log, TEXT("%s heard a sound (size %d, remaining %.0f), path has %d corners."),
 		*GetName(), (int32)Event.Size, RemainingBudget, PathCorners.Num());
 
-	// A sound beats everything: stop returning to the post and go to the sound.
-	// The reaction animation (a slow start) only plays for an armor that stands still at its post,
-	// and never for the cat's footsteps. An armor that was lured away (looking around at the end
-	// of a trip, or walking back to its post) is already alert: it goes straight to the new sound.
+	// Idle can also mean a failed patrol path is waiting to retry. That wait does not rearm the reaction.
+	const bool bHasPatrol = HasPatrol();
 	const bool bAtPost = FVector::Dist2D(GetActorLocation(), PostLocation) <= 50.f;
 	const bool bStandingAtPost = Action == EArmorAction::Idle && !bHasDestination && (bAtPost || bPatrolWaiting);
-	// A patrolling armor that walks between two points has not noticed anything yet either: the first
-	// sound makes it react (stop and look) before it runs. After that it stays alert (bPatrolAlerted)
-	// until it reaches a patrol point again.
-	const bool bPatrolWalking = HasPatrol() && !bPatrolAlerted && !bHasDestination && !bFollowingMark
+	const bool bPatrolWalking = bHasPatrol && !bHasDestination && !bFollowingMark
 		&& bReturningToPost && (Action == EArmorAction::Walking || Action == EArmorAction::Turning);
-	const bool bPlayReaction = (bStandingAtPost || bPatrolWalking) && Event.Kind != ECatrunSoundKind::Footstep;
+	const bool bPlayReaction = (bStandingAtPost || bPatrolWalking) && (!bHasPatrol || !bPatrolAlerted)
+		&& Event.Kind != ECatrunSoundKind::Footstep;
 	bPatrolAlerted = true;
 	bHasDestination = true;
 	bReturningToPost = false;
@@ -587,8 +585,12 @@ bool ACatrunArmor::SkipEmptyPatrolSlots()
 
 void ACatrunArmor::OnPatrolPointReached()
 {
-	bPatrolAlerted = false; // back on the route: the next sound is a new surprise
 	const ACatrunPatrolPoint* Point = PatrolPoints.IsValidIndex(PatrolIndex) ? PatrolPoints[PatrolIndex].Get() : nullptr;
+	// A stuck walk can finish a leg early. Only physical arrival makes the next sound a surprise.
+	if (Point && FVector::Dist2D(GetActorLocation(), Point->GetActorLocation()) <= PatrolPointArrivalDistance)
+	{
+		bPatrolAlerted = false;
+	}
 	const UCatrunSoundSettings* S = SoundManager.IsValid() ? SoundManager->GetSettings() : nullptr;
 	const float DefaultPause = S ? S->ArmorPatrolPause : 1.5f;
 	PatrolWaitLeft = (Point && Point->PauseSeconds >= 0.f) ? Point->PauseSeconds : DefaultPause;
@@ -644,7 +646,7 @@ void ACatrunArmor::BeginPatrolLeg()
 
 	const FVector Target = Point->GetActorLocation();
 	bRestorePostHeading = false;
-	if (FVector::Dist2D(GetActorLocation(), Target) <= 50.f)
+	if (FVector::Dist2D(GetActorLocation(), Target) <= PatrolPointArrivalDistance)
 	{
 		OnPatrolPointReached(); // already standing at it
 		return;

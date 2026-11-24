@@ -1058,11 +1058,55 @@ bool FCatrunArmorPatrolSlotsAndFirstSoundTest::RunTest(const FString&)
 	FCatrunSoundEvent Device; Device.Location=FVector(700,700,90); Device.Kind=ECatrunSoundKind::Device; Device.Size=ECatrunSoundSize::Medium;
 	Armor->OnSoundHeard_Implementation(Device,100.f);
 	TestEqual(TEXT("First sound on a patrol walk plays the reaction"),Armor->GetAction(),EArmorAction::Reacting);
-	Armor->Action=EArmorAction::Walking;
+	Armor->ActionTime = Armor->ActionDuration;
+	Armor->TickReacting(0.f);
 	FCatrunSoundEvent Bell; Bell.Location=FVector(700,300,90); // louder, so it replaces the destination
 	Armor->OnSoundHeard_Implementation(Bell,100.f);
 	TestTrue(TEXT("The louder sound is accepted"),Armor->Destination.Equals(Bell.Location));
 	TestNotEqual(TEXT("An alerted armor runs to the next sound without reacting again"),Armor->GetAction(),EArmorAction::Reacting);
+
+	// Reach the bell while the grid is unavailable. The patrol retries away from its post and waypoint.
+	Armor->SetActorLocation(Bell.Location);
+	auto& Grid = const_cast<FCatrunGridData&>(F.Manager->GetGrid());
+	Grid.Walkable.Init(0, Grid.NumCells());
+	Armor->FinishTrip();
+	Armor->TickIdle(.6f);
+	if (!TestTrue(TEXT("A failed patrol retry waits away from the waypoint"),
+		Armor->bPatrolWaiting && Armor->GetAction() == EArmorAction::Idle && Armor->PathCorners.IsEmpty()))
+		return false;
+
+	Grid.Walkable.Init(1, Grid.NumCells());
+	Device.Location = FVector(500,300,90);
+	Armor->OnSoundHeard_Implementation(Device, 100.f);
+	TestTrue(TEXT("A reachable sound during retry immediately starts a walk to the new location"),
+		Armor->GetAction() == EArmorAction::Walking && Armor->IsInvestigatingSound()
+		&& Armor->Destination.Equals(Device.Location));
+
+	Armor->SetActorLocation(Device.Location);
+	Armor->FinishTrip();
+	if (!TestTrue(TEXT("Investigation resumes the interrupted patrol"),
+		Armor->GetAction() == EArmorAction::Walking && Armor->bReturningToPost && !Armor->PathCorners.IsEmpty()))
+		return false;
+
+	// Trigger the normal stuck timeout while still far from the point. The route may advance its wait.
+	Armor->ActionTime = 1.f;
+	Armor->TickWalking(Armor->StuckTime * 4.f + .1f);
+	TestTrue(TEXT("A stuck leg ending short of the waypoint keeps the patrol alerted"),
+		Armor->bPatrolWaiting && Armor->bPatrolAlerted);
+	Armor->TickIdle(Armor->PatrolWaitLeft + .01f);
+	if (!TestTrue(TEXT("The straight return leg resumes after the wait"),
+		Armor->GetAction() == EArmorAction::Walking && Armor->PathCorners.Num() == 1 && Armor->NextCorner == 0))
+		return false;
+
+	// Move the fixture to its planned final corner and let ordinary walking process the arrival.
+	const FVector End = Armor->PathCorners.Last();
+	Armor->SetActorLocation(FVector(End.X, End.Y, Armor->GetActorLocation().Z));
+	Armor->TickWalking(.01f);
+	TestTrue(TEXT("Reaching the patrol point rearms the reaction"),
+		Armor->GetAction() == EArmorAction::Idle && Armor->bPatrolWaiting && !Armor->bPatrolAlerted);
+	Armor->OnSoundHeard_Implementation(Device, 100.f);
+	TestEqual(TEXT("The first sound after waypoint arrival plays the reaction again"),
+		Armor->GetAction(), EArmorAction::Reacting);
 	return true;
 }
 

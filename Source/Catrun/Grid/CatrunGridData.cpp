@@ -86,7 +86,6 @@ int32 FCatrunGridData::FindNearestCell(const FVector& WorldLocation, int32 MaxRi
 
 bool FCatrunGridData::Bake(UWorld& World, const UCatrunSoundSettings& Settings)
 {
-	PuzzleClearance.Reset();
 	// 1) Collect the floors. Each floor is a world-space box plus its sound cost multiplier.
 	TArray<TPair<FBox, float>> Floors;
 	FBox AllFloors(ForceInit);
@@ -106,9 +105,10 @@ bool FCatrunGridData::Bake(UWorld& World, const UCatrunSoundSettings& Settings)
 			}
 		}
 		const FBox Box = Actor->GetComponentsBoundingBox(false);
-		if (!Box.IsValid)
+		if (!Box.IsValid || Box.Min.ContainsNaN() || Box.Max.ContainsNaN()
+			|| Box.Max.X <= Box.Min.X || Box.Max.Y <= Box.Min.Y || Box.Max.Z < Box.Min.Z)
 		{
-			UE_LOG(LogCatrunSound, Warning, TEXT("Grid bake: floor %s has no collision bounds and is ignored."), *Actor->GetName());
+			UE_LOG(LogCatrunSound, Warning, TEXT("Grid bake: floor %s has invalid collision bounds and is ignored."), *Actor->GetName());
 			continue;
 		}
 		Floors.Emplace(Box, Cost);
@@ -116,26 +116,42 @@ bool FCatrunGridData::Bake(UWorld& World, const UCatrunSoundSettings& Settings)
 	}
 	if (Floors.IsEmpty())
 	{
-		UE_LOG(LogCatrunSound, Error, TEXT("Grid bake: no actor has the floor tag '%s'."), *Settings.FloorTag.ToString());
+		UE_LOG(LogCatrunSound, Error, TEXT("Grid bake: no valid collision bounds for floor tag '%s'."), *Settings.FloorTag.ToString());
 		return false;
 	}
 
 	// 2) Size the grid so that it covers every floor, aligned to whole cells.
-	CellSize = FMath::Max(Settings.CellSize, 5.f);
-	Origin = FVector(FMath::FloorToFloat(AllFloors.Min.X / CellSize) * CellSize,
-		FMath::FloorToFloat(AllFloors.Min.Y / CellSize) * CellSize, AllFloors.Max.Z);
-	Width = FMath::CeilToInt((AllFloors.Max.X - Origin.X) / CellSize);
-	Height = FMath::CeilToInt((AllFloors.Max.Y - Origin.Y) / CellSize);
-	// Biggest grid we accept: a bigger one (a stray floor tag far away, a tiny CellSize) would take
-	// minutes to bake and a lot of memory.
-	constexpr int64 MaxCells = 1000000;
-	if (Width <= 0 || Height <= 0 || static_cast<int64>(Width) * Height > MaxCells)
+	if (!FMath::IsFinite(Settings.CellSize))
 	{
-		UE_LOG(LogCatrunSound, Error, TEXT("Grid bake: the floors give a %d x %d grid (empty or more than %lld cells). Check the floor tags and CellSize."), Width, Height, MaxCells);
-		Width = 0;
-		Height = 0;
+		UE_LOG(LogCatrunSound, Error, TEXT("Grid bake: CellSize must be finite."));
 		return false;
 	}
+	const float NewCellSize = FMath::Max(Settings.CellSize, 5.f);
+	const double OriginX = FMath::FloorToDouble(AllFloors.Min.X / NewCellSize) * NewCellSize;
+	const double OriginY = FMath::FloorToDouble(AllFloors.Min.Y / NewCellSize) * NewCellSize;
+	const double WidthInCells = (AllFloors.Max.X - OriginX) / NewCellSize;
+	const double HeightInCells = (AllFloors.Max.Y - OriginY) / NewCellSize;
+	// Reject non-finite or oversized dimensions before converting or multiplying them.
+	constexpr int64 MaxCells = 1000000;
+	if (!(WidthInCells > 0.0 && WidthInCells <= MaxCells && HeightInCells > 0.0 && HeightInCells <= MaxCells))
+	{
+		UE_LOG(LogCatrunSound, Error, TEXT("Grid bake: the floors give invalid dimensions (%g x %g cells). Check the floor tags and CellSize."), WidthInCells, HeightInCells);
+		return false;
+	}
+	const int64 NewWidth = FMath::CeilToInt(WidthInCells);
+	const int64 NewHeight = FMath::CeilToInt(HeightInCells);
+	if (NewWidth * NewHeight > MaxCells)
+	{
+		UE_LOG(LogCatrunSound, Error, TEXT("Grid bake: the floors give a %lld x %lld grid (more than %lld cells). Check the floor tags and CellSize."), NewWidth, NewHeight, MaxCells);
+		return false;
+	}
+
+	// Keep the previous bake, including dynamic obstacle clearance, until validation succeeds.
+	CellSize = NewCellSize;
+	Origin = FVector(OriginX, OriginY, AllFloors.Max.Z);
+	Width = static_cast<int32>(NewWidth);
+	Height = static_cast<int32>(NewHeight);
+	PuzzleClearance.Reset();
 
 	Walkable.Init(0, NumCells());
 	CostMultiplier.Init(1.f, NumCells());
