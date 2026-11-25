@@ -1,0 +1,20 @@
+{
+  "success": true,
+  "time": "2026-11-25T13:59:54.001693+09:00",
+  "files": [
+    {
+      "relative": "Content/Maps/Stage2.umap",
+      "before": "9234c3534c6c790d21873fe0a59251fd323a3f0419a41f37334af80fef7d8f01",
+      "after": "5378cdd4d06c124eb661746097a6c7ca0deb43e34c986d6372b9c665821cddda"
+    },
+    {
+      "relative": "Content/Maps/SoundTest_Stage2.umap",
+      "before": "1f82f7afba730c834be602293b3b9376fe80d7b2fa51b9b1945bdfb787367b53",
+      "after": "e205801575e7991d1313eff796b318ac548690458370198582ec370a403dd99c"
+    }
+  ],
+  "runtime_reports": {
+    "a_no_lure": "C:\\Users\\whghk\\.codex\\workspaces\\Stage2Room2Layout_20261125_01a20e2d\\RuntimeQA\\Runs\\20261125-133703-868954\\report.json",
+    "a": "C:\\Users\\whghk\\.codex\\workspaces\\Stage2Room2Layout_20261125_01a20e2d\\RuntimeQA\\Runs\\20261125-135836-056232\\report.json"
+  }
+}
