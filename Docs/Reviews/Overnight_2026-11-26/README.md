@@ -15,9 +15,11 @@
 | Stage2→3 승강기 재연출 | Elevator.md | C++, Stage2·3, 에셋 |
 | 승강기 먼지 재질의 끊긴 입력 복구 | `Saved/Regression20261126/fixes` | 재질 1개 |
 | Stage3 도착 첫 프레임 회귀 수정 | [회귀검사](../Regression_2026-11-26.md) | C++ |
+| Stage1 출구 복도 벽 페이드(감수 B-02) | MergedScreens.md | Stage1 액터 6개의 재질 슬롯, 재질 7개 |
 
 - 사용자 결정(11-26): 플레이 고양이는 바꾸지 않고 시네마틱만 Compact 계열을 쓴다. 새 고양이의 미술 승인은 아직이다.
 - 검사 결과와 미확인 항목은 [회귀검사](../Regression_2026-11-26.md), 통합 전 연출 점검은 [감수 보고서](../DirectingAudit_2026-11-26.md)를 본다.
 - 통합 전 백업: `D:\CatrunWork\integration_backup_0555`, 로컬 Git ref `refs/backup/overnight_20261126_before`. 작업별 백업은 각 문서에 있다.
 - 실제 빌드는 전체 재빌드였다. 오래된 obj가 섞이면 자동화가 크래시한 전례가 있으니 소스를 파일 복사로 넣을 때 수정 시각을 확인한다.
 - 중복: 같은 새 고양이 메시가 `Characters/BlackCat/Refine_20261125`와 `Cinematics/Stage1/Portal/RefineCat20261126`에 있다. 승강기가 뒤의 것을 쓴다.
+- 통합본 화면 재확인과 남은 경미한 항목(포획 중 표식 구슬, Stage3 포획 카메라 1프레임 튐, 도착 복귀 컷의 2cm 뜬 발)은 MergedScreens.md에 있다.
