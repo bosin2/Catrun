@@ -1,0 +1,19 @@
+00:03.063  blend            | Read blend: "C:\Users\whghk\.codex\worktrees\110f\Catrun\SourceArt\BlackCat\RigV2\UniformJointRepair\UniformDensity\SK_BlackCat_UniformJointRepair.blend"
+Info: Saved as "SK_BlackCat_UniformJointRepair.blend"
+SCANNED forearm_L max_overlap 0
+SCANNED forearm_R max_overlap 0
+SCANNED paw_F_L max_overlap 0
+SCANNED paw_F_R max_overlap 0
+SCANNED shin_L max_overlap 2
+SCANNED shin_R max_overlap 0
+SCANNED hock_L max_overlap 0
+SCANNED hock_R max_overlap 0
+SCANNED paw_H_L max_overlap 0
+SCANNED paw_H_R max_overlap 0
+SCAN_COMPLETE
+MOTION Body max limb intersections 0 max lower body 0
+MOTION PawReach max limb intersections 0 max lower body 0
+MOTION Curl max limb intersections 0 max lower body 0
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 02:38:20)
+
+Blender quit

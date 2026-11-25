@@ -10,7 +10,7 @@ DEST='/Game/Environment/Stage3/FinalGuard'
 EA=u.EditorAssetLibrary; ML=u.MaterialEditingLibrary
 ACT=u.get_editor_subsystem(u.EditorActorSubsystem)
 LEVEL=u.get_editor_subsystem(u.LevelEditorSubsystem)
-REPORT={'rooms':L.ROOMS,'actors':{},'portals':{},'closures':{}}
+REPORT={'rooms':L.ROOMS,'connectors':L.CONNECTORS,'actors':{},'portals':{},'closures':{}}
 IM=json.loads((OUT/'import_report.json').read_text())
 assert IM.get('success')
 SERIAL=0
@@ -187,6 +187,14 @@ def characters():
         a.set_editor_property('PatrolPoints',points);a.set_editor_property('bPatrolEnabled',bool(points));a.set_editor_property('bPatrolLoop',len(points)>2)
 
 def main():
+    gate_x0,gate_y0,gate_x1,gate_y1=L.ROOMS['GateHall']
+    gate_x=(gate_x0+gate_x1)/2
+    final_gate_y=gate_y1-50
+    exhibit_x0,exhibit_y0,_,exhibit_y1=L.ROOMS['Exhibition']
+    d2=[(center,fixed) for orient,fixed,start,end,openings in L.INTERNAL
+        for center,kind,label in openings if label=='D2' and orient=='h']
+    assert len(d2)==1
+    d2_x,d2_y=d2[0]
     path='/Game/Maps/Stage3'
     marker=OUT/'map_ownership.json'
     if EA.does_asset_exist(path):
@@ -200,14 +208,14 @@ def main():
     world=u.get_editor_subsystem(u.UnrealEditorSubsystem).get_editor_world()
     world.get_world_settings().set_editor_property('default_game_mode',EA.load_blueprint_class('/Game/Blueprints/GameModes/GM_Cat'))
     for i,(x,y,w,h) in enumerate(L.floor_rectangles()):
-        typ='SM_S3_Floor_GatePlain' if y>=2950 else 'SM_S3_Floor_Octagon'
+        typ='SM_S3_Floor_GatePlain' if y>=gate_y0 else 'SM_S3_Floor_Octagon'
         m=cropped(mesh(typ),w,h)
         at_min(f'Floor_{i:04}',m,(x,y,-5),folder='Floors',tags=('SoundFloor',))
     # A short external landing supports the cat as the final exit overlap completes.
-    for i in range(3):at_min(f'ExitLanding{i}','SM_S3_Floor_GatePlain',(-500+i*200,4050,-5),folder='Floors',tags=('SoundFloor',))
+    for i in range(3):at_min(f'ExitLanding{i}','SM_S3_Floor_GatePlain',(gate_x-300+i*200,gate_y1,-5),folder='Floors',tags=('SoundFloor',))
     for orient,fixed,start,end,side in L.boundary_segments():
-        if orient=='h' and fixed==4050:
-            wall_run(orient,fixed,start,-600,side);wall_run(orient,fixed,200,end,side)
+        if orient=='h' and fixed==gate_y1:
+            wall_run(orient,fixed,start,gate_x-400,side);wall_run(orient,fixed,gate_x+400,end,side)
         else:wall_run(orient,fixed,start,end,side)
     for orient,fixed,start,end,openings in L.INTERNAL:wall_run(orient,fixed,start,end,0,openings)
     for label,name,pos,yaw in L.PROPS:
@@ -246,34 +254,34 @@ def main():
         # Published PuzzleGate_ThreeLocks assembly: +90 degrees Blender Y is
         # -90 Unreal pitch, with 16 cm horizontal withdrawal and moving keepers.
         z=62+i*70
-        housing=static(f'Lock{i+1}_Housing','SM_S3_GateLockHousing',(-271,2329,z),folder='Objectives',collision=False)
+        housing=static(f'Lock{i+1}_Housing','SM_S3_GateLockHousing',(d2_x-71,d2_y-21,z),folder='Objectives',collision=False)
         housing.set_actor_rotation(u.Rotator(pitch=-90,yaw=180),True)
-        bolt=static(f'Lock{i+1}_Bolt','SM_S3_GateLockBolt',(-259.9,2329,z),folder='Objectives',movable=True,collision=False)
+        bolt=static(f'Lock{i+1}_Bolt','SM_S3_GateLockBolt',(d2_x-59.9,d2_y-21,z),folder='Objectives',movable=True,collision=False)
         bolt.set_actor_rotation(u.Rotator(pitch=-90,yaw=180),True)
-        keeper=static(f'Lock{i+1}_Keeper','SM_S3_D2_BarKeeper',(-264.4,2329,z),180,folder='Objectives',movable=True,collision=False)
+        keeper=static(f'Lock{i+1}_Keeper','SM_S3_D2_BarKeeper',(d2_x-64.4,d2_y-21,z),180,folder='Objectives',movable=True,collision=False)
         keeper.attach_to_actor(GATES['D2'],u.Name('None'),u.AttachmentRule.KEEP_WORLD,u.AttachmentRule.KEEP_WORLD,u.AttachmentRule.KEEP_WORLD,False)
         d=u.CatrunReleaseDevice();d.set_editor_property('Housing',h);d.set_editor_property('Ring',r);d.set_editor_property('Pin',p);d.set_editor_property('LockBolt',bolt);d.set_editor_property('ChainLinks',chain);devices.append(d)
     director.set_editor_property('Devices',devices)
-    for x in [-670,270]:
-        for j,y in enumerate([3200,3500,3775]):
+    for x in [gate_x-470,gate_x+470]:
+        for j,y in enumerate([gate_y0+250,gate_y0+550,gate_y0+825]):
             for part,z in [('Base',0),('ShaftLower',40),('ShaftUpper',300),('Capital',840)]:
                 static(f'GrandPillar_{x}_{j}_{part}','SM_S3_GrandPillar_'+part,(x,y,z),folder='GateHall',tags=('SoundObstacle',),occlusion=True)
-    for part,z in [('LowerFrame',0),('UpperFrame',300)]:static('FinalGate_'+part,'SM_S3_FinalGate_'+part,(-200,4000,z),180,folder='GateHall',tags=('SoundWall',),occlusion=True)
-    REPORT['portals']['FinalGate']={'position':(-200,4000,0),'orientation':'h','kind':'gate','clear_width':600}
+    for part,z in [('LowerFrame',0),('UpperFrame',300)]:static('FinalGate_'+part,'SM_S3_FinalGate_'+part,(gate_x,final_gate_y,z),180,folder='GateHall',tags=('SoundWall',),occlusion=True)
+    REPORT['portals']['FinalGate']={'position':(gate_x,final_gate_y,0),'orientation':'h','kind':'gate','clear_width':600}
     for part,prop in [('Leaf_L','FinalLeafLeft'),('Leaf_R','FinalLeafRight')]:
         imported_part='Leaf_R' if part=='Leaf_L' else 'Leaf_L'
-        a=static('FinalGate_'+part,'SM_S3_FinalGate_'+imported_part,(-200,4000,0),180,folder='GateHall',movable=True,occlusion=True);director.set_editor_property(prop,a)
+        a=static('FinalGate_'+part,'SM_S3_FinalGate_'+imported_part,(gate_x,final_gate_y,0),180,folder='GateHall',movable=True,occlusion=True);director.set_editor_property(prop,a)
     # Carpet sits above, never coincides with the stone surface. It has no unapproved acoustic multiplier.
     runners=[k for k in IM['meshes'] if 'Runner' in k]
-    for j,y in enumerate(range(3050,3850,200)):
+    for j,y in enumerate(range(gate_y0+100,gate_y0+900,200)):
         name=next((k for k in runners if ('End' in k)==(j in [0,3])),runners[0])
-        at_min(f'Runner{j}',name,(-325,y,.15),90,folder='GateHall',collision=False)
-    for j,(x,y) in enumerate([(-930,1450),(-930,2100),(-330,1100),(1140,1640),(870,2500),(-880,3300),(480,3300),(-880,3900),(480,3900)]):
-        grand=y>=2950
+        at_min(f'Runner{j}',name,(gate_x-125,y,.15),90,folder='GateHall',collision=False)
+    for j,(x,y) in enumerate([(exhibit_x0+70,exhibit_y0+150),(exhibit_x0+70,exhibit_y0+800),(-330,1100),(1140,1640),(870,2500),(gate_x0+70,gate_y0+350),(gate_x1-70,gate_y0+350),(gate_x0+70,gate_y1-150),(gate_x1-70,gate_y1-150)]):
+        grand=y>=gate_y0
         static(f'Lantern{j}','SM_S3_GrandWallLantern' if grand else 'SM_S3_WallSconce',(x,y,160),folder='Lighting',collision=False)
         light=spawn(u.PointLight,f'LocalLight{j}',(x,y-45,205),folder='Lighting')
         c=light.point_light_component;c.set_mobility(u.ComponentMobility.MOVABLE);c.set_intensity(500 if grand else 220);c.set_light_color(u.LinearColor(1,.91,.76,1));c.set_attenuation_radius(550);c.set_cast_shadows(False)
-    for j,(x,y,z) in enumerate([(-800,4020,650),(400,4020,650),(-900,2350,280),(900,2530,280)]):
+    for j,(x,y,z) in enumerate([(gate_x-600,gate_y1-30,650),(gate_x+600,gate_y1-30,650),(exhibit_x0+100,exhibit_y1-50,280),(900,2530,280)]):
         static(f'Banner{j}','SM_S3_GrandBanner' if z>300 else 'SM_S3_GuardBanner',(x,y,z),folder='Decor',collision=False,occlusion=True)
     key=spawn(u.DirectionalLight,'KeyLight',(0,2000,1000),folder='Lighting');key.set_actor_rotation(u.Rotator(pitch=-55,yaw=-35),True);key.get_component_by_class(u.DirectionalLightComponent).set_mobility(u.ComponentMobility.MOVABLE);key.get_component_by_class(u.DirectionalLightComponent).set_intensity(2.2);key.get_component_by_class(u.DirectionalLightComponent).set_light_color(u.LinearColor(.92,.94,1,1))
     fill=spawn(u.DirectionalLight,'FillLight',(0,2000,1000),folder='Lighting');fill.set_actor_rotation(u.Rotator(pitch=-70,yaw=145),True);fill.get_component_by_class(u.DirectionalLightComponent).set_mobility(u.ComponentMobility.MOVABLE);fill.get_component_by_class(u.DirectionalLightComponent).set_intensity(.8);fill.get_component_by_class(u.DirectionalLightComponent).set_cast_shadows(False)
@@ -282,13 +290,13 @@ def main():
     spawn(u.PlayerStart,'PlayerStart',(150,110,30),90)
     cat=bp('/Game/Characters/BlackCat/Blueprints/BP_Cat','Player',(150,110,26.2),90)
     cat.set_editor_property('auto_possess_player',u.AutoReceiveInput.PLAYER0)
-    cam=bp('/Game/Systems/Camera/BP_QuarterViewCamera','FollowCamera',(150,110,26),-135)
+    cam=bp('/Game/Systems/Camera/BP_QuarterViewCamera','FollowCamera',(150,110,26),45)
     cam.get_component_by_class(u.CameraComponent).set_editor_property('ortho_width',900.)
     cam.tags=list(cam.tags)+[u.Name('CatrunGameplayCamera')]
     grid=spawn(u.SoundGridManager,'SoundGrid');grid.set_editor_property('Settings',load('/Game/Systems/Sound/DA_SoundSettings'))
     bp('/Game/Systems/Sound/Visual/Bluprints/BP_CatrunSoundController','SoundVisual')
     characters()
-    ex=spawn(u.CatrunStageExit,'FinalExit',(-200,4140,60));ex.get_editor_property('Trigger').set_box_extent(u.Vector(250,45,80));ex.set_editor_property('bRequireCenterInside',True)
+    ex=spawn(u.CatrunStageExit,'FinalExit',(gate_x,gate_y1+90,60));ex.get_editor_property('Trigger').set_box_extent(u.Vector(250,45,80));ex.set_editor_property('bRequireCenterInside',True)
     grid.build_grid();assert grid.has_grid()
     REPORT['grid']=json.loads(grid.call_method('ExportBakedGridSnapshot'))
     REPORT['bounds']=[{'label':a.get_actor_label(),'min':xyz(a.get_actor_bounds(False)[0]-a.get_actor_bounds(False)[1]),'max':xyz(a.get_actor_bounds(False)[0]+a.get_actor_bounds(False)[1]),'tags':[str(t) for t in a.tags]} for a in ACT.get_all_level_actors() if isinstance(a,u.StaticMeshActor)]

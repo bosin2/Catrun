@@ -1,0 +1,3733 @@
+{
+  "camera_comparisons": [
+    {
+      "view": "Entrance",
+      "max_delta": {
+        "cat": 0.0,
+        "camera": 0.0,
+        "rotation": 0.0,
+        "camera_distance_cm": 0.0
+      }
+    },
+    {
+      "view": "Lobby",
+      "max_delta": {
+        "cat": 0.0,
+        "camera": 0.0015912048615405183,
+        "rotation": 0.0,
+        "camera_distance_cm": 0.002021171201597374
+      }
+    },
+    {
+      "view": "Exhibition",
+      "max_delta": {
+        "cat": 0.0,
+        "camera": 0.07640232047333484,
+        "rotation": 0.0,
+        "camera_distance_cm": 0.0860156352537272
+      }
+    },
+    {
+      "view": "Warehouse",
+      "max_delta": {
+        "cat": 0.0,
+        "camera": 0.003965973644653786,
+        "rotation": 0.0,
+        "camera_distance_cm": 0.0043765704882090155
+      }
+    },
+    {
+      "view": "Altar",
+      "max_delta": {
+        "cat": 0.0,
+        "camera": 3.737109556594543,
+        "rotation": 0.0,
+        "camera_distance_cm": 4.5621913974025485
+      }
+    },
+    {
+      "view": "GateHall",
+      "max_delta": {
+        "cat": 0.0,
+        "camera": 0.009891754978070821,
+        "rotation": 0.0,
+        "camera_distance_cm": 0.0113624823586024
+      }
+    }
+  ],
+  "screen_luma_not_basecolor": {
+    "Entrance_before.png": {
+      "mean_display_luma_nonblack": 129.06288808975683,
+      "p95_display_luma_nonblack": 175.0642
+    },
+    "Entrance_after.png": {
+      "mean_display_luma_nonblack": 36.021204672912724,
+      "p95_display_luma_nonblack": 73.2086
+    },
+    "Lobby_before.png": {
+      "mean_display_luma_nonblack": 125.94550317392869,
+      "p95_display_luma_nonblack": 172.1364
+    },
+    "Lobby_after.png": {
+      "mean_display_luma_nonblack": 32.26013787598416,
+      "p95_display_luma_nonblack": 69.42119999999998
+    },
+    "Exhibition_before.png": {
+      "mean_display_luma_nonblack": 172.60260308101795,
+      "p95_display_luma_nonblack": 228.48539999999997
+    },
+    "Exhibition_after.png": {
+      "mean_display_luma_nonblack": 62.2596121809815,
+      "p95_display_luma_nonblack": 130.99419999999998
+    },
+    "Warehouse_before.png": {
+      "mean_display_luma_nonblack": 137.0654776412155,
+      "p95_display_luma_nonblack": 210.20059999999998
+    },
+    "Warehouse_after.png": {
+      "mean_display_luma_nonblack": 49.04511793698524,
+      "p95_display_luma_nonblack": 111.9666
+    },
+    "Altar_before.png": {
+      "mean_display_luma_nonblack": 149.29408154905454,
+      "p95_display_luma_nonblack": 229.13240000000002
+    },
+    "Altar_after.png": {
+      "mean_display_luma_nonblack": 49.0686115853413,
+      "p95_display_luma_nonblack": 109.76620000000001
+    },
+    "GateHall_before.png": {
+      "mean_display_luma_nonblack": 151.2505504466146,
+      "p95_display_luma_nonblack": 232.0602
+    },
+    "GateHall_after.png": {
+      "mean_display_luma_nonblack": 64.30193751141347,
+      "p95_display_luma_nonblack": 120.5456
+    }
+  },
+  "basecolor_gpu_raw": {
+    "method": "Deferred SceneCapture SCS_BASE_COLOR -> RGBA16F -> raw linear pixel readback; equal-area UV0 plane",
+    "tolerance_srgb_bytes": 2.5,
+    "resolution": 256,
+    "rows": [
+      {
+        "calibration": "M_S3_flagstone__Floor",
+        "material": "/Game/Environment/Stage3/ColorCorrection_20261125/Instances/MI_CC_Floor_S3_flagstone_dd4b3f82.MI_CC_Floor_S3_flagstone_dd4b3f82",
+        "role": "Floor",
+        "target_srgb": [
+          150,
+          146,
+          139
+        ],
+        "gpu_mean_linear": [
+          0.30763009190559387,
+          0.2854348123073578,
+          0.2570509761571884
+        ],
+        "gpu_representative_srgb": [
+          150.59072273457423,
+          145.53371554656542,
+          138.7201153070954
+        ],
+        "gpu_std_linear": [
+          0.006633078002878165,
+          0.006201463106752353,
+          0.005939067490085108
+        ],
+        "max_srgb_error": 0.5907227345742285,
+        "black_pixels": 0,
+        "passed": true
+      },
+      {
+        "calibration": "M_S3_dark_stone__FloorDiamond",
+        "material": "/Game/Environment/Stage3/ColorCorrection_20261125/Instances/MI_CC_FloorDiamond_S3_dark_stone_e5eb254e.MI_CC_FloorDiamond_S3_dark_stone_e5eb254e",
+        "role": "FloorDiamond",
+        "target_srgb": [
+          112,
+          108,
+          102
+        ],
+        "gpu_mean_linear": [
+          0.15988358855247498,
+          0.15178637206554413,
+          0.13077940046787262
+        ],
+        "gpu_representative_srgb": [
+          111.30188914994967,
+          108.6171151706452,
+          101.2364377548889
+        ],
+        "gpu_std_linear": [
+          0.004978948805635068,
+          0.0038949832054724926,
+          0.004671360389008575
+        ],
+        "max_srgb_error": 0.7635622451111033,
+        "black_pixels": 0,
+        "passed": true
+      },
+      {
+        "calibration": "M_S3_mid_stone__FloorDiamond",
+        "material": "/Game/Environment/Stage3/ColorCorrection_20261125/Instances/MI_CC_FloorDiamond_S3_mid_stone_c9c23e85.MI_CC_FloorDiamond_S3_mid_stone_c9c23e85",
+        "role": "FloorDiamond",
+        "target_srgb": [
+          112,
+          108,
+          102
+        ],
+        "gpu_mean_linear": [
+          0.1617075353860855,
+          0.15059255063533783,
+          0.13395380973815918
+        ],
+        "gpu_representative_srgb": [
+          111.89563764705892,
+          108.21427362107215,
+          102.39401463893012
+        ],
+        "gpu_std_linear": [
+          0.0060425196238399394,
+          0.00479295274663123,
+          0.005389850469250882
+        ],
+        "max_srgb_error": 0.39401463893011623,
+        "black_pixels": 0,
+        "passed": true
+      },
+      {
+        "calibration": "M_S3_limestone_Occlusion__Wall",
+        "material": "/Game/Environment/Stage3/ColorCorrection_20261125/Instances/MI_CC_Wall_S3_limestone_Occlusion_77621a48.MI_CC_Wall_S3_limestone_Occlusion_77621a48",
+        "role": "Wall",
+        "target_srgb": [
+          101,
+          97,
+          95
+        ],
+        "gpu_mean_linear": [
+          0.1296142414212227,
+          0.11974306404590607,
+          0.11426766961812973
+        ],
+        "gpu_representative_srgb": [
+          100.80744391099968,
+          97.07915301435976,
+          94.93339846174145
+        ],
+        "gpu_std_linear": [
+          0.0038681142851640063,
+          0.003260965900211365,
+          0.002844838646490712
+        ],
+        "max_srgb_error": 0.19255608900031973,
+        "black_pixels": 0,
+        "passed": true
+      },
+      {
+        "calibration": "M_S3_dressed_stone_Occlusion__Wall",
+        "material": "/Game/Environment/Stage3/ColorCorrection_20261125/Instances/MI_CC_Wall_S3_dressed_stone_Occlusion_b0ae3164.MI_CC_Wall_S3_dressed_stone_Occlusion_b0ae3164",
+        "role": "Wall",
+        "target_srgb": [
+          101,
+          97,
+          95
+        ],
+        "gpu_mean_linear": [
+          0.1292901337146759,
+          0.1195044293999672,
+          0.11504907160997391
+        ],
+        "gpu_representative_srgb": [
+          100.68771279025243,
+          96.98684172629258,
+          95.24323787280608
+        ],
+        "gpu_std_linear": [
+          0.0027655766891514283,
+          0.0019747736700207637,
+          0.0030846541864214968
+        ],
+        "max_srgb_error": 0.3122872097475664,
+        "black_pixels": 0,
+        "passed": true
+      },
+      {
+        "calibration": "M_S3_dressed_stone__Wall",
+        "material": "/Game/Environment/Stage3/ColorCorrection_20261125/Instances/MI_CC_Wall_S3_dressed_stone_a73e6eae.MI_CC_Wall_S3_dressed_stone_a73e6eae",
+        "role": "Wall",
+        "target_srgb": [
+          101,
+          97,
+          95
+        ],
+        "gpu_mean_linear": [
+          0.1292901337146759,
+          0.1195044293999672,
+          0.11504907160997391
+        ],
+        "gpu_representative_srgb": [
+          100.68771279025243,
+          96.98684172629258,
+          95.24323787280608
+        ],
+        "gpu_std_linear": [
+          0.0027655766891514283,
+          0.0019747736700207637,
+          0.0030846541864214968
+        ],
+        "max_srgb_error": 0.3122872097475664,
+        "black_pixels": 0,
+        "passed": true
+      },
+      {
+        "calibration": "M_S3_iron_Occlusion__BlackIron",
+        "material": "/Game/Environment/Stage3/ColorCorrection_20261125/Instances/MI_CC_BlackIron_S3_iron_Occlusion_32460bd2.MI_CC_BlackIron_S3_iron_Occlusion_32460bd2",
+        "role": "BlackIron",
+        "target_srgb": [
+          52,
+          50,
+          54
+        ],
+        "gpu_mean_linear": [
+          0.034423828125,
+          0.031982421875,
+          0.03564453125
+        ],
+        "gpu_representative_srgb": [
+          52.067263453518024,
+          50.07219654272084,
+          53.03388864353048
+        ],
+        "gpu_std_linear": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "max_srgb_error": 0.9661113564695185,
+        "black_pixels": 0,
+        "passed": false
+      },
+      {
+        "calibration": "M_S3_iron__BlackIron",
+        "material": "/Game/Environment/Stage3/ColorCorrection_20261125/Instances/MI_CC_BlackIron_S3_iron_f0f5dfad.MI_CC_BlackIron_S3_iron_f0f5dfad",
+        "role": "BlackIron",
+        "target_srgb": [
+          52,
+          50,
+          54
+        ],
+        "gpu_mean_linear": [
+          0.034423828125,
+          0.031982421875,
+          0.03564453125
+        ],
+        "gpu_representative_srgb": [
+          52.067263453518024,
+          50.07219654272084,
+          53.03388864353048
+        ],
+        "gpu_std_linear": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "max_srgb_error": 0.9661113564695185,
+        "black_pixels": 0,
+        "passed": false
+      },
+      {
+        "calibration": "M_S3_brass__Brass",
+        "material": "/Game/Environment/Stage3/ColorCorrection_20261125/Instances/MI_CC_Brass_S3_brass_e2f06f41.MI_CC_Brass_S3_brass_e2f06f41",
+        "role": "Brass",
+        "target_srgb": [
+          150,
+          134,
+          107
+        ],
+        "gpu_mean_linear": [
+          0.3046541213989258,
+          0.23828792572021484,
+          0.1503455638885498
+        ],
+        "gpu_representative_srgb": [
+          149.92531198610936,
+          133.9716285621546,
+          108.13069839503105
+        ],
+        "gpu_std_linear": [
+          0.00042594024653108556,
+          0.0001613457989810907,
+          0.00046689876256826796
+        ],
+        "max_srgb_error": 1.1306983950310467,
+        "black_pixels": 0,
+        "passed": true
+      },
+      {
+        "calibration": "M_S3_brass_Occlusion__Brass",
+        "material": "/Game/Environment/Stage3/ColorCorrection_20261125/Instances/MI_CC_Brass_S3_brass_Occlusion_1bb96641.MI_CC_Brass_S3_brass_Occlusion_1bb96641",
+        "role": "Brass",
+        "target_srgb": [
+          150,
+          134,
+          107
+        ],
+        "gpu_mean_linear": [
+          0.3046541213989258,
+          0.23828792572021484,
+          0.1503455638885498
+        ],
+        "gpu_representative_srgb": [
+          149.92531198610936,
+          133.9716285621546,
+          108.13069839503105
+        ],
+        "gpu_std_linear": [
+          0.00042594024653108556,
+          0.0001613457989810907,
+          0.00046689876256826796
+        ],
+        "max_srgb_error": 1.1306983950310467,
+        "black_pixels": 0,
+        "passed": true
+      },
+      {
+        "calibration": "M_S3_wood_Occlusion__Wood",
+        "material": "/Game/Environment/Stage3/ColorCorrection_20261125/Instances/MI_CC_Wood_S3_wood_Occlusion_1ddf0530.MI_CC_Wood_S3_wood_Occlusion_1ddf0530",
+        "role": "Wood",
+        "target_srgb": [
+          89,
+          72,
+          61
+        ],
+        "gpu_mean_linear": [
+          0.1001284271478653,
+          0.06512181460857391,
+          0.04637479968369007
+        ],
+        "gpu_representative_srgb": [
+          89.09863688339085,
+          72.17594211853147,
+          60.805186253131424
+        ],
+        "gpu_std_linear": [
+          0.015395088101367574,
+          0.009084147897643108,
+          0.006094504801485182
+        ],
+        "max_srgb_error": 0.19481374686857578,
+        "black_pixels": 0,
+        "passed": true
+      },
+      {
+        "calibration": "M_S3_iron_DeviceReadability__BlackIron",
+        "material": "/Game/Environment/Stage3/ColorCorrection_20261125/Instances/MI_CC_BlackIron_S3_Release1_Housing_2_Readability_43685659.MI_CC_BlackIron_S3_Release1_Housing_2_Readability_43685659",
+        "role": "BlackIron",
+        "target_srgb": [
+          52,
+          50,
+          54
+        ],
+        "gpu_mean_linear": [
+          0.034423828125,
+          0.031982421875,
+          0.03564453125
+        ],
+        "gpu_representative_srgb": [
+          52.067263453518024,
+          50.07219654272084,
+          53.03388864353048
+        ],
+        "gpu_std_linear": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "max_srgb_error": 0.9661113564695185,
+        "black_pixels": 0,
+        "passed": false
+      },
+      {
+        "calibration": "M_S3_iron_DeviceReadability__BlackIron",
+        "material": "/Game/Environment/Stage3/ColorCorrection_20261125/Instances/MI_CC_BlackIron_S3_Release2_Housing_2_Readability_3f75230e.MI_CC_BlackIron_S3_Release2_Housing_2_Readability_3f75230e",
+        "role": "BlackIron",
+        "target_srgb": [
+          52,
+          50,
+          54
+        ],
+        "gpu_mean_linear": [
+          0.034423828125,
+          0.031982421875,
+          0.03564453125
+        ],
+        "gpu_representative_srgb": [
+          52.067263453518024,
+          50.07219654272084,
+          53.03388864353048
+        ],
+        "gpu_std_linear": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "max_srgb_error": 0.9661113564695185,
+        "black_pixels": 0,
+        "passed": false
+      },
+      {
+        "calibration": "M_S3_iron_DeviceReadability__BlackIron",
+        "material": "/Game/Environment/Stage3/ColorCorrection_20261125/Instances/MI_CC_BlackIron_S3_Release3_Housing_2_Readability_7d5531ca.MI_CC_BlackIron_S3_Release3_Housing_2_Readability_7d5531ca",
+        "role": "BlackIron",
+        "target_srgb": [
+          52,
+          50,
+          54
+        ],
+        "gpu_mean_linear": [
+          0.034423828125,
+          0.031982421875,
+          0.03564453125
+        ],
+        "gpu_representative_srgb": [
+          52.067263453518024,
+          50.07219654272084,
+          53.03388864353048
+        ],
+        "gpu_std_linear": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "max_srgb_error": 0.9661113564695185,
+        "black_pixels": 0,
+        "passed": false
+      },
+      {
+        "calibration": "M_S3_dressed_stone_Occlusion__Pillar",
+        "material": "/Game/Environment/Stage3/ColorCorrection_20261125/Instances/MI_CC_Pillar_S3_dressed_stone_Occlusion_fde0d488.MI_CC_Pillar_S3_dressed_stone_Occlusion_fde0d488",
+        "role": "Pillar",
+        "target_srgb": [
+          119,
+          115,
+          109
+        ],
+        "gpu_mean_linear": [
+          0.1837644726037979,
+          0.17187340557575226,
+          0.15447057783603668
+        ],
+        "gpu_representative_srgb": [
+          118.78627733382957,
+          115.13546237300598,
+          109.51617038579063
+        ],
+        "gpu_std_linear": [
+          0.003729112110445267,
+          0.0031445853076674133,
+          0.0039574787085596965
+        ],
+        "max_srgb_error": 0.5161703857906303,
+        "black_pixels": 0,
+        "passed": true
+      },
+      {
+        "calibration": "M_S3_limestone_Occlusion__Pillar",
+        "material": "/Game/Environment/Stage3/ColorCorrection_20261125/Instances/MI_CC_Pillar_S3_limestone_Occlusion_56397d6d.MI_CC_Pillar_S3_limestone_Occlusion_56397d6d",
+        "role": "Pillar",
+        "target_srgb": [
+          119,
+          115,
+          109
+        ],
+        "gpu_mean_linear": [
+          0.1838727593421936,
+          0.1720626950263977,
+          0.153317391872406
+        ],
+        "gpu_representative_srgb": [
+          118.81888072742004,
+          115.19471350224227,
+          109.13104478272315
+        ],
+        "gpu_std_linear": [
+          0.0055266346716930865,
+          0.004840285735654006,
+          0.0036164807112793454
+        ],
+        "max_srgb_error": 0.1947135022422657,
+        "black_pixels": 0,
+        "passed": true
+      },
+      {
+        "calibration": "M_S3_limestone_Occlusion__GateDecorStone",
+        "material": "/Game/Environment/Stage3/ColorCorrection_20261125/Instances/MI_CC_GateDecorStone_S3_limestone_Occlusion_d61c49bf.MI_CC_GateDecorStone_S3_limestone_Occlusion_d61c49bf",
+        "role": "GateDecorStone",
+        "target_srgb": [
+          81,
+          77,
+          75
+        ],
+        "gpu_mean_linear": [
+          0.08216725289821625,
+          0.07451189309358597,
+          0.07031191885471344
+        ],
+        "gpu_representative_srgb": [
+          80.94442163710299,
+          77.1522814338069,
+          74.9745961580538
+        ],
+        "gpu_std_linear": [
+          0.0024419766307721556,
+          0.0020985619707236786,
+          0.0016548422164132965
+        ],
+        "max_srgb_error": 0.1522814338069054,
+        "black_pixels": 0,
+        "passed": true
+      },
+      {
+        "calibration": "M_S3_dressed_stone_Occlusion__GateDecorStone",
+        "material": "/Game/Environment/Stage3/ColorCorrection_20261125/Instances/MI_CC_GateDecorStone_S3_dressed_stone_Occlusion_a1ecab65.MI_CC_GateDecorStone_S3_dressed_stone_Occlusion_a1ecab65",
+        "role": "GateDecorStone",
+        "target_srgb": [
+          81,
+          77,
+          75
+        ],
+        "gpu_mean_linear": [
+          0.08210476487874985,
+          0.07442229986190796,
+          0.07073197513818741
+        ],
+        "gpu_representative_srgb": [
+          80.91432160881253,
+          77.10658551866842,
+          75.1957529621554
+        ],
+        "gpu_std_linear": [
+          0.0016955261277929498,
+          0.001326027273159064,
+          0.0019443299510910799
+        ],
+        "max_srgb_error": 0.19575296215539595,
+        "black_pixels": 0,
+        "passed": true
+      },
+      {
+        "calibration": "M_S3_GrandGateRunner_End__Carpet",
+        "material": "/Game/Environment/Stage3/ColorCorrection_20261125/Instances/MI_CC_Carpet_S3_GrandGateRunner_End_eda59b1f.MI_CC_Carpet_S3_GrandGateRunner_End_eda59b1f",
+        "role": "Carpet",
+        "target_srgb": [
+          73,
+          67,
+          74
+        ],
+        "gpu_mean_linear": [
+          0.06803727895021439,
+          0.0568094477057457,
+          0.07032782584428787
+        ],
+        "gpu_representative_srgb": [
+          73.76341274877971,
+          67.40814534941391,
+          74.9829850999424
+        ],
+        "gpu_std_linear": [
+          0.007633537491716839,
+          0.0063541454479729845,
+          0.007313244375293701
+        ],
+        "max_srgb_error": 0.9829850999423968,
+        "black_pixels": 0,
+        "passed": true
+      },
+      {
+        "calibration": "M_S3_GrandGateRunner_Center__Carpet",
+        "material": "/Game/Environment/Stage3/ColorCorrection_20261125/Instances/MI_CC_Carpet_S3_GrandGateRunner_Center_5b52454f.MI_CC_Carpet_S3_GrandGateRunner_Center_5b52454f",
+        "role": "Carpet",
+        "target_srgb": [
+          73,
+          67,
+          74
+        ],
+        "gpu_mean_linear": [
+          0.0688771903514862,
+          0.05672629177570343,
+          0.07073540985584259
+        ],
+        "gpu_representative_srgb": [
+          74.21335430113258,
+          67.3584577351939,
+          75.19755815560238
+        ],
+        "gpu_std_linear": [
+          0.007043977234078931,
+          0.005975042514090178,
+          0.007062943492606391
+        ],
+        "max_srgb_error": 1.2133543011325827,
+        "black_pixels": 0,
+        "passed": true
+      },
+      {
+        "calibration": "M_S3_grand_pennon_Occlusion__Banner",
+        "material": "/Game/Environment/Stage3/ColorCorrection_20261125/Instances/MI_CC_Banner_S3_grand_pennon_Occlusion_d34d695f.MI_CC_Banner_S3_grand_pennon_Occlusion_d34d695f",
+        "role": "Banner",
+        "target_srgb": [
+          101,
+          49,
+          62
+        ],
+        "gpu_mean_linear": [
+          0.13129513710737228,
+          0.030767075717449188,
+          0.04805484414100647
+        ],
+        "gpu_representative_srgb": [
+          101.42561228231285,
+          49.04583275062888,
+          61.92302106147537
+        ],
+        "gpu_std_linear": [
+          0.04789073692967906,
+          0.04751101882778348,
+          0.026058443334060027
+        ],
+        "max_srgb_error": 0.425612282312855,
+        "black_pixels": 0,
+        "passed": true
+      },
+      {
+        "calibration": "M_S3_cloth_Occlusion__Banner",
+        "material": "/Game/Environment/Stage3/ColorCorrection_20261125/Instances/MI_CC_Banner_S3_cloth_Occlusion_a24d69c0.MI_CC_Banner_S3_cloth_Occlusion_a24d69c0",
+        "role": "Banner",
+        "target_srgb": [
+          101,
+          49,
+          62
+        ],
+        "gpu_mean_linear": [
+          0.12968968972563744,
+          0.03058534860610962,
+          0.04826882481575012
+        ],
+        "gpu_representative_srgb": [
+          100.8352907824562,
+          48.89034338296561,
+          62.063748738471716
+        ],
+        "gpu_std_linear": [
+          0.03423332701909871,
+          0.006057488832135949,
+          0.01178913371677275
+        ],
+        "max_srgb_error": 0.16470921754380186,
+        "black_pixels": 0,
+        "passed": true
+      },
+      {
+        "calibration": "M_S3_guard_pennon_Occlusion__Banner",
+        "material": "/Game/Environment/Stage3/ColorCorrection_20261125/Instances/MI_CC_Banner_S3_guard_pennon_Occlusion_f0ecbee4.MI_CC_Banner_S3_guard_pennon_Occlusion_f0ecbee4",
+        "role": "Banner",
+        "target_srgb": [
+          101,
+          49,
+          62
+        ],
+        "gpu_mean_linear": [
+          0.1317119151353836,
+          0.030751924961805344,
+          0.04806840419769287
+        ],
+        "gpu_representative_srgb": [
+          101.5781718910188,
+          49.03288996419738,
+          61.931949876233816
+        ],
+        "gpu_std_linear": [
+          0.04745766724597329,
+          0.047393337725009387,
+          0.026541802138791877
+        ],
+        "max_srgb_error": 0.5781718910187976,
+        "black_pixels": 0,
+        "passed": true
+      },
+      {
+        "calibration": "M_ArmorStage2_Brass__Brass",
+        "material": "/Game/Environment/Stage3/ColorCorrection_20261125/Instances/MI_CC_Brass_ArmorStage2_Brass_a2a76ebe.MI_CC_Brass_ArmorStage2_Brass_a2a76ebe",
+        "role": "Brass",
+        "target_srgb": [
+          150,
+          134,
+          107
+        ],
+        "gpu_mean_linear": [
+          0.305999755859375,
+          0.2375495433807373,
+          0.150390625
+        ],
+        "gpu_representative_srgb": [
+          150.22665595336744,
+          133.78037355265292,
+          108.14595211643181
+        ],
+        "gpu_std_linear": [
+          0.0034924964938763963,
+          0.001524084776126991,
+          0.0
+        ],
+        "max_srgb_error": 1.1459521164318147,
+        "black_pixels": 0,
+        "passed": true
+      }
+    ],
+    "success": false,
+    "limitations": "256px UV-plane samples imported GPU texture/mips, not every source mip0 texel; GBuffer/compression quantization included.",
+    "original_actor_set_preserved": true
+  },
+  "basecolor_gpu_analysis": {
+    "raw_gpu_report_preserved": true,
+    "target_tolerance_srgb_bytes": 2.5,
+    "target_pass_count": 24,
+    "instance_count": 24,
+    "targets_success": true,
+    "maximum_target_error_srgb_bytes": 1.2133543011325827,
+    "visible_variation_count": 19,
+    "all_stone_samples_have_visible_variation": true,
+    "iron_detail_matches_original_at_256_and_1024": true,
+    "iron_original_comparison": [
+      {
+        "kind": "original",
+        "material": "/Game/Environment/Stage3/FinalGuard/Materials/M_S3_iron.M_S3_iron",
+        "resolution": 256,
+        "mean_linear": [
+          0.045166015625,
+          0.046630859375,
+          0.0498046875
+        ],
+        "std_linear": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "unique_per_channel": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "kind": "corrected",
+        "material": "/Game/Environment/Stage3/ColorCorrection_20261125/Instances/MI_CC_BlackIron_S3_iron_f0f5dfad.MI_CC_BlackIron_S3_iron_f0f5dfad",
+        "resolution": 256,
+        "mean_linear": [
+          0.034423828125,
+          0.031982421875,
+          0.03564453125
+        ],
+        "std_linear": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "unique_per_channel": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "kind": "original",
+        "material": "/Game/Environment/Stage3/FinalGuard/Materials/M_S3_iron.M_S3_iron",
+        "resolution": 1024,
+        "mean_linear": [
+          0.045166015625,
+          0.046630859375,
+          0.0498046875
+        ],
+        "std_linear": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "unique_per_channel": [
+          1,
+          1,
+          1
+        ]
+      },
+      {
+        "kind": "corrected",
+        "material": "/Game/Environment/Stage3/ColorCorrection_20261125/Instances/MI_CC_BlackIron_S3_iron_f0f5dfad.MI_CC_BlackIron_S3_iron_f0f5dfad",
+        "resolution": 1024,
+        "mean_linear": [
+          0.034423828125,
+          0.031982421875,
+          0.03564453125
+        ],
+        "std_linear": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "unique_per_channel": [
+          1,
+          1,
+          1
+        ]
+      }
+    ],
+    "success": true,
+    "flat_samples": [
+      "/Game/Environment/Stage3/ColorCorrection_20261125/Instances/MI_CC_BlackIron_S3_iron_Occlusion_32460bd2.MI_CC_BlackIron_S3_iron_Occlusion_32460bd2",
+      "/Game/Environment/Stage3/ColorCorrection_20261125/Instances/MI_CC_BlackIron_S3_iron_f0f5dfad.MI_CC_BlackIron_S3_iron_f0f5dfad",
+      "/Game/Environment/Stage3/ColorCorrection_20261125/Instances/MI_CC_BlackIron_S3_Release1_Housing_2_Readability_43685659.MI_CC_BlackIron_S3_Release1_Housing_2_Readability_43685659",
+      "/Game/Environment/Stage3/ColorCorrection_20261125/Instances/MI_CC_BlackIron_S3_Release2_Housing_2_Readability_3f75230e.MI_CC_BlackIron_S3_Release2_Housing_2_Readability_3f75230e",
+      "/Game/Environment/Stage3/ColorCorrection_20261125/Instances/MI_CC_BlackIron_S3_Release3_Housing_2_Readability_7d5531ca.MI_CC_BlackIron_S3_Release3_Housing_2_Readability_7d5531ca"
+    ],
+    "source_iron_mip_predictions": [
+      {
+        "width": 2048,
+        "ideal_linear_std": [
+          0.0013514433724189324,
+          0.0013048934706883322,
+          0.0015011559208618806
+        ],
+        "ideal_srgb_byte_std": [
+          1.0822647377653623,
+          1.090237042892384,
+          1.1548996091194015
+        ],
+        "ideal_srgb_byte_min": [
+          50.26173074282439,
+          48.07711022911805,
+          51.58449704545169
+        ],
+        "ideal_srgb_byte_max": [
+          53.83197611556021,
+          52.32922321981424,
+          55.95700601215956
+        ],
+        "quantized_srgb_std": [
+          1.2125382149435098,
+          1.0535711197057263,
+          1.2374738051085064
+        ],
+        "quantized_unique_per_channel": [
+          5,
+          5,
+          5
+        ]
+      },
+      {
+        "width": 1024,
+        "ideal_linear_std": [
+          0.0012216053433536257,
+          0.0011839617436064467,
+          0.0013629076466776682
+        ],
+        "ideal_srgb_byte_std": [
+          0.9783267095158202,
+          0.9892769083411821,
+          1.0484548059324632
+        ],
+        "ideal_srgb_byte_min": [
+          50.26173074282439,
+          48.07711022911805,
+          51.58449704545169
+        ],
+        "ideal_srgb_byte_max": [
+          53.83197611556021,
+          52.32922321981424,
+          55.95700601215956
+        ],
+        "quantized_srgb_std": [
+          1.0468230856931249,
+          0.9825969922586522,
+          1.1173549562439142
+        ],
+        "quantized_unique_per_channel": [
+          5,
+          5,
+          5
+        ]
+      },
+      {
+        "width": 512,
+        "ideal_linear_std": [
+          0.0009502809217645722,
+          0.0009236369839901075,
+          0.0010633511070512307
+        ],
+        "ideal_srgb_byte_std": [
+          0.7611540815529254,
+          0.7720270558899138,
+          0.8177458679606038
+        ],
+        "ideal_srgb_byte_min": [
+          50.26173074282439,
+          48.07711022911805,
+          51.58449704545169
+        ],
+        "ideal_srgb_byte_max": [
+          53.83197611556018,
+          52.32922321981425,
+          55.95700601215956
+        ],
+        "quantized_srgb_std": [
+          0.815281868145502,
+          0.8155822191158093,
+          0.8597547320386343
+        ],
+        "quantized_unique_per_channel": [
+          5,
+          5,
+          5
+        ]
+      },
+      {
+        "width": 256,
+        "ideal_linear_std": [
+          0.0005887261097750418,
+          0.0005727172439440256,
+          0.0006596279602293362
+        ],
+        "ideal_srgb_byte_std": [
+          0.4716174325494536,
+          0.4788953563053271,
+          0.5070198732509005
+        ],
+        "ideal_srgb_byte_min": [
+          50.34614551623076,
+          48.21106251274497,
+          51.984799020987
+        ],
+        "ideal_srgb_byte_max": [
+          53.69385396581978,
+          51.92065261445043,
+          55.78132898646837
+        ],
+        "quantized_srgb_std": [
+          0.5514014916486263,
+          0.5546931093143874,
+          0.5827668137579525
+        ],
+        "quantized_unique_per_channel": [
+          5,
+          5,
+          5
+        ]
+      }
+    ],
+    "interpretation": "Five iron variants have zero measured BaseColor variance. Direct GPU capture of the UNCHANGED ORIGINAL iron material also has zero variance at BOTH 256 and 1024, so this is pre-existing imported/rendered behavior rather than newly lost detail. Exact codec/mip cause is not claimed. Original PNG and UV/Normal/ORM graph preservation are separately proven. Ideal box-filter predictions are supplementary and do not reproduce the GPU codec.",
+    "scope": "24 color targets pass fixed tolerance; stone grain visible; iron detail matches original rendered baseline. Raw zero-variance flags remain preserved; no claim that original iron has visible BaseColor grain."
+  },
+  "loaded_material_checks": {
+    "success": true,
+    "checks": [
+      {
+        "name": "Original graph texture UV sampling and links intact: M_CC_S3_flagstone_eac28b6a",
+        "passed": true,
+        "detail": []
+      },
+      {
+        "name": "All non-BaseColor outputs unchanged: M_CC_S3_flagstone_eac28b6a",
+        "passed": true,
+        "detail": []
+      },
+      {
+        "name": "Original graph texture UV sampling and links intact: M_CC_S3_dark_stone_3bda9b07",
+        "passed": true,
+        "detail": []
+      },
+      {
+        "name": "All non-BaseColor outputs unchanged: M_CC_S3_dark_stone_3bda9b07",
+        "passed": true,
+        "detail": []
+      },
+      {
+        "name": "Original graph texture UV sampling and links intact: M_CC_S3_mid_stone_ea5e813d",
+        "passed": true,
+        "detail": []
+      },
+      {
+        "name": "All non-BaseColor outputs unchanged: M_CC_S3_mid_stone_ea5e813d",
+        "passed": true,
+        "detail": []
+      },
+      {
+        "name": "Original graph texture UV sampling and links intact: M_CC_S3_limestone_Occlusion_32f0a66c",
+        "passed": true,
+        "detail": []
+      },
+      {
+        "name": "All non-BaseColor outputs unchanged: M_CC_S3_limestone_Occlusion_32f0a66c",
+        "passed": true,
+        "detail": []
+      },
+      {
+        "name": "Original graph texture UV sampling and links intact: M_CC_S3_dressed_stone_Occlusion_383dff3a",
+        "passed": true,
+        "detail": []
+      },
+      {
+        "name": "All non-BaseColor outputs unchanged: M_CC_S3_dressed_stone_Occlusion_383dff3a",
+        "passed": true,
+        "detail": []
+      },
+      {
+        "name": "Original graph texture UV sampling and links intact: M_CC_S3_dressed_stone_44359e50",
+        "passed": true,
+        "detail": []
+      },
+      {
+        "name": "All non-BaseColor outputs unchanged: M_CC_S3_dressed_stone_44359e50",
+        "passed": true,
+        "detail": []
+      },
+      {
+        "name": "Original graph texture UV sampling and links intact: M_CC_S3_iron_Occlusion_d9ab5f17",
+        "passed": true,
+        "detail": []
+      },
+      {
+        "name": "All non-BaseColor outputs unchanged: M_CC_S3_iron_Occlusion_d9ab5f17",
+        "passed": true,
+        "detail": []
+      },
+      {
+        "name": "Original graph texture UV sampling and links intact: M_CC_S3_iron_20621ead",
+        "passed": true,
+        "detail": []
+      },
+      {
+        "name": "All non-BaseColor outputs unchanged: M_CC_S3_iron_20621ead",
+        "passed": true,
+        "detail": []
+      },
+      {
+        "name": "Original graph texture UV sampling and links intact: M_CC_S3_brass_657ca690",
+        "passed": true,
+        "detail": []
+      },
+      {
+        "name": "All non-BaseColor outputs unchanged: M_CC_S3_brass_657ca690",
+        "passed": true,
+        "detail": []
+      },
+      {
+        "name": "Original graph texture UV sampling and links intact: M_CC_S3_brass_Occlusion_77c6ec79",
+        "passed": true,
+        "detail": []
+      },
+      {
+        "name": "All non-BaseColor outputs unchanged: M_CC_S3_brass_Occlusion_77c6ec79",
+        "passed": true,
+        "detail": []
+      },
+      {
+        "name": "Original graph texture UV sampling and links intact: M_CC_S3_wood_Occlusion_26898ef3",
+        "passed": true,
+        "detail": []
+      },
+      {
+        "name": "All non-BaseColor outputs unchanged: M_CC_S3_wood_Occlusion_26898ef3",
+        "passed": true,
+        "detail": []
+      },
+      {
+        "name": "Original graph texture UV sampling and links intact: M_CC_S3_iron_DeviceReadability_9aa6b255",
+        "passed": true,
+        "detail": []
+      },
+      {
+        "name": "All non-BaseColor outputs unchanged: M_CC_S3_iron_DeviceReadability_9aa6b255",
+        "passed": true,
+        "detail": []
+      },
+      {
+        "name": "Original graph texture UV sampling and links intact: M_CC_S3_GrandGateRunner_End_fc2fbfcf",
+        "passed": true,
+        "detail": []
+      },
+      {
+        "name": "All non-BaseColor outputs unchanged: M_CC_S3_GrandGateRunner_End_fc2fbfcf",
+        "passed": true,
+        "detail": []
+      },
+      {
+        "name": "Original graph texture UV sampling and links intact: M_CC_S3_GrandGateRunner_Center_3cdeba96",
+        "passed": true,
+        "detail": []
+      },
+      {
+        "name": "All non-BaseColor outputs unchanged: M_CC_S3_GrandGateRunner_Center_3cdeba96",
+        "passed": true,
+        "detail": []
+      },
+      {
+        "name": "Original graph texture UV sampling and links intact: M_CC_S3_grand_pennon_Occlusion_8cd23a7f",
+        "passed": true,
+        "detail": []
+      },
+      {
+        "name": "All non-BaseColor outputs unchanged: M_CC_S3_grand_pennon_Occlusion_8cd23a7f",
+        "passed": true,
+        "detail": []
+      },
+      {
+        "name": "Original graph texture UV sampling and links intact: M_CC_S3_cloth_Occlusion_65db74da",
+        "passed": true,
+        "detail": []
+      },
+      {
+        "name": "All non-BaseColor outputs unchanged: M_CC_S3_cloth_Occlusion_65db74da",
+        "passed": true,
+        "detail": []
+      },
+      {
+        "name": "Original graph texture UV sampling and links intact: M_CC_S3_guard_pennon_Occlusion_e0fc6a85",
+        "passed": true,
+        "detail": []
+      },
+      {
+        "name": "All non-BaseColor outputs unchanged: M_CC_S3_guard_pennon_Occlusion_e0fc6a85",
+        "passed": true,
+        "detail": []
+      },
+      {
+        "name": "Original graph texture UV sampling and links intact: M_CC_ArmorStage2_Brass_43329758",
+        "passed": true,
+        "detail": []
+      },
+      {
+        "name": "All non-BaseColor outputs unchanged: M_CC_ArmorStage2_Brass_43329758",
+        "passed": true,
+        "detail": []
+      },
+      {
+        "name": "Live MI parameters: MI_CC_Floor_S3_flagstone_dd4b3f82",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Live BaseColor equation: MI_CC_Floor_S3_flagstone_dd4b3f82",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Live MI parameters: MI_CC_FloorDiamond_S3_dark_stone_e5eb254e",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Live BaseColor equation: MI_CC_FloorDiamond_S3_dark_stone_e5eb254e",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Live MI parameters: MI_CC_FloorDiamond_S3_mid_stone_c9c23e85",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Live BaseColor equation: MI_CC_FloorDiamond_S3_mid_stone_c9c23e85",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Live MI parameters: MI_CC_Wall_S3_limestone_Occlusion_77621a48",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Live BaseColor equation: MI_CC_Wall_S3_limestone_Occlusion_77621a48",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Live MI parameters: MI_CC_Wall_S3_dressed_stone_Occlusion_b0ae3164",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Live BaseColor equation: MI_CC_Wall_S3_dressed_stone_Occlusion_b0ae3164",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Live MI parameters: MI_CC_Wall_S3_dressed_stone_a73e6eae",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Live BaseColor equation: MI_CC_Wall_S3_dressed_stone_a73e6eae",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Live MI parameters: MI_CC_BlackIron_S3_iron_Occlusion_32460bd2",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Live BaseColor equation: MI_CC_BlackIron_S3_iron_Occlusion_32460bd2",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Live MI parameters: MI_CC_BlackIron_S3_iron_f0f5dfad",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Live BaseColor equation: MI_CC_BlackIron_S3_iron_f0f5dfad",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Live MI parameters: MI_CC_Brass_S3_brass_e2f06f41",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Live BaseColor equation: MI_CC_Brass_S3_brass_e2f06f41",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Live MI parameters: MI_CC_Brass_S3_brass_Occlusion_1bb96641",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Live BaseColor equation: MI_CC_Brass_S3_brass_Occlusion_1bb96641",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Live MI parameters: MI_CC_Wood_S3_wood_Occlusion_1ddf0530",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Live BaseColor equation: MI_CC_Wood_S3_wood_Occlusion_1ddf0530",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Live MI parameters: MI_CC_BlackIron_S3_Release1_Housing_2_Readability_43685659",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Live BaseColor equation: MI_CC_BlackIron_S3_Release1_Housing_2_Readability_43685659",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Live MI parameters: MI_CC_BlackIron_S3_Release2_Housing_2_Readability_3f75230e",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Live BaseColor equation: MI_CC_BlackIron_S3_Release2_Housing_2_Readability_3f75230e",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Live MI parameters: MI_CC_BlackIron_S3_Release3_Housing_2_Readability_7d5531ca",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Live BaseColor equation: MI_CC_BlackIron_S3_Release3_Housing_2_Readability_7d5531ca",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Live MI parameters: MI_CC_Pillar_S3_dressed_stone_Occlusion_fde0d488",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Live BaseColor equation: MI_CC_Pillar_S3_dressed_stone_Occlusion_fde0d488",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Live MI parameters: MI_CC_Pillar_S3_limestone_Occlusion_56397d6d",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Live BaseColor equation: MI_CC_Pillar_S3_limestone_Occlusion_56397d6d",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Live MI parameters: MI_CC_GateDecorStone_S3_limestone_Occlusion_d61c49bf",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Live BaseColor equation: MI_CC_GateDecorStone_S3_limestone_Occlusion_d61c49bf",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Live MI parameters: MI_CC_GateDecorStone_S3_dressed_stone_Occlusion_a1ecab65",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Live BaseColor equation: MI_CC_GateDecorStone_S3_dressed_stone_Occlusion_a1ecab65",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Live MI parameters: MI_CC_Carpet_S3_GrandGateRunner_End_eda59b1f",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Live BaseColor equation: MI_CC_Carpet_S3_GrandGateRunner_End_eda59b1f",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Live MI parameters: MI_CC_Carpet_S3_GrandGateRunner_Center_5b52454f",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Live BaseColor equation: MI_CC_Carpet_S3_GrandGateRunner_Center_5b52454f",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Live MI parameters: MI_CC_Banner_S3_grand_pennon_Occlusion_d34d695f",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Live BaseColor equation: MI_CC_Banner_S3_grand_pennon_Occlusion_d34d695f",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Live MI parameters: MI_CC_Banner_S3_cloth_Occlusion_a24d69c0",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Live BaseColor equation: MI_CC_Banner_S3_cloth_Occlusion_a24d69c0",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Live MI parameters: MI_CC_Banner_S3_guard_pennon_Occlusion_f0ecbee4",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Live BaseColor equation: MI_CC_Banner_S3_guard_pennon_Occlusion_f0ecbee4",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Live MI parameters: MI_CC_Brass_ArmorStage2_Brass_a2a76ebe",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Live BaseColor equation: MI_CC_Brass_ArmorStage2_Brass_a2a76ebe",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "All 1095 actual component slots match assigned or preserved material",
+        "passed": true,
+        "detail": []
+      }
+    ]
+  },
+  "source_calibration": {
+    "success": true,
+    "checks": [
+      {
+        "name": "All ten exact user target RGBs",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "PNG source unchanged: /Game/Environment/Stage3/FinalGuard/Textures/T_S3_brass_BaseColor.T_S3_brass_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Histogram mean agrees: /Game/Environment/Stage3/FinalGuard/Textures/T_S3_brass_BaseColor.T_S3_brass_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Source texture uses sRGB sampler: /Game/Environment/Stage3/FinalGuard/Textures/T_S3_brass_BaseColor.T_S3_brass_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "PNG source unchanged: /Game/Environment/Stage3/FinalGuard/Textures/T_S3_cloth_BaseColor.T_S3_cloth_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Histogram mean agrees: /Game/Environment/Stage3/FinalGuard/Textures/T_S3_cloth_BaseColor.T_S3_cloth_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Source texture uses sRGB sampler: /Game/Environment/Stage3/FinalGuard/Textures/T_S3_cloth_BaseColor.T_S3_cloth_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "PNG source unchanged: /Game/Environment/Stage3/FinalGuard/Textures/T_S3_dark_stone_BaseColor.T_S3_dark_stone_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Histogram mean agrees: /Game/Environment/Stage3/FinalGuard/Textures/T_S3_dark_stone_BaseColor.T_S3_dark_stone_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Source texture uses sRGB sampler: /Game/Environment/Stage3/FinalGuard/Textures/T_S3_dark_stone_BaseColor.T_S3_dark_stone_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "PNG source unchanged: /Game/Environment/Stage3/FinalGuard/Textures/T_S3_dressed_stone_BaseColor.T_S3_dressed_stone_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Histogram mean agrees: /Game/Environment/Stage3/FinalGuard/Textures/T_S3_dressed_stone_BaseColor.T_S3_dressed_stone_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Source texture uses sRGB sampler: /Game/Environment/Stage3/FinalGuard/Textures/T_S3_dressed_stone_BaseColor.T_S3_dressed_stone_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "PNG source unchanged: /Game/Environment/Stage3/FinalGuard/Textures/T_S3_flagstone_BaseColor.T_S3_flagstone_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Histogram mean agrees: /Game/Environment/Stage3/FinalGuard/Textures/T_S3_flagstone_BaseColor.T_S3_flagstone_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Source texture uses sRGB sampler: /Game/Environment/Stage3/FinalGuard/Textures/T_S3_flagstone_BaseColor.T_S3_flagstone_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "PNG source unchanged: /Game/Environment/Stage3/FinalGuard/Textures/T_S3_flame_BaseColor.T_S3_flame_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Histogram mean agrees: /Game/Environment/Stage3/FinalGuard/Textures/T_S3_flame_BaseColor.T_S3_flame_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Source texture uses sRGB sampler: /Game/Environment/Stage3/FinalGuard/Textures/T_S3_flame_BaseColor.T_S3_flame_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "PNG source unchanged: /Game/Environment/Stage3/FinalGuard/Textures/T_S3_iron_BaseColor.T_S3_iron_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Histogram mean agrees: /Game/Environment/Stage3/FinalGuard/Textures/T_S3_iron_BaseColor.T_S3_iron_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Source texture uses sRGB sampler: /Game/Environment/Stage3/FinalGuard/Textures/T_S3_iron_BaseColor.T_S3_iron_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "PNG source unchanged: /Game/Environment/Stage3/FinalGuard/Textures/T_S3_leather_BaseColor.T_S3_leather_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Histogram mean agrees: /Game/Environment/Stage3/FinalGuard/Textures/T_S3_leather_BaseColor.T_S3_leather_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Source texture uses sRGB sampler: /Game/Environment/Stage3/FinalGuard/Textures/T_S3_leather_BaseColor.T_S3_leather_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "PNG source unchanged: /Game/Environment/Stage3/FinalGuard/Textures/T_S3_limestone_BaseColor.T_S3_limestone_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Histogram mean agrees: /Game/Environment/Stage3/FinalGuard/Textures/T_S3_limestone_BaseColor.T_S3_limestone_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Source texture uses sRGB sampler: /Game/Environment/Stage3/FinalGuard/Textures/T_S3_limestone_BaseColor.T_S3_limestone_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "PNG source unchanged: /Game/Environment/Stage3/FinalGuard/Textures/T_S3_mid_stone_BaseColor.T_S3_mid_stone_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Histogram mean agrees: /Game/Environment/Stage3/FinalGuard/Textures/T_S3_mid_stone_BaseColor.T_S3_mid_stone_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Source texture uses sRGB sampler: /Game/Environment/Stage3/FinalGuard/Textures/T_S3_mid_stone_BaseColor.T_S3_mid_stone_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "PNG source unchanged: /Game/Environment/Stage3/FinalGuard/Textures/T_S3_mortar_BaseColor.T_S3_mortar_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Histogram mean agrees: /Game/Environment/Stage3/FinalGuard/Textures/T_S3_mortar_BaseColor.T_S3_mortar_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Source texture uses sRGB sampler: /Game/Environment/Stage3/FinalGuard/Textures/T_S3_mortar_BaseColor.T_S3_mortar_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "PNG source unchanged: /Game/Environment/Stage3/FinalGuard/Textures/T_S3_paper_BaseColor.T_S3_paper_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Histogram mean agrees: /Game/Environment/Stage3/FinalGuard/Textures/T_S3_paper_BaseColor.T_S3_paper_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Source texture uses sRGB sampler: /Game/Environment/Stage3/FinalGuard/Textures/T_S3_paper_BaseColor.T_S3_paper_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "PNG source unchanged: /Game/Environment/Stage3/FinalGuard/Textures/T_S3_steel_BaseColor.T_S3_steel_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Histogram mean agrees: /Game/Environment/Stage3/FinalGuard/Textures/T_S3_steel_BaseColor.T_S3_steel_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Source texture uses sRGB sampler: /Game/Environment/Stage3/FinalGuard/Textures/T_S3_steel_BaseColor.T_S3_steel_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "PNG source unchanged: /Game/Environment/Stage3/FinalGuard/Textures/T_S3_wax_BaseColor.T_S3_wax_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Histogram mean agrees: /Game/Environment/Stage3/FinalGuard/Textures/T_S3_wax_BaseColor.T_S3_wax_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Source texture uses sRGB sampler: /Game/Environment/Stage3/FinalGuard/Textures/T_S3_wax_BaseColor.T_S3_wax_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "PNG source unchanged: /Game/Environment/Stage3/FinalGuard/Textures/T_S3_wood_BaseColor.T_S3_wood_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Histogram mean agrees: /Game/Environment/Stage3/FinalGuard/Textures/T_S3_wood_BaseColor.T_S3_wood_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Source texture uses sRGB sampler: /Game/Environment/Stage3/FinalGuard/Textures/T_S3_wood_BaseColor.T_S3_wood_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "PNG source unchanged: /Game/Environment/Stage3/FinalGuard/Textures/T_S3_wood_end_BaseColor.T_S3_wood_end_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Histogram mean agrees: /Game/Environment/Stage3/FinalGuard/Textures/T_S3_wood_end_BaseColor.T_S3_wood_end_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Source texture uses sRGB sampler: /Game/Environment/Stage3/FinalGuard/Textures/T_S3_wood_end_BaseColor.T_S3_wood_end_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "PNG source unchanged: /Game/Environment/Stage3/FinalGuard/Textures/T_S3_Guardian_FineLimestone_BaseColor.T_S3_Guardian_FineLimestone_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Histogram mean agrees: /Game/Environment/Stage3/FinalGuard/Textures/T_S3_Guardian_FineLimestone_BaseColor.T_S3_Guardian_FineLimestone_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Source texture uses sRGB sampler: /Game/Environment/Stage3/FinalGuard/Textures/T_S3_Guardian_FineLimestone_BaseColor.T_S3_Guardian_FineLimestone_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "PNG source unchanged: /Game/Environment/Stage3/FinalGuard/Textures/T_S3_watch_plan_BaseColor.T_S3_watch_plan_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Histogram mean agrees: /Game/Environment/Stage3/FinalGuard/Textures/T_S3_watch_plan_BaseColor.T_S3_watch_plan_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Source texture uses sRGB sampler: /Game/Environment/Stage3/FinalGuard/Textures/T_S3_watch_plan_BaseColor.T_S3_watch_plan_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "PNG source unchanged: /Game/Environment/Stage3/FinalGuard/Textures/T_S3_guard_pennon_BaseColor.T_S3_guard_pennon_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Histogram mean agrees: /Game/Environment/Stage3/FinalGuard/Textures/T_S3_guard_pennon_BaseColor.T_S3_guard_pennon_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Source texture uses sRGB sampler: /Game/Environment/Stage3/FinalGuard/Textures/T_S3_guard_pennon_BaseColor.T_S3_guard_pennon_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "PNG source unchanged: /Game/Environment/Stage3/FinalGuard/Textures/T_S3_grand_pennon_BaseColor.T_S3_grand_pennon_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Histogram mean agrees: /Game/Environment/Stage3/FinalGuard/Textures/T_S3_grand_pennon_BaseColor.T_S3_grand_pennon_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Source texture uses sRGB sampler: /Game/Environment/Stage3/FinalGuard/Textures/T_S3_grand_pennon_BaseColor.T_S3_grand_pennon_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "PNG source unchanged: /Game/Environment/Stage3/FinalGuard/Textures/T_S3_GrandGateRunner_Center_BaseColor.T_S3_GrandGateRunner_Center_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Histogram mean agrees: /Game/Environment/Stage3/FinalGuard/Textures/T_S3_GrandGateRunner_Center_BaseColor.T_S3_GrandGateRunner_Center_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Source texture uses sRGB sampler: /Game/Environment/Stage3/FinalGuard/Textures/T_S3_GrandGateRunner_Center_BaseColor.T_S3_GrandGateRunner_Center_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "PNG source unchanged: /Game/Environment/Stage3/FinalGuard/Textures/T_S3_woven_runner_BaseColor.T_S3_woven_runner_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Histogram mean agrees: /Game/Environment/Stage3/FinalGuard/Textures/T_S3_woven_runner_BaseColor.T_S3_woven_runner_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Source texture uses sRGB sampler: /Game/Environment/Stage3/FinalGuard/Textures/T_S3_woven_runner_BaseColor.T_S3_woven_runner_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "PNG source unchanged: /Game/Environment/Stage3/FinalGuard/Textures/T_S3_GrandGateRunner_End_BaseColor.T_S3_GrandGateRunner_End_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Histogram mean agrees: /Game/Environment/Stage3/FinalGuard/Textures/T_S3_GrandGateRunner_End_BaseColor.T_S3_GrandGateRunner_End_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Source texture uses sRGB sampler: /Game/Environment/Stage3/FinalGuard/Textures/T_S3_GrandGateRunner_End_BaseColor.T_S3_GrandGateRunner_End_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "PNG source unchanged: /Game/Characters/Stage2/A/LivingArmor/Textures/T_ArmorStage2_Steel_BaseColor.T_ArmorStage2_Steel_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Histogram mean agrees: /Game/Characters/Stage2/A/LivingArmor/Textures/T_ArmorStage2_Steel_BaseColor.T_ArmorStage2_Steel_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Source texture uses sRGB sampler: /Game/Characters/Stage2/A/LivingArmor/Textures/T_ArmorStage2_Steel_BaseColor.T_ArmorStage2_Steel_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "PNG source unchanged: /Game/Characters/Stage2/A/LivingArmor/Textures/T_ArmorStage2_Joint_BaseColor.T_ArmorStage2_Joint_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Histogram mean agrees: /Game/Characters/Stage2/A/LivingArmor/Textures/T_ArmorStage2_Joint_BaseColor.T_ArmorStage2_Joint_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Source texture uses sRGB sampler: /Game/Characters/Stage2/A/LivingArmor/Textures/T_ArmorStage2_Joint_BaseColor.T_ArmorStage2_Joint_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "PNG source unchanged: /Game/Characters/Stage2/A/LivingArmor/Textures/T_ArmorStage2_Brass_BaseColor.T_ArmorStage2_Brass_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Histogram mean agrees: /Game/Characters/Stage2/A/LivingArmor/Textures/T_ArmorStage2_Brass_BaseColor.T_ArmorStage2_Brass_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Source texture uses sRGB sampler: /Game/Characters/Stage2/A/LivingArmor/Textures/T_ArmorStage2_Brass_BaseColor.T_ArmorStage2_Brass_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "PNG source unchanged: /Game/Environment/Stage3/FinalGuard/Textures/T_ArmorStage3_Charcoal_BaseColor.T_ArmorStage3_Charcoal_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Histogram mean agrees: /Game/Environment/Stage3/FinalGuard/Textures/T_ArmorStage3_Charcoal_BaseColor.T_ArmorStage3_Charcoal_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Source texture uses sRGB sampler: /Game/Environment/Stage3/FinalGuard/Textures/T_ArmorStage3_Charcoal_BaseColor.T_ArmorStage3_Charcoal_BaseColor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Final representative RGB: M_S3_flagstone__Floor",
+        "passed": true,
+        "detail": {
+          "measured": [
+            150.00000000007515,
+            146.00000000105135,
+            139.00000000087627
+          ],
+          "target": [
+            150,
+            146,
+            139
+          ]
+        }
+      },
+      {
+        "name": "ColorTint stores decoded final target: M_S3_flagstone__Floor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Texture detail survives: M_S3_flagstone__Floor",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "No independently measured albedo clipping: M_S3_flagstone__Floor",
+        "passed": true,
+        "detail": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "name": "Final representative RGB: M_S3_dark_stone__FloorDiamond",
+        "passed": true,
+        "detail": {
+          "measured": [
+            111.99999999972252,
+            108.00000000021411,
+            101.99999999974457
+          ],
+          "target": [
+            112,
+            108,
+            102
+          ]
+        }
+      },
+      {
+        "name": "ColorTint stores decoded final target: M_S3_dark_stone__FloorDiamond",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Texture detail survives: M_S3_dark_stone__FloorDiamond",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "No independently measured albedo clipping: M_S3_dark_stone__FloorDiamond",
+        "passed": true,
+        "detail": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "name": "Final representative RGB: M_S3_mid_stone__FloorDiamond",
+        "passed": true,
+        "detail": {
+          "measured": [
+            112.00000000015793,
+            107.99999999995634,
+            101.99999999992978
+          ],
+          "target": [
+            112,
+            108,
+            102
+          ]
+        }
+      },
+      {
+        "name": "ColorTint stores decoded final target: M_S3_mid_stone__FloorDiamond",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Texture detail survives: M_S3_mid_stone__FloorDiamond",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "No independently measured albedo clipping: M_S3_mid_stone__FloorDiamond",
+        "passed": true,
+        "detail": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "name": "Final representative RGB: M_S3_limestone_Occlusion__Wall",
+        "passed": true,
+        "detail": {
+          "measured": [
+            100.99999999923268,
+            96.99999999931238,
+            94.99999999971375
+          ],
+          "target": [
+            101,
+            97,
+            95
+          ]
+        }
+      },
+      {
+        "name": "ColorTint stores decoded final target: M_S3_limestone_Occlusion__Wall",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Texture detail survives: M_S3_limestone_Occlusion__Wall",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "No independently measured albedo clipping: M_S3_limestone_Occlusion__Wall",
+        "passed": true,
+        "detail": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "name": "Final representative RGB: M_S3_dressed_stone_Occlusion__Wall",
+        "passed": true,
+        "detail": {
+          "measured": [
+            101.00000000083134,
+            97.00000000084796,
+            95.00000000031723
+          ],
+          "target": [
+            101,
+            97,
+            95
+          ]
+        }
+      },
+      {
+        "name": "ColorTint stores decoded final target: M_S3_dressed_stone_Occlusion__Wall",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Texture detail survives: M_S3_dressed_stone_Occlusion__Wall",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "No independently measured albedo clipping: M_S3_dressed_stone_Occlusion__Wall",
+        "passed": true,
+        "detail": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "name": "Final representative RGB: M_S3_dressed_stone__Wall",
+        "passed": true,
+        "detail": {
+          "measured": [
+            101.00000000083134,
+            97.00000000084796,
+            95.00000000031723
+          ],
+          "target": [
+            101,
+            97,
+            95
+          ]
+        }
+      },
+      {
+        "name": "ColorTint stores decoded final target: M_S3_dressed_stone__Wall",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Texture detail survives: M_S3_dressed_stone__Wall",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "No independently measured albedo clipping: M_S3_dressed_stone__Wall",
+        "passed": true,
+        "detail": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "name": "Final representative RGB: M_S3_iron_Occlusion__BlackIron",
+        "passed": true,
+        "detail": {
+          "measured": [
+            51.9999999992365,
+            50.00000000045833,
+            54.00000000021467
+          ],
+          "target": [
+            52,
+            50,
+            54
+          ]
+        }
+      },
+      {
+        "name": "ColorTint stores decoded final target: M_S3_iron_Occlusion__BlackIron",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Texture detail survives: M_S3_iron_Occlusion__BlackIron",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "No independently measured albedo clipping: M_S3_iron_Occlusion__BlackIron",
+        "passed": true,
+        "detail": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "name": "Final representative RGB: M_S3_iron__BlackIron",
+        "passed": true,
+        "detail": {
+          "measured": [
+            51.9999999992365,
+            50.00000000045833,
+            54.00000000021467
+          ],
+          "target": [
+            52,
+            50,
+            54
+          ]
+        }
+      },
+      {
+        "name": "ColorTint stores decoded final target: M_S3_iron__BlackIron",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Texture detail survives: M_S3_iron__BlackIron",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "No independently measured albedo clipping: M_S3_iron__BlackIron",
+        "passed": true,
+        "detail": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "name": "Final representative RGB: M_S3_brass__Brass",
+        "passed": true,
+        "detail": {
+          "measured": [
+            149.9999999982844,
+            134.00000000071415,
+            106.9999999989235
+          ],
+          "target": [
+            150,
+            134,
+            107
+          ]
+        }
+      },
+      {
+        "name": "ColorTint stores decoded final target: M_S3_brass__Brass",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Texture detail survives: M_S3_brass__Brass",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "No independently measured albedo clipping: M_S3_brass__Brass",
+        "passed": true,
+        "detail": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "name": "Final representative RGB: M_S3_brass_Occlusion__Brass",
+        "passed": true,
+        "detail": {
+          "measured": [
+            149.9999999982844,
+            134.00000000071415,
+            106.9999999989235
+          ],
+          "target": [
+            150,
+            134,
+            107
+          ]
+        }
+      },
+      {
+        "name": "ColorTint stores decoded final target: M_S3_brass_Occlusion__Brass",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Texture detail survives: M_S3_brass_Occlusion__Brass",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "No independently measured albedo clipping: M_S3_brass_Occlusion__Brass",
+        "passed": true,
+        "detail": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "name": "Final representative RGB: M_S3_wood_Occlusion__Wood",
+        "passed": true,
+        "detail": {
+          "measured": [
+            88.99999999988538,
+            72.00000000019583,
+            61.000000000308866
+          ],
+          "target": [
+            89,
+            72,
+            61
+          ]
+        }
+      },
+      {
+        "name": "ColorTint stores decoded final target: M_S3_wood_Occlusion__Wood",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Texture detail survives: M_S3_wood_Occlusion__Wood",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "No independently measured albedo clipping: M_S3_wood_Occlusion__Wood",
+        "passed": true,
+        "detail": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "name": "Final representative RGB: M_S3_iron_DeviceReadability__BlackIron",
+        "passed": true,
+        "detail": {
+          "measured": [
+            51.9999999992365,
+            50.00000000045833,
+            54.00000000021467
+          ],
+          "target": [
+            52,
+            50,
+            54
+          ]
+        }
+      },
+      {
+        "name": "ColorTint stores decoded final target: M_S3_iron_DeviceReadability__BlackIron",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Texture detail survives: M_S3_iron_DeviceReadability__BlackIron",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "No independently measured albedo clipping: M_S3_iron_DeviceReadability__BlackIron",
+        "passed": true,
+        "detail": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "name": "Final representative RGB: M_S3_dressed_stone_Occlusion__Pillar",
+        "passed": true,
+        "detail": {
+          "measured": [
+            119.00000000096145,
+            115.00000000098544,
+            109.00000000035796
+          ],
+          "target": [
+            119,
+            115,
+            109
+          ]
+        }
+      },
+      {
+        "name": "ColorTint stores decoded final target: M_S3_dressed_stone_Occlusion__Pillar",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Texture detail survives: M_S3_dressed_stone_Occlusion__Pillar",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "No independently measured albedo clipping: M_S3_dressed_stone_Occlusion__Pillar",
+        "passed": true,
+        "detail": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "name": "Final representative RGB: M_S3_limestone_Occlusion__Pillar",
+        "passed": true,
+        "detail": {
+          "measured": [
+            118.99999999911265,
+            114.99999999920091,
+            108.99999999967699
+          ],
+          "target": [
+            119,
+            115,
+            109
+          ]
+        }
+      },
+      {
+        "name": "ColorTint stores decoded final target: M_S3_limestone_Occlusion__Pillar",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Texture detail survives: M_S3_limestone_Occlusion__Pillar",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "No independently measured albedo clipping: M_S3_limestone_Occlusion__Pillar",
+        "passed": true,
+        "detail": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "name": "Final representative RGB: M_S3_limestone_Occlusion__GateDecorStone",
+        "passed": true,
+        "detail": {
+          "measured": [
+            80.9999999993661,
+            76.99999999943626,
+            74.99999999976626
+          ],
+          "target": [
+            81,
+            77,
+            75
+          ]
+        }
+      },
+      {
+        "name": "ColorTint stores decoded final target: M_S3_limestone_Occlusion__GateDecorStone",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Texture detail survives: M_S3_limestone_Occlusion__GateDecorStone",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "No independently measured albedo clipping: M_S3_limestone_Occlusion__GateDecorStone",
+        "passed": true,
+        "detail": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "name": "Final representative RGB: M_S3_dressed_stone_Occlusion__GateDecorStone",
+        "passed": true,
+        "detail": {
+          "measured": [
+            81.00000000068677,
+            77.00000000069522,
+            75.00000000025904
+          ],
+          "target": [
+            81,
+            77,
+            75
+          ]
+        }
+      },
+      {
+        "name": "ColorTint stores decoded final target: M_S3_dressed_stone_Occlusion__GateDecorStone",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Texture detail survives: M_S3_dressed_stone_Occlusion__GateDecorStone",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "No independently measured albedo clipping: M_S3_dressed_stone_Occlusion__GateDecorStone",
+        "passed": true,
+        "detail": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "name": "Final representative RGB: M_S3_GrandGateRunner_End__Carpet",
+        "passed": true,
+        "detail": {
+          "measured": [
+            72.99999999974094,
+            67.00000000017846,
+            73.99999999943383
+          ],
+          "target": [
+            73,
+            67,
+            74
+          ]
+        }
+      },
+      {
+        "name": "ColorTint stores decoded final target: M_S3_GrandGateRunner_End__Carpet",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Texture detail survives: M_S3_GrandGateRunner_End__Carpet",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "No independently measured albedo clipping: M_S3_GrandGateRunner_End__Carpet",
+        "passed": true,
+        "detail": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "name": "Final representative RGB: M_S3_GrandGateRunner_Center__Carpet",
+        "passed": true,
+        "detail": {
+          "measured": [
+            72.99999999962519,
+            67.00000000017681,
+            73.99999999933257
+          ],
+          "target": [
+            73,
+            67,
+            74
+          ]
+        }
+      },
+      {
+        "name": "ColorTint stores decoded final target: M_S3_GrandGateRunner_Center__Carpet",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Texture detail survives: M_S3_GrandGateRunner_Center__Carpet",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "No independently measured albedo clipping: M_S3_GrandGateRunner_Center__Carpet",
+        "passed": true,
+        "detail": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "name": "Final representative RGB: M_S3_grand_pennon_Occlusion__Banner",
+        "passed": true,
+        "detail": {
+          "measured": [
+            100.99999999993,
+            49.00000000085343,
+            62.000000000529035
+          ],
+          "target": [
+            101,
+            49,
+            62
+          ]
+        }
+      },
+      {
+        "name": "ColorTint stores decoded final target: M_S3_grand_pennon_Occlusion__Banner",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Texture detail survives: M_S3_grand_pennon_Occlusion__Banner",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "No independently measured albedo clipping: M_S3_grand_pennon_Occlusion__Banner",
+        "passed": true,
+        "detail": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "name": "Final representative RGB: M_S3_cloth_Occlusion__Banner",
+        "passed": true,
+        "detail": {
+          "measured": [
+            100.99999999990824,
+            49.00000000038365,
+            62.00000000047608
+          ],
+          "target": [
+            101,
+            49,
+            62
+          ]
+        }
+      },
+      {
+        "name": "ColorTint stores decoded final target: M_S3_cloth_Occlusion__Banner",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Texture detail survives: M_S3_cloth_Occlusion__Banner",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "No independently measured albedo clipping: M_S3_cloth_Occlusion__Banner",
+        "passed": true,
+        "detail": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "name": "Final representative RGB: M_S3_guard_pennon_Occlusion__Banner",
+        "passed": true,
+        "detail": {
+          "measured": [
+            100.99999999992949,
+            49.00000000085115,
+            62.000000000526484
+          ],
+          "target": [
+            101,
+            49,
+            62
+          ]
+        }
+      },
+      {
+        "name": "ColorTint stores decoded final target: M_S3_guard_pennon_Occlusion__Banner",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Texture detail survives: M_S3_guard_pennon_Occlusion__Banner",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "No independently measured albedo clipping: M_S3_guard_pennon_Occlusion__Banner",
+        "passed": true,
+        "detail": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "name": "Final representative RGB: M_ArmorStage2_Brass__Brass",
+        "passed": true,
+        "detail": {
+          "measured": [
+            150.00000000140923,
+            133.99999999804427,
+            106.99999999840429
+          ],
+          "target": [
+            150,
+            134,
+            107
+          ]
+        }
+      },
+      {
+        "name": "ColorTint stores decoded final target: M_ArmorStage2_Brass__Brass",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Texture detail survives: M_ArmorStage2_Brass__Brass",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "No independently measured albedo clipping: M_ArmorStage2_Brass__Brass",
+        "passed": true,
+        "detail": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      },
+      {
+        "name": "Every probed component slot accounted exactly once",
+        "passed": true,
+        "detail": {
+          "expected": 1095,
+          "assigned": 716,
+          "preserved": 379,
+          "missing": [],
+          "unexpected": []
+        }
+      },
+      {
+        "name": "All target roles occur in assignments",
+        "passed": true,
+        "detail": null
+      }
+    ],
+    "results": {
+      "M_S3_flagstone__Floor": {
+        "role": "Floor",
+        "target_srgb": [
+          150,
+          146,
+          139
+        ],
+        "independent_result_srgb": [
+          150.00000000007515,
+          146.00000000105135,
+          139.00000000087627
+        ],
+        "independent_source_mean_linear": [
+          0.3854099721893769,
+          0.3594558345118514,
+          0.3111867289200835
+        ],
+        "independent_source_std_linear": [
+          0.05663553255187539,
+          0.052835229329648965,
+          0.0456876368489734
+        ]
+      },
+      "M_S3_dark_stone__FloorDiamond": {
+        "role": "FloorDiamond",
+        "target_srgb": [
+          112,
+          108,
+          102
+        ],
+        "independent_result_srgb": [
+          111.99999999972252,
+          108.00000000021411,
+          101.99999999974457
+        ],
+        "independent_source_mean_linear": [
+          0.06024531840064007,
+          0.058009689081626584,
+          0.06024531840064007
+        ],
+        "independent_source_std_linear": [
+          0.009851213296270112,
+          0.00965327110097927,
+          0.009851213296270112
+        ]
+      },
+      "M_S3_mid_stone__FloorDiamond": {
+        "role": "FloorDiamond",
+        "target_srgb": [
+          112,
+          108,
+          102
+        ],
+        "independent_result_srgb": [
+          112.00000000015793,
+          107.99999999995634,
+          101.99999999992978
+        ],
+        "independent_source_mean_linear": [
+          0.17515265544183456,
+          0.15903064694615288,
+          0.14378960403898683
+        ],
+        "independent_source_std_linear": [
+          0.03997377418659218,
+          0.036131739705232965,
+          0.03243017910024476
+        ]
+      },
+      "M_S3_limestone_Occlusion__Wall": {
+        "role": "Wall",
+        "target_srgb": [
+          101,
+          97,
+          95
+        ],
+        "independent_result_srgb": [
+          100.99999999923268,
+          96.99999999931238,
+          94.99999999971375
+        ],
+        "independent_source_mean_linear": [
+          0.237295708856126,
+          0.21801270943142093,
+          0.19078917382908916
+        ],
+        "independent_source_std_linear": [
+          0.04223842464063795,
+          0.03914008941716789,
+          0.03387642581941786
+        ]
+      },
+      "M_S3_dressed_stone_Occlusion__Wall": {
+        "role": "Wall",
+        "target_srgb": [
+          101,
+          97,
+          95
+        ],
+        "independent_result_srgb": [
+          101.00000000083134,
+          97.00000000084796,
+          95.00000000031723
+        ],
+        "independent_source_mean_linear": [
+          0.3461967906195985,
+          0.3104396179606784,
+          0.2662987373709381
+        ],
+        "independent_source_std_linear": [
+          0.04470604906903002,
+          0.03937073594600647,
+          0.033610935656347214
+        ]
+      },
+      "M_S3_dressed_stone__Wall": {
+        "role": "Wall",
+        "target_srgb": [
+          101,
+          97,
+          95
+        ],
+        "independent_result_srgb": [
+          101.00000000083134,
+          97.00000000084796,
+          95.00000000031723
+        ],
+        "independent_source_mean_linear": [
+          0.3461967906195985,
+          0.3104396179606784,
+          0.2662987373709381
+        ],
+        "independent_source_std_linear": [
+          0.04470604906903002,
+          0.03937073594600647,
+          0.033610935656347214
+        ]
+      },
+      "M_S3_iron_Occlusion__BlackIron": {
+        "role": "BlackIron",
+        "target_srgb": [
+          52,
+          50,
+          54
+        ],
+        "independent_result_srgb": [
+          51.9999999992365,
+          50.00000000045833,
+          54.00000000021467
+        ],
+        "independent_source_mean_linear": [
+          0.045109339782172256,
+          0.04705580115236101,
+          0.0508951612078018
+        ],
+        "independent_source_std_linear": [
+          0.0017752784291049989,
+          0.0019250923003896866,
+          0.002071095442205148
+        ]
+      },
+      "M_S3_iron__BlackIron": {
+        "role": "BlackIron",
+        "target_srgb": [
+          52,
+          50,
+          54
+        ],
+        "independent_result_srgb": [
+          51.9999999992365,
+          50.00000000045833,
+          54.00000000021467
+        ],
+        "independent_source_mean_linear": [
+          0.045109339782172256,
+          0.04705580115236101,
+          0.0508951612078018
+        ],
+        "independent_source_std_linear": [
+          0.0017752784291049989,
+          0.0019250923003896866,
+          0.002071095442205148
+        ]
+      },
+      "M_S3_brass__Brass": {
+        "role": "Brass",
+        "target_srgb": [
+          150,
+          134,
+          107
+        ],
+        "independent_result_srgb": [
+          149.9999999982844,
+          134.00000000071415,
+          106.9999999989235
+        ],
+        "independent_source_mean_linear": [
+          0.4773691070666769,
+          0.3187455670468745,
+          0.10652283927775588
+        ],
+        "independent_source_std_linear": [
+          0.021793726093024,
+          0.014151144422642736,
+          0.004504151993140839
+        ]
+      },
+      "M_S3_brass_Occlusion__Brass": {
+        "role": "Brass",
+        "target_srgb": [
+          150,
+          134,
+          107
+        ],
+        "independent_result_srgb": [
+          149.9999999982844,
+          134.00000000071415,
+          106.9999999989235
+        ],
+        "independent_source_mean_linear": [
+          0.4773691070666769,
+          0.3187455670468745,
+          0.10652283927775588
+        ],
+        "independent_source_std_linear": [
+          0.021793726093024,
+          0.014151144422642736,
+          0.004504151993140839
+        ]
+      },
+      "M_S3_wood_Occlusion__Wood": {
+        "role": "Wood",
+        "target_srgb": [
+          89,
+          72,
+          61
+        ],
+        "independent_result_srgb": [
+          88.99999999988538,
+          72.00000000019583,
+          61.000000000308866
+        ],
+        "independent_source_mean_linear": [
+          0.06151837121640039,
+          0.03104847047225259,
+          0.016733084125848827
+        ],
+        "independent_source_std_linear": [
+          0.021293417858514154,
+          0.010078026891331845,
+          0.00499489945254155
+        ]
+      },
+      "M_S3_iron_DeviceReadability__BlackIron": {
+        "role": "BlackIron",
+        "target_srgb": [
+          52,
+          50,
+          54
+        ],
+        "independent_result_srgb": [
+          51.9999999992365,
+          50.00000000045833,
+          54.00000000021467
+        ],
+        "independent_source_mean_linear": [
+          0.045109339782172256,
+          0.04705580115236101,
+          0.0508951612078018
+        ],
+        "independent_source_std_linear": [
+          0.0017752784291049989,
+          0.0019250923003896866,
+          0.002071095442205148
+        ]
+      },
+      "M_S3_dressed_stone_Occlusion__Pillar": {
+        "role": "Pillar",
+        "target_srgb": [
+          119,
+          115,
+          109
+        ],
+        "independent_result_srgb": [
+          119.00000000096145,
+          115.00000000098544,
+          109.00000000035796
+        ],
+        "independent_source_mean_linear": [
+          0.3461967906195985,
+          0.3104396179606784,
+          0.2662987373709381
+        ],
+        "independent_source_std_linear": [
+          0.04470604906903002,
+          0.03937073594600647,
+          0.033610935656347214
+        ]
+      },
+      "M_S3_limestone_Occlusion__Pillar": {
+        "role": "Pillar",
+        "target_srgb": [
+          119,
+          115,
+          109
+        ],
+        "independent_result_srgb": [
+          118.99999999911265,
+          114.99999999920091,
+          108.99999999967699
+        ],
+        "independent_source_mean_linear": [
+          0.237295708856126,
+          0.21801270943142093,
+          0.19078917382908916
+        ],
+        "independent_source_std_linear": [
+          0.04223842464063795,
+          0.03914008941716789,
+          0.03387642581941786
+        ]
+      },
+      "M_S3_limestone_Occlusion__GateDecorStone": {
+        "role": "GateDecorStone",
+        "target_srgb": [
+          81,
+          77,
+          75
+        ],
+        "independent_result_srgb": [
+          80.9999999993661,
+          76.99999999943626,
+          74.99999999976626
+        ],
+        "independent_source_mean_linear": [
+          0.237295708856126,
+          0.21801270943142093,
+          0.19078917382908916
+        ],
+        "independent_source_std_linear": [
+          0.04223842464063795,
+          0.03914008941716789,
+          0.03387642581941786
+        ]
+      },
+      "M_S3_dressed_stone_Occlusion__GateDecorStone": {
+        "role": "GateDecorStone",
+        "target_srgb": [
+          81,
+          77,
+          75
+        ],
+        "independent_result_srgb": [
+          81.00000000068677,
+          77.00000000069522,
+          75.00000000025904
+        ],
+        "independent_source_mean_linear": [
+          0.3461967906195985,
+          0.3104396179606784,
+          0.2662987373709381
+        ],
+        "independent_source_std_linear": [
+          0.04470604906903002,
+          0.03937073594600647,
+          0.033610935656347214
+        ]
+      },
+      "M_S3_GrandGateRunner_End__Carpet": {
+        "role": "Carpet",
+        "target_srgb": [
+          73,
+          67,
+          74
+        ],
+        "independent_result_srgb": [
+          72.99999999974094,
+          67.00000000017846,
+          73.99999999943383
+        ],
+        "independent_source_mean_linear": [
+          0.07252526107231705,
+          0.05901283365011656,
+          0.04704555376540365
+        ],
+        "independent_source_std_linear": [
+          0.013752754628086356,
+          0.011086181057381054,
+          0.008530488222855553
+        ]
+      },
+      "M_S3_GrandGateRunner_Center__Carpet": {
+        "role": "Carpet",
+        "target_srgb": [
+          73,
+          67,
+          74
+        ],
+        "independent_result_srgb": [
+          72.99999999962519,
+          67.00000000017681,
+          73.99999999933257
+        ],
+        "independent_source_mean_linear": [
+          0.06932010452012496,
+          0.05660739222458748,
+          0.04533024864657039
+        ],
+        "independent_source_std_linear": [
+          0.011820372345969863,
+          0.009621763992942154,
+          0.00747539164790145
+        ]
+      },
+      "M_S3_grand_pennon_Occlusion__Banner": {
+        "role": "Banner",
+        "target_srgb": [
+          101,
+          49,
+          62
+        ],
+        "independent_result_srgb": [
+          100.99999999993,
+          49.00000000085343,
+          62.000000000529035
+        ],
+        "independent_source_mean_linear": [
+          0.1123741026716048,
+          0.022272884388073393,
+          0.024628891187974226
+        ],
+        "independent_source_std_linear": [
+          0.060983351831170624,
+          0.040885305261226426,
+          0.017229471150493482
+        ]
+      },
+      "M_S3_cloth_Occlusion__Banner": {
+        "role": "Banner",
+        "target_srgb": [
+          101,
+          49,
+          62
+        ],
+        "independent_result_srgb": [
+          100.99999999990824,
+          49.00000000038365,
+          62.00000000047608
+        ],
+        "independent_source_mean_linear": [
+          0.09864981709959991,
+          0.011096547991238066,
+          0.020218649427901598
+        ],
+        "independent_source_std_linear": [
+          0.0328703541244064,
+          0.0028890796817042396,
+          0.005826827680193902
+        ]
+      },
+      "M_S3_guard_pennon_Occlusion__Banner": {
+        "role": "Banner",
+        "target_srgb": [
+          101,
+          49,
+          62
+        ],
+        "independent_result_srgb": [
+          100.99999999992949,
+          49.00000000085115,
+          62.000000000526484
+        ],
+        "independent_source_mean_linear": [
+          0.11220807502614019,
+          0.022222878191059916,
+          0.02459671336011189
+        ],
+        "independent_source_std_linear": [
+          0.060807395449123114,
+          0.040766627538825644,
+          0.01719135198701777
+        ]
+      },
+      "M_ArmorStage2_Brass__Brass": {
+        "role": "Brass",
+        "target_srgb": [
+          150,
+          134,
+          107
+        ],
+        "independent_result_srgb": [
+          150.00000000140923,
+          133.99999999804427,
+          106.99999999840429
+        ],
+        "independent_source_mean_linear": [
+          0.518406769731544,
+          0.3076472053640175,
+          0.09667368683610741
+        ],
+        "independent_source_std_linear": [
+          0.00329993701458408,
+          0.002252796419729403,
+          0.0011172560898734946
+        ]
+      }
+    },
+    "metric": "Independent full mip0 source PNG per-channel 256-bin histogram, IEC sRGB decode then equal-texel linear mean",
+    "limitations": "Source-pixel proof only. GPU BC compression, imported texture size, mip sampling and compiled graph require readback."
+  },
+  "world_checks": [
+    {
+      "name": "Actor identities unchanged",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Actor transforms, meshes, component layout and collision unchanged",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "Protected Stage1 Stage2 shared originals, config and FinalGuard files unchanged",
+      "passed": false,
+      "detail": [
+        "Content/Environment/Shared/Castle/Props/Hiding/BasketVariants20261125/Shared/Materials/M_Cloth_Stage1.uasset",
+        "Content/Environment/Shared/Castle/Props/Hiding/BasketVariants20261125/Stage1/Meshes/SK_HideBasket_Stage1_Cloth.uasset",
+        "Content/Environment/Shared/Castle/Props/Hiding/BasketVariants20261125/Stage2/Meshes/SK_HideBasket_Stage2_Cloth.uasset",
+        "Content/Environment/Shared/Castle/Props/Hiding/BasketVariants20261125/Stage3/Meshes/SK_HideBasket_Stage3_Cloth.uasset"
+      ]
+    },
+    {
+      "name": "Source tree unchanged since snapshot (concurrent chat changes reported separately)",
+      "passed": false,
+      "detail": [
+        "Source/Catrun/Interaction/BasketExitMath.h",
+        "Source/Catrun/Interaction/CatrunBasketInteractionComponent.cpp",
+        "Source/Catrun/Interaction/Tests/BasketExitTests.cpp"
+      ]
+    },
+    {
+      "name": "All changed material slots use isolated correction assets",
+      "passed": true,
+      "detail": []
+    },
+    {
+      "name": "Full exported world identical except material overrides and explicit lighting exposure fields",
+      "passed": true,
+      "detail": null
+    }
+  ],
+  "lighting": {
+    "map": "/Game/Maps/Stage3",
+    "snapshot": "C:\\Users\\whghk\\Catrun\\Saved\\Stage3MaterialCorrection20261125\\Lighting\\20261125T100421_676999\\before.json",
+    "before": {
+      "S3_KeyLight": {
+        "intensity": 1.399999976158142
+      },
+      "S3_FillLight": {
+        "intensity": 1.7000000476837158
+      },
+      "S3_AmbientSkyLight": {
+        "intensity": 2.0,
+        "cubemap": {
+          "object": "/Engine/MapTemplates/Sky/DaylightAmbientCubemap.DaylightAmbientCubemap"
+        }
+      },
+      "S3_LocalLight0": {
+        "intensity": 220.0
+      },
+      "S3_LocalLight1": {
+        "intensity": 220.0
+      },
+      "S3_LocalLight2": {
+        "intensity": 220.0
+      },
+      "S3_LocalLight3": {
+        "intensity": 220.0
+      },
+      "S3_LocalLight4": {
+        "intensity": 220.0
+      },
+      "S3_LocalLight5": {
+        "intensity": 500.0
+      },
+      "S3_LocalLight6": {
+        "intensity": 500.0
+      },
+      "S3_LocalLight7": {
+        "intensity": 500.0
+      },
+      "S3_LocalLight8": {
+        "intensity": 500.0
+      },
+      "S3_Exposure": {
+        "override_auto_exposure_method": false,
+        "auto_exposure_method": {
+          "exposure_enum": 0
+        },
+        "override_auto_exposure_apply_physical_camera_exposure": false,
+        "auto_exposure_apply_physical_camera_exposure": true,
+        "override_auto_exposure_bias": false,
+        "auto_exposure_bias": 1.0,
+        "override_auto_exposure_min_brightness": true,
+        "auto_exposure_min_brightness": 1.0,
+        "override_auto_exposure_max_brightness": true,
+        "auto_exposure_max_brightness": 1.0
+      }
+    },
+    "after": {
+      "S3_KeyLight": {
+        "intensity": 0.44999998807907104
+      },
+      "S3_FillLight": {
+        "intensity": 0.14000000059604645
+      },
+      "S3_AmbientSkyLight": {
+        "intensity": 0.3499999940395355,
+        "cubemap": {
+          "object": "/Engine/EditorMaterials/AssetViewer/T_GreyAmbient.T_GreyAmbient"
+        }
+      },
+      "S3_LocalLight0": {
+        "intensity": 18.0
+      },
+      "S3_LocalLight1": {
+        "intensity": 18.0
+      },
+      "S3_LocalLight2": {
+        "intensity": 18.0
+      },
+      "S3_LocalLight3": {
+        "intensity": 18.0
+      },
+      "S3_LocalLight4": {
+        "intensity": 18.0
+      },
+      "S3_LocalLight5": {
+        "intensity": 40.0
+      },
+      "S3_LocalLight6": {
+        "intensity": 40.0
+      },
+      "S3_LocalLight7": {
+        "intensity": 40.0
+      },
+      "S3_LocalLight8": {
+        "intensity": 40.0
+      },
+      "S3_Exposure": {
+        "override_auto_exposure_method": true,
+        "auto_exposure_method": {
+          "exposure_enum": 2
+        },
+        "override_auto_exposure_apply_physical_camera_exposure": true,
+        "auto_exposure_apply_physical_camera_exposure": false,
+        "override_auto_exposure_bias": true,
+        "auto_exposure_bias": 0.0,
+        "override_auto_exposure_min_brightness": true,
+        "auto_exposure_min_brightness": 1.0,
+        "override_auto_exposure_max_brightness": true,
+        "auto_exposure_max_brightness": 1.0
+      }
+    },
+    "invariants_equal": true,
+    "packages_saved": false,
+    "local_lights_normalized": true,
+    "visual_approval": "pending actual player-camera comparison"
+  },
+  "counts": {
+    "parents": 18,
+    "instances": 24,
+    "assignments": 716,
+    "preserved_slots": 379
+  },
+  "stage3_dx12_regression": {
+    "success": true,
+    "checks": [
+      {
+        "name": "Stage3 live timer",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Timer advances in real game time",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Patrols move",
+        "passed": true,
+        "detail": {
+          "S3_Armor_LobbyPost": 0.0,
+          "S3_Armor_LobbyPatrol": 100.5876332292476,
+          "S3_Armor_CentralPost": 0.0,
+          "S3_Armor_ControlPatrol": 398.3687285392479,
+          "S3_Armor_GateLeft": 476.5362151029468,
+          "S3_Armor_GateRight": 484.41939696375465,
+          "S3_Candle_Exhibition": 390.70692348480225,
+          "S3_Candle_WarehouseNorth": 0.0,
+          "S3_Candle_WarehouseSouth": 0.0,
+          "S3_Candle_GateLeft": 207.40188666275643,
+          "S3_Candle_GateRight": 207.40188666275674
+        }
+      },
+      {
+        "name": "All three patrolling candles move",
+        "passed": true,
+        "detail": {
+          "S3_Armor_LobbyPost": 0.0,
+          "S3_Armor_LobbyPatrol": 100.5876332292476,
+          "S3_Armor_CentralPost": 0.0,
+          "S3_Armor_ControlPatrol": 398.3687285392479,
+          "S3_Armor_GateLeft": 476.5362151029468,
+          "S3_Armor_GateRight": 484.41939696375465,
+          "S3_Candle_Exhibition": 390.70692348480225,
+          "S3_Candle_WarehouseNorth": 0.0,
+          "S3_Candle_WarehouseSouth": 0.0,
+          "S3_Candle_GateLeft": 207.40188666275643,
+          "S3_Candle_GateRight": 207.40188666275674
+        }
+      },
+      {
+        "name": "push1 seated through native pushes",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "D1 fully recessed",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "push2 seated through native pushes",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "P2 alone leaves D2 closed",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Device1 rejects rear interaction",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Device1 reachable from front",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Device1 activates",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Device1 rejects concurrent activation",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Activation waits for physical pull",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Interrupted pull does not commit",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Animation takeover restores movement",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Animation takeover releases input",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Device1 rejects rear interaction",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Device1 reachable from front",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Device1 activates",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Device1 rejects concurrent activation",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Activation waits for physical pull",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Pause freezes interaction animation",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Device1 animation sampled",
+        "passed": true,
+        "detail": 96
+      },
+      {
+        "name": "Device1 pull commits once",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Device1 cannot activate twice",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Device1 restores movement",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Device1 restores action availability",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "D2 stays locked until all devices",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Device2 rejects rear interaction",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Device2 reachable from front",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Device2 activates",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Device2 rejects concurrent activation",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Activation waits for physical pull",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Device2 animation sampled",
+        "passed": true,
+        "detail": 144
+      },
+      {
+        "name": "Device2 pull commits once",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Device2 cannot activate twice",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Device2 restores movement",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Device2 restores action availability",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "D2 stays locked until all devices",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Device3 rejects rear interaction",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Device3 reachable from front",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Device3 activates",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Device3 rejects concurrent activation",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Activation waits for physical pull",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Device3 animation sampled",
+        "passed": true,
+        "detail": 144
+      },
+      {
+        "name": "Device3 pull commits once",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Device3 cannot activate twice",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Device3 restores movement",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Device3 restores action availability",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "All three releases and P2 open D2",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Final gate opens",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "name": "Final gate clears 600 cm passage",
+        "passed": true,
+        "detail": {
+          "left": [
+            -510.0,
+            4000.0,
+            0.0
+          ],
+          "right": [
+            110.0,
+            4000.0,
+            0.0
+          ]
+        }
+      },
+      {
+        "name": "Physical walk through final gate completes Stage3",
+        "passed": true,
+        "detail": [
+          -200.00000000000006,
+          4097.1022958285175,
+          26.15000057220459
+        ]
+      }
+    ],
+    "scope": "Actual saved Stage3 in isolated offscreen PIE. Test positions are transient.\n\nNPC motion is observed first, then disabled in this process for deterministic\npuzzle fixtures. This is not a manual difficulty or full playthrough assessment.\n"
+  },
+  "readability_capture": {
+    "phase": "shutdown",
+    "index": 3,
+    "started": 22893.625,
+    "views": [
+      {
+        "name": "GateHallShade",
+        "requested_cat": [
+          -200,
+          3800,
+          26.2
+        ],
+        "cat": [
+          -200.0,
+          3800.0,
+          26.2
+        ],
+        "camera": [
+          -347.7862748652482,
+          3652.171951864425,
+          435.7760221444956
+        ],
+        "rotation": [
+          -54.99999999999986,
+          44.99999999999993,
+          -0.0
+        ],
+        "world": "/Game/Maps/UEDPIE_0_Stage3.Stage3",
+        "game_seconds": 5.13696651533246
+      },
+      {
+        "name": "GateHallUpper",
+        "requested_cat": [
+          -200,
+          4050,
+          26.2
+        ],
+        "cat": [
+          -200.0,
+          4050.0,
+          26.2
+        ],
+        "camera": [
+          -218.99986808749114,
+          4031.00013190587,
+          175.65799831033354
+        ],
+        "rotation": [
+          -54.99999999999986,
+          44.99999999999993,
+          -0.0
+        ],
+        "world": "/Game/Maps/UEDPIE_0_Stage3.Stage3",
+        "game_seconds": 7.150529518723488
+      },
+      {
+        "name": "LobbyClear",
+        "requested_cat": [
+          100,
+          580,
+          26.2
+        ],
+        "cat": [
+          100.0,
+          580.0,
+          26.2
+        ],
+        "camera": [
+          154.9999999996321,
+          634.9999999996321,
+          26.2
+        ],
+        "rotation": [
+          -54.99999999999986,
+          44.99999999999993,
+          -0.0
+        ],
+        "world": "/Game/Maps/UEDPIE_0_Stage3.Stage3",
+        "game_seconds": 9.155851017683744
+      }
+    ],
+    "scope": "Compare Stage3 using its real possessed player camera in isolated PIE.\n\nTransient fixture: fixed cat positions, stopped NPC ticks and no capture. No\npackage is saved. Material/lighting changes are performed by separate scripts.\n",
+    "capture_phase": "readability",
+    "command_line": "-RenderOffscreen -d3d12 -windowed -ResX=1280 -ResY=720 -NoSplash -NoSound -unattended -nop4 -NoSaveConfig -SaveToUserDir -UserDir=C:\\Users\\whghk\\Catrun\\Saved\\Stage3Integration20261125\\ColorReadabilityUser -ini:EditorSettings:[/Script/UnrealEd.EditorPerformanceSettings]:bThrottleCPUWhenNotForeground=False -ExecCmds=\"Slate.bAllowThrottling 0,t.IdleWhenNotForeground 0,py C:/Users/whghk/Catrun/Scripts/Stage3/ColorCorrection/capture.py\" -abslog=C:\\Users\\whghk\\Catrun\\Saved\\Stage3Integration20261125\\ColorReadability.log",
+    "compilation_wait_completed": true,
+    "game_at": 7.150529518723488,
+    "changed": 22924.078,
+    "success": true,
+    "error": null
+  }
+}

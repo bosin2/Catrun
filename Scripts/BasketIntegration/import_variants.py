@@ -17,7 +17,9 @@ def task(file,folder,name,options=None):
     assert obj,('Import failed',file,[x.get_path_name() for x in assets]);return obj
 def material(name,prefix,cloth=False):
     path=DEST+'/Shared/Materials';m=EA.load_asset(path+'/'+name) if EA.does_asset_exist(path+'/'+name) else None
-    if m:return m
+    if m:
+        if cloth:ML.set_material_usage(m,u.MaterialUsage.MATUSAGE_SKELETAL_MESH);EA.save_loaded_asset(m)
+        return m
     m=AT.create_asset(name,path,u.Material,u.MaterialFactoryNew());ML.delete_all_material_expressions(m)
     def node(cls,x,y):return ML.create_material_expression(m,cls,x,y)
     def connect(a,out,b,inp):assert ML.connect_material_expressions(a,out,b,inp)
@@ -29,6 +31,7 @@ def material(name,prefix,cloth=False):
     mult=node(u.MaterialExpressionMultiply,-300,-300);strength=node(u.MaterialExpressionConstant3Vector,-500,-450);strength.constant=u.LinearColor(.10 if cloth else .38,.10 if cloth else .38,1.,1.)
     connect(normal,'RGB',mult,'A');connect(strength,'',mult,'B');normalize=node(u.MaterialExpressionNormalize,-100,-300);connect(mult,'',normalize,'VectorInput');prop(normalize,'',u.MaterialProperty.MP_NORMAL)
     if cloth:
+        ML.set_material_usage(m,u.MaterialUsage.MATUSAGE_SKELETAL_MESH)
         spec=node(u.MaterialExpressionConstant,-100,100);spec.r=.25;prop(spec,'',u.MaterialProperty.MP_SPECULAR)
     ML.recompile_material(m);EA.save_loaded_asset(m);return m
 try:
@@ -62,8 +65,10 @@ try:
             key='M_Rattan' if 'Rattan' in name else 'M_AgedBrass' if 'Brass' in name else 'M_BlackIron' if 'Iron' in name else 'M_Walnut' if stage<3 else 'M_MilitaryWood'
             body.set_material(i,EA.load_asset(REPORT['materials'][key]))
         mats=cloth.get_editor_property('materials')
-        for slot in mats:slot.set_editor_property('material_interface',EA.load_asset(REPORT['materials'][f'M_Cloth_Stage{stage}']))
+        for i in range(len(mats)):
+            slot=mats[i];slot.set_editor_property('material_interface',EA.load_asset(REPORT['materials'][f'M_Cloth_Stage{stage}']));mats[i]=slot
         cloth.set_editor_property('materials',mats)
+        assert all(slot.material_interface.get_path_name()==REPORT['materials'][f'M_Cloth_Stage{stage}'] for slot in cloth.get_editor_property('materials'))
         EA.save_loaded_asset(body);EA.save_loaded_asset(cloth)
         REPORT['stages'][str(stage)]={'body':body.get_path_name(),'cloth':cloth.get_path_name(),'body_bounds':str(body.get_bounds()),'cloth_materials':len(mats)}
         save_report()

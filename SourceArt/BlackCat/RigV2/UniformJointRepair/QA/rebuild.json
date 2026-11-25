@@ -1,0 +1,27 @@
+{
+  "method": "connected torso and limb retopology",
+  "limbs": {
+    "F_L": {
+      "rings": 6,
+      "vertices_per_ring": 8,
+      "integrated_torso_boundary": true
+    },
+    "F_R": {
+      "rings": 6,
+      "vertices_per_ring": 8,
+      "integrated_torso_boundary": true
+    },
+    "H_L": {
+      "rings": 6,
+      "vertices_per_ring": 8,
+      "integrated_torso_boundary": true
+    },
+    "H_R": {
+      "rings": 6,
+      "vertices_per_ring": 8,
+      "integrated_torso_boundary": true
+    }
+  },
+  "vertices": 2826,
+  "triangles": 5278
+}

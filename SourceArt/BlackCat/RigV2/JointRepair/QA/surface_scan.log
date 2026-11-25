@@ -1,0 +1,15 @@
+00:06.984  blend            | Read blend: "C:\Users\whghk\.codex\worktrees\110f\Catrun\SourceArt\BlackCat\RigV2\JointRepair\SK_BlackCat_JointRepair_V3.blend"
+SCANNED forearm_L max_overlap 103
+SCANNED forearm_R max_overlap 79
+SCANNED paw_F_L max_overlap 34
+SCANNED paw_F_R max_overlap 34
+SCANNED shin_L max_overlap 60
+SCANNED shin_R max_overlap 62
+SCANNED hock_L max_overlap 60
+SCANNED hock_R max_overlap 61
+SCANNED paw_H_L max_overlap 33
+SCANNED paw_H_R max_overlap 33
+SCAN_COMPLETE
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 02:38:20)
+
+Blender quit

@@ -1,0 +1,13 @@
+{
+  "success": true,
+  "before_yaw": -44.99999827040029,
+  "after_yaw": -134.99999999999997,
+  "scope": "Stage3 placed camera only; X side reversed",
+  "protected_sha256": {
+    "Content\\Maps\\Stage1.umap": "bfd2163f3128a7c90112615a5e887cf7b7d7fde9b3a076d51470f1d08bdeba4b",
+    "Content\\Maps\\Stage2.umap": "9234c3534c6c790d21873fe0a59251fd323a3f0419a41f37334af80fef7d8f01",
+    "Content\\Systems\\Camera\\BP_QuarterViewCamera.uasset": "2c2ecd45a0e5d9cd72949d76209d3bb3cfd6971be5b5b22f160d774d5678b280"
+  },
+  "other_actor_transforms_unchanged": 1451,
+  "saved_map_sha256": "2cb02d30407d9ab4a2969dc8309186217d745fff703a4ef92b4c3d4049571e42"
+}

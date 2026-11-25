@@ -1,0 +1,19 @@
+00:02.797  blend            | Read blend: "C:\Users\whghk\.codex\worktrees\110f\Catrun\SourceArt\BlackCat\RigV2\SK_BlackCat_RigV2.blend"
+Info: Saved as "SK_BlackCat_UniformJointRepair.blend"
+Info: Saved as "SK_BlackCat_UniformJointRepair.blend"
+SURFACE_GUIDES_ADDED 28
+Info: Saved as "SK_BlackCat_UniformJointRepair.blend"
+Info: Saved as "SK_BlackCat_UniformJointRepair.blend"
+GAIN {'gain': 0, 'max': 21, 'total': 136, 'limb_max': 3}
+GAIN {'gain': 0.3, 'max': 2, 'total': 4, 'limb_max': 2}
+GAIN {'gain': 0.6, 'max': 0, 'total': 0, 'limb_max': 0}
+GAIN {'gain': 0.9, 'max': 9, 'total': 78, 'limb_max': 4}
+GAIN {'gain': 1.2, 'max': 21, 'total': 246, 'limb_max': 10}
+GAIN {'gain': 1.5, 'max': 46, 'total': 552, 'limb_max': 22}
+Info: Saved as "SK_BlackCat_UniformJointRepair.blend"
+MOTION Body max limb intersections 0 max lower body 0
+MOTION PawReach max limb intersections 0 max lower body 0
+MOTION Curl max limb intersections 0 max lower body 0
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 02:38:20)
+
+Blender quit

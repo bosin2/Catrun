@@ -1,0 +1,56 @@
+{
+  "Body": {
+    "frames": 91,
+    "seconds": 3,
+    "type": "rig capability test, not a production gameplay clip",
+    "finite": true,
+    "negative_scale_frames": [],
+    "min_ground_z": -0.001433058874681592,
+    "max_ik_target_error_m": 0.0007076394325119644
+  },
+  "PawReach": {
+    "frames": 91,
+    "seconds": 3,
+    "type": "rig capability test, not a production gameplay clip",
+    "finite": true,
+    "negative_scale_frames": [],
+    "min_ground_z": -0.0014330109115689993,
+    "max_ik_target_error_m": 3.8036290289204825e-08
+  },
+  "Face": {
+    "frames": 91,
+    "seconds": 3,
+    "type": "rig capability test, not a production gameplay clip",
+    "finite": true,
+    "negative_scale_frames": [],
+    "min_ground_z": -0.0014330109115689993,
+    "max_ik_target_error_m": 0.0
+  },
+  "Jump": {
+    "frames": 91,
+    "seconds": 3,
+    "type": "rig capability test, not a production gameplay clip",
+    "finite": true,
+    "negative_scale_frames": [],
+    "min_ground_z": -0.0014330099802464247,
+    "max_ik_target_error_m": 5.3011810298106474e-08
+  },
+  "Curl": {
+    "frames": 91,
+    "seconds": 3,
+    "type": "rig capability test, not a production gameplay clip",
+    "finite": true,
+    "negative_scale_frames": [],
+    "min_ground_z": -0.0014000292867422104,
+    "max_ik_target_error_m": 0.0
+  },
+  "Roll": {
+    "frames": 91,
+    "seconds": 3,
+    "type": "rig capability test, not a production gameplay clip",
+    "finite": true,
+    "negative_scale_frames": [],
+    "min_ground_z": -0.001400083303451538,
+    "max_ik_target_error_m": 0.0
+  }
+}

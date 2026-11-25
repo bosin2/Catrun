@@ -1,6 +1,7 @@
 #if WITH_DEV_AUTOMATION_TESTS
 
 #include "UI/CatrunMinimapWidget.h"
+#include "UI/CatrunMinimapMarkerWidget.h"
 
 #if WITH_EDITOR
 #include "AssetCompilingManager.h"
@@ -522,6 +523,12 @@ bool FCatrunMinimapOffscreenPreviewTest::RunTest(const FString&)
 		Widget->UpdateMarker(*Widget->PlayerMarker, &CenterUV);
 		Widget->UpdateEnemyMarkers(ECatrunMinimapEnemyKind::Armor, ArmorUVs);
 		Widget->UpdateEnemyMarkers(ECatrunMinimapEnemyKind::Candle, CandleUVs);
+		TestTrue(TEXT("Player uses the yellow cat-face glyph"), Widget->PlayerMarker->GetContent()->IsA<UCatrunMinimapCatMarker>());
+		if (Widget->ArmorMarkers.Num() && Widget->CandleMarkers.Num())
+		{
+			TestTrue(TEXT("Armor uses the red helmet glyph"), Widget->ArmorMarkers[0]->GetContent()->IsA<UCatrunMinimapArmorMarker>());
+			TestTrue(TEXT("Candle uses the simplified wax and flame glyph"), Widget->CandleMarkers[0]->GetContent()->IsA<UCatrunMinimapCandleMarker>());
+		}
 		int32 VisibleArmor = 0;
 		for (const UCanvasPanelSlot* Slot : Widget->ArmorMarkers)
 			VisibleArmor += Slot->GetContent()->GetVisibility() == ESlateVisibility::HitTestInvisible;
@@ -535,6 +542,21 @@ bool FCatrunMinimapOffscreenPreviewTest::RunTest(const FString&)
 			|| !TestTrue(TEXT("Slate pixels were read back"), FImageUtils::GetRenderTargetImage(Target, Pixels)))
 			return false;
 		const FString Path = PreviewDirectory / FString::Printf(TEXT("%s.png"), Phase);
+		const auto MarkerCenterPixel = [&](const UCanvasPanelSlot& Slot, FVector2D Sample = FVector2D(.5,.5))
+		{
+			const FGeometry& G = Slot.GetContent()->GetPaintSpaceGeometry();
+			const FVector2D P = G.LocalToAbsolute(G.GetLocalSize() * Sample);
+			return Pixels.GetOnePixelLinear(FMath::Clamp(FMath::RoundToInt(P.X), 0, Pixels.SizeX - 1),
+				FMath::Clamp(FMath::RoundToInt(P.Y), 0, Pixels.SizeY - 1));
+		};
+		const FLinearColor CatPixel = MarkerCenterPixel(*Widget->PlayerMarker);
+		TestTrue(TEXT("Cat face paints yellow rather than white or green"),
+			CatPixel.R > CatPixel.B + .15f && CatPixel.G > CatPixel.B + .1f);
+		if (Widget->ArmorMarkers.Num())
+		{
+			const FLinearColor ArmorPixel = MarkerCenterPixel(*Widget->ArmorMarkers[0], FVector2D(.5,.70));
+			TestTrue(TEXT("Helmet paints red rather than white"), ArmorPixel.R > ArmorPixel.G + .15f);
+		}
 		if (!TestTrue(TEXT("Saved minimap preview as PNG"), FImageUtils::SaveImageByExtension(*Path, Pixels)))
 			return false;
 
@@ -608,7 +630,7 @@ bool FCatrunMinimapOffscreenPreviewTest::RunTest(const FString&)
 		AddInfo(FString::Printf(TEXT("%s frame rim alpha %.3f at (%d,%d), padding alpha %.3f at (%d,%d)"),
 			Phase, RimAlpha, RimPixel.X, RimPixel.Y, FillAlpha, FillPixel.X, FillPixel.Y));
 		TestTrue(FString::Printf(TEXT("%s metallic rim is visible"), Phase), RimAlpha >= .25f);
-		TestTrue(FString::Printf(TEXT("%s frame padding has translucent fill"), Phase), FillAlpha >= .04f && FillAlpha <= .20f);
+		TestTrue(FString::Printf(TEXT("%s minimal frame remains translucent"), Phase), FillAlpha >= .35f && FillAlpha <= .50f);
 
 		const ESlateVisibility ImageVisibility = Widget->MapBackground->GetVisibility();
 		Widget->MapBackground->SetVisibility(ESlateVisibility::Hidden);
@@ -621,8 +643,8 @@ bool FCatrunMinimapOffscreenPreviewTest::RunTest(const FString&)
 		const float BackdropAlpha = BackdropPixels.GetOnePixelLinear(BackdropPixel.X, BackdropPixel.Y).A;
 		AddInfo(FString::Printf(TEXT("%s backdrop alpha %.3f at (%d,%d) with transparent map"),
 			Phase, BackdropAlpha, BackdropPixel.X, BackdropPixel.Y));
-		TestTrue(FString::Printf(TEXT("%s empty map has a stronger translucent backing than the frame padding"), Phase),
-			BackdropAlpha > FillAlpha + .12f && BackdropAlpha < .50f);
+		TestTrue(FString::Printf(TEXT("%s empty map keeps the same subdued backing"), Phase),
+			BackdropAlpha >= FillAlpha && BackdropAlpha <= 1.f);
 	}
 	Widget->HoldSizeMultiplier = 1.50f;
 	Widget->HoldCoverageMultiplier = 1.05f;

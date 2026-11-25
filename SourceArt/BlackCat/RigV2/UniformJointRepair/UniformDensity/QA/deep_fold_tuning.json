@@ -1,0 +1,27 @@
+[
+  {
+    "threshold": 100,
+    "max": 2,
+    "total": 2
+  },
+  {
+    "threshold": 95,
+    "max": 0,
+    "total": 0
+  },
+  {
+    "threshold": 90,
+    "max": 0,
+    "total": 0
+  },
+  {
+    "threshold": 85,
+    "max": 0,
+    "total": 0
+  },
+  {
+    "threshold": 80,
+    "max": 0,
+    "total": 0
+  }
+]

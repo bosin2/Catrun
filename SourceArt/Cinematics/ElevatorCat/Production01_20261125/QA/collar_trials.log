@@ -1,0 +1,5 @@
+00:05.125  blend            | Read blend: "C:\Users\whghk\Catrun\SourceArt\Cinematics\ElevatorCat\Production01_20261125\SK_BlackCat_Elevator.blend"
+[{'angle': -40, 'y': 0, 'collar_arm_intersections': 0}, {'angle': -40, 'y': 0.004, 'collar_arm_intersections': 0}, {'angle': -40, 'y': 0.008, 'collar_arm_intersections': 0}, {'angle': -30, 'y': 0, 'collar_arm_intersections': 0}, {'angle': -30, 'y': 0.004, 'collar_arm_intersections': 0}, {'angle': -30, 'y': 0.008, 'collar_arm_intersections': 0}, {'angle': -20, 'y': 0.004, 'collar_arm_intersections': 0}, {'angle': -20, 'y': 0.008, 'collar_arm_intersections': 0}, {'angle': -10, 'y': 0.004, 'collar_arm_intersections': 0}, {'angle': -10, 'y': 0.008, 'collar_arm_intersections': 0}]
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 02:38:20)
+
+Blender quit

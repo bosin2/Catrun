@@ -1,4 +1,7 @@
 #include "CatrunMinimapWidget.h"
+#include "UI/CatrunHUDStyle.h"
+#include "UI/CatrunMinimapMarkerWidget.h"
+#include "Brushes/SlateRoundedBoxBrush.h"
 
 #include "Camera/PlayerCameraManager.h"
 #include "Components/Border.h"
@@ -291,6 +294,10 @@ FSlateRenderTransform CatrunMinimap::ToImageTransform(const FSlateRenderTransfor
 
 bool UCatrunMinimapWidget::InitializeMap(ACatrunMinimapPresenter& InPresenter)
 {
+	// Migrate all saved panels to the same legible glyphs without rewriting map packages.
+	PlayerMarkerClass = UCatrunMinimapCatMarker::StaticClass();
+	ArmorMarkerClass = UCatrunMinimapArmorMarker::StaticClass();
+	CandleMarkerClass = UCatrunMinimapCandleMarker::StaticClass();
 	if (!InPresenter.BackgroundTexture || !MapBackground || !MarkerLayer || !PlayerMarkerClass
 		|| (!EnemyMarkerClass && (!ArmorMarkerClass || !CandleMarkerClass))
 		|| !CatrunMinimap::FitCameraProjection(InPresenter.MapSize, InPresenter.CaptureYawDegrees,
@@ -302,6 +309,16 @@ bool UCatrunMinimapWidget::InitializeMap(ACatrunMinimapPresenter& InPresenter)
 	// Older panels have the same frame in the tree without the optional binding.
 	UWidget* Frame = MinimapFrame ? MinimapFrame.Get() : GetWidgetFromName(TEXT("MinimapFrame"));
 	FrameSlot = Frame ? Cast<UCanvasPanelSlot>(Frame->Slot) : nullptr;
+	if (UBorder* Border = Cast<UBorder>(Frame))
+	{
+		const FSlateRoundedBoxBrush FrameBrush(CatrunHUDStyle::Ink.CopyWithNewOpacity(.42f),
+			4.f, CatrunHUDStyle::Rim.CopyWithNewOpacity(.55f), 1.f);
+		Border->SetBrush(FrameBrush);
+		Border->SetBrushColor(FLinearColor::White);
+	}
+	if (UBorder* Backdrop = Cast<UBorder>(GetWidgetFromName(TEXT("MinimapBackdrop"))))
+		Backdrop->SetBrushColor(CatrunHUDStyle::Ink.CopyWithNewOpacity(.08f));
+	MapBackground->SetRenderOpacity(.72f);
 	if (FrameSlot)
 		CompactFrameLayout = FrameSlot->GetLayout();
 	if (UPanelWidget* MapSurface = MapBackground->GetParent(); MapSurface && MapSurface == MarkerLayer->GetParent())
@@ -313,7 +330,10 @@ bool UCatrunMinimapWidget::InitializeMap(ACatrunMinimapPresenter& InPresenter)
 	{
 		MapBackground->SetBrushFromMaterial(FloorplanMaterial);
 		if (auto* Material = MapBackground->GetDynamicMaterial())
+		{
 			Material->SetTextureParameterValue(TEXT("Floorplan"), InPresenter.BackgroundTexture);
+			Material->SetVectorParameterValue(TEXT("WarmGray"), CatrunHUDStyle::Parchment);
+		}
 	}
 	MapBackground->SetRenderTransformPivot(MapSurfaceCenter);
 	PlayerMarker = AddMarker(PlayerMarkerClass, 1);

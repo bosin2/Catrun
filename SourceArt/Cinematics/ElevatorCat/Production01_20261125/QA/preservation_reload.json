@@ -1,0 +1,64 @@
+{
+  "original_data_equal_after_save_reload": true,
+  "snapshots": [
+    {
+      "file": "C:\\Users\\whghk\\Desktop\\CastleKit\\BlackCat\\Final\\SK_BlackCat_Final.blend",
+      "signature": "857f01077da884ee5780d62de0d23f1ee2cc8cd9d8870eb18a608bc8c3a32cb8",
+      "vertices": 7485,
+      "triangles": 14910,
+      "materials": [
+        "Cat_Fur",
+        "Cat_Eye",
+        "Cat_Pupil",
+        "Cat_Nose",
+        "Collar_Red",
+        "Bell_Gold",
+        "Bell_Clapper"
+      ],
+      "bones": 78,
+      "original_actions": [
+        "AN_BlackCat_BasketEnter",
+        "AN_BlackCat_BellShake",
+        "AN_BlackCat_CautiousWalk",
+        "AN_BlackCat_Idle",
+        "AN_BlackCat_JumpDown",
+        "AN_BlackCat_Landing",
+        "AN_BlackCat_Run",
+        "AN_BlackCat_Sleep",
+        "AN_BlackCat_StandUp",
+        "AN_BlackCat_WakeUp",
+        "AN_BlackCat_Walk"
+      ]
+    },
+    {
+      "file": "C:\\Users\\whghk\\Catrun\\SourceArt\\Cinematics\\ElevatorCat\\Production01_20261125\\SK_BlackCat_Elevator.blend",
+      "signature": "857f01077da884ee5780d62de0d23f1ee2cc8cd9d8870eb18a608bc8c3a32cb8",
+      "vertices": 7485,
+      "triangles": 14910,
+      "materials": [
+        "Cat_Fur",
+        "Cat_Eye",
+        "Cat_Pupil",
+        "Cat_Nose",
+        "Collar_Red",
+        "Bell_Gold",
+        "Bell_Clapper"
+      ],
+      "bones": 78,
+      "original_actions": [
+        "AN_BlackCat_BasketEnter",
+        "AN_BlackCat_BellShake",
+        "AN_BlackCat_CautiousWalk",
+        "AN_BlackCat_Idle",
+        "AN_BlackCat_JumpDown",
+        "AN_BlackCat_Landing",
+        "AN_BlackCat_Run",
+        "AN_BlackCat_Sleep",
+        "AN_BlackCat_StandUp",
+        "AN_BlackCat_WakeUp",
+        "AN_BlackCat_Walk"
+      ]
+    }
+  ],
+  "source_sha256": "07a220d70764ff0cda34e77da3344797847b77547de8df7aa88a5eb6df8c3327"
+}

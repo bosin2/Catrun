@@ -1,0 +1,11 @@
+[mcp_servers.unreal-mcp]
+url = "http://127.0.0.1:8000/mcp"
+
+# Cat Audio Director: OAuth is completed by the user; no secrets belong here.
+[mcp_servers.suno]
+url = "https://api.suno.com/mcp"
+enabled = false # Authentication deferred by the user; mock/local workflows remain available.
+
+[agents]
+enabled = true
+max_concurrent_threads_per_session = 3

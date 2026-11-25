@@ -1,0 +1,138 @@
+{
+  "phase": "shutdown",
+  "index": 2,
+  "mode": 1,
+  "started": 36284.203,
+  "views": [
+    {
+      "name": "Entrance",
+      "mode": "Lit",
+      "cat": [
+        150.0,
+        -110.0,
+        26.2
+      ],
+      "camera": [
+        297.7898938366867,
+        37.78989383668707,
+        435.77602214449524
+      ],
+      "rotation": [
+        -54.99999999999988,
+        -134.9999999999999,
+        5.5451278676952425e-15
+      ],
+      "mode_command": "Lit",
+      "post_compilation_settle_seconds": 2.0,
+      "post_compilation_slate_callbacks": 120
+    },
+    {
+      "name": "GateHall",
+      "mode": "Lit",
+      "cat": [
+        -250.0,
+        -3400.0,
+        26.2
+      ],
+      "camera": [
+        -102.2101061633042,
+        -3252.2101061632375,
+        435.77602214449536
+      ],
+      "rotation": [
+        -54.99999999999988,
+        -134.9999999999999,
+        5.5451278676952425e-15
+      ],
+      "mode_command": "Lit",
+      "post_compilation_settle_seconds": 2.0,
+      "post_compilation_slate_callbacks": 120
+    }
+  ],
+  "compilation_barriers": [
+    {
+      "reason": "PIE first-render after 3 game seconds",
+      "game_seconds": 3.0979340225458145,
+      "wall_seconds": 0.20300000000133878,
+      "returned": true
+    },
+    {
+      "reason": "PIE first-render after 3 game seconds",
+      "game_seconds": 3.0979340225458145,
+      "wall_seconds": 0.43699999999807915,
+      "returned": true
+    },
+    {
+      "reason": "PIE first-render after 3 game seconds",
+      "game_seconds": 3.0979340225458145,
+      "wall_seconds": 0.6569999999992433,
+      "returned": true
+    },
+    {
+      "reason": "PIE first-render after 3 game seconds",
+      "game_seconds": 3.0979340225458145,
+      "wall_seconds": 0.875,
+      "returned": true
+    },
+    {
+      "reason": "PIE first-render after 3 game seconds",
+      "game_seconds": 3.0979340225458145,
+      "wall_seconds": 0.9069999999992433,
+      "returned": true
+    },
+    {
+      "reason": "PIE first-render after 3 game seconds",
+      "game_seconds": 3.0979340225458145,
+      "wall_seconds": 0.9689999999973224,
+      "returned": true
+    },
+    {
+      "reason": "PIE rendered warmup complete",
+      "game_seconds": 13.492080423980951,
+      "wall_seconds": 0.0,
+      "returned": true
+    },
+    {
+      "reason": "Entrance positioned view",
+      "game_seconds": 16.494358327239752,
+      "wall_seconds": 0.0,
+      "returned": true
+    },
+    {
+      "reason": "Entrance Lit first rendered",
+      "game_seconds": 16.494358327239752,
+      "wall_seconds": 0.0,
+      "returned": true
+    },
+    {
+      "reason": "GateHall positioned view",
+      "game_seconds": 19.507915429770947,
+      "wall_seconds": 0.0,
+      "returned": true
+    },
+    {
+      "reason": "GateHall Lit first rendered",
+      "game_seconds": 19.507915429770947,
+      "wall_seconds": 0.0,
+      "returned": true
+    }
+  ],
+  "mode_commands": {
+    "Lit": "Lit",
+    "BaseColor": "VisualizeBuffer",
+    "DetailLighting": "Lit_DetailLighting"
+  },
+  "readiness_policy": "After 3 PIE game seconds: FinishAll, 10 wall seconds and 60 Slate callbacks warmup, FinishAll; after each view/mode renders: FinishAll then 2 seconds and 30 callbacks",
+  "fixture": "Actual player camera; fixed cat poses, NPC tick stopped after 3 game seconds; no package saved",
+  "command_line": "-RenderOffscreen -d3d12 -windowed -ResX=1280 -ResY=720 -NoSplash -NoSound -unattended -nop4 -NoSaveConfig -SaveToUserDir -UserDir=C:\\Users\\whghk\\Catrun\\Saved\\Stage3Integration20261125\\Stage3CameraXReverseUser -ini:EditorSettings:[/Script/UnrealEd.EditorPerformanceSettings]:bThrottleCPUWhenNotForeground=False -ExecCmds=\"Slate.bAllowThrottling 0,t.IdleWhenNotForeground 0,py C:/Users/whghk/Catrun/Scripts/Stage3/OrientationFix20261125/camera_x_capture.py\" -abslog=C:\\Users\\whghk\\Catrun\\Saved\\Stage3Integration20261125\\Stage3CameraXReverse.log",
+  "camera_x_verified": true,
+  "actual_gameplay_yaw": -134.9999999999999,
+  "viewmode_cheat_manager_present": true,
+  "changed": 36318.796,
+  "warmup_ticks": 586,
+  "initial_warmup_wall_seconds": 10.014999999999418,
+  "game_at": 16.494358327239752,
+  "mode_ticks": 120,
+  "success": true,
+  "error": null
+}

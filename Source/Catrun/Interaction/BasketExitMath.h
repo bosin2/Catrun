@@ -3,6 +3,14 @@
 
 namespace CatrunBasket
 {
+	// BP_Cat normal walking flattens the camera forward/right vectors separately.
+	inline FVector MovementDirection(const FVector2D& Input, const FRotator& CameraRotation)
+	{
+		const FRotationMatrix Basis(CameraRotation);
+		return (Basis.GetUnitAxis(EAxis::X).GetSafeNormal2D()*Input.X
+			+ Basis.GetUnitAxis(EAxis::Y).GetSafeNormal2D()*Input.Y).GetSafeNormal2D();
+	}
+
 	inline int32 DirectionSector(const FVector& Direction, float CameraYaw)
 	{
 		const float Angle = FMath::FindDeltaAngleDegrees(CameraYaw, Direction.Rotation().Yaw);
@@ -20,24 +28,6 @@ namespace CatrunBasket
 		if (Direction.GetSafeNormal2D().IsNearlyZero()) return FVector::ZeroVector;
 		const float Yaw = ReferenceForward.GetSafeNormal2D().Rotation().Yaw;
 		return FRotator(0, Yaw + DirectionSector(Direction, Yaw)*45.f, 0).Vector();
-	}
-
-	// One key per camera direction. Chords retain a held selection or prefer the
-	// forward/back axis; they never create a fifth diagonal input requirement.
-	inline FVector SelectDirection(float CameraYaw, float ForwardAxis, float RightAxis,
-		const FVector& Previous, const FVector& BasketForward)
-	{
-		const FRotationMatrix Camera(FRotator(0, CameraYaw, 0));
-		if (FMath::IsNearlyZero(ForwardAxis) && FMath::IsNearlyZero(RightAxis)) return Previous;
-		// The actual exit follows the screen/camera axes exactly, never the basket axes.
-		const FVector F = Camera.GetUnitAxis(EAxis::X)*FMath::Sign(ForwardAxis);
-		const FVector R = Camera.GetUnitAxis(EAxis::Y)*FMath::Sign(RightAxis);
-		if (!FMath::IsNearlyZero(ForwardAxis) && !FMath::IsNearlyZero(RightAxis))
-		{
-			if (Previous.Equals(F,.001) || Previous.Equals(R,.001)) return Previous;
-			return FMath::Abs(RightAxis)>FMath::Abs(ForwardAxis) ? R : F;
-		}
-		return FMath::IsNearlyZero(ForwardAxis) ? R : F;
 	}
 
 	inline FVector ArcPoint(const FVector& Start, const FVector& End, float Height, float T)

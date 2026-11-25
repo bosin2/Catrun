@@ -1,0 +1,242 @@
+[
+  {
+    "file": "AN_BlackCat_Elevator_LookPrepare.fbx",
+    "hierarchy_equal": true,
+    "bones": 78,
+    "actions": 1,
+    "frame_range": [
+      1.0,
+      43.0
+    ],
+    "expected_range": [
+      1,
+      43
+    ],
+    "fps": 30,
+    "armature_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "max_joint_position_error_game_cm": 0.00010490926123719895,
+    "max_rest_joint_error_game_cm": 0.00010794860289260646,
+    "max_skinning_matrix_component_error": 7.748603820800781e-07,
+    "nonfinite": 0
+  },
+  {
+    "file": "AN_BlackCat_Elevator_JumpGrab.fbx",
+    "hierarchy_equal": true,
+    "bones": 78,
+    "actions": 1,
+    "frame_range": [
+      1.0,
+      25.0
+    ],
+    "expected_range": [
+      1,
+      25
+    ],
+    "fps": 30,
+    "armature_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "max_joint_position_error_game_cm": 0.00011810888807845264,
+    "max_rest_joint_error_game_cm": 0.00010794860289260646,
+    "max_skinning_matrix_component_error": 1.773471012711525e-06,
+    "nonfinite": 0
+  },
+  {
+    "file": "AN_BlackCat_Elevator_HangPull.fbx",
+    "hierarchy_equal": true,
+    "bones": 78,
+    "actions": 1,
+    "frame_range": [
+      1.0,
+      31.0
+    ],
+    "expected_range": [
+      1,
+      31
+    ],
+    "fps": 30,
+    "armature_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "max_joint_position_error_game_cm": 9.265419330993079e-05,
+    "max_rest_joint_error_game_cm": 0.00010794860289260646,
+    "max_skinning_matrix_component_error": 1.7454332805755257e-06,
+    "nonfinite": 0
+  },
+  {
+    "file": "AN_BlackCat_Elevator_ReleaseLand.fbx",
+    "hierarchy_equal": true,
+    "bones": 78,
+    "actions": 1,
+    "frame_range": [
+      1.0,
+      48.0
+    ],
+    "expected_range": [
+      1,
+      48
+    ],
+    "fps": 30,
+    "armature_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "max_joint_position_error_game_cm": 0.00010733630046694599,
+    "max_rest_joint_error_game_cm": 0.00010794860289260646,
+    "max_skinning_matrix_component_error": 1.994892954826355e-06,
+    "nonfinite": 0
+  },
+  {
+    "file": "AN_BlackCat_Elevator_StartleTail.fbx",
+    "hierarchy_equal": true,
+    "bones": 78,
+    "actions": 1,
+    "frame_range": [
+      1.0,
+      61.0
+    ],
+    "expected_range": [
+      1,
+      61
+    ],
+    "fps": 30,
+    "armature_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "max_joint_position_error_game_cm": 0.00010523945093154907,
+    "max_rest_joint_error_game_cm": 0.00010794860289260646,
+    "max_skinning_matrix_component_error": 1.3113021850585938e-06,
+    "nonfinite": 0
+  },
+  {
+    "file": "AN_BlackCat_Elevator_PeekDown.fbx",
+    "hierarchy_equal": true,
+    "bones": 78,
+    "actions": 1,
+    "frame_range": [
+      1.0,
+      276.0
+    ],
+    "expected_range": [
+      1,
+      276
+    ],
+    "fps": 30,
+    "armature_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "max_joint_position_error_game_cm": 0.00010745380149674384,
+    "max_rest_joint_error_game_cm": 0.00010794860289260646,
+    "max_skinning_matrix_component_error": 1.0281801223754883e-06,
+    "nonfinite": 0
+  },
+  {
+    "file": "AN_BlackCat_Elevator_RideBalance.fbx",
+    "hierarchy_equal": true,
+    "bones": 78,
+    "actions": 1,
+    "frame_range": [
+      1.0,
+      91.0
+    ],
+    "expected_range": [
+      1,
+      91
+    ],
+    "fps": 30,
+    "armature_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "max_joint_position_error_game_cm": 0.00010751360809433828,
+    "max_rest_joint_error_game_cm": 0.00010794860289260646,
+    "max_skinning_matrix_component_error": 8.940696716308594e-07,
+    "nonfinite": 0
+  },
+  {
+    "file": "AN_BlackCat_Elevator_LoafIdle.fbx",
+    "hierarchy_equal": true,
+    "bones": 78,
+    "actions": 1,
+    "frame_range": [
+      1.0,
+      241.0
+    ],
+    "expected_range": [
+      1,
+      241
+    ],
+    "fps": 30,
+    "armature_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "max_joint_position_error_game_cm": 8.480907890688399e-05,
+    "max_rest_joint_error_game_cm": 0.00010794860289260646,
+    "max_skinning_matrix_component_error": 3.337860107421875e-06,
+    "nonfinite": 0
+  },
+  {
+    "file": "AN_BlackCat_Elevator_LoafStartleRise.fbx",
+    "hierarchy_equal": true,
+    "bones": 78,
+    "actions": 1,
+    "frame_range": [
+      1.0,
+      82.0
+    ],
+    "expected_range": [
+      1,
+      82
+    ],
+    "fps": 30,
+    "armature_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "max_joint_position_error_game_cm": 0.00010745387523205548,
+    "max_rest_joint_error_game_cm": 0.00010794860289260646,
+    "max_skinning_matrix_component_error": 3.874301910400391e-06,
+    "nonfinite": 0
+  },
+  {
+    "file": "AN_BlackCat_Elevator_MASTER_JumpPullLand.fbx",
+    "hierarchy_equal": true,
+    "bones": 78,
+    "actions": 1,
+    "frame_range": [
+      1.0,
+      102.0
+    ],
+    "expected_range": [
+      1,
+      102
+    ],
+    "fps": 30,
+    "armature_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "max_joint_position_error_game_cm": 0.00011810888807845264,
+    "max_rest_joint_error_game_cm": 0.00010794860289260646,
+    "max_skinning_matrix_component_error": 1.994892954826355e-06,
+    "nonfinite": 0
+  }
+]

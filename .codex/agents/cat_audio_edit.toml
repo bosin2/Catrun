@@ -1,0 +1,9 @@
+name = "cat_audio_edit"
+description = "Process a merged audio brief with FFmpeg and return manifests plus measured QA."
+developer_instructions = """
+Read .agents/skills/cat-audio-director/SKILL.md and Scripts/CatAudioDirector/README.md.
+Run Scripts/CatAudioDirector/cat_audio.py on the director's merged brief, using the explicitly assigned mock or local mode.
+Keep originals unchanged. Own only your assigned run directory. Do not invoke paid providers or write Unreal assets.
+Use the pipeline's bounded retries, log, hashes, manifest, import plan, and QA; fail visibly on missing or invalid inputs.
+Return absolute result paths, measured format/loudness/loop checks, failed IDs, and listening-review limitations. Mock tones are test fixtures.
+"""

@@ -1,0 +1,110 @@
+{
+  "SK_BlackCat_BellClapper_V2": {
+    "ok": true,
+    "pass": true,
+    "errors": [],
+    "warnings": [
+      "asset lowest point z=0.042 (not resting on ground plane z=0)"
+    ],
+    "ground_z": 0.042,
+    "zfighting": [],
+    "floating": [],
+    "back_to_back": [],
+    "enclosed": [],
+    "objects": {
+      "SK_BlackCat_BellClapper_V2": {
+        "verts": 42,
+        "faces": 48,
+        "tris": 80,
+        "ngons": 0,
+        "boundary_edges": 0,
+        "nonmanifold_edges": 0,
+        "wire_edges": 0,
+        "loose_verts": 0,
+        "degenerate_faces": 0,
+        "zero_length_edges": 0,
+        "inconsistent_normals_edges": 0,
+        "duplicate_verts": 0,
+        "islands": 1,
+        "inside_out_islands": 0,
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "materials": 1,
+        "unweighted_verts": 0,
+        "verts_over_4_influences": 0,
+        "uv_maps": 1,
+        "uv_oob_pct": 100.0,
+        "uv_zero_area_faces": 0,
+        "uv_overlap_pct": 0.0,
+        "uv_coverage_pct": 0.0
+      }
+    }
+  },
+  "SK_BlackCat_RigV2": {
+    "ok": true,
+    "pass": true,
+    "errors": [],
+    "warnings": [
+      "SK_BlackCat_RigV2: duplicate verts=8 loose verts=0",
+      "2 parts fully enclosed, not touching (eyes/internals?): ['SK_BlackCat_RigV2', 'SK_BlackCat_RigV2']"
+    ],
+    "ground_z": -0.0009,
+    "zfighting": [],
+    "floating": [],
+    "back_to_back": [],
+    "enclosed": [
+      {
+        "object": "SK_BlackCat_RigV2",
+        "island_verts": 26,
+        "center": [
+          -0.025,
+          -0.089,
+          0.143
+        ]
+      },
+      {
+        "object": "SK_BlackCat_RigV2",
+        "island_verts": 26,
+        "center": [
+          0.025,
+          -0.089,
+          0.143
+        ]
+      }
+    ],
+    "objects": {
+      "SK_BlackCat_RigV2": {
+        "verts": 2826,
+        "faces": 3936,
+        "tris": 5278,
+        "ngons": 0,
+        "boundary_edges": 314,
+        "nonmanifold_edges": 0,
+        "wire_edges": 0,
+        "loose_verts": 0,
+        "degenerate_faces": 0,
+        "zero_length_edges": 0,
+        "inconsistent_normals_edges": 0,
+        "duplicate_verts": 8,
+        "islands": 22,
+        "inside_out_islands": 0,
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "materials": 8,
+        "unweighted_verts": 0,
+        "verts_over_4_influences": 0,
+        "uv_maps": 1,
+        "uv_oob_pct": 0.0,
+        "uv_zero_area_faces": 0,
+        "uv_overlap_pct": 0.12,
+        "uv_coverage_pct": 39.8
+      }
+    }
+  }
+}

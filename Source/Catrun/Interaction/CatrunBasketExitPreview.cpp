@@ -11,6 +11,8 @@ UCatrunBasketExitPreview::UCatrunBasketExitPreview()
 	SetGenerateOverlapEvents(false);
 	SetCastShadow(false);
 	SetCanEverAffectNavigation(false);
+	// Draw the single exit guide after translucent foreground walls.
+	TranslucencySortPriority = 1000;
 	NumCustomDataFloats = 1;
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> Mesh(TEXT("/Engine/BasicShapes/Sphere"));
 	static ConstructorHelpers::FObjectFinder<UMaterialInterface> Material(TEXT("/Game/Systems/Interaction/Hiding/Visual/M_BasketExitArc"));

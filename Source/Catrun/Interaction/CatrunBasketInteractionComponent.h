@@ -126,6 +126,8 @@ private:
 	void ExitBasket();
 	void FinishExit();
 	bool UpdateExitCandidate(bool bForce, bool bReadDirectionInput = true);
+	bool ReadExitDirectionInput();
+	bool bHasExitSupport = false;
 	bool FindExitSupport(const FVector& Reference, FVector& OutCenter) const;
 	bool IsBasketExitPathClear(const FVector& Destination) const;
 	void UpdatePreview();

@@ -1,0 +1,26 @@
+00:09.453  blend            | Read blend: "C:\Users\whghk\.codex\worktrees\110f\Catrun\SourceArt\BlackCat\RigV2\SK_BlackCat_RigV2.blend"
+Info: Saved as "SK_BlackCat_UniformJointRepair.blend"
+Info: Saved as "SK_BlackCat_UniformJointRepair.blend"
+SURFACE_GUIDES_ADDED 28
+Info: Saved as "SK_BlackCat_UniformJointRepair.blend"
+00:17.859  render           | Saved: 'C:\Users\whghk\.codex\worktrees\110f\Catrun\SourceArt\BlackCat\RigV2\UniformJointRepair\Previews\after_neutral_threequarter.png'
+00:18.390  render           | Saved: 'C:\Users\whghk\.codex\worktrees\110f\Catrun\SourceArt\BlackCat\RigV2\UniformJointRepair\Previews\after_neutral_face.png'
+00:18.609  render           | Saved: 'C:\Users\whghk\.codex\worktrees\110f\Catrun\SourceArt\BlackCat\RigV2\UniformJointRepair\Previews\after_blink_25.png'
+00:18.843  render           | Saved: 'C:\Users\whghk\.codex\worktrees\110f\Catrun\SourceArt\BlackCat\RigV2\UniformJointRepair\Previews\after_blink_50.png'
+00:19.015  render           | Saved: 'C:\Users\whghk\.codex\worktrees\110f\Catrun\SourceArt\BlackCat\RigV2\UniformJointRepair\Previews\after_blink_75.png'
+00:19.187  render           | Saved: 'C:\Users\whghk\.codex\worktrees\110f\Catrun\SourceArt\BlackCat\RigV2\UniformJointRepair\Previews\after_blink_100.png'
+00:19.375  render           | Saved: 'C:\Users\whghk\.codex\worktrees\110f\Catrun\SourceArt\BlackCat\RigV2\UniformJointRepair\Previews\after_wink_gaze.png'
+00:19.546  render           | Saved: 'C:\Users\whghk\.codex\worktrees\110f\Catrun\SourceArt\BlackCat\RigV2\UniformJointRepair\Previews\after_jaw_open.png'
+00:19.734  render           | Saved: 'C:\Users\whghk\.codex\worktrees\110f\Catrun\SourceArt\BlackCat\RigV2\UniformJointRepair\Previews\after_crouch.png'
+00:19.906  render           | Saved: 'C:\Users\whghk\.codex\worktrees\110f\Catrun\SourceArt\BlackCat\RigV2\UniformJointRepair\Previews\after_paw_reach.png'
+00:20.093  render           | Saved: 'C:\Users\whghk\.codex\worktrees\110f\Catrun\SourceArt\BlackCat\RigV2\UniformJointRepair\Previews\after_side_bend.png'
+00:20.281  render           | Saved: 'C:\Users\whghk\.codex\worktrees\110f\Catrun\SourceArt\BlackCat\RigV2\UniformJointRepair\Previews\after_twist60.png'
+00:20.484  render           | Saved: 'C:\Users\whghk\.codex\worktrees\110f\Catrun\SourceArt\BlackCat\RigV2\UniformJointRepair\Previews\after_arch.png'
+Info: Saved as "SK_BlackCat_UniformJointRepair.blend"
+RIG_REVIEW_DONE
+MOTION Body max limb intersections 5 max lower body 33
+MOTION PawReach max limb intersections 1 max lower body 7
+MOTION Curl max limb intersections 3 max lower body 8
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 02:38:20)
+
+Blender quit

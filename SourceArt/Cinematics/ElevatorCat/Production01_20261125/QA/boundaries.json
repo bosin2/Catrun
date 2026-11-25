@@ -1,0 +1,37 @@
+[
+  {
+    "from": "LookPrepare",
+    "to": "JumpGrab",
+    "max_matrix_delta": 2.384185791015625e-07
+  },
+  {
+    "from": "JumpGrab",
+    "to": "HangPull",
+    "max_matrix_delta": 0.0
+  },
+  {
+    "from": "HangPull",
+    "to": "ReleaseLand",
+    "max_matrix_delta": 0.0
+  },
+  {
+    "from": "ReleaseLand",
+    "to": "StartleTail",
+    "max_matrix_delta": 1.4901161193847656e-08
+  },
+  {
+    "from": "RideBalance",
+    "to": "RideBalance",
+    "max_matrix_delta": 0.0
+  },
+  {
+    "from": "LoafIdle",
+    "to": "LoafIdle",
+    "max_matrix_delta": 0.0
+  },
+  {
+    "from": "LoafIdle",
+    "to": "LoafStartleRise",
+    "max_matrix_delta": 0.0
+  }
+]

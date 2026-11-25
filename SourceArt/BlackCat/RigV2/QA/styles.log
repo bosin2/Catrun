@@ -1,0 +1,20 @@
+00:02.844  blend            | Read blend: "C:\Users\whghk\.codex\worktrees\110f\Catrun\SourceArt\BlackCat\RigV2\SK_BlackCat_RigV2.blend"
+C:\Users\whghk\.codex\worktrees\110f\Catrun\SourceArt\BlackCat\RigV2\Scripts\render_style_examples.py:9: DeprecationWarning: 'World.use_nodes' is expected to be removed in Blender 6.0
+  sc.world=bpy.data.worlds.new('StyleStudio_World');sc.world.use_nodes=True
+C:\Users\whghk\.codex\worktrees\110f\Catrun\SourceArt\BlackCat\RigV2\Scripts\render_style_examples.py:18: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0
+  fm=bpy.data.materials.new('StudioFloor_Matte');fm.use_nodes=True;p=next(n for n in fm.node_tree.nodes if n.type=='BSDF_PRINCIPLED');p.inputs['Base Color'].default_value=(.23,.25,.28,1);p.inputs['Roughness'].default_value=.92;floor_mesh.materials.append(fm)
+00:25.219  render           | Saved: 'C:\Users\whghk\.codex\worktrees\110f\Catrun\SourceArt\BlackCat\RigV2\StyleExamples\A_Matte_Neutral.png'
+00:25.750  render           | Saved: 'C:\Users\whghk\.codex\worktrees\110f\Catrun\SourceArt\BlackCat\RigV2\StyleExamples\A_Matte_BentPaw.png'
+정보: 저장된 사본을 "A_Matte.blend"로 함
+STYLE_EXAMPLE_DONE A_Matte
+00:33.235  render           | Saved: 'C:\Users\whghk\.codex\worktrees\110f\Catrun\SourceArt\BlackCat\RigV2\StyleExamples\B_Clay_Neutral.png'
+00:37.547  render           | Saved: 'C:\Users\whghk\.codex\worktrees\110f\Catrun\SourceArt\BlackCat\RigV2\StyleExamples\B_Clay_BentPaw.png'
+정보: 저장된 사본을 "B_Clay.blend"로 함
+STYLE_EXAMPLE_DONE B_Clay
+00:40.703  render           | Saved: 'C:\Users\whghk\.codex\worktrees\110f\Catrun\SourceArt\BlackCat\RigV2\StyleExamples\C_Toon_Neutral.png'
+00:41.235  render           | Saved: 'C:\Users\whghk\.codex\worktrees\110f\Catrun\SourceArt\BlackCat\RigV2\StyleExamples\C_Toon_BentPaw.png'
+정보: 저장된 사본을 "C_Toon.blend"로 함
+STYLE_EXAMPLE_DONE C_Toon
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 02:38:20)
+
+Blender quit

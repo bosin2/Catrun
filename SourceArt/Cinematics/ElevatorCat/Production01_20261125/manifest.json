@@ -1,0 +1,354 @@
+{
+  "fps": 30,
+  "native_to_game_scale": 2,
+  "coordinates": "Blender -Y forward +Z up. Preview elevator is uniformly half-scale; cat mesh and armature stay scale 1. Export native meters. root bone translation already contains trajectory. Do not add a second Actor jump.",
+  "clips": [
+    {
+      "id": "C01",
+      "action": "AN_BlackCat_Elevator_LookPrepare",
+      "frames": [
+        1,
+        43
+      ],
+      "seconds": 1.4,
+      "loop": false,
+      "fbx": "FBX/AN_BlackCat_Elevator_LookPrepare.fbx",
+      "root_start_native_m": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "root_end_native_m": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "root_start_game_cm": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "root_end_game_cm": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "preview": "Previews/C01_LookPrepare.mp4"
+    },
+    {
+      "id": "C02",
+      "action": "AN_BlackCat_Elevator_JumpGrab",
+      "frames": [
+        1,
+        25
+      ],
+      "seconds": 0.8,
+      "loop": false,
+      "fbx": "FBX/AN_BlackCat_Elevator_JumpGrab.fbx",
+      "root_start_native_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "root_end_native_m": [
+        0.0,
+        -0.11500000208616257,
+        0.4449999928474426
+      ],
+      "root_start_game_cm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "root_end_game_cm": [
+        0.0,
+        -23.0,
+        89.0
+      ],
+      "preview": "Previews/C02_JumpGrab.mp4"
+    },
+    {
+      "id": "C03",
+      "action": "AN_BlackCat_Elevator_HangPull",
+      "frames": [
+        1,
+        31
+      ],
+      "seconds": 1.0,
+      "loop": false,
+      "fbx": "FBX/AN_BlackCat_Elevator_HangPull.fbx",
+      "root_start_native_m": [
+        0.0,
+        -0.11500000208616257,
+        0.4449999928474426
+      ],
+      "root_end_native_m": [
+        0.0,
+        -0.11500000208616257,
+        0.35499998927116394
+      ],
+      "root_start_game_cm": [
+        0.0,
+        -23.0,
+        89.0
+      ],
+      "root_end_game_cm": [
+        0.0,
+        -23.0,
+        71.0
+      ],
+      "preview": "Previews/C03_HangPull.mp4"
+    },
+    {
+      "id": "C04",
+      "action": "AN_BlackCat_Elevator_ReleaseLand",
+      "frames": [
+        1,
+        48
+      ],
+      "seconds": 1.5666666666666667,
+      "loop": false,
+      "fbx": "FBX/AN_BlackCat_Elevator_ReleaseLand.fbx",
+      "root_start_native_m": [
+        0.0,
+        -0.11500000208616257,
+        0.35499998927116394
+      ],
+      "root_end_native_m": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "root_start_game_cm": [
+        0.0,
+        -23.0,
+        71.0
+      ],
+      "root_end_game_cm": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "preview": "Previews/C04_ReleaseLand.mp4"
+    },
+    {
+      "id": "C05",
+      "action": "AN_BlackCat_Elevator_StartleTail",
+      "frames": [
+        1,
+        61
+      ],
+      "seconds": 2.0,
+      "loop": false,
+      "fbx": "FBX/AN_BlackCat_Elevator_StartleTail.fbx",
+      "status": "startle_complete_tail_puff_blocked",
+      "missing": "tail radial volume puff",
+      "root_start_native_m": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "root_end_native_m": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "root_start_game_cm": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "root_end_game_cm": [
+        0.0,
+        -0.0,
+        0.0
+      ],
+      "preview": "Previews/C05_StartleTail.mp4"
+    },
+    {
+      "id": "C06",
+      "action": "AN_BlackCat_Elevator_PeekDown",
+      "frames": [
+        1,
+        276
+      ],
+      "seconds": 9.166666666666666,
+      "loop": false,
+      "fbx": "FBX/AN_BlackCat_Elevator_PeekDown.fbx",
+      "root_start_native_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "root_end_native_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "root_start_game_cm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "root_end_game_cm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "preview": "Previews/C06_PeekDown.mp4"
+    },
+    {
+      "id": "C07",
+      "action": "AN_BlackCat_Elevator_RideBalance",
+      "frames": [
+        1,
+        91
+      ],
+      "seconds": 3.0,
+      "loop": true,
+      "fbx": "FBX/AN_BlackCat_Elevator_RideBalance.fbx",
+      "root_start_native_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "root_end_native_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "root_start_game_cm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "root_end_game_cm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "preview": "Previews/C07_RideBalance.mp4"
+    },
+    {
+      "id": "C08",
+      "action": "AN_BlackCat_Elevator_LoafIdle",
+      "frames": [
+        1,
+        241
+      ],
+      "seconds": 8.0,
+      "loop": true,
+      "fbx": "FBX/AN_BlackCat_Elevator_LoafIdle.fbx",
+      "root_start_native_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "root_end_native_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "root_start_game_cm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "root_end_game_cm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "preview": "Previews/C08_LoafIdle.mp4"
+    },
+    {
+      "id": "C09",
+      "action": "AN_BlackCat_Elevator_LoafStartleRise",
+      "frames": [
+        1,
+        82
+      ],
+      "seconds": 2.7,
+      "loop": false,
+      "fbx": "FBX/AN_BlackCat_Elevator_LoafStartleRise.fbx",
+      "root_start_native_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "root_end_native_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "root_start_game_cm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "root_end_game_cm": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "preview": "Previews/C09_LoafStartleRise.mp4"
+    }
+  ],
+  "master": {
+    "action": "AN_BlackCat_Elevator_MASTER_JumpPullLand",
+    "frames": [
+      1,
+      102
+    ],
+    "splits": {
+      "C02": [
+        1,
+        25
+      ],
+      "C03": [
+        25,
+        55
+      ],
+      "C04": [
+        55,
+        102
+      ]
+    }
+  },
+  "events_master": {
+    "takeoff": 7,
+    "both_front_paws_grab": 24,
+    "pull_start": 29,
+    "pull_full": 48,
+    "release": 55,
+    "landing": 73,
+    "settled": 102
+  },
+  "events": {
+    "C05": {
+      "cabin_start_impact": 9,
+      "tail_flick_peak": 12
+    },
+    "C06": {
+      "edge_arrival": 103,
+      "look_down": 133,
+      "retreat": 174
+    },
+    "C09": {
+      "loaf_read": [
+        1,
+        37
+      ],
+      "lock_impact": 38,
+      "eyes_open": 39,
+      "rise": 42,
+      "standing": 59
+    }
+  },
+  "tail": "NOT DELIVERED: radial scale puff preserved native centerline but animation-only FBX round-trip moved tail joints by up to 7.48cm. Main C05 includes startle, ear reaction, balance and tail flick only. Experimental blend retained separately, not approved for export. Minimal proposed exception: one TailPuff morph on existing mesh, no added bones; requires separate user authorization.",
+  "status": "Review delivery. C05 tail volume puff excluded. Original skin folds retained; no zero-self-intersection claim. Unreal import and runtime outside scope.",
+  "preview_sampling_fps": 15,
+  "new_skeleton_bones": 0,
+  "new_morph_targets": 0,
+  "unreal_imported": false
+}

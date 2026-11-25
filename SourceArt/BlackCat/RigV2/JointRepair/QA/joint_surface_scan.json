@@ -1,0 +1,5116 @@
+{
+  "neutral": {
+    "F_L": {
+      "intersection_pairs": 0,
+      "examples": [],
+      "min_triangle_area": 8.292896236717595e-09,
+      "near_zero_triangles": 0
+    },
+    "F_R": {
+      "intersection_pairs": 0,
+      "examples": [],
+      "min_triangle_area": 1.5970260166393948e-08,
+      "near_zero_triangles": 0
+    },
+    "H_L": {
+      "intersection_pairs": 0,
+      "examples": [],
+      "min_triangle_area": 2.2588682088667577e-08,
+      "near_zero_triangles": 0
+    },
+    "H_R": {
+      "intersection_pairs": 0,
+      "examples": [],
+      "min_triangle_area": 3.488355710125642e-08,
+      "near_zero_triangles": 0
+    }
+  },
+  "tests": {
+    "forearm_L": [
+      {
+        "intersection_pairs": 95,
+        "examples": [
+          [
+            9947,
+            10159
+          ],
+          [
+            9885,
+            10159
+          ],
+          [
+            4171,
+            9947
+          ],
+          [
+            4148,
+            9948
+          ],
+          [
+            4148,
+            9947
+          ]
+        ],
+        "min_triangle_area": 8.292143636749537e-09,
+        "near_zero_triangles": 0,
+        "angle": -90,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 86,
+        "examples": [
+          [
+            4171,
+            9947
+          ],
+          [
+            4148,
+            9947
+          ],
+          [
+            4172,
+            9947
+          ],
+          [
+            9884,
+            10159
+          ],
+          [
+            9884,
+            10160
+          ]
+        ],
+        "min_triangle_area": 8.29445732167455e-09,
+        "near_zero_triangles": 0,
+        "angle": -85,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 94,
+        "examples": [
+          [
+            4172,
+            9947
+          ],
+          [
+            4172,
+            10159
+          ],
+          [
+            4172,
+            10160
+          ],
+          [
+            4172,
+            10172
+          ],
+          [
+            9884,
+            10159
+          ]
+        ],
+        "min_triangle_area": 8.289925986823085e-09,
+        "near_zero_triangles": 0,
+        "angle": -80,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 103,
+        "examples": [
+          [
+            9884,
+            10159
+          ],
+          [
+            4172,
+            9947
+          ],
+          [
+            4172,
+            10159
+          ],
+          [
+            4209,
+            9971
+          ],
+          [
+            4208,
+            9971
+          ]
+        ],
+        "min_triangle_area": 8.28479841417469e-09,
+        "near_zero_triangles": 0,
+        "angle": -75,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 86,
+        "examples": [
+          [
+            4172,
+            9947
+          ],
+          [
+            4209,
+            9972
+          ],
+          [
+            4209,
+            9971
+          ],
+          [
+            4173,
+            10159
+          ],
+          [
+            4173,
+            10165
+          ]
+        ],
+        "min_triangle_area": 8.291879215365378e-09,
+        "near_zero_triangles": 0,
+        "angle": -70,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 76,
+        "examples": [
+          [
+            9906,
+            9972
+          ],
+          [
+            4174,
+            10173
+          ],
+          [
+            4174,
+            9952
+          ],
+          [
+            9886,
+            10173
+          ],
+          [
+            9886,
+            10174
+          ]
+        ],
+        "min_triangle_area": 8.298306177078707e-09,
+        "near_zero_triangles": 0,
+        "angle": -65,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 68,
+        "examples": [
+          [
+            4175,
+            10186
+          ],
+          [
+            4175,
+            10188
+          ],
+          [
+            4175,
+            10187
+          ],
+          [
+            4175,
+            10176
+          ],
+          [
+            4152,
+            10186
+          ]
+        ],
+        "min_triangle_area": 8.297876517847012e-09,
+        "near_zero_triangles": 0,
+        "angle": -60,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 14,
+        "examples": [
+          [
+            4151,
+            9958
+          ],
+          [
+            4151,
+            9957
+          ],
+          [
+            4176,
+            9958
+          ],
+          [
+            4152,
+            9958
+          ],
+          [
+            4175,
+            9958
+          ]
+        ],
+        "min_triangle_area": 8.29704236290696e-09,
+        "near_zero_triangles": 0,
+        "angle": -55,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 8.295675245217417e-09,
+        "near_zero_triangles": 0,
+        "angle": -50,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 8.294064591336992e-09,
+        "near_zero_triangles": 0,
+        "angle": -45,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 8.292399989448442e-09,
+        "near_zero_triangles": 0,
+        "angle": -40,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 8.296726698342504e-09,
+        "near_zero_triangles": 0,
+        "angle": -35,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 8.294608944511368e-09,
+        "near_zero_triangles": 0,
+        "angle": -30,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 8.292320533245488e-09,
+        "near_zero_triangles": 0,
+        "angle": -25,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 8.284333760803136e-09,
+        "near_zero_triangles": 0,
+        "angle": -20,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 8.288863097964616e-09,
+        "near_zero_triangles": 0,
+        "angle": -15,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 8.294363498930253e-09,
+        "near_zero_triangles": 0,
+        "angle": -10,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 8.292997100513068e-09,
+        "near_zero_triangles": 0,
+        "angle": -5,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 8.292896236717595e-09,
+        "near_zero_triangles": 0,
+        "angle": 0,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 8.293209553403193e-09,
+        "near_zero_triangles": 0,
+        "angle": 5,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 8.29396811872963e-09,
+        "near_zero_triangles": 0,
+        "angle": 10,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 8.29520192295215e-09,
+        "near_zero_triangles": 0,
+        "angle": 15,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 8.292369648796497e-09,
+        "near_zero_triangles": 0,
+        "angle": 20,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 8.2885957568102e-09,
+        "near_zero_triangles": 0,
+        "angle": 25,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 8.291566483189799e-09,
+        "near_zero_triangles": 0,
+        "angle": 30,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 8.295126066014215e-09,
+        "near_zero_triangles": 0,
+        "angle": 35,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 8.29741403877246e-09,
+        "near_zero_triangles": 0,
+        "angle": 40,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 8.296353970940125e-09,
+        "near_zero_triangles": 0,
+        "angle": 45,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 8.295978502065323e-09,
+        "near_zero_triangles": 0,
+        "angle": 50,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 8.292742866257388e-09,
+        "near_zero_triangles": 0,
+        "angle": 55,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 8.29132404015887e-09,
+        "near_zero_triangles": 0,
+        "angle": 60,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 8.299281969361119e-09,
+        "near_zero_triangles": 0,
+        "angle": 65,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 8.295878547226103e-09,
+        "near_zero_triangles": 0,
+        "angle": 70,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 8.290348207290237e-09,
+        "near_zero_triangles": 0,
+        "angle": 75,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 9,
+        "examples": [
+          [
+            4166,
+            9999
+          ],
+          [
+            4166,
+            10000
+          ],
+          [
+            4166,
+            9995
+          ],
+          [
+            4166,
+            9940
+          ],
+          [
+            9878,
+            9940
+          ]
+        ],
+        "min_triangle_area": 8.288572782867951e-09,
+        "near_zero_triangles": 0,
+        "angle": 80,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 30,
+        "examples": [
+          [
+            4166,
+            10000
+          ],
+          [
+            4166,
+            10104
+          ],
+          [
+            4165,
+            10000
+          ],
+          [
+            4165,
+            9999
+          ],
+          [
+            4163,
+            10104
+          ]
+        ],
+        "min_triangle_area": 8.296556964365657e-09,
+        "near_zero_triangles": 0,
+        "angle": 85,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 64,
+        "examples": [
+          [
+            4120,
+            10006
+          ],
+          [
+            4120,
+            9999
+          ],
+          [
+            4118,
+            4166
+          ],
+          [
+            4115,
+            4166
+          ],
+          [
+            4115,
+            4163
+          ]
+        ],
+        "min_triangle_area": 8.293185765923972e-09,
+        "near_zero_triangles": 0,
+        "angle": 90,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 71,
+        "examples": [
+          [
+            4120,
+            10006
+          ],
+          [
+            4120,
+            10122
+          ],
+          [
+            4120,
+            4168
+          ],
+          [
+            4113,
+            4161
+          ],
+          [
+            4114,
+            4161
+          ]
+        ],
+        "min_triangle_area": 8.290563412837004e-09,
+        "near_zero_triangles": 0,
+        "angle": 95,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 75,
+        "examples": [
+          [
+            4120,
+            4168
+          ],
+          [
+            4113,
+            4161
+          ],
+          [
+            4114,
+            4161
+          ],
+          [
+            4114,
+            10093
+          ],
+          [
+            4114,
+            10091
+          ]
+        ],
+        "min_triangle_area": 8.293797597804394e-09,
+        "near_zero_triangles": 0,
+        "angle": 100,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 64,
+        "examples": [
+          [
+            4114,
+            4161
+          ],
+          [
+            4113,
+            4161
+          ],
+          [
+            4168,
+            10122
+          ],
+          [
+            4120,
+            4168
+          ],
+          [
+            9881,
+            10122
+          ]
+        ],
+        "min_triangle_area": 8.291515983225792e-09,
+        "near_zero_triangles": 0,
+        "angle": 105,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 58,
+        "examples": [
+          [
+            9935,
+            10113
+          ],
+          [
+            9935,
+            10115
+          ],
+          [
+            9935,
+            10114
+          ],
+          [
+            9935,
+            10117
+          ],
+          [
+            9935,
+            10116
+          ]
+        ],
+        "min_triangle_area": 8.296861275898722e-09,
+        "near_zero_triangles": 0,
+        "angle": 110,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 66,
+        "examples": [
+          [
+            4112,
+            9981
+          ],
+          [
+            4112,
+            9925
+          ],
+          [
+            4112,
+            10093
+          ],
+          [
+            4112,
+            10092
+          ],
+          [
+            4112,
+            10091
+          ]
+        ],
+        "min_triangle_area": 8.301717064492703e-09,
+        "near_zero_triangles": 0,
+        "angle": 115,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 68,
+        "examples": [
+          [
+            4112,
+            9981
+          ],
+          [
+            4112,
+            9925
+          ],
+          [
+            4112,
+            10093
+          ],
+          [
+            4112,
+            10092
+          ],
+          [
+            4112,
+            10091
+          ]
+        ],
+        "min_triangle_area": 8.291556082757925e-09,
+        "near_zero_triangles": 0,
+        "angle": 120,
+        "finite": true
+      }
+    ],
+    "forearm_R": [
+      {
+        "intersection_pairs": 79,
+        "examples": [
+          [
+            3827,
+            3899
+          ],
+          [
+            3827,
+            3898
+          ],
+          [
+            3851,
+            3898
+          ],
+          [
+            3850,
+            3898
+          ],
+          [
+            3860,
+            3885
+          ]
+        ],
+        "min_triangle_area": 1.5969924296214998e-08,
+        "near_zero_triangles": 0,
+        "angle": -90,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 68,
+        "examples": [
+          [
+            3827,
+            3898
+          ],
+          [
+            3850,
+            3898
+          ],
+          [
+            3851,
+            3898
+          ],
+          [
+            3837,
+            3908
+          ],
+          [
+            3836,
+            3909
+          ]
+        ],
+        "min_triangle_area": 1.597080421518575e-08,
+        "near_zero_triangles": 0,
+        "angle": -85,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 71,
+        "examples": [
+          [
+            3851,
+            3898
+          ],
+          [
+            3885,
+            3995
+          ],
+          [
+            3885,
+            3994
+          ],
+          [
+            3860,
+            3908
+          ],
+          [
+            3861,
+            3908
+          ]
+        ],
+        "min_triangle_area": 1.596840076314922e-08,
+        "near_zero_triangles": 0,
+        "angle": -80,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 73,
+        "examples": [
+          [
+            3851,
+            3898
+          ],
+          [
+            3860,
+            3908
+          ],
+          [
+            3860,
+            3909
+          ],
+          [
+            3860,
+            3994
+          ],
+          [
+            3861,
+            3908
+          ]
+        ],
+        "min_triangle_area": 1.5967160633736814e-08,
+        "near_zero_triangles": 0,
+        "angle": -75,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 64,
+        "examples": [
+          [
+            3851,
+            3898
+          ],
+          [
+            3860,
+            3909
+          ],
+          [
+            3861,
+            3909
+          ],
+          [
+            3861,
+            3908
+          ],
+          [
+            3852,
+            3978
+          ]
+        ],
+        "min_triangle_area": 1.5970288316385367e-08,
+        "near_zero_triangles": 0,
+        "angle": -70,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 68,
+        "examples": [
+          [
+            3884,
+            3909
+          ],
+          [
+            3861,
+            3909
+          ],
+          [
+            3861,
+            3906
+          ],
+          [
+            3829,
+            3978
+          ],
+          [
+            3829,
+            3901
+          ]
+        ],
+        "min_triangle_area": 1.5969870282736155e-08,
+        "near_zero_triangles": 0,
+        "angle": -65,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 46,
+        "examples": [
+          [
+            3831,
+            3981
+          ],
+          [
+            3831,
+            3980
+          ],
+          [
+            3854,
+            3981
+          ],
+          [
+            3854,
+            3980
+          ],
+          [
+            3830,
+            3981
+          ]
+        ],
+        "min_triangle_area": 1.597024330629867e-08,
+        "near_zero_triangles": 0,
+        "angle": -60,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 15,
+        "examples": [
+          [
+            3882,
+            3907
+          ],
+          [
+            3854,
+            3903
+          ],
+          [
+            3831,
+            3903
+          ],
+          [
+            3855,
+            3903
+          ],
+          [
+            3830,
+            3903
+          ]
+        ],
+        "min_triangle_area": 1.5970309302851187e-08,
+        "near_zero_triangles": 0,
+        "angle": -55,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 1.597074038216963e-08,
+        "near_zero_triangles": 0,
+        "angle": -50,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 1.5967991766044443e-08,
+        "near_zero_triangles": 0,
+        "angle": -45,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 1.5967040686670846e-08,
+        "near_zero_triangles": 0,
+        "angle": -40,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 1.597036716839649e-08,
+        "near_zero_triangles": 0,
+        "angle": -35,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 1.5969922375358513e-08,
+        "near_zero_triangles": 0,
+        "angle": -30,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 1.5970009562570084e-08,
+        "near_zero_triangles": 0,
+        "angle": -25,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 1.5969743219714517e-08,
+        "near_zero_triangles": 0,
+        "angle": -20,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 1.5970594684264847e-08,
+        "near_zero_triangles": 0,
+        "angle": -15,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 1.596742018896764e-08,
+        "near_zero_triangles": 0,
+        "angle": -10,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 1.5970220394826664e-08,
+        "near_zero_triangles": 0,
+        "angle": -5,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 1.5970260166393948e-08,
+        "near_zero_triangles": 0,
+        "angle": 0,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 1.596916016666288e-08,
+        "near_zero_triangles": 0,
+        "angle": 5,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 1.5970330121429696e-08,
+        "near_zero_triangles": 0,
+        "angle": 10,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 1.5970062532912496e-08,
+        "near_zero_triangles": 0,
+        "angle": 15,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 1.5969610792972838e-08,
+        "near_zero_triangles": 0,
+        "angle": 20,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 1.5970258946733933e-08,
+        "near_zero_triangles": 0,
+        "angle": 25,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 1.596812977190328e-08,
+        "near_zero_triangles": 0,
+        "angle": 30,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 1.5970661183868362e-08,
+        "near_zero_triangles": 0,
+        "angle": 35,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 1.5967023425453758e-08,
+        "near_zero_triangles": 0,
+        "angle": 40,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 1.596839541995755e-08,
+        "near_zero_triangles": 0,
+        "angle": 45,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 1.5970235265073097e-08,
+        "near_zero_triangles": 0,
+        "angle": 50,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 1.5969985187107347e-08,
+        "near_zero_triangles": 0,
+        "angle": 55,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 1.597045305385815e-08,
+        "near_zero_triangles": 0,
+        "angle": 60,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 1.597052990265609e-08,
+        "near_zero_triangles": 0,
+        "angle": 65,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 1.5967255697110923e-08,
+        "near_zero_triangles": 0,
+        "angle": 70,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 1.5967866335050716e-08,
+        "near_zero_triangles": 0,
+        "angle": 75,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 9,
+        "examples": [
+          [
+            3845,
+            3917
+          ],
+          [
+            3845,
+            3916
+          ],
+          [
+            3845,
+            3893
+          ],
+          [
+            3842,
+            3917
+          ],
+          [
+            3842,
+            3914
+          ]
+        ],
+        "min_triangle_area": 1.5967608551939816e-08,
+        "near_zero_triangles": 0,
+        "angle": 80,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 26,
+        "examples": [
+          [
+            3845,
+            3917
+          ],
+          [
+            3845,
+            3952
+          ],
+          [
+            3845,
+            3951
+          ],
+          [
+            3845,
+            3949
+          ],
+          [
+            3844,
+            3917
+          ]
+        ],
+        "min_triangle_area": 1.5968539055405842e-08,
+        "near_zero_triangles": 0,
+        "angle": 85,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 41,
+        "examples": [
+          [
+            3799,
+            3916
+          ],
+          [
+            3799,
+            3919
+          ],
+          [
+            3797,
+            3845
+          ],
+          [
+            3794,
+            3842
+          ],
+          [
+            3795,
+            3842
+          ]
+        ],
+        "min_triangle_area": 1.5970006256864983e-08,
+        "near_zero_triangles": 0,
+        "angle": 90,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 70,
+        "examples": [
+          [
+            3796,
+            3847
+          ],
+          [
+            3796,
+            3844
+          ],
+          [
+            3792,
+            3840
+          ],
+          [
+            3793,
+            3840
+          ],
+          [
+            3793,
+            3913
+          ]
+        ],
+        "min_triangle_area": 1.596989115756033e-08,
+        "near_zero_triangles": 0,
+        "angle": 95,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 66,
+        "examples": [
+          [
+            3796,
+            3847
+          ],
+          [
+            3796,
+            3844
+          ],
+          [
+            3792,
+            3840
+          ],
+          [
+            3793,
+            3840
+          ],
+          [
+            3799,
+            3847
+          ]
+        ],
+        "min_triangle_area": 1.597044459947708e-08,
+        "near_zero_triangles": 0,
+        "angle": 100,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 52,
+        "examples": [
+          [
+            3792,
+            3840
+          ],
+          [
+            3793,
+            3840
+          ],
+          [
+            3847,
+            3957
+          ],
+          [
+            3870,
+            3957
+          ],
+          [
+            3799,
+            3847
+          ]
+        ],
+        "min_triangle_area": 1.5967003871502407e-08,
+        "near_zero_triangles": 0,
+        "angle": 105,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 50,
+        "examples": [
+          [
+            3893,
+            3951
+          ],
+          [
+            3893,
+            3950
+          ],
+          [
+            3893,
+            3949
+          ],
+          [
+            3799,
+            3847
+          ],
+          [
+            3796,
+            3847
+          ]
+        ],
+        "min_triangle_area": 1.5968287771859438e-08,
+        "near_zero_triangles": 0,
+        "angle": 110,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 56,
+        "examples": [
+          [
+            3791,
+            3912
+          ],
+          [
+            3791,
+            3889
+          ],
+          [
+            3791,
+            3913
+          ],
+          [
+            3791,
+            3941
+          ],
+          [
+            3791,
+            3886
+          ]
+        ],
+        "min_triangle_area": 1.596714497971945e-08,
+        "near_zero_triangles": 0,
+        "angle": 115,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 55,
+        "examples": [
+          [
+            3791,
+            3889
+          ],
+          [
+            3791,
+            3912
+          ],
+          [
+            3791,
+            3913
+          ],
+          [
+            3791,
+            3941
+          ],
+          [
+            3791,
+            3886
+          ]
+        ],
+        "min_triangle_area": 1.596928293702104e-08,
+        "near_zero_triangles": 0,
+        "angle": 120,
+        "finite": true
+      }
+    ],
+    "paw_F_L": [
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 8.292904362329665e-09,
+        "near_zero_triangles": 0,
+        "angle": -60,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 8.29290293911063e-09,
+        "near_zero_triangles": 0,
+        "angle": -55,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 8.292900704973046e-09,
+        "near_zero_triangles": 0,
+        "angle": -50,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 8.292901515916654e-09,
+        "near_zero_triangles": 0,
+        "angle": -45,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 8.292896236717595e-09,
+        "near_zero_triangles": 0,
+        "angle": -40,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 8.292897047673726e-09,
+        "near_zero_triangles": 0,
+        "angle": -35,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 8.29289481356212e-09,
+        "near_zero_triangles": 0,
+        "angle": -30,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 8.292892173972018e-09,
+        "near_zero_triangles": 0,
+        "angle": -25,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 8.29289298494365e-09,
+        "near_zero_triangles": 0,
+        "angle": -20,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 8.29289298494365e-09,
+        "near_zero_triangles": 0,
+        "angle": -15,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 8.29289257945709e-09,
+        "near_zero_triangles": 0,
+        "angle": -10,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 8.29289440808018e-09,
+        "near_zero_triangles": 0,
+        "angle": -5,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 8.292896236717595e-09,
+        "near_zero_triangles": 0,
+        "angle": 0,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 8.292900704973046e-09,
+        "near_zero_triangles": 0,
+        "angle": 5,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 8.29290740740552e-09,
+        "near_zero_triangles": 0,
+        "angle": 10,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 8.292913704446368e-09,
+        "near_zero_triangles": 0,
+        "angle": 15,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 8.29292223576965e-09,
+        "near_zero_triangles": 0,
+        "angle": 20,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 8.292932596045493e-09,
+        "near_zero_triangles": 0,
+        "angle": 25,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 8.292942956554233e-09,
+        "near_zero_triangles": 0,
+        "angle": 30,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 8.292958191330969e-09,
+        "near_zero_triangles": 0,
+        "angle": 35,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 8.29297221042593e-09,
+        "near_zero_triangles": 0,
+        "angle": 40,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 8.292991914903521e-09,
+        "near_zero_triangles": 0,
+        "angle": 45,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 8.293010809398016e-09,
+        "near_zero_triangles": 0,
+        "angle": 50,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 8.293034173803707e-09,
+        "near_zero_triangles": 0,
+        "angle": 55,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 8.293057134018096e-09,
+        "near_zero_triangles": 0,
+        "angle": 60,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 21,
+        "examples": [
+          [
+            4046,
+            4117
+          ],
+          [
+            4046,
+            4118
+          ],
+          [
+            4046,
+            4094
+          ],
+          [
+            4043,
+            4118
+          ],
+          [
+            4043,
+            4115
+          ]
+        ],
+        "min_triangle_area": 8.293084970048989e-09,
+        "near_zero_triangles": 0,
+        "angle": 65,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 24,
+        "examples": [
+          [
+            4069,
+            4120
+          ],
+          [
+            4046,
+            4117
+          ],
+          [
+            4046,
+            4118
+          ],
+          [
+            4046,
+            4120
+          ],
+          [
+            4044,
+            4116
+          ]
+        ],
+        "min_triangle_area": 8.293111997220115e-09,
+        "near_zero_triangles": 0,
+        "angle": 70,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 28,
+        "examples": [
+          [
+            4046,
+            4117
+          ],
+          [
+            4046,
+            4118
+          ],
+          [
+            4046,
+            4142
+          ],
+          [
+            4046,
+            4141
+          ],
+          [
+            4046,
+            4120
+          ]
+        ],
+        "min_triangle_area": 8.293143495932534e-09,
+        "near_zero_triangles": 0,
+        "angle": 75,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 34,
+        "examples": [
+          [
+            4048,
+            4167
+          ],
+          [
+            4045,
+            4142
+          ],
+          [
+            4045,
+            4165
+          ],
+          [
+            4045,
+            4141
+          ],
+          [
+            4045,
+            4167
+          ]
+        ],
+        "min_triangle_area": 8.292624264974431e-09,
+        "near_zero_triangles": 0,
+        "angle": 80,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 29,
+        "examples": [
+          [
+            4048,
+            4167
+          ],
+          [
+            4048,
+            4168
+          ],
+          [
+            4048,
+            4144
+          ],
+          [
+            4048,
+            4143
+          ],
+          [
+            4045,
+            4165
+          ]
+        ],
+        "min_triangle_area": 8.293216655096821e-09,
+        "near_zero_triangles": 0,
+        "angle": 85,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 33,
+        "examples": [
+          [
+            4045,
+            4165
+          ],
+          [
+            4045,
+            4166
+          ],
+          [
+            4045,
+            4168
+          ],
+          [
+            4022,
+            4166
+          ],
+          [
+            4043,
+            4164
+          ]
+        ],
+        "min_triangle_area": 8.292698623517015e-09,
+        "near_zero_triangles": 0,
+        "angle": 90,
+        "finite": true
+      }
+    ],
+    "paw_F_R": [
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 1.5968645371715993e-08,
+        "near_zero_triangles": 0,
+        "angle": -60,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 1.597023469327284e-08,
+        "near_zero_triangles": 0,
+        "angle": -55,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 1.5970247429511177e-08,
+        "near_zero_triangles": 0,
+        "angle": -50,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 1.5970247429511177e-08,
+        "near_zero_triangles": 0,
+        "angle": -45,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 1.5970260166393948e-08,
+        "near_zero_triangles": 0,
+        "angle": -40,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 1.597026653507699e-08,
+        "near_zero_triangles": 0,
+        "angle": -35,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 1.5970183337667142e-08,
+        "near_zero_triangles": 0,
+        "angle": -30,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 1.5970131140379917e-08,
+        "near_zero_triangles": 0,
+        "angle": -25,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 1.5970072570337773e-08,
+        "near_zero_triangles": 0,
+        "angle": -20,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 1.5970036361871942e-08,
+        "near_zero_triangles": 0,
+        "angle": -15,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 1.5970131140379917e-08,
+        "near_zero_triangles": 0,
+        "angle": -10,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 1.5970241907739435e-08,
+        "near_zero_triangles": 0,
+        "angle": -5,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 1.5970260166393948e-08,
+        "near_zero_triangles": 0,
+        "angle": 0,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 1.5970188858804552e-08,
+        "near_zero_triangles": 0,
+        "angle": 5,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 1.597046487439817e-08,
+        "near_zero_triangles": 0,
+        "angle": 10,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 1.5970092081039354e-08,
+        "near_zero_triangles": 0,
+        "angle": 15,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 1.5969765810393503e-08,
+        "near_zero_triangles": 0,
+        "angle": 20,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 1.5970212770691772e-08,
+        "near_zero_triangles": 0,
+        "angle": 25,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 1.5970122376634553e-08,
+        "near_zero_triangles": 0,
+        "angle": 30,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 1.596996714099144e-08,
+        "near_zero_triangles": 0,
+        "angle": 35,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 1.5968709340483858e-08,
+        "near_zero_triangles": 0,
+        "angle": 40,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 1.59699992009376e-08,
+        "near_zero_triangles": 0,
+        "angle": 45,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 1.597015770934226e-08,
+        "near_zero_triangles": 0,
+        "angle": 50,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 1.5970207252204093e-08,
+        "near_zero_triangles": 0,
+        "angle": 55,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 1.597001131684757e-08,
+        "near_zero_triangles": 0,
+        "angle": 60,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 21,
+        "examples": [
+          [
+            3748,
+            3798
+          ],
+          [
+            3748,
+            3773
+          ],
+          [
+            3725,
+            3796
+          ],
+          [
+            3725,
+            3797
+          ],
+          [
+            3725,
+            3794
+          ]
+        ],
+        "min_triangle_area": 1.5970115701390096e-08,
+        "near_zero_triangles": 0,
+        "angle": 65,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 25,
+        "examples": [
+          [
+            3748,
+            3799
+          ],
+          [
+            3725,
+            3796
+          ],
+          [
+            3725,
+            3797
+          ],
+          [
+            3725,
+            3794
+          ],
+          [
+            3725,
+            3799
+          ]
+        ],
+        "min_triangle_area": 1.5970152664335708e-08,
+        "near_zero_triangles": 0,
+        "angle": 70,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 28,
+        "examples": [
+          [
+            3725,
+            3796
+          ],
+          [
+            3725,
+            3820
+          ],
+          [
+            3725,
+            3821
+          ],
+          [
+            3725,
+            3797
+          ],
+          [
+            3725,
+            3818
+          ]
+        ],
+        "min_triangle_area": 1.5969039871408102e-08,
+        "near_zero_triangles": 0,
+        "angle": 75,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 34,
+        "examples": [
+          [
+            3727,
+            3846
+          ],
+          [
+            3724,
+            3821
+          ],
+          [
+            3724,
+            3844
+          ],
+          [
+            3724,
+            3846
+          ],
+          [
+            3724,
+            3823
+          ]
+        ],
+        "min_triangle_area": 1.59691308933257e-08,
+        "near_zero_triangles": 0,
+        "angle": 80,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 29,
+        "examples": [
+          [
+            3724,
+            3844
+          ],
+          [
+            3724,
+            3845
+          ],
+          [
+            3724,
+            3847
+          ],
+          [
+            3725,
+            3845
+          ],
+          [
+            3725,
+            3842
+          ]
+        ],
+        "min_triangle_area": 1.5970141915585834e-08,
+        "near_zero_triangles": 0,
+        "angle": 85,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 33,
+        "examples": [
+          [
+            3701,
+            3845
+          ],
+          [
+            3701,
+            3842
+          ],
+          [
+            3698,
+            3843
+          ],
+          [
+            3698,
+            3842
+          ],
+          [
+            3699,
+            3843
+          ]
+        ],
+        "min_triangle_area": 1.596958701333114e-08,
+        "near_zero_triangles": 0,
+        "angle": 90,
+        "finite": true
+      }
+    ],
+    "shin_L": [
+      {
+        "intersection_pairs": 14,
+        "examples": [
+          [
+            3454,
+            3505
+          ],
+          [
+            3454,
+            3502
+          ],
+          [
+            3454,
+            3479
+          ],
+          [
+            3454,
+            3504
+          ],
+          [
+            3431,
+            3505
+          ]
+        ],
+        "min_triangle_area": 2.258936230504227e-08,
+        "near_zero_triangles": 0,
+        "angle": -90,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 2,
+        "examples": [
+          [
+            3460,
+            3482
+          ],
+          [
+            3460,
+            3485
+          ]
+        ],
+        "min_triangle_area": 2.2589979847102807e-08,
+        "near_zero_triangles": 0,
+        "angle": -85,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.259086878937955e-08,
+        "near_zero_triangles": 0,
+        "angle": -80,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.2590329647824815e-08,
+        "near_zero_triangles": 0,
+        "angle": -75,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.2585022136046445e-08,
+        "near_zero_triangles": 0,
+        "angle": -70,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.258188971697664e-08,
+        "near_zero_triangles": 0,
+        "angle": -65,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.258385071532141e-08,
+        "near_zero_triangles": 0,
+        "angle": -60,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.2584618956302137e-08,
+        "near_zero_triangles": 0,
+        "angle": -55,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.259091096847188e-08,
+        "near_zero_triangles": 0,
+        "angle": -50,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.2583284949397202e-08,
+        "near_zero_triangles": 0,
+        "angle": -45,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.2586757599260323e-08,
+        "near_zero_triangles": 0,
+        "angle": -40,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.2592552587818037e-08,
+        "near_zero_triangles": 0,
+        "angle": -35,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.2582656093826098e-08,
+        "near_zero_triangles": 0,
+        "angle": -30,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.2586999943984102e-08,
+        "near_zero_triangles": 0,
+        "angle": -25,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.258644057094366e-08,
+        "near_zero_triangles": 0,
+        "angle": -20,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.2588245036768958e-08,
+        "near_zero_triangles": 0,
+        "angle": -15,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.2587879848550064e-08,
+        "near_zero_triangles": 0,
+        "angle": -10,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.25888051381789e-08,
+        "near_zero_triangles": 0,
+        "angle": -5,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.2588682088667577e-08,
+        "near_zero_triangles": 0,
+        "angle": 0,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.2587058982424078e-08,
+        "near_zero_triangles": 0,
+        "angle": 5,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.2583062193253916e-08,
+        "near_zero_triangles": 0,
+        "angle": 10,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.2584033837644933e-08,
+        "near_zero_triangles": 0,
+        "angle": 15,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.258763760202198e-08,
+        "near_zero_triangles": 0,
+        "angle": 20,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.2589703895450258e-08,
+        "near_zero_triangles": 0,
+        "angle": 25,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.2588044658495825e-08,
+        "near_zero_triangles": 0,
+        "angle": 30,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.2587281444054494e-08,
+        "near_zero_triangles": 0,
+        "angle": 35,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.258598583967567e-08,
+        "near_zero_triangles": 0,
+        "angle": 40,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 24,
+        "examples": [
+          [
+            3425,
+            3494
+          ],
+          [
+            3425,
+            3471
+          ],
+          [
+            3425,
+            3473
+          ],
+          [
+            3425,
+            3470
+          ],
+          [
+            3449,
+            3494
+          ]
+        ],
+        "min_triangle_area": 2.258315847451457e-08,
+        "near_zero_triangles": 0,
+        "angle": 45,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 25,
+        "examples": [
+          [
+            3423,
+            3494
+          ],
+          [
+            3423,
+            3495
+          ],
+          [
+            3421,
+            3493
+          ],
+          [
+            3420,
+            3492
+          ],
+          [
+            3420,
+            3495
+          ]
+        ],
+        "min_triangle_area": 2.2588585969400778e-08,
+        "near_zero_triangles": 0,
+        "angle": 50,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 53,
+        "examples": [
+          [
+            3425,
+            3531
+          ],
+          [
+            3425,
+            3530
+          ],
+          [
+            3425,
+            3529
+          ],
+          [
+            3425,
+            3494
+          ],
+          [
+            3425,
+            3495
+          ]
+        ],
+        "min_triangle_area": 2.2583205914027344e-08,
+        "near_zero_triangles": 0,
+        "angle": 55,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 59,
+        "examples": [
+          [
+            3447,
+            3530
+          ],
+          [
+            3447,
+            3494
+          ],
+          [
+            3447,
+            3495
+          ],
+          [
+            3444,
+            3528
+          ],
+          [
+            3444,
+            3527
+          ]
+        ],
+        "min_triangle_area": 2.2588074391486033e-08,
+        "near_zero_triangles": 0,
+        "angle": 60,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 58,
+        "examples": [
+          [
+            3471,
+            3529
+          ],
+          [
+            3471,
+            3530
+          ],
+          [
+            3473,
+            3529
+          ],
+          [
+            3473,
+            3530
+          ],
+          [
+            3473,
+            3531
+          ]
+        ],
+        "min_triangle_area": 2.2589880290094137e-08,
+        "near_zero_triangles": 0,
+        "angle": 65,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 60,
+        "examples": [
+          [
+            3379,
+            3473
+          ],
+          [
+            3379,
+            3496
+          ],
+          [
+            3379,
+            3472
+          ],
+          [
+            3473,
+            3531
+          ],
+          [
+            3473,
+            3530
+          ]
+        ],
+        "min_triangle_area": 2.2585989407808192e-08,
+        "near_zero_triangles": 0,
+        "angle": 70,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 60,
+        "examples": [
+          [
+            3379,
+            3497
+          ],
+          [
+            3379,
+            3496
+          ],
+          [
+            3379,
+            3534
+          ],
+          [
+            3379,
+            3535
+          ],
+          [
+            3379,
+            3536
+          ]
+        ],
+        "min_triangle_area": 2.2586300121493626e-08,
+        "near_zero_triangles": 0,
+        "angle": 75,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 45,
+        "examples": [
+          [
+            3468,
+            3529
+          ],
+          [
+            3468,
+            3530
+          ],
+          [
+            3468,
+            3528
+          ],
+          [
+            3467,
+            3518
+          ],
+          [
+            3467,
+            3519
+          ]
+        ],
+        "min_triangle_area": 2.2586469123835325e-08,
+        "near_zero_triangles": 0,
+        "angle": 80,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 44,
+        "examples": [
+          [
+            3468,
+            3529
+          ],
+          [
+            3468,
+            3530
+          ],
+          [
+            3473,
+            3534
+          ],
+          [
+            3469,
+            3529
+          ],
+          [
+            3469,
+            3528
+          ]
+        ],
+        "min_triangle_area": 2.2588800145710284e-08,
+        "near_zero_triangles": 0,
+        "angle": 85,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 50,
+        "examples": [
+          [
+            3469,
+            3529
+          ],
+          [
+            3469,
+            3530
+          ],
+          [
+            3469,
+            3528
+          ],
+          [
+            3467,
+            3517
+          ],
+          [
+            3467,
+            3519
+          ]
+        ],
+        "min_triangle_area": 2.2586858242453143e-08,
+        "near_zero_triangles": 0,
+        "angle": 90,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 47,
+        "examples": [
+          [
+            3492,
+            3530
+          ],
+          [
+            3467,
+            3518
+          ],
+          [
+            3467,
+            3517
+          ],
+          [
+            3467,
+            3519
+          ],
+          [
+            3378,
+            3538
+          ]
+        ],
+        "min_triangle_area": 2.259043487463856e-08,
+        "near_zero_triangles": 0,
+        "angle": 95,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 48,
+        "examples": [
+          [
+            3473,
+            3534
+          ],
+          [
+            3492,
+            3530
+          ],
+          [
+            3467,
+            3519
+          ],
+          [
+            3467,
+            3518
+          ],
+          [
+            3467,
+            3517
+          ]
+        ],
+        "min_triangle_area": 2.258686137835477e-08,
+        "near_zero_triangles": 0,
+        "angle": 100,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 49,
+        "examples": [
+          [
+            3471,
+            3529
+          ],
+          [
+            3471,
+            3530
+          ],
+          [
+            3468,
+            3529
+          ],
+          [
+            3468,
+            3530
+          ],
+          [
+            3473,
+            3534
+          ]
+        ],
+        "min_triangle_area": 2.259156869960242e-08,
+        "near_zero_triangles": 0,
+        "angle": 105,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 44,
+        "examples": [
+          [
+            3473,
+            3534
+          ],
+          [
+            3471,
+            3530
+          ],
+          [
+            3468,
+            3530
+          ],
+          [
+            3469,
+            3528
+          ],
+          [
+            3467,
+            3520
+          ]
+        ],
+        "min_triangle_area": 2.2579770930548398e-08,
+        "near_zero_triangles": 0,
+        "angle": 110,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 53,
+        "examples": [
+          [
+            3470,
+            3532
+          ],
+          [
+            3471,
+            3532
+          ],
+          [
+            3471,
+            3531
+          ],
+          [
+            3471,
+            3530
+          ],
+          [
+            3466,
+            3523
+          ]
+        ],
+        "min_triangle_area": 2.2590080839641723e-08,
+        "near_zero_triangles": 0,
+        "angle": 115,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 56,
+        "examples": [
+          [
+            3473,
+            3534
+          ],
+          [
+            3473,
+            3535
+          ],
+          [
+            3473,
+            3536
+          ],
+          [
+            3380,
+            3534
+          ],
+          [
+            3380,
+            3496
+          ]
+        ],
+        "min_triangle_area": 2.2589869181852164e-08,
+        "near_zero_triangles": 0,
+        "angle": 120,
+        "finite": true
+      }
+    ],
+    "shin_R": [
+      {
+        "intersection_pairs": 14,
+        "examples": [
+          [
+            3111,
+            3182
+          ],
+          [
+            3111,
+            3185
+          ],
+          [
+            3134,
+            3182
+          ],
+          [
+            3134,
+            3185
+          ],
+          [
+            3134,
+            3159
+          ]
+        ],
+        "min_triangle_area": 3.4884296238827046e-08,
+        "near_zero_triangles": 0,
+        "angle": -90,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 2,
+        "examples": [
+          [
+            3140,
+            3162
+          ],
+          [
+            3140,
+            3165
+          ]
+        ],
+        "min_triangle_area": 3.4883754977842976e-08,
+        "near_zero_triangles": 0,
+        "angle": -85,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.488387219563278e-08,
+        "near_zero_triangles": 0,
+        "angle": -80,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.4886571625023526e-08,
+        "near_zero_triangles": 0,
+        "angle": -75,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.4884426919020226e-08,
+        "near_zero_triangles": 0,
+        "angle": -70,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.488536305431304e-08,
+        "near_zero_triangles": 0,
+        "angle": -65,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.488146216260073e-08,
+        "near_zero_triangles": 0,
+        "angle": -60,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.488297512132623e-08,
+        "near_zero_triangles": 0,
+        "angle": -55,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.488251140914295e-08,
+        "near_zero_triangles": 0,
+        "angle": -50,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.488513528852205e-08,
+        "near_zero_triangles": 0,
+        "angle": -45,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.4883733300102087e-08,
+        "near_zero_triangles": 0,
+        "angle": -40,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.488495892205086e-08,
+        "near_zero_triangles": 0,
+        "angle": -35,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.488532216203645e-08,
+        "near_zero_triangles": 0,
+        "angle": -30,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.488336710319467e-08,
+        "near_zero_triangles": 0,
+        "angle": -25,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.48844261593963e-08,
+        "near_zero_triangles": 0,
+        "angle": -20,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.488342267093105e-08,
+        "near_zero_triangles": 0,
+        "angle": -15,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.4882481624423046e-08,
+        "near_zero_triangles": 0,
+        "angle": -10,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.4882433598205726e-08,
+        "near_zero_triangles": 0,
+        "angle": -5,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.488355710125642e-08,
+        "near_zero_triangles": 0,
+        "angle": 0,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.4884194128224925e-08,
+        "near_zero_triangles": 0,
+        "angle": 5,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.4881174951927505e-08,
+        "near_zero_triangles": 0,
+        "angle": 10,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.4884387864761285e-08,
+        "near_zero_triangles": 0,
+        "angle": 15,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.488336501584355e-08,
+        "near_zero_triangles": 0,
+        "angle": 20,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.48858624759874e-08,
+        "near_zero_triangles": 0,
+        "angle": 25,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.4883905993083115e-08,
+        "near_zero_triangles": 0,
+        "angle": 30,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.4883013972122213e-08,
+        "near_zero_triangles": 0,
+        "angle": 35,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.488071954170569e-08,
+        "near_zero_triangles": 0,
+        "angle": 40,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 25,
+        "examples": [
+          [
+            3129,
+            3174
+          ],
+          [
+            3126,
+            3174
+          ],
+          [
+            3103,
+            3174
+          ],
+          [
+            3103,
+            3175
+          ],
+          [
+            3103,
+            3172
+          ]
+        ],
+        "min_triangle_area": 3.488336383519212e-08,
+        "near_zero_triangles": 0,
+        "angle": 45,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 25,
+        "examples": [
+          [
+            3103,
+            3175
+          ],
+          [
+            3103,
+            3174
+          ],
+          [
+            3103,
+            3172
+          ],
+          [
+            3100,
+            3173
+          ],
+          [
+            3100,
+            3172
+          ]
+        ],
+        "min_triangle_area": 3.4884531886251457e-08,
+        "near_zero_triangles": 0,
+        "angle": 50,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 56,
+        "examples": [
+          [
+            3127,
+            3211
+          ],
+          [
+            3126,
+            3211
+          ],
+          [
+            3126,
+            3212
+          ],
+          [
+            3126,
+            3213
+          ],
+          [
+            3079,
+            3209
+          ]
+        ],
+        "min_triangle_area": 3.488316222422585e-08,
+        "near_zero_triangles": 0,
+        "angle": 55,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 55,
+        "examples": [
+          [
+            3127,
+            3211
+          ],
+          [
+            3127,
+            3175
+          ],
+          [
+            3127,
+            3174
+          ],
+          [
+            3124,
+            3208
+          ],
+          [
+            3125,
+            3208
+          ]
+        ],
+        "min_triangle_area": 3.488363396998944e-08,
+        "near_zero_triangles": 0,
+        "angle": 60,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 57,
+        "examples": [
+          [
+            3153,
+            3210
+          ],
+          [
+            3153,
+            3209
+          ],
+          [
+            3153,
+            3211
+          ],
+          [
+            3153,
+            3175
+          ],
+          [
+            3153,
+            3215
+          ]
+        ],
+        "min_triangle_area": 3.488358593940586e-08,
+        "near_zero_triangles": 0,
+        "angle": 65,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 62,
+        "examples": [
+          [
+            3059,
+            3153
+          ],
+          [
+            3059,
+            3176
+          ],
+          [
+            3059,
+            3152
+          ],
+          [
+            3153,
+            3211
+          ],
+          [
+            3153,
+            3210
+          ]
+        ],
+        "min_triangle_area": 3.488448068076428e-08,
+        "near_zero_triangles": 0,
+        "angle": 70,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 62,
+        "examples": [
+          [
+            3059,
+            3176
+          ],
+          [
+            3059,
+            3177
+          ],
+          [
+            3059,
+            3215
+          ],
+          [
+            3059,
+            3155
+          ],
+          [
+            3059,
+            3179
+          ]
+        ],
+        "min_triangle_area": 3.488318622916783e-08,
+        "near_zero_triangles": 0,
+        "angle": 75,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 41,
+        "examples": [
+          [
+            3153,
+            3215
+          ],
+          [
+            3151,
+            3209
+          ],
+          [
+            3151,
+            3210
+          ],
+          [
+            3151,
+            3208
+          ],
+          [
+            3147,
+            3198
+          ]
+        ],
+        "min_triangle_area": 3.488354009947425e-08,
+        "near_zero_triangles": 0,
+        "angle": 80,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 41,
+        "examples": [
+          [
+            3151,
+            3209
+          ],
+          [
+            3151,
+            3210
+          ],
+          [
+            3151,
+            3208
+          ],
+          [
+            3153,
+            3215
+          ],
+          [
+            3147,
+            3198
+          ]
+        ],
+        "min_triangle_area": 3.4880489865637826e-08,
+        "near_zero_triangles": 0,
+        "angle": 85,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 46,
+        "examples": [
+          [
+            3151,
+            3208
+          ],
+          [
+            3151,
+            3210
+          ],
+          [
+            3174,
+            3208
+          ],
+          [
+            3059,
+            3179
+          ],
+          [
+            3059,
+            3220
+          ]
+        ],
+        "min_triangle_area": 3.488356603263354e-08,
+        "near_zero_triangles": 0,
+        "angle": 90,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 42,
+        "examples": [
+          [
+            3058,
+            3219
+          ],
+          [
+            3058,
+            3220
+          ],
+          [
+            3058,
+            3218
+          ],
+          [
+            3059,
+            3179
+          ],
+          [
+            3059,
+            3220
+          ]
+        ],
+        "min_triangle_area": 3.4883746405258257e-08,
+        "near_zero_triangles": 0,
+        "angle": 95,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 44,
+        "examples": [
+          [
+            3153,
+            3215
+          ],
+          [
+            3147,
+            3198
+          ],
+          [
+            3058,
+            3219
+          ],
+          [
+            3058,
+            3220
+          ],
+          [
+            3058,
+            3218
+          ]
+        ],
+        "min_triangle_area": 3.4883577709073783e-08,
+        "near_zero_triangles": 0,
+        "angle": 100,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 48,
+        "examples": [
+          [
+            3151,
+            3210
+          ],
+          [
+            3151,
+            3208
+          ],
+          [
+            3153,
+            3215
+          ],
+          [
+            3147,
+            3198
+          ],
+          [
+            3174,
+            3208
+          ]
+        ],
+        "min_triangle_area": 3.488457398094363e-08,
+        "near_zero_triangles": 0,
+        "angle": 105,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 44,
+        "examples": [
+          [
+            3153,
+            3215
+          ],
+          [
+            3151,
+            3210
+          ],
+          [
+            3151,
+            3208
+          ],
+          [
+            3147,
+            3198
+          ],
+          [
+            3147,
+            3199
+          ]
+        ],
+        "min_triangle_area": 3.488373620635375e-08,
+        "near_zero_triangles": 0,
+        "angle": 110,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 58,
+        "examples": [
+          [
+            3151,
+            3213
+          ],
+          [
+            3151,
+            3212
+          ],
+          [
+            3151,
+            3211
+          ],
+          [
+            3150,
+            3213
+          ],
+          [
+            3148,
+            3208
+          ]
+        ],
+        "min_triangle_area": 3.488464347852809e-08,
+        "near_zero_triangles": 0,
+        "angle": 115,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 53,
+        "examples": [
+          [
+            3060,
+            3215
+          ],
+          [
+            3060,
+            3176
+          ],
+          [
+            3060,
+            3177
+          ],
+          [
+            3060,
+            3179
+          ],
+          [
+            3060,
+            3218
+          ]
+        ],
+        "min_triangle_area": 3.488417654652469e-08,
+        "near_zero_triangles": 0,
+        "angle": 120,
+        "finite": true
+      }
+    ],
+    "hock_L": [
+      {
+        "intersection_pairs": 46,
+        "examples": [
+          [
+            3383,
+            3428
+          ],
+          [
+            3383,
+            3405
+          ],
+          [
+            3383,
+            3478
+          ],
+          [
+            3383,
+            3455
+          ],
+          [
+            3383,
+            3431
+          ]
+        ],
+        "min_triangle_area": 2.2585053865780603e-08,
+        "near_zero_triangles": 0,
+        "angle": -60,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 29,
+        "examples": [
+          [
+            3384,
+            3480
+          ],
+          [
+            3384,
+            3432
+          ],
+          [
+            3384,
+            3435
+          ],
+          [
+            3384,
+            3433
+          ],
+          [
+            3384,
+            3456
+          ]
+        ],
+        "min_triangle_area": 2.258909708743628e-08,
+        "near_zero_triangles": 0,
+        "angle": -55,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.258551738697017e-08,
+        "near_zero_triangles": 0,
+        "angle": -50,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.2588419738516732e-08,
+        "near_zero_triangles": 0,
+        "angle": -45,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.258697821227904e-08,
+        "near_zero_triangles": 0,
+        "angle": -40,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.2587479394147177e-08,
+        "near_zero_triangles": 0,
+        "angle": -35,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.2588944714470888e-08,
+        "near_zero_triangles": 0,
+        "angle": -30,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.2586005986072e-08,
+        "near_zero_triangles": 0,
+        "angle": -25,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.2589258788924033e-08,
+        "near_zero_triangles": 0,
+        "angle": -20,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.258904025332148e-08,
+        "near_zero_triangles": 0,
+        "angle": -15,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.2588156541056285e-08,
+        "near_zero_triangles": 0,
+        "angle": -10,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.2585264269578312e-08,
+        "near_zero_triangles": 0,
+        "angle": -5,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.2588682088667577e-08,
+        "near_zero_triangles": 0,
+        "angle": 0,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.2586661193726246e-08,
+        "near_zero_triangles": 0,
+        "angle": 5,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.258845626574716e-08,
+        "near_zero_triangles": 0,
+        "angle": 10,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.2589598061441318e-08,
+        "near_zero_triangles": 0,
+        "angle": 15,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.258796190039494e-08,
+        "near_zero_triangles": 0,
+        "angle": 20,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.2586139936005936e-08,
+        "near_zero_triangles": 0,
+        "angle": 25,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.258613793308284e-08,
+        "near_zero_triangles": 0,
+        "angle": 30,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.2589378346042386e-08,
+        "near_zero_triangles": 0,
+        "angle": 35,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.2587503757527946e-08,
+        "near_zero_triangles": 0,
+        "angle": 40,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.2590169218611944e-08,
+        "near_zero_triangles": 0,
+        "angle": 45,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.258754917906517e-08,
+        "near_zero_triangles": 0,
+        "angle": 50,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.2586460545073043e-08,
+        "near_zero_triangles": 0,
+        "angle": 55,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.2590294054195676e-08,
+        "near_zero_triangles": 0,
+        "angle": 60,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.2589461661657152e-08,
+        "near_zero_triangles": 0,
+        "angle": 65,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.258925593713809e-08,
+        "near_zero_triangles": 0,
+        "angle": 70,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 33,
+        "examples": [
+          [
+            3375,
+            3471
+          ],
+          [
+            3375,
+            3470
+          ],
+          [
+            3375,
+            3422
+          ],
+          [
+            3375,
+            3423
+          ],
+          [
+            3375,
+            3446
+          ]
+        ],
+        "min_triangle_area": 2.2588961241783453e-08,
+        "near_zero_triangles": 0,
+        "angle": 75,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 45,
+        "examples": [
+          [
+            3374,
+            3470
+          ],
+          [
+            3374,
+            3473
+          ],
+          [
+            3398,
+            3470
+          ],
+          [
+            3398,
+            3423
+          ],
+          [
+            3398,
+            3446
+          ]
+        ],
+        "min_triangle_area": 2.259287304799908e-08,
+        "near_zero_triangles": 0,
+        "angle": 80,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 53,
+        "examples": [
+          [
+            3375,
+            3471
+          ],
+          [
+            3373,
+            3469
+          ],
+          [
+            3373,
+            3466
+          ],
+          [
+            3377,
+            3473
+          ],
+          [
+            3377,
+            3472
+          ]
+        ],
+        "min_triangle_area": 2.259030297170979e-08,
+        "near_zero_triangles": 0,
+        "angle": 85,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 60,
+        "examples": [
+          [
+            3327,
+            3470
+          ],
+          [
+            3327,
+            3471
+          ],
+          [
+            3327,
+            3447
+          ],
+          [
+            3327,
+            3444
+          ],
+          [
+            3324,
+            3471
+          ]
+        ],
+        "min_triangle_area": 2.2582228653223722e-08,
+        "near_zero_triangles": 0,
+        "angle": 90,
+        "finite": true
+      }
+    ],
+    "hock_R": [
+      {
+        "intersection_pairs": 47,
+        "examples": [
+          [
+            3063,
+            3085
+          ],
+          [
+            3063,
+            3108
+          ],
+          [
+            3063,
+            3158
+          ],
+          [
+            3063,
+            3135
+          ],
+          [
+            3063,
+            3134
+          ]
+        ],
+        "min_triangle_area": 3.488436752075187e-08,
+        "near_zero_triangles": 0,
+        "angle": -60,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 29,
+        "examples": [
+          [
+            3065,
+            3160
+          ],
+          [
+            3065,
+            3137
+          ],
+          [
+            3065,
+            3136
+          ],
+          [
+            3064,
+            3160
+          ],
+          [
+            3064,
+            3163
+          ]
+        ],
+        "min_triangle_area": 3.488198975238401e-08,
+        "near_zero_triangles": 0,
+        "angle": -55,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.488486444426888e-08,
+        "near_zero_triangles": 0,
+        "angle": -50,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.488519862596189e-08,
+        "near_zero_triangles": 0,
+        "angle": -45,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.4882254681496355e-08,
+        "near_zero_triangles": 0,
+        "angle": -40,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.488501455498045e-08,
+        "near_zero_triangles": 0,
+        "angle": -35,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.488431902313277e-08,
+        "near_zero_triangles": 0,
+        "angle": -30,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.4884104055044797e-08,
+        "near_zero_triangles": 0,
+        "angle": -25,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.4881365317964575e-08,
+        "near_zero_triangles": 0,
+        "angle": -20,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.488383426132823e-08,
+        "near_zero_triangles": 0,
+        "angle": -15,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.488412264128348e-08,
+        "near_zero_triangles": 0,
+        "angle": -10,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.488367915666883e-08,
+        "near_zero_triangles": 0,
+        "angle": -5,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.488355710125642e-08,
+        "near_zero_triangles": 0,
+        "angle": 0,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.4883530351789835e-08,
+        "near_zero_triangles": 0,
+        "angle": 5,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.4883465797795916e-08,
+        "near_zero_triangles": 0,
+        "angle": 10,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.4884253352768465e-08,
+        "near_zero_triangles": 0,
+        "angle": 15,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.488176734180673e-08,
+        "near_zero_triangles": 0,
+        "angle": 20,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.488539025032632e-08,
+        "near_zero_triangles": 0,
+        "angle": 25,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.488309538807206e-08,
+        "near_zero_triangles": 0,
+        "angle": 30,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.488416710560197e-08,
+        "near_zero_triangles": 0,
+        "angle": 35,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.488174812973232e-08,
+        "near_zero_triangles": 0,
+        "angle": 40,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.488342761467432e-08,
+        "near_zero_triangles": 0,
+        "angle": 45,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.488505136420271e-08,
+        "near_zero_triangles": 0,
+        "angle": 50,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.488355394955841e-08,
+        "near_zero_triangles": 0,
+        "angle": 55,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.4882720571816834e-08,
+        "near_zero_triangles": 0,
+        "angle": 60,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.488399437408762e-08,
+        "near_zero_triangles": 0,
+        "angle": 65,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.488369476529001e-08,
+        "near_zero_triangles": 0,
+        "angle": 70,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 33,
+        "examples": [
+          [
+            3078,
+            3150
+          ],
+          [
+            3078,
+            3127
+          ],
+          [
+            3079,
+            3150
+          ],
+          [
+            3079,
+            3151
+          ],
+          [
+            3079,
+            3148
+          ]
+        ],
+        "min_triangle_area": 3.48823217649473e-08,
+        "near_zero_triangles": 0,
+        "angle": 75,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 46,
+        "examples": [
+          [
+            3054,
+            3150
+          ],
+          [
+            3054,
+            3153
+          ],
+          [
+            3079,
+            3150
+          ],
+          [
+            3078,
+            3150
+          ],
+          [
+            3078,
+            3126
+          ]
+        ],
+        "min_triangle_area": 3.4883594133435475e-08,
+        "near_zero_triangles": 0,
+        "angle": 80,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 53,
+        "examples": [
+          [
+            3052,
+            3148
+          ],
+          [
+            3052,
+            3149
+          ],
+          [
+            3053,
+            3149
+          ],
+          [
+            3053,
+            3146
+          ],
+          [
+            3057,
+            3128
+          ]
+        ],
+        "min_triangle_area": 3.488552127320843e-08,
+        "near_zero_triangles": 0,
+        "angle": 85,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 61,
+        "examples": [
+          [
+            2903,
+            3151
+          ],
+          [
+            2903,
+            3150
+          ],
+          [
+            2903,
+            3148
+          ],
+          [
+            2903,
+            3127
+          ],
+          [
+            2900,
+            3148
+          ]
+        ],
+        "min_triangle_area": 3.488223154539678e-08,
+        "near_zero_triangles": 0,
+        "angle": 90,
+        "finite": true
+      }
+    ],
+    "paw_H_L": [
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.2590302227105858e-08,
+        "near_zero_triangles": 0,
+        "angle": -60,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.2588148056947455e-08,
+        "near_zero_triangles": 0,
+        "angle": -55,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.258770595752245e-08,
+        "near_zero_triangles": 0,
+        "angle": -50,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.258819402269678e-08,
+        "near_zero_triangles": 0,
+        "angle": -45,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.258860824773228e-08,
+        "near_zero_triangles": 0,
+        "angle": -40,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.258902332054987e-08,
+        "near_zero_triangles": 0,
+        "angle": -35,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.2589189010021977e-08,
+        "near_zero_triangles": 0,
+        "angle": -30,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.2589262848759384e-08,
+        "near_zero_triangles": 0,
+        "angle": -25,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.2589262848759384e-08,
+        "near_zero_triangles": 0,
+        "angle": -20,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.258934569354043e-08,
+        "near_zero_triangles": 0,
+        "angle": -15,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.2589262848759384e-08,
+        "near_zero_triangles": 0,
+        "angle": -10,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.258910616528353e-08,
+        "near_zero_triangles": 0,
+        "angle": -5,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.2588682088667577e-08,
+        "near_zero_triangles": 0,
+        "angle": 0,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.2587871647398808e-08,
+        "near_zero_triangles": 0,
+        "angle": 5,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.258664698475593e-08,
+        "near_zero_triangles": 0,
+        "angle": 10,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.2589583651657104e-08,
+        "near_zero_triangles": 0,
+        "angle": 15,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.2588469749903988e-08,
+        "near_zero_triangles": 0,
+        "angle": 20,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.2586434671257064e-08,
+        "near_zero_triangles": 0,
+        "angle": 25,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.2588937401685785e-08,
+        "near_zero_triangles": 0,
+        "angle": 30,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.258989399722142e-08,
+        "near_zero_triangles": 0,
+        "angle": 35,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.2587713867443068e-08,
+        "near_zero_triangles": 0,
+        "angle": 40,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.258893451774008e-08,
+        "near_zero_triangles": 0,
+        "angle": 45,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.2584739153383753e-08,
+        "near_zero_triangles": 0,
+        "angle": 50,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.2585088928602572e-08,
+        "near_zero_triangles": 0,
+        "angle": 55,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 2.258503355792773e-08,
+        "near_zero_triangles": 0,
+        "angle": 60,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 17,
+        "examples": [
+          [
+            3303,
+            3374
+          ],
+          [
+            3303,
+            3375
+          ],
+          [
+            3303,
+            3351
+          ],
+          [
+            3300,
+            3375
+          ],
+          [
+            3300,
+            3372
+          ]
+        ],
+        "min_triangle_area": 2.2589177845748976e-08,
+        "near_zero_triangles": 0,
+        "angle": 65,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 20,
+        "examples": [
+          [
+            3303,
+            3374
+          ],
+          [
+            3303,
+            3375
+          ],
+          [
+            3303,
+            3377
+          ],
+          [
+            3326,
+            3377
+          ],
+          [
+            3301,
+            3372
+          ]
+        ],
+        "min_triangle_area": 2.258836665836443e-08,
+        "near_zero_triangles": 0,
+        "angle": 70,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 28,
+        "examples": [
+          [
+            3303,
+            3374
+          ],
+          [
+            3303,
+            3398
+          ],
+          [
+            3303,
+            3375
+          ],
+          [
+            3303,
+            3399
+          ],
+          [
+            3303,
+            3396
+          ]
+        ],
+        "min_triangle_area": 2.2586773615407777e-08,
+        "near_zero_triangles": 0,
+        "angle": 75,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 33,
+        "examples": [
+          [
+            3305,
+            3424
+          ],
+          [
+            3302,
+            3399
+          ],
+          [
+            3302,
+            3422
+          ],
+          [
+            3302,
+            3401
+          ],
+          [
+            3302,
+            3424
+          ]
+        ],
+        "min_triangle_area": 2.2589339085359987e-08,
+        "near_zero_triangles": 0,
+        "angle": 80,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 29,
+        "examples": [
+          [
+            3305,
+            3425
+          ],
+          [
+            3305,
+            3424
+          ],
+          [
+            3305,
+            3400
+          ],
+          [
+            3305,
+            3401
+          ],
+          [
+            3302,
+            3422
+          ]
+        ],
+        "min_triangle_area": 2.2587261979785224e-08,
+        "near_zero_triangles": 0,
+        "angle": 85,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 33,
+        "examples": [
+          [
+            3279,
+            3423
+          ],
+          [
+            3279,
+            3420
+          ],
+          [
+            3300,
+            3421
+          ],
+          [
+            3276,
+            3421
+          ],
+          [
+            3276,
+            3420
+          ]
+        ],
+        "min_triangle_area": 2.258909679145166e-08,
+        "near_zero_triangles": 0,
+        "angle": 90,
+        "finite": true
+      }
+    ],
+    "paw_H_R": [
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.488332897204251e-08,
+        "near_zero_triangles": 0,
+        "angle": -60,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.4883968526176476e-08,
+        "near_zero_triangles": 0,
+        "angle": -55,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.488345729323572e-08,
+        "near_zero_triangles": 0,
+        "angle": -50,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.4883500067817993e-08,
+        "near_zero_triangles": 0,
+        "angle": -45,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.488355710125642e-08,
+        "near_zero_triangles": 0,
+        "angle": -40,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.488359987683177e-08,
+        "near_zero_triangles": 0,
+        "angle": -35,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.488364265283271e-08,
+        "near_zero_triangles": 0,
+        "angle": -30,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.4883656911594274e-08,
+        "near_zero_triangles": 0,
+        "angle": -25,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.4883685429259256e-08,
+        "near_zero_triangles": 0,
+        "angle": -20,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.488369968816268e-08,
+        "near_zero_triangles": 0,
+        "angle": -15,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.488367117040312e-08,
+        "near_zero_triangles": 0,
+        "angle": -10,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.488361413545146e-08,
+        "near_zero_triangles": 0,
+        "angle": -5,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.488355710125642e-08,
+        "near_zero_triangles": 0,
+        "angle": 0,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.488345729323572e-08,
+        "near_zero_triangles": 0,
+        "angle": 5,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.488332897204251e-08,
+        "near_zero_triangles": 0,
+        "angle": 10,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.4883726118968e-08,
+        "near_zero_triangles": 0,
+        "angle": 15,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.488351224136694e-08,
+        "near_zero_triangles": 0,
+        "angle": 20,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.4883284117407945e-08,
+        "near_zero_triangles": 0,
+        "angle": 25,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.48835672521295e-08,
+        "near_zero_triangles": 0,
+        "angle": 30,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.488377916685503e-08,
+        "near_zero_triangles": 0,
+        "angle": 35,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.48833941997572e-08,
+        "near_zero_triangles": 0,
+        "angle": 40,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.488353487769376e-08,
+        "near_zero_triangles": 0,
+        "angle": 45,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.488360433656194e-08,
+        "near_zero_triangles": 0,
+        "angle": 50,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.488361682809712e-08,
+        "near_zero_triangles": 0,
+        "angle": 55,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 0,
+        "examples": [],
+        "min_triangle_area": 3.488361511316241e-08,
+        "near_zero_triangles": 0,
+        "angle": 60,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 17,
+        "examples": [
+          [
+            2902,
+            3056
+          ],
+          [
+            2902,
+            2927
+          ],
+          [
+            2900,
+            2925
+          ],
+          [
+            2879,
+            3054
+          ],
+          [
+            2879,
+            3055
+          ]
+        ],
+        "min_triangle_area": 3.488351366351283e-08,
+        "near_zero_triangles": 0,
+        "angle": 65,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 20,
+        "examples": [
+          [
+            2902,
+            3057
+          ],
+          [
+            2879,
+            3054
+          ],
+          [
+            2879,
+            3055
+          ],
+          [
+            2879,
+            3057
+          ],
+          [
+            2900,
+            3050
+          ]
+        ],
+        "min_triangle_area": 2.3145064202214317e-08,
+        "near_zero_triangles": 0,
+        "angle": 70,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 28,
+        "examples": [
+          [
+            2879,
+            3054
+          ],
+          [
+            2879,
+            3079
+          ],
+          [
+            2879,
+            3055
+          ],
+          [
+            2879,
+            3057
+          ],
+          [
+            2879,
+            3078
+          ]
+        ],
+        "min_triangle_area": 3.4883737215968555e-08,
+        "near_zero_triangles": 0,
+        "angle": 75,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 33,
+        "examples": [
+          [
+            2881,
+            3104
+          ],
+          [
+            2878,
+            3102
+          ],
+          [
+            2878,
+            3079
+          ],
+          [
+            2878,
+            3081
+          ],
+          [
+            2878,
+            3104
+          ]
+        ],
+        "min_triangle_area": 3.4883464956137744e-08,
+        "near_zero_triangles": 0,
+        "angle": 80,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 29,
+        "examples": [
+          [
+            2878,
+            3102
+          ],
+          [
+            2878,
+            3103
+          ],
+          [
+            2878,
+            3105
+          ],
+          [
+            2879,
+            3103
+          ],
+          [
+            2876,
+            3103
+          ]
+        ],
+        "min_triangle_area": 3.4883747487301177e-08,
+        "near_zero_triangles": 0,
+        "angle": 85,
+        "finite": true
+      },
+      {
+        "intersection_pairs": 33,
+        "examples": [
+          [
+            2855,
+            3103
+          ],
+          [
+            2853,
+            3101
+          ],
+          [
+            2852,
+            3103
+          ],
+          [
+            2852,
+            3100
+          ],
+          [
+            2852,
+            3101
+          ]
+        ],
+        "min_triangle_area": 3.488394471621957e-08,
+        "near_zero_triangles": 0,
+        "angle": 90,
+        "finite": true
+      }
+    ]
+  }
+}

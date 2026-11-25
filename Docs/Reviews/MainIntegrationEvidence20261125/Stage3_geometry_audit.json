@@ -1,0 +1,163 @@
+{
+  "success": true,
+  "scope": "Independent read-only geometry and serialized configuration audit; no Unreal API or map mutations. Runtime gameplay validation belongs to separate regression run.",
+  "created_utc": "2026-11-25T04:48:28.960775+00:00",
+  "sources": {
+    "before": "C:\\Users\\whghk\\Catrun\\Saved\\Stage3OrientationFix20261125\\QA\\before\\snapshot.json",
+    "after": "C:\\Users\\whghk\\Catrun\\Saved\\Stage3OrientationFix20261125\\QA\\after\\snapshot.json",
+    "applied": "C:\\Users\\whghk\\Catrun\\Saved\\Stage3OrientationFix20261125\\applied.json"
+  },
+  "checks": [
+    {
+      "name": "actor_identity_set_preserved",
+      "passed": true,
+      "details": {
+        "before": 1452,
+        "after": 1452
+      }
+    },
+    {
+      "name": "architectural_bounds_exact_Y_reflection_294",
+      "passed": true,
+      "details": {
+        "count": 294,
+        "max_error_cm": 3.4228543199787964e-06,
+        "failures": {}
+      }
+    },
+    {
+      "name": "all_snapshot_structural_bounds_Y_reflection",
+      "passed": true,
+      "details": {
+        "count": 302,
+        "max_error_cm": 3.4228543199787964e-06,
+        "failures": {}
+      }
+    },
+    {
+      "name": "actual_floor_union_exact_Y_reflection",
+      "passed": true,
+      "details": {
+        "floor_actors_before": 160,
+        "floor_actors_after": 160,
+        "cells_50cm_before": 2274,
+        "cells_after": 2274,
+        "area_m2": 568.5,
+        "max_grid_alignment_error_cm": 1.747056739986874e-05,
+        "missing": 0,
+        "extra": 0,
+        "scope": "S3_Floor_ actors; exit landing excluded"
+      }
+    },
+    {
+      "name": "protected_hash_manifest_unchanged",
+      "passed": true,
+      "details": {
+        "count": 1029
+      }
+    },
+    {
+      "name": "protected_1029_current_disk_hashes",
+      "passed": true,
+      "details": {
+        "count": 1029,
+        "mismatches": []
+      }
+    },
+    {
+      "name": "native_puzzle_configuration_and_object_references_unchanged",
+      "passed": true,
+      "details": {
+        "count": 1,
+        "SocketAxis": "Both links remain (0,+1,0); current native code reduces to unsigned axis with abs(X),abs(Y), CatrunStatuePuzzle.cpp:55-56. No claim that authored SocketAxis was reflected."
+      }
+    },
+    {
+      "name": "native_objectives_references_and_configuration_unchanged",
+      "passed": true,
+      "details": {
+        "count": 1
+      }
+    },
+    {
+      "name": "MouthOffsets_local_samples_unchanged",
+      "passed": true,
+      "details": {
+        "samples": 73
+      }
+    },
+    {
+      "name": "saved_camera_actor_yaw_minus_45",
+      "passed": true,
+      "details": {
+        "yaw_degrees": -44.99995531515645,
+        "source": "actual after snapshot actor quaternion"
+      }
+    },
+    {
+      "name": "cat_D0_release_housings_positive_scale",
+      "passed": true,
+      "details": {
+        "S3_Player": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "S3_D0": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "S3_Release1_Housing": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "S3_Release2_Housing": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "S3_Release3_Housing": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "name": "final_gate_left_right_refs_and_X_unchanged",
+      "passed": true,
+      "details": {
+        "FinalLeafLeft": {
+          "reference_unchanged": true,
+          "X_before": -250.0,
+          "X_after": -250.0,
+          "Y_before": 3950.0,
+          "Y_after": -3950.0
+        },
+        "FinalLeafRight": {
+          "reference_unchanged": true,
+          "X_before": -250.0,
+          "X_after": -250.0,
+          "Y_before": 3950.0,
+          "Y_after": -3950.0
+        }
+      }
+    },
+    {
+      "name": "current_saved_map_matches_after_snapshot",
+      "passed": true,
+      "details": {
+        "after_snapshot_sha256": "77535010e37c44a2f5c9635feeabc1ef4bbdd5421ac8abe6b69d18d493a9ec92",
+        "current_sha256": "77535010e37c44a2f5c9635feeabc1ef4bbdd5421ac8abe6b69d18d493a9ec92"
+      }
+    }
+  ],
+  "passed": 13,
+  "total": 13,
+  "notes": [
+    "SocketAxis authored values are unchanged; native current semantics ignore sign.",
+    "Geometry correspondence does not establish runtime movement, door interactions, visual quality, or navgrid validity."
+  ]
+}

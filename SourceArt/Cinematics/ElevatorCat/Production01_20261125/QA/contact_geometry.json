@@ -1,0 +1,3408 @@
+{
+  "master": [
+    {
+      "frame": 1,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 96.71667218208313,
+      "actual_paw_mesh": {}
+    },
+    {
+      "frame": 2,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 95.48776149749756,
+      "actual_paw_mesh": {}
+    },
+    {
+      "frame": 3,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 94.27596926689148,
+      "actual_paw_mesh": {}
+    },
+    {
+      "frame": 4,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 93.08286309242249,
+      "actual_paw_mesh": {}
+    },
+    {
+      "frame": 5,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 91.91004037857056,
+      "actual_paw_mesh": {}
+    },
+    {
+      "frame": 6,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 90.75910449028015,
+      "actual_paw_mesh": {}
+    },
+    {
+      "frame": 7,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 89.63162302970886,
+      "actual_paw_mesh": {}
+    },
+    {
+      "frame": 8,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 79.79163527488708,
+      "actual_paw_mesh": {}
+    },
+    {
+      "frame": 9,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 70.51776051521301,
+      "actual_paw_mesh": {}
+    },
+    {
+      "frame": 10,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 61.93346381187439,
+      "actual_paw_mesh": {}
+    },
+    {
+      "frame": 11,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 53.93640995025635,
+      "actual_paw_mesh": {}
+    },
+    {
+      "frame": 12,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 45.43076455593109,
+      "actual_paw_mesh": {}
+    },
+    {
+      "frame": 13,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 37.210944294929504,
+      "actual_paw_mesh": {}
+    },
+    {
+      "frame": 14,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 29.714369773864746,
+      "actual_paw_mesh": {}
+    },
+    {
+      "frame": 15,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 23.297041654586792,
+      "actual_paw_mesh": {}
+    },
+    {
+      "frame": 16,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 17.235098779201508,
+      "actual_paw_mesh": {}
+    },
+    {
+      "frame": 17,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 11.980297416448593,
+      "actual_paw_mesh": {}
+    },
+    {
+      "frame": 18,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 8.309752494096756,
+      "actual_paw_mesh": {}
+    },
+    {
+      "frame": 19,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 6.92126527428627,
+      "actual_paw_mesh": {}
+    },
+    {
+      "frame": 20,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 5.343319848179817,
+      "actual_paw_mesh": {}
+    },
+    {
+      "frame": 21,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 3.90755794942379,
+      "actual_paw_mesh": {}
+    },
+    {
+      "frame": 22,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 2.9060907661914825,
+      "actual_paw_mesh": {}
+    },
+    {
+      "frame": 23,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 2.2660689428448677,
+      "actual_paw_mesh": {}
+    },
+    {
+      "frame": 24,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 2.095630392432213,
+      "actual_paw_mesh": {
+        "L": {
+          "min_vertex_to_ring_surface_cm": 0.037987937685102224,
+          "surface_intersection_pairs": 14
+        },
+        "R": {
+          "min_vertex_to_ring_surface_cm": 0.003826384272542782,
+          "surface_intersection_pairs": 14
+        }
+      }
+    },
+    {
+      "frame": 25,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 2.095630392432213,
+      "actual_paw_mesh": {
+        "L": {
+          "min_vertex_to_ring_surface_cm": 0.037987937685102224,
+          "surface_intersection_pairs": 14
+        },
+        "R": {
+          "min_vertex_to_ring_surface_cm": 0.003826384272542782,
+          "surface_intersection_pairs": 14
+        }
+      }
+    },
+    {
+      "frame": 26,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 2.095630392432213,
+      "actual_paw_mesh": {
+        "L": {
+          "min_vertex_to_ring_surface_cm": 0.037987937685102224,
+          "surface_intersection_pairs": 14
+        },
+        "R": {
+          "min_vertex_to_ring_surface_cm": 0.003826384272542782,
+          "surface_intersection_pairs": 14
+        }
+      }
+    },
+    {
+      "frame": 27,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 2.095630392432213,
+      "actual_paw_mesh": {
+        "L": {
+          "min_vertex_to_ring_surface_cm": 0.037987937685102224,
+          "surface_intersection_pairs": 14
+        },
+        "R": {
+          "min_vertex_to_ring_surface_cm": 0.003826384272542782,
+          "surface_intersection_pairs": 14
+        }
+      }
+    },
+    {
+      "frame": 28,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 2.095630392432213,
+      "actual_paw_mesh": {
+        "L": {
+          "min_vertex_to_ring_surface_cm": 0.037987937685102224,
+          "surface_intersection_pairs": 14
+        },
+        "R": {
+          "min_vertex_to_ring_surface_cm": 0.003826384272542782,
+          "surface_intersection_pairs": 14
+        }
+      }
+    },
+    {
+      "frame": 29,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 2.095630392432213,
+      "actual_paw_mesh": {
+        "L": {
+          "min_vertex_to_ring_surface_cm": 0.037987937685102224,
+          "surface_intersection_pairs": 14
+        },
+        "R": {
+          "min_vertex_to_ring_surface_cm": 0.003826384272542782,
+          "surface_intersection_pairs": 14
+        }
+      }
+    },
+    {
+      "frame": 30,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 2.0956242457032204,
+      "actual_paw_mesh": {
+        "L": {
+          "min_vertex_to_ring_surface_cm": 0.03796094097197056,
+          "surface_intersection_pairs": 14
+        },
+        "R": {
+          "min_vertex_to_ring_surface_cm": 0.0038259895518422127,
+          "surface_intersection_pairs": 14
+        }
+      }
+    },
+    {
+      "frame": 31,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 2.095630392432213,
+      "actual_paw_mesh": {
+        "L": {
+          "min_vertex_to_ring_surface_cm": 0.03798716934397817,
+          "surface_intersection_pairs": 14
+        },
+        "R": {
+          "min_vertex_to_ring_surface_cm": 0.0038252230297075585,
+          "surface_intersection_pairs": 14
+        }
+      }
+    },
+    {
+      "frame": 32,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 2.0956363528966904,
+      "actual_paw_mesh": {
+        "L": {
+          "min_vertex_to_ring_surface_cm": 0.037972486461512744,
+          "surface_intersection_pairs": 14
+        },
+        "R": {
+          "min_vertex_to_ring_surface_cm": 0.0038277437852229923,
+          "surface_intersection_pairs": 14
+        }
+      }
+    },
+    {
+      "frame": 33,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 2.095630392432213,
+      "actual_paw_mesh": {
+        "L": {
+          "min_vertex_to_ring_surface_cm": 0.03796094097197056,
+          "surface_intersection_pairs": 14
+        },
+        "R": {
+          "min_vertex_to_ring_surface_cm": 0.003825420208158903,
+          "surface_intersection_pairs": 14
+        }
+      }
+    },
+    {
+      "frame": 34,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 2.095630392432213,
+      "actual_paw_mesh": {
+        "L": {
+          "min_vertex_to_ring_surface_cm": 0.03796094097197056,
+          "surface_intersection_pairs": 14
+        },
+        "R": {
+          "min_vertex_to_ring_surface_cm": 0.0038422276702476665,
+          "surface_intersection_pairs": 14
+        }
+      }
+    },
+    {
+      "frame": 35,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 2.0956363528966904,
+      "actual_paw_mesh": {
+        "L": {
+          "min_vertex_to_ring_surface_cm": 0.03796074306592345,
+          "surface_intersection_pairs": 14
+        },
+        "R": {
+          "min_vertex_to_ring_surface_cm": 0.003824828309006989,
+          "surface_intersection_pairs": 14
+        }
+      }
+    },
+    {
+      "frame": 36,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 2.095630392432213,
+      "actual_paw_mesh": {
+        "L": {
+          "min_vertex_to_ring_surface_cm": 0.03796094097197056,
+          "surface_intersection_pairs": 14
+        },
+        "R": {
+          "min_vertex_to_ring_surface_cm": 0.0038250254874583334,
+          "surface_intersection_pairs": 14
+        }
+      }
+    },
+    {
+      "frame": 37,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 2.0956363528966904,
+      "actual_paw_mesh": {
+        "L": {
+          "min_vertex_to_ring_surface_cm": 0.03796015225816518,
+          "surface_intersection_pairs": 14
+        },
+        "R": {
+          "min_vertex_to_ring_surface_cm": 0.003798207762883976,
+          "surface_intersection_pairs": 14
+        }
+      }
+    },
+    {
+      "frame": 38,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 2.0956363528966904,
+      "actual_paw_mesh": {
+        "L": {
+          "min_vertex_to_ring_surface_cm": 0.03796190721914172,
+          "surface_intersection_pairs": 14
+        },
+        "R": {
+          "min_vertex_to_ring_surface_cm": 0.0038259895518422127,
+          "surface_intersection_pairs": 14
+        }
+      }
+    },
+    {
+      "frame": 39,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 2.0956363528966904,
+      "actual_paw_mesh": {
+        "L": {
+          "min_vertex_to_ring_surface_cm": 0.03794314689002931,
+          "surface_intersection_pairs": 14
+        },
+        "R": {
+          "min_vertex_to_ring_surface_cm": 0.003798405668931082,
+          "surface_intersection_pairs": 14
+        }
+      }
+    },
+    {
+      "frame": 40,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 2.0956363528966904,
+      "actual_paw_mesh": {
+        "L": {
+          "min_vertex_to_ring_surface_cm": 0.03794334479607642,
+          "surface_intersection_pairs": 14
+        },
+        "R": {
+          "min_vertex_to_ring_surface_cm": 0.0038244335883064196,
+          "surface_intersection_pairs": 14
+        }
+      }
+    },
+    {
+      "frame": 41,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 2.095630392432213,
+      "actual_paw_mesh": {
+        "L": {
+          "min_vertex_to_ring_surface_cm": 0.037977550528012216,
+          "surface_intersection_pairs": 14
+        },
+        "R": {
+          "min_vertex_to_ring_surface_cm": 0.0038420301279984415,
+          "surface_intersection_pairs": 14
+        }
+      }
+    },
+    {
+      "frame": 42,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 2.0956363528966904,
+      "actual_paw_mesh": {
+        "L": {
+          "min_vertex_to_ring_surface_cm": 0.03794314689002931,
+          "surface_intersection_pairs": 14
+        },
+        "R": {
+          "min_vertex_to_ring_surface_cm": 0.0038234702515183017,
+          "surface_intersection_pairs": 14
+        }
+      }
+    },
+    {
+      "frame": 43,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 2.0956242457032204,
+      "actual_paw_mesh": {
+        "L": {
+          "min_vertex_to_ring_surface_cm": 0.0379765871912241,
+          "surface_intersection_pairs": 14
+        },
+        "R": {
+          "min_vertex_to_ring_surface_cm": 0.003824630766757764,
+          "surface_intersection_pairs": 14
+        }
+      }
+    },
+    {
+      "frame": 44,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 2.0956363528966904,
+      "actual_paw_mesh": {
+        "L": {
+          "min_vertex_to_ring_surface_cm": 0.03793607174884528,
+          "surface_intersection_pairs": 14
+        },
+        "R": {
+          "min_vertex_to_ring_surface_cm": 0.0038089852750999853,
+          "surface_intersection_pairs": 14
+        }
+      }
+    },
+    {
+      "frame": 45,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 2.0956363528966904,
+      "actual_paw_mesh": {
+        "L": {
+          "min_vertex_to_ring_surface_cm": 0.03796074306592345,
+          "surface_intersection_pairs": 14
+        },
+        "R": {
+          "min_vertex_to_ring_surface_cm": 0.003807627217611298,
+          "surface_intersection_pairs": 14
+        }
+      }
+    },
+    {
+      "frame": 46,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 2.095630392432213,
+      "actual_paw_mesh": {
+        "L": {
+          "min_vertex_to_ring_surface_cm": 0.03795898810494691,
+          "surface_intersection_pairs": 14
+        },
+        "R": {
+          "min_vertex_to_ring_surface_cm": 0.0038234702515183017,
+          "surface_intersection_pairs": 14
+        }
+      }
+    },
+    {
+      "frame": 47,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 2.095630392432213,
+      "actual_paw_mesh": {
+        "L": {
+          "min_vertex_to_ring_surface_cm": 0.03795938391704112,
+          "surface_intersection_pairs": 14
+        },
+        "R": {
+          "min_vertex_to_ring_surface_cm": 0.003824236409855075,
+          "surface_intersection_pairs": 14
+        }
+      }
+    },
+    {
+      "frame": 48,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 2.095630392432213,
+      "actual_paw_mesh": {
+        "L": {
+          "min_vertex_to_ring_surface_cm": 0.037976785097271204,
+          "surface_intersection_pairs": 14
+        },
+        "R": {
+          "min_vertex_to_ring_surface_cm": 0.003841635407297872,
+          "surface_intersection_pairs": 14
+        }
+      }
+    },
+    {
+      "frame": 49,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 2.095630392432213,
+      "actual_paw_mesh": {
+        "L": {
+          "min_vertex_to_ring_surface_cm": 0.037976785097271204,
+          "surface_intersection_pairs": 14
+        },
+        "R": {
+          "min_vertex_to_ring_surface_cm": 0.003841635407297872,
+          "surface_intersection_pairs": 14
+        }
+      }
+    },
+    {
+      "frame": 50,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 2.095630392432213,
+      "actual_paw_mesh": {
+        "L": {
+          "min_vertex_to_ring_surface_cm": 0.037976785097271204,
+          "surface_intersection_pairs": 14
+        },
+        "R": {
+          "min_vertex_to_ring_surface_cm": 0.003841635407297872,
+          "surface_intersection_pairs": 14
+        }
+      }
+    },
+    {
+      "frame": 51,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 2.095630392432213,
+      "actual_paw_mesh": {
+        "L": {
+          "min_vertex_to_ring_surface_cm": 0.037976785097271204,
+          "surface_intersection_pairs": 14
+        },
+        "R": {
+          "min_vertex_to_ring_surface_cm": 0.003841635407297872,
+          "surface_intersection_pairs": 14
+        }
+      }
+    },
+    {
+      "frame": 52,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 2.095630392432213,
+      "actual_paw_mesh": {
+        "L": {
+          "min_vertex_to_ring_surface_cm": 0.037976785097271204,
+          "surface_intersection_pairs": 14
+        },
+        "R": {
+          "min_vertex_to_ring_surface_cm": 0.003841635407297872,
+          "surface_intersection_pairs": 14
+        }
+      }
+    },
+    {
+      "frame": 53,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 2.095630392432213,
+      "actual_paw_mesh": {
+        "L": {
+          "min_vertex_to_ring_surface_cm": 0.037976785097271204,
+          "surface_intersection_pairs": 14
+        },
+        "R": {
+          "min_vertex_to_ring_surface_cm": 0.003841635407297872,
+          "surface_intersection_pairs": 14
+        }
+      }
+    },
+    {
+      "frame": 54,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 2.095630392432213,
+      "actual_paw_mesh": {
+        "L": {
+          "min_vertex_to_ring_surface_cm": 0.037976785097271204,
+          "surface_intersection_pairs": 14
+        },
+        "R": {
+          "min_vertex_to_ring_surface_cm": 0.003841635407297872,
+          "surface_intersection_pairs": 14
+        }
+      }
+    },
+    {
+      "frame": 55,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 2.095630392432213,
+      "actual_paw_mesh": {
+        "L": {
+          "min_vertex_to_ring_surface_cm": 0.037976785097271204,
+          "surface_intersection_pairs": 14
+        },
+        "R": {
+          "min_vertex_to_ring_surface_cm": 0.003841635407297872,
+          "surface_intersection_pairs": 14
+        }
+      }
+    },
+    {
+      "frame": 56,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 2.3028653115034103,
+      "actual_paw_mesh": {}
+    },
+    {
+      "frame": 57,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 3.0018961057066917,
+      "actual_paw_mesh": {}
+    },
+    {
+      "frame": 58,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 4.152301698923111,
+      "actual_paw_mesh": {}
+    },
+    {
+      "frame": 59,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 5.571389198303223,
+      "actual_paw_mesh": {}
+    },
+    {
+      "frame": 60,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 6.685156375169754,
+      "actual_paw_mesh": {}
+    },
+    {
+      "frame": 61,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 8.714495599269867,
+      "actual_paw_mesh": {}
+    },
+    {
+      "frame": 62,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 12.945862114429474,
+      "actual_paw_mesh": {}
+    },
+    {
+      "frame": 63,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 18.283435702323914,
+      "actual_paw_mesh": {}
+    },
+    {
+      "frame": 64,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 23.610053956508636,
+      "actual_paw_mesh": {}
+    },
+    {
+      "frame": 65,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 30.076134204864502,
+      "actual_paw_mesh": {}
+    },
+    {
+      "frame": 66,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 36.760637164115906,
+      "actual_paw_mesh": {}
+    },
+    {
+      "frame": 67,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 42.84655153751373,
+      "actual_paw_mesh": {}
+    },
+    {
+      "frame": 68,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 48.860448598861694,
+      "actual_paw_mesh": {}
+    },
+    {
+      "frame": 69,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 55.68647384643555,
+      "actual_paw_mesh": {}
+    },
+    {
+      "frame": 70,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 63.1104052066803,
+      "actual_paw_mesh": {}
+    },
+    {
+      "frame": 71,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 70.87778449058533,
+      "actual_paw_mesh": {}
+    },
+    {
+      "frame": 72,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 78.76436114311218,
+      "actual_paw_mesh": {}
+    },
+    {
+      "frame": 73,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 86.58843636512756,
+      "actual_paw_mesh": {}
+    },
+    {
+      "frame": 74,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 86.27640008926392,
+      "actual_paw_mesh": {}
+    },
+    {
+      "frame": 75,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 87.40735650062561,
+      "actual_paw_mesh": {}
+    },
+    {
+      "frame": 76,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 88.75753283500671,
+      "actual_paw_mesh": {}
+    },
+    {
+      "frame": 77,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 89.88903164863586,
+      "actual_paw_mesh": {}
+    },
+    {
+      "frame": 78,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 90.36360383033752,
+      "actual_paw_mesh": {}
+    },
+    {
+      "frame": 79,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 90.34152626991272,
+      "actual_paw_mesh": {}
+    },
+    {
+      "frame": 80,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 90.2779221534729,
+      "actual_paw_mesh": {}
+    },
+    {
+      "frame": 81,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 90.17683863639832,
+      "actual_paw_mesh": {}
+    },
+    {
+      "frame": 82,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 90.04247784614563,
+      "actual_paw_mesh": {}
+    },
+    {
+      "frame": 83,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 89.87906575202942,
+      "actual_paw_mesh": {}
+    },
+    {
+      "frame": 84,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 89.6908700466156,
+      "actual_paw_mesh": {}
+    },
+    {
+      "frame": 85,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 89.48214650154114,
+      "actual_paw_mesh": {}
+    },
+    {
+      "frame": 86,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 89.2570436000824,
+      "actual_paw_mesh": {}
+    },
+    {
+      "frame": 87,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 89.01966214179993,
+      "actual_paw_mesh": {}
+    },
+    {
+      "frame": 88,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 88.77399563789368,
+      "actual_paw_mesh": {}
+    },
+    {
+      "frame": 89,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 88.52384686470032,
+      "actual_paw_mesh": {}
+    },
+    {
+      "frame": 90,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 88.27294707298279,
+      "actual_paw_mesh": {}
+    },
+    {
+      "frame": 91,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 88.02481889724731,
+      "actual_paw_mesh": {}
+    },
+    {
+      "frame": 92,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 87.78283596038818,
+      "actual_paw_mesh": {}
+    },
+    {
+      "frame": 93,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 87.55027055740356,
+      "actual_paw_mesh": {}
+    },
+    {
+      "frame": 94,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 87.33019828796387,
+      "actual_paw_mesh": {}
+    },
+    {
+      "frame": 95,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 87.12558150291443,
+      "actual_paw_mesh": {}
+    },
+    {
+      "frame": 96,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 86.93928122520447,
+      "actual_paw_mesh": {}
+    },
+    {
+      "frame": 97,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 86.77409887313843,
+      "actual_paw_mesh": {}
+    },
+    {
+      "frame": 98,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 86.63274049758911,
+      "actual_paw_mesh": {}
+    },
+    {
+      "frame": 99,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 86.51793599128723,
+      "actual_paw_mesh": {}
+    },
+    {
+      "frame": 100,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 86.43239140510559,
+      "actual_paw_mesh": {}
+    },
+    {
+      "frame": 101,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 86.37891411781311,
+      "actual_paw_mesh": {}
+    },
+    {
+      "frame": 102,
+      "head_ring_surface_intersections": 0,
+      "min_head_to_ring_cm": 86.3604187965393,
+      "actual_paw_mesh": {}
+    }
+  ],
+  "peek": [
+    {
+      "frame": 1,
+      "foot_vertices_min_edge_clearance_cm": 89.7056020796299,
+      "pelvis_game_cm": [
+        0.0,
+        8.0,
+        15.80000114440918
+      ]
+    },
+    {
+      "frame": 2,
+      "foot_vertices_min_edge_clearance_cm": 89.35375362634659,
+      "pelvis_game_cm": [
+        0.0,
+        7.6481475830078125,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 3,
+      "foot_vertices_min_edge_clearance_cm": 88.47412317991257,
+      "pelvis_game_cm": [
+        0.0,
+        6.768519401550293,
+        14.999999046325684
+      ]
+    },
+    {
+      "frame": 4,
+      "foot_vertices_min_edge_clearance_cm": 87.3306006193161,
+      "pelvis_game_cm": [
+        0.0,
+        5.624999523162842,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 5,
+      "foot_vertices_min_edge_clearance_cm": 86.18708550930023,
+      "pelvis_game_cm": [
+        0.0,
+        4.481481552124023,
+        14.999999046325684
+      ]
+    },
+    {
+      "frame": 6,
+      "foot_vertices_min_edge_clearance_cm": 85.30745804309845,
+      "pelvis_game_cm": [
+        0.0,
+        3.60185170173645,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 7,
+      "foot_vertices_min_edge_clearance_cm": 84.9556028842926,
+      "pelvis_game_cm": [
+        0.0,
+        3.25,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 8,
+      "foot_vertices_min_edge_clearance_cm": 84.95559990406036,
+      "pelvis_game_cm": [
+        0.0,
+        2.8981480598449707,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 9,
+      "foot_vertices_min_edge_clearance_cm": 84.95559990406036,
+      "pelvis_game_cm": [
+        0.0,
+        2.0185184478759766,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 10,
+      "foot_vertices_min_edge_clearance_cm": 84.9556028842926,
+      "pelvis_game_cm": [
+        0.0,
+        0.8750001192092896,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 11,
+      "foot_vertices_min_edge_clearance_cm": 82.66856670379639,
+      "pelvis_game_cm": [
+        0.0,
+        -0.26851874589920044,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 12,
+      "foot_vertices_min_edge_clearance_cm": 80.90931177139282,
+      "pelvis_game_cm": [
+        0.0,
+        -1.148148536682129,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 13,
+      "foot_vertices_min_edge_clearance_cm": 80.20559996366501,
+      "pelvis_game_cm": [
+        0.0,
+        -1.4999998807907104,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 14,
+      "foot_vertices_min_edge_clearance_cm": 80.20560443401337,
+      "pelvis_game_cm": [
+        0.0,
+        -1.8518520593643188,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 15,
+      "foot_vertices_min_edge_clearance_cm": 80.20560294389725,
+      "pelvis_game_cm": [
+        0.0,
+        -2.7314815521240234,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 16,
+      "foot_vertices_min_edge_clearance_cm": 80.20560145378113,
+      "pelvis_game_cm": [
+        0.0,
+        -3.875,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 17,
+      "foot_vertices_min_edge_clearance_cm": 77.91856527328491,
+      "pelvis_game_cm": [
+        0.0,
+        -5.018518447875977,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 18,
+      "foot_vertices_min_edge_clearance_cm": 76.15930736064911,
+      "pelvis_game_cm": [
+        0.0,
+        -5.8981475830078125,
+        14.999999046325684
+      ]
+    },
+    {
+      "frame": 19,
+      "foot_vertices_min_edge_clearance_cm": 75.45560300350189,
+      "pelvis_game_cm": [
+        0.0,
+        -6.249999523162842,
+        14.999999046325684
+      ]
+    },
+    {
+      "frame": 20,
+      "foot_vertices_min_edge_clearance_cm": 75.45560300350189,
+      "pelvis_game_cm": [
+        0.0,
+        -6.6018524169921875,
+        14.999999046325684
+      ]
+    },
+    {
+      "frame": 21,
+      "foot_vertices_min_edge_clearance_cm": 75.45560151338577,
+      "pelvis_game_cm": [
+        0.0,
+        -7.481480598449707,
+        14.999999046325684
+      ]
+    },
+    {
+      "frame": 22,
+      "foot_vertices_min_edge_clearance_cm": 75.45560300350189,
+      "pelvis_game_cm": [
+        0.0,
+        -8.625000953674316,
+        14.999999046325684
+      ]
+    },
+    {
+      "frame": 23,
+      "foot_vertices_min_edge_clearance_cm": 73.16856384277344,
+      "pelvis_game_cm": [
+        0.0,
+        -9.768518447875977,
+        14.999999046325684
+      ]
+    },
+    {
+      "frame": 24,
+      "foot_vertices_min_edge_clearance_cm": 71.40931487083435,
+      "pelvis_game_cm": [
+        0.0,
+        -10.648146629333496,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 25,
+      "foot_vertices_min_edge_clearance_cm": 70.70561051368713,
+      "pelvis_game_cm": [
+        0.0,
+        -11.0,
+        14.999999046325684
+      ]
+    },
+    {
+      "frame": 26,
+      "foot_vertices_min_edge_clearance_cm": 70.70560455322266,
+      "pelvis_game_cm": [
+        0.0,
+        -11.351852416992188,
+        14.999999046325684
+      ]
+    },
+    {
+      "frame": 27,
+      "foot_vertices_min_edge_clearance_cm": 70.70561051368713,
+      "pelvis_game_cm": [
+        0.0,
+        -12.23148250579834,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 28,
+      "foot_vertices_min_edge_clearance_cm": 70.70560455322266,
+      "pelvis_game_cm": [
+        0.0,
+        -13.375000953674316,
+        14.999999046325684
+      ]
+    },
+    {
+      "frame": 29,
+      "foot_vertices_min_edge_clearance_cm": 68.41856837272644,
+      "pelvis_game_cm": [
+        0.0,
+        -14.51852035522461,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 30,
+      "foot_vertices_min_edge_clearance_cm": 66.6593074798584,
+      "pelvis_game_cm": [
+        0.0,
+        -15.398147583007812,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 31,
+      "foot_vertices_min_edge_clearance_cm": 65.95560312271118,
+      "pelvis_game_cm": [
+        0.0,
+        -15.750000953674316,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 32,
+      "foot_vertices_min_edge_clearance_cm": 65.95560014247894,
+      "pelvis_game_cm": [
+        0.0,
+        -16.10185432434082,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 33,
+      "foot_vertices_min_edge_clearance_cm": 65.95560312271118,
+      "pelvis_game_cm": [
+        0.0,
+        -16.981481552124023,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 34,
+      "foot_vertices_min_edge_clearance_cm": 65.95560312271118,
+      "pelvis_game_cm": [
+        0.0,
+        -18.125,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 35,
+      "foot_vertices_min_edge_clearance_cm": 63.668566942214966,
+      "pelvis_game_cm": [
+        0.0,
+        -19.26852035522461,
+        14.999999046325684
+      ]
+    },
+    {
+      "frame": 36,
+      "foot_vertices_min_edge_clearance_cm": 61.90930902957916,
+      "pelvis_game_cm": [
+        0.0,
+        -20.148149490356445,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 37,
+      "foot_vertices_min_edge_clearance_cm": 61.205604672431946,
+      "pelvis_game_cm": [
+        0.0,
+        -20.500001907348633,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 38,
+      "foot_vertices_min_edge_clearance_cm": 61.20560169219971,
+      "pelvis_game_cm": [
+        0.0,
+        -20.851852416992188,
+        14.999999046325684
+      ]
+    },
+    {
+      "frame": 39,
+      "foot_vertices_min_edge_clearance_cm": 61.20560169219971,
+      "pelvis_game_cm": [
+        0.0,
+        -21.731483459472656,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 40,
+      "foot_vertices_min_edge_clearance_cm": 61.20559871196747,
+      "pelvis_game_cm": [
+        0.0,
+        -22.875,
+        14.999999046325684
+      ]
+    },
+    {
+      "frame": 41,
+      "foot_vertices_min_edge_clearance_cm": 58.91856253147125,
+      "pelvis_game_cm": [
+        0.0,
+        -24.01852035522461,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 42,
+      "foot_vertices_min_edge_clearance_cm": 57.15930759906769,
+      "pelvis_game_cm": [
+        0.0,
+        -24.898147583007812,
+        14.999999046325684
+      ]
+    },
+    {
+      "frame": 43,
+      "foot_vertices_min_edge_clearance_cm": 56.45560622215271,
+      "pelvis_game_cm": [
+        0.0,
+        -25.25,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 44,
+      "foot_vertices_min_edge_clearance_cm": 56.45560920238495,
+      "pelvis_game_cm": [
+        0.0,
+        -25.601852416992188,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 45,
+      "foot_vertices_min_edge_clearance_cm": 56.45560324192047,
+      "pelvis_game_cm": [
+        0.0,
+        -26.481475830078125,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 46,
+      "foot_vertices_min_edge_clearance_cm": 56.45560622215271,
+      "pelvis_game_cm": [
+        0.0,
+        -27.625,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 47,
+      "foot_vertices_min_edge_clearance_cm": 54.168567061424255,
+      "pelvis_game_cm": [
+        0.0,
+        -28.768518447875977,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 48,
+      "foot_vertices_min_edge_clearance_cm": 52.40930616855621,
+      "pelvis_game_cm": [
+        0.0,
+        -29.64814567565918,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 49,
+      "foot_vertices_min_edge_clearance_cm": 51.705601811409,
+      "pelvis_game_cm": [
+        0.0,
+        -30.000001907348633,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 50,
+      "foot_vertices_min_edge_clearance_cm": 51.705601811409,
+      "pelvis_game_cm": [
+        0.0,
+        -30.351850509643555,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 51,
+      "foot_vertices_min_edge_clearance_cm": 51.705604791641235,
+      "pelvis_game_cm": [
+        0.0,
+        -31.231477737426758,
+        14.999999046325684
+      ]
+    },
+    {
+      "frame": 52,
+      "foot_vertices_min_edge_clearance_cm": 51.705601811409,
+      "pelvis_game_cm": [
+        0.0,
+        -32.375,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 53,
+      "foot_vertices_min_edge_clearance_cm": 49.41856861114502,
+      "pelvis_game_cm": [
+        0.0,
+        -33.51851272583008,
+        14.999999046325684
+      ]
+    },
+    {
+      "frame": 54,
+      "foot_vertices_min_edge_clearance_cm": 47.6593017578125,
+      "pelvis_game_cm": [
+        0.0,
+        -34.39814758300781,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 55,
+      "foot_vertices_min_edge_clearance_cm": 46.95559740066528,
+      "pelvis_game_cm": [
+        0.0,
+        -34.750003814697266,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 56,
+      "foot_vertices_min_edge_clearance_cm": 46.95559740066528,
+      "pelvis_game_cm": [
+        0.0,
+        -35.10185241699219,
+        14.999999046325684
+      ]
+    },
+    {
+      "frame": 57,
+      "foot_vertices_min_edge_clearance_cm": 46.95559740066528,
+      "pelvis_game_cm": [
+        0.0,
+        -35.98147964477539,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 58,
+      "foot_vertices_min_edge_clearance_cm": 46.95559740066528,
+      "pelvis_game_cm": [
+        0.0,
+        -37.124996185302734,
+        14.999999046325684
+      ]
+    },
+    {
+      "frame": 59,
+      "foot_vertices_min_edge_clearance_cm": 44.668567180633545,
+      "pelvis_game_cm": [
+        0.0,
+        -38.268516540527344,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 60,
+      "foot_vertices_min_edge_clearance_cm": 42.909300327301025,
+      "pelvis_game_cm": [
+        0.0,
+        -39.14814376831055,
+        14.999999046325684
+      ]
+    },
+    {
+      "frame": 61,
+      "foot_vertices_min_edge_clearance_cm": 42.205607891082764,
+      "pelvis_game_cm": [
+        0.0,
+        -39.499996185302734,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 62,
+      "foot_vertices_min_edge_clearance_cm": 42.20559597015381,
+      "pelvis_game_cm": [
+        0.0,
+        -39.85184860229492,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 63,
+      "foot_vertices_min_edge_clearance_cm": 42.20559597015381,
+      "pelvis_game_cm": [
+        0.0,
+        -40.731475830078125,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 64,
+      "foot_vertices_min_edge_clearance_cm": 42.205601930618286,
+      "pelvis_game_cm": [
+        0.0,
+        -41.874996185302734,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 65,
+      "foot_vertices_min_edge_clearance_cm": 39.918577671051025,
+      "pelvis_game_cm": [
+        0.0,
+        -43.018516540527344,
+        14.999999046325684
+      ]
+    },
+    {
+      "frame": 66,
+      "foot_vertices_min_edge_clearance_cm": 38.159310817718506,
+      "pelvis_game_cm": [
+        0.0,
+        -43.89814376831055,
+        14.999999046325684
+      ]
+    },
+    {
+      "frame": 67,
+      "foot_vertices_min_edge_clearance_cm": 37.45560646057129,
+      "pelvis_game_cm": [
+        0.0,
+        -44.249996185302734,
+        14.999999046325684
+      ]
+    },
+    {
+      "frame": 68,
+      "foot_vertices_min_edge_clearance_cm": 37.455594539642334,
+      "pelvis_game_cm": [
+        0.0,
+        -44.60184860229492,
+        14.999999046325684
+      ]
+    },
+    {
+      "frame": 69,
+      "foot_vertices_min_edge_clearance_cm": 37.455594539642334,
+      "pelvis_game_cm": [
+        0.0,
+        -45.481483459472656,
+        14.999999046325684
+      ]
+    },
+    {
+      "frame": 70,
+      "foot_vertices_min_edge_clearance_cm": 37.45560646057129,
+      "pelvis_game_cm": [
+        0.0,
+        -46.624996185302734,
+        14.999999046325684
+      ]
+    },
+    {
+      "frame": 71,
+      "foot_vertices_min_edge_clearance_cm": 35.168564319610596,
+      "pelvis_game_cm": [
+        0.0,
+        -47.768516540527344,
+        14.999999046325684
+      ]
+    },
+    {
+      "frame": 72,
+      "foot_vertices_min_edge_clearance_cm": 33.40930938720703,
+      "pelvis_game_cm": [
+        0.0,
+        -48.64814376831055,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 73,
+      "foot_vertices_min_edge_clearance_cm": 32.705605030059814,
+      "pelvis_game_cm": [
+        0.0,
+        -48.999996185302734,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 74,
+      "foot_vertices_min_edge_clearance_cm": 32.70559310913086,
+      "pelvis_game_cm": [
+        0.0,
+        -49.35185241699219,
+        14.999999046325684
+      ]
+    },
+    {
+      "frame": 75,
+      "foot_vertices_min_edge_clearance_cm": 32.705605030059814,
+      "pelvis_game_cm": [
+        0.0,
+        -50.23147964477539,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 76,
+      "foot_vertices_min_edge_clearance_cm": 32.705605030059814,
+      "pelvis_game_cm": [
+        0.0,
+        -51.375,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 77,
+      "foot_vertices_min_edge_clearance_cm": 30.41856288909912,
+      "pelvis_game_cm": [
+        0.0,
+        -52.518524169921875,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 78,
+      "foot_vertices_min_edge_clearance_cm": 28.659307956695557,
+      "pelvis_game_cm": [
+        0.0,
+        -53.398155212402344,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 79,
+      "foot_vertices_min_edge_clearance_cm": 27.955591678619385,
+      "pelvis_game_cm": [
+        0.0,
+        -53.75000762939453,
+        15.000001907348633
+      ]
+    },
+    {
+      "frame": 80,
+      "foot_vertices_min_edge_clearance_cm": 27.95560359954834,
+      "pelvis_game_cm": [
+        0.0,
+        -54.10186004638672,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 81,
+      "foot_vertices_min_edge_clearance_cm": 27.95560359954834,
+      "pelvis_game_cm": [
+        0.0,
+        -54.981483459472656,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 82,
+      "foot_vertices_min_edge_clearance_cm": 27.95560359954834,
+      "pelvis_game_cm": [
+        0.0,
+        -56.125003814697266,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 83,
+      "foot_vertices_min_edge_clearance_cm": 25.668561458587646,
+      "pelvis_game_cm": [
+        0.0,
+        -57.268516540527344,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 84,
+      "foot_vertices_min_edge_clearance_cm": 23.909306526184082,
+      "pelvis_game_cm": [
+        0.0,
+        -58.14815902709961,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 85,
+      "foot_vertices_min_edge_clearance_cm": 23.20559024810791,
+      "pelvis_game_cm": [
+        0.0,
+        -58.5000114440918,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 86,
+      "foot_vertices_min_edge_clearance_cm": 23.205602169036865,
+      "pelvis_game_cm": [
+        0.0,
+        -58.85185623168945,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 87,
+      "foot_vertices_min_edge_clearance_cm": 23.205602169036865,
+      "pelvis_game_cm": [
+        0.0,
+        -59.73149108886719,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 88,
+      "foot_vertices_min_edge_clearance_cm": 23.205602169036865,
+      "pelvis_game_cm": [
+        0.0,
+        -60.8750114440918,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 89,
+      "foot_vertices_min_edge_clearance_cm": 20.918571949005127,
+      "pelvis_game_cm": [
+        0.0,
+        -62.01852035522461,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 90,
+      "foot_vertices_min_edge_clearance_cm": 19.159305095672607,
+      "pelvis_game_cm": [
+        0.0,
+        -62.89815139770508,
+        15.000001907348633
+      ]
+    },
+    {
+      "frame": 91,
+      "foot_vertices_min_edge_clearance_cm": 18.455612659454346,
+      "pelvis_game_cm": [
+        0.0,
+        -63.250003814697266,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 92,
+      "foot_vertices_min_edge_clearance_cm": 18.45560073852539,
+      "pelvis_game_cm": [
+        0.0,
+        -63.60185241699219,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 93,
+      "foot_vertices_min_edge_clearance_cm": 18.45560073852539,
+      "pelvis_game_cm": [
+        0.0,
+        -64.48149108886719,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 94,
+      "foot_vertices_min_edge_clearance_cm": 18.45560073852539,
+      "pelvis_game_cm": [
+        0.0,
+        -65.62500762939453,
+        15.000001907348633
+      ]
+    },
+    {
+      "frame": 95,
+      "foot_vertices_min_edge_clearance_cm": 16.168570518493652,
+      "pelvis_game_cm": [
+        0.0,
+        -66.76852416992188,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 96,
+      "foot_vertices_min_edge_clearance_cm": 14.409303665161133,
+      "pelvis_game_cm": [
+        0.0,
+        -67.64815521240234,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 97,
+      "foot_vertices_min_edge_clearance_cm": 13.705611228942871,
+      "pelvis_game_cm": [
+        0.0,
+        -68.0,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 98,
+      "foot_vertices_min_edge_clearance_cm": 13.705611228942871,
+      "pelvis_game_cm": [
+        0.0,
+        -68.0,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 99,
+      "foot_vertices_min_edge_clearance_cm": 13.705611228942871,
+      "pelvis_game_cm": [
+        0.0,
+        -68.0,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 100,
+      "foot_vertices_min_edge_clearance_cm": 13.705611228942871,
+      "pelvis_game_cm": [
+        0.0,
+        -68.0,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 101,
+      "foot_vertices_min_edge_clearance_cm": 13.705611228942871,
+      "pelvis_game_cm": [
+        0.0,
+        -68.0,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 102,
+      "foot_vertices_min_edge_clearance_cm": 13.705611228942871,
+      "pelvis_game_cm": [
+        0.0,
+        -68.0,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 103,
+      "foot_vertices_min_edge_clearance_cm": 13.705611228942871,
+      "pelvis_game_cm": [
+        0.0,
+        -68.0,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 104,
+      "foot_vertices_min_edge_clearance_cm": 13.705599308013916,
+      "pelvis_game_cm": [
+        0.0,
+        -68.0,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 105,
+      "foot_vertices_min_edge_clearance_cm": 13.705599308013916,
+      "pelvis_game_cm": [
+        0.0,
+        -68.0,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 106,
+      "foot_vertices_min_edge_clearance_cm": 13.705599308013916,
+      "pelvis_game_cm": [
+        0.0,
+        -68.0,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 107,
+      "foot_vertices_min_edge_clearance_cm": 13.705599308013916,
+      "pelvis_game_cm": [
+        0.0,
+        -68.0,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 108,
+      "foot_vertices_min_edge_clearance_cm": 13.705599308013916,
+      "pelvis_game_cm": [
+        0.0,
+        -68.0,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 109,
+      "foot_vertices_min_edge_clearance_cm": 13.705599308013916,
+      "pelvis_game_cm": [
+        0.0,
+        -68.0,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 110,
+      "foot_vertices_min_edge_clearance_cm": 13.705599308013916,
+      "pelvis_game_cm": [
+        0.0,
+        -68.0,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 111,
+      "foot_vertices_min_edge_clearance_cm": 13.705599308013916,
+      "pelvis_game_cm": [
+        0.0,
+        -68.0,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 112,
+      "foot_vertices_min_edge_clearance_cm": 13.705599308013916,
+      "pelvis_game_cm": [
+        0.0,
+        -68.0,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 113,
+      "foot_vertices_min_edge_clearance_cm": 13.705599308013916,
+      "pelvis_game_cm": [
+        0.0,
+        -68.0,
+        14.991301536560059
+      ]
+    },
+    {
+      "frame": 114,
+      "foot_vertices_min_edge_clearance_cm": 13.705599308013916,
+      "pelvis_game_cm": [
+        0.0,
+        -68.0,
+        14.966401100158691
+      ]
+    },
+    {
+      "frame": 115,
+      "foot_vertices_min_edge_clearance_cm": 13.705599308013916,
+      "pelvis_game_cm": [
+        0.0,
+        -68.0,
+        14.927101135253906
+      ]
+    },
+    {
+      "frame": 116,
+      "foot_vertices_min_edge_clearance_cm": 13.705611228942871,
+      "pelvis_game_cm": [
+        0.0,
+        -68.0,
+        14.875200271606445
+      ]
+    },
+    {
+      "frame": 117,
+      "foot_vertices_min_edge_clearance_cm": 13.705599308013916,
+      "pelvis_game_cm": [
+        0.0,
+        -67.99999237060547,
+        14.812499046325684
+      ]
+    },
+    {
+      "frame": 118,
+      "foot_vertices_min_edge_clearance_cm": 13.705611228942871,
+      "pelvis_game_cm": [
+        0.0,
+        -68.0,
+        14.740800857543945
+      ]
+    },
+    {
+      "frame": 119,
+      "foot_vertices_min_edge_clearance_cm": 13.705599308013916,
+      "pelvis_game_cm": [
+        0.0,
+        -67.99999237060547,
+        14.661900520324707
+      ]
+    },
+    {
+      "frame": 120,
+      "foot_vertices_min_edge_clearance_cm": 13.705611228942871,
+      "pelvis_game_cm": [
+        0.0,
+        -68.0,
+        14.577600479125977
+      ]
+    },
+    {
+      "frame": 121,
+      "foot_vertices_min_edge_clearance_cm": 13.705611228942871,
+      "pelvis_game_cm": [
+        0.0,
+        -68.0,
+        14.489701271057129
+      ]
+    },
+    {
+      "frame": 122,
+      "foot_vertices_min_edge_clearance_cm": 13.705611228942871,
+      "pelvis_game_cm": [
+        0.0,
+        -68.0,
+        14.399999618530273
+      ]
+    },
+    {
+      "frame": 123,
+      "foot_vertices_min_edge_clearance_cm": 13.705599308013916,
+      "pelvis_game_cm": [
+        0.0,
+        -68.0,
+        14.310300827026367
+      ]
+    },
+    {
+      "frame": 124,
+      "foot_vertices_min_edge_clearance_cm": 13.705611228942871,
+      "pelvis_game_cm": [
+        0.0,
+        -68.0,
+        14.22240161895752
+      ]
+    },
+    {
+      "frame": 125,
+      "foot_vertices_min_edge_clearance_cm": 13.705611228942871,
+      "pelvis_game_cm": [
+        0.0,
+        -68.0,
+        14.138099670410156
+      ]
+    },
+    {
+      "frame": 126,
+      "foot_vertices_min_edge_clearance_cm": 13.705599308013916,
+      "pelvis_game_cm": [
+        0.0,
+        -68.0,
+        14.05920124053955
+      ]
+    },
+    {
+      "frame": 127,
+      "foot_vertices_min_edge_clearance_cm": 13.705599308013916,
+      "pelvis_game_cm": [
+        0.0,
+        -68.0,
+        13.98750114440918
+      ]
+    },
+    {
+      "frame": 128,
+      "foot_vertices_min_edge_clearance_cm": 13.705599308013916,
+      "pelvis_game_cm": [
+        0.0,
+        -67.99999237060547,
+        13.924800872802734
+      ]
+    },
+    {
+      "frame": 129,
+      "foot_vertices_min_edge_clearance_cm": 13.705611228942871,
+      "pelvis_game_cm": [
+        0.0,
+        -68.0,
+        13.87290096282959
+      ]
+    },
+    {
+      "frame": 130,
+      "foot_vertices_min_edge_clearance_cm": 13.705611228942871,
+      "pelvis_game_cm": [
+        0.0,
+        -68.0,
+        13.833600044250488
+      ]
+    },
+    {
+      "frame": 131,
+      "foot_vertices_min_edge_clearance_cm": 13.705611228942871,
+      "pelvis_game_cm": [
+        0.0,
+        -67.99999237060547,
+        13.808700561523438
+      ]
+    },
+    {
+      "frame": 132,
+      "foot_vertices_min_edge_clearance_cm": 13.705611228942871,
+      "pelvis_game_cm": [
+        0.0,
+        -67.99999237060547,
+        13.80000114440918
+      ]
+    },
+    {
+      "frame": 133,
+      "foot_vertices_min_edge_clearance_cm": 13.705611228942871,
+      "pelvis_game_cm": [
+        0.0,
+        -67.99999237060547,
+        13.80000114440918
+      ]
+    },
+    {
+      "frame": 134,
+      "foot_vertices_min_edge_clearance_cm": 13.705611228942871,
+      "pelvis_game_cm": [
+        0.0,
+        -67.99999237060547,
+        13.80000114440918
+      ]
+    },
+    {
+      "frame": 135,
+      "foot_vertices_min_edge_clearance_cm": 13.705611228942871,
+      "pelvis_game_cm": [
+        0.0,
+        -67.99999237060547,
+        13.80000114440918
+      ]
+    },
+    {
+      "frame": 136,
+      "foot_vertices_min_edge_clearance_cm": 13.705611228942871,
+      "pelvis_game_cm": [
+        0.0,
+        -67.99999237060547,
+        13.80000114440918
+      ]
+    },
+    {
+      "frame": 137,
+      "foot_vertices_min_edge_clearance_cm": 13.705611228942871,
+      "pelvis_game_cm": [
+        0.0,
+        -67.99999237060547,
+        13.80000114440918
+      ]
+    },
+    {
+      "frame": 138,
+      "foot_vertices_min_edge_clearance_cm": 13.705611228942871,
+      "pelvis_game_cm": [
+        0.0,
+        -67.99999237060547,
+        13.80000114440918
+      ]
+    },
+    {
+      "frame": 139,
+      "foot_vertices_min_edge_clearance_cm": 13.705611228942871,
+      "pelvis_game_cm": [
+        0.0,
+        -67.99999237060547,
+        13.80000114440918
+      ]
+    },
+    {
+      "frame": 140,
+      "foot_vertices_min_edge_clearance_cm": 13.705611228942871,
+      "pelvis_game_cm": [
+        0.0,
+        -67.99999237060547,
+        13.80000114440918
+      ]
+    },
+    {
+      "frame": 141,
+      "foot_vertices_min_edge_clearance_cm": 13.705611228942871,
+      "pelvis_game_cm": [
+        0.0,
+        -67.99999237060547,
+        13.80000114440918
+      ]
+    },
+    {
+      "frame": 142,
+      "foot_vertices_min_edge_clearance_cm": 13.705611228942871,
+      "pelvis_game_cm": [
+        0.0,
+        -67.99999237060547,
+        13.80000114440918
+      ]
+    },
+    {
+      "frame": 143,
+      "foot_vertices_min_edge_clearance_cm": 13.705611228942871,
+      "pelvis_game_cm": [
+        0.0,
+        -67.99999237060547,
+        13.80000114440918
+      ]
+    },
+    {
+      "frame": 144,
+      "foot_vertices_min_edge_clearance_cm": 13.705611228942871,
+      "pelvis_game_cm": [
+        0.0,
+        -67.99999237060547,
+        13.80000114440918
+      ]
+    },
+    {
+      "frame": 145,
+      "foot_vertices_min_edge_clearance_cm": 13.705611228942871,
+      "pelvis_game_cm": [
+        0.0,
+        -67.99999237060547,
+        13.80000114440918
+      ]
+    },
+    {
+      "frame": 146,
+      "foot_vertices_min_edge_clearance_cm": 13.705611228942871,
+      "pelvis_game_cm": [
+        0.0,
+        -67.99999237060547,
+        13.80000114440918
+      ]
+    },
+    {
+      "frame": 147,
+      "foot_vertices_min_edge_clearance_cm": 13.705611228942871,
+      "pelvis_game_cm": [
+        0.0,
+        -67.99999237060547,
+        13.80000114440918
+      ]
+    },
+    {
+      "frame": 148,
+      "foot_vertices_min_edge_clearance_cm": 13.705611228942871,
+      "pelvis_game_cm": [
+        0.0,
+        -67.99999237060547,
+        13.80000114440918
+      ]
+    },
+    {
+      "frame": 149,
+      "foot_vertices_min_edge_clearance_cm": 13.705611228942871,
+      "pelvis_game_cm": [
+        0.0,
+        -67.99999237060547,
+        13.80000114440918
+      ]
+    },
+    {
+      "frame": 150,
+      "foot_vertices_min_edge_clearance_cm": 13.705611228942871,
+      "pelvis_game_cm": [
+        0.0,
+        -67.99999237060547,
+        13.80000114440918
+      ]
+    },
+    {
+      "frame": 151,
+      "foot_vertices_min_edge_clearance_cm": 13.705611228942871,
+      "pelvis_game_cm": [
+        0.0,
+        -67.99999237060547,
+        13.80000114440918
+      ]
+    },
+    {
+      "frame": 152,
+      "foot_vertices_min_edge_clearance_cm": 13.705611228942871,
+      "pelvis_game_cm": [
+        0.0,
+        -67.99999237060547,
+        13.80000114440918
+      ]
+    },
+    {
+      "frame": 153,
+      "foot_vertices_min_edge_clearance_cm": 13.705611228942871,
+      "pelvis_game_cm": [
+        0.0,
+        -67.99999237060547,
+        13.80000114440918
+      ]
+    },
+    {
+      "frame": 154,
+      "foot_vertices_min_edge_clearance_cm": 13.705611228942871,
+      "pelvis_game_cm": [
+        0.0,
+        -67.99999237060547,
+        13.808700561523438
+      ]
+    },
+    {
+      "frame": 155,
+      "foot_vertices_min_edge_clearance_cm": 13.705611228942871,
+      "pelvis_game_cm": [
+        0.0,
+        -68.0,
+        13.833600044250488
+      ]
+    },
+    {
+      "frame": 156,
+      "foot_vertices_min_edge_clearance_cm": 13.705611228942871,
+      "pelvis_game_cm": [
+        0.0,
+        -68.0,
+        13.87290096282959
+      ]
+    },
+    {
+      "frame": 157,
+      "foot_vertices_min_edge_clearance_cm": 13.705599308013916,
+      "pelvis_game_cm": [
+        0.0,
+        -67.99999237060547,
+        13.924800872802734
+      ]
+    },
+    {
+      "frame": 158,
+      "foot_vertices_min_edge_clearance_cm": 13.705599308013916,
+      "pelvis_game_cm": [
+        0.0,
+        -68.0,
+        13.98750114440918
+      ]
+    },
+    {
+      "frame": 159,
+      "foot_vertices_min_edge_clearance_cm": 13.705599308013916,
+      "pelvis_game_cm": [
+        0.0,
+        -68.0,
+        14.05920124053955
+      ]
+    },
+    {
+      "frame": 160,
+      "foot_vertices_min_edge_clearance_cm": 13.705611228942871,
+      "pelvis_game_cm": [
+        0.0,
+        -68.0,
+        14.138099670410156
+      ]
+    },
+    {
+      "frame": 161,
+      "foot_vertices_min_edge_clearance_cm": 13.705611228942871,
+      "pelvis_game_cm": [
+        0.0,
+        -68.0,
+        14.22240161895752
+      ]
+    },
+    {
+      "frame": 162,
+      "foot_vertices_min_edge_clearance_cm": 13.705599308013916,
+      "pelvis_game_cm": [
+        0.0,
+        -68.0,
+        14.310300827026367
+      ]
+    },
+    {
+      "frame": 163,
+      "foot_vertices_min_edge_clearance_cm": 13.705611228942871,
+      "pelvis_game_cm": [
+        0.0,
+        -68.0,
+        14.399999618530273
+      ]
+    },
+    {
+      "frame": 164,
+      "foot_vertices_min_edge_clearance_cm": 13.705611228942871,
+      "pelvis_game_cm": [
+        0.0,
+        -68.0,
+        14.489701271057129
+      ]
+    },
+    {
+      "frame": 165,
+      "foot_vertices_min_edge_clearance_cm": 13.705611228942871,
+      "pelvis_game_cm": [
+        0.0,
+        -68.0,
+        14.577600479125977
+      ]
+    },
+    {
+      "frame": 166,
+      "foot_vertices_min_edge_clearance_cm": 13.705599308013916,
+      "pelvis_game_cm": [
+        0.0,
+        -67.99999237060547,
+        14.661900520324707
+      ]
+    },
+    {
+      "frame": 167,
+      "foot_vertices_min_edge_clearance_cm": 13.705611228942871,
+      "pelvis_game_cm": [
+        0.0,
+        -68.0,
+        14.740800857543945
+      ]
+    },
+    {
+      "frame": 168,
+      "foot_vertices_min_edge_clearance_cm": 13.705599308013916,
+      "pelvis_game_cm": [
+        0.0,
+        -67.99999237060547,
+        14.812499046325684
+      ]
+    },
+    {
+      "frame": 169,
+      "foot_vertices_min_edge_clearance_cm": 13.705611228942871,
+      "pelvis_game_cm": [
+        0.0,
+        -68.0,
+        14.875200271606445
+      ]
+    },
+    {
+      "frame": 170,
+      "foot_vertices_min_edge_clearance_cm": 13.705599308013916,
+      "pelvis_game_cm": [
+        0.0,
+        -68.0,
+        14.927101135253906
+      ]
+    },
+    {
+      "frame": 171,
+      "foot_vertices_min_edge_clearance_cm": 13.705599308013916,
+      "pelvis_game_cm": [
+        0.0,
+        -68.0,
+        14.966401100158691
+      ]
+    },
+    {
+      "frame": 172,
+      "foot_vertices_min_edge_clearance_cm": 13.705599308013916,
+      "pelvis_game_cm": [
+        0.0,
+        -68.0,
+        14.991301536560059
+      ]
+    },
+    {
+      "frame": 173,
+      "foot_vertices_min_edge_clearance_cm": 13.705599308013916,
+      "pelvis_game_cm": [
+        0.0,
+        -68.0,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 174,
+      "foot_vertices_min_edge_clearance_cm": 13.705611228942871,
+      "pelvis_game_cm": [
+        0.0,
+        -68.0,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 175,
+      "foot_vertices_min_edge_clearance_cm": 13.705611228942871,
+      "pelvis_game_cm": [
+        0.0,
+        -68.0,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 176,
+      "foot_vertices_min_edge_clearance_cm": 13.705611228942871,
+      "pelvis_game_cm": [
+        0.0,
+        -68.0,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 177,
+      "foot_vertices_min_edge_clearance_cm": 13.705611228942871,
+      "pelvis_game_cm": [
+        0.0,
+        -68.0,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 178,
+      "foot_vertices_min_edge_clearance_cm": 13.705611228942871,
+      "pelvis_game_cm": [
+        0.0,
+        -68.0,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 179,
+      "foot_vertices_min_edge_clearance_cm": 13.705611228942871,
+      "pelvis_game_cm": [
+        0.0,
+        -68.0,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 180,
+      "foot_vertices_min_edge_clearance_cm": 13.705611228942871,
+      "pelvis_game_cm": [
+        0.0,
+        -68.0,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 181,
+      "foot_vertices_min_edge_clearance_cm": 14.409303665161133,
+      "pelvis_game_cm": [
+        0.0,
+        -67.64815521240234,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 182,
+      "foot_vertices_min_edge_clearance_cm": 16.168570518493652,
+      "pelvis_game_cm": [
+        0.0,
+        -66.76852416992188,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 183,
+      "foot_vertices_min_edge_clearance_cm": 18.45560073852539,
+      "pelvis_game_cm": [
+        0.0,
+        -65.62500762939453,
+        15.000001907348633
+      ]
+    },
+    {
+      "frame": 184,
+      "foot_vertices_min_edge_clearance_cm": 18.45560073852539,
+      "pelvis_game_cm": [
+        0.0,
+        -64.48149108886719,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 185,
+      "foot_vertices_min_edge_clearance_cm": 18.45560073852539,
+      "pelvis_game_cm": [
+        0.0,
+        -63.60185241699219,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 186,
+      "foot_vertices_min_edge_clearance_cm": 18.455612659454346,
+      "pelvis_game_cm": [
+        0.0,
+        -63.250003814697266,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 187,
+      "foot_vertices_min_edge_clearance_cm": 19.159305095672607,
+      "pelvis_game_cm": [
+        0.0,
+        -62.89815139770508,
+        15.000001907348633
+      ]
+    },
+    {
+      "frame": 188,
+      "foot_vertices_min_edge_clearance_cm": 20.918571949005127,
+      "pelvis_game_cm": [
+        0.0,
+        -62.01852035522461,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 189,
+      "foot_vertices_min_edge_clearance_cm": 23.205602169036865,
+      "pelvis_game_cm": [
+        0.0,
+        -60.8750114440918,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 190,
+      "foot_vertices_min_edge_clearance_cm": 23.205602169036865,
+      "pelvis_game_cm": [
+        0.0,
+        -59.73149108886719,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 191,
+      "foot_vertices_min_edge_clearance_cm": 23.205602169036865,
+      "pelvis_game_cm": [
+        0.0,
+        -58.85185623168945,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 192,
+      "foot_vertices_min_edge_clearance_cm": 23.20559024810791,
+      "pelvis_game_cm": [
+        0.0,
+        -58.5000114440918,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 193,
+      "foot_vertices_min_edge_clearance_cm": 23.909306526184082,
+      "pelvis_game_cm": [
+        0.0,
+        -58.14815902709961,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 194,
+      "foot_vertices_min_edge_clearance_cm": 25.668561458587646,
+      "pelvis_game_cm": [
+        0.0,
+        -57.268516540527344,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 195,
+      "foot_vertices_min_edge_clearance_cm": 27.95560359954834,
+      "pelvis_game_cm": [
+        0.0,
+        -56.125003814697266,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 196,
+      "foot_vertices_min_edge_clearance_cm": 27.95560359954834,
+      "pelvis_game_cm": [
+        0.0,
+        -54.981483459472656,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 197,
+      "foot_vertices_min_edge_clearance_cm": 27.95560359954834,
+      "pelvis_game_cm": [
+        0.0,
+        -54.10186004638672,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 198,
+      "foot_vertices_min_edge_clearance_cm": 27.955591678619385,
+      "pelvis_game_cm": [
+        0.0,
+        -53.75000762939453,
+        15.000001907348633
+      ]
+    },
+    {
+      "frame": 199,
+      "foot_vertices_min_edge_clearance_cm": 28.659307956695557,
+      "pelvis_game_cm": [
+        0.0,
+        -53.398155212402344,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 200,
+      "foot_vertices_min_edge_clearance_cm": 30.41856288909912,
+      "pelvis_game_cm": [
+        0.0,
+        -52.518524169921875,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 201,
+      "foot_vertices_min_edge_clearance_cm": 32.705605030059814,
+      "pelvis_game_cm": [
+        0.0,
+        -51.375,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 202,
+      "foot_vertices_min_edge_clearance_cm": 32.705605030059814,
+      "pelvis_game_cm": [
+        0.0,
+        -50.23147964477539,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 203,
+      "foot_vertices_min_edge_clearance_cm": 32.70559310913086,
+      "pelvis_game_cm": [
+        0.0,
+        -49.35185241699219,
+        14.999999046325684
+      ]
+    },
+    {
+      "frame": 204,
+      "foot_vertices_min_edge_clearance_cm": 32.705605030059814,
+      "pelvis_game_cm": [
+        0.0,
+        -48.999996185302734,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 205,
+      "foot_vertices_min_edge_clearance_cm": 33.40930938720703,
+      "pelvis_game_cm": [
+        0.0,
+        -48.64814376831055,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 206,
+      "foot_vertices_min_edge_clearance_cm": 35.168564319610596,
+      "pelvis_game_cm": [
+        0.0,
+        -47.768516540527344,
+        14.999999046325684
+      ]
+    },
+    {
+      "frame": 207,
+      "foot_vertices_min_edge_clearance_cm": 37.45560646057129,
+      "pelvis_game_cm": [
+        0.0,
+        -46.624996185302734,
+        14.999999046325684
+      ]
+    },
+    {
+      "frame": 208,
+      "foot_vertices_min_edge_clearance_cm": 37.455594539642334,
+      "pelvis_game_cm": [
+        0.0,
+        -45.481483459472656,
+        14.999999046325684
+      ]
+    },
+    {
+      "frame": 209,
+      "foot_vertices_min_edge_clearance_cm": 37.455594539642334,
+      "pelvis_game_cm": [
+        0.0,
+        -44.60184860229492,
+        14.999999046325684
+      ]
+    },
+    {
+      "frame": 210,
+      "foot_vertices_min_edge_clearance_cm": 37.45560646057129,
+      "pelvis_game_cm": [
+        0.0,
+        -44.249996185302734,
+        14.999999046325684
+      ]
+    },
+    {
+      "frame": 211,
+      "foot_vertices_min_edge_clearance_cm": 38.159310817718506,
+      "pelvis_game_cm": [
+        0.0,
+        -43.89814376831055,
+        14.999999046325684
+      ]
+    },
+    {
+      "frame": 212,
+      "foot_vertices_min_edge_clearance_cm": 39.918577671051025,
+      "pelvis_game_cm": [
+        0.0,
+        -43.018516540527344,
+        14.999999046325684
+      ]
+    },
+    {
+      "frame": 213,
+      "foot_vertices_min_edge_clearance_cm": 42.205601930618286,
+      "pelvis_game_cm": [
+        0.0,
+        -41.874996185302734,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 214,
+      "foot_vertices_min_edge_clearance_cm": 42.20559597015381,
+      "pelvis_game_cm": [
+        0.0,
+        -40.731475830078125,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 215,
+      "foot_vertices_min_edge_clearance_cm": 42.20559597015381,
+      "pelvis_game_cm": [
+        0.0,
+        -39.85184860229492,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 216,
+      "foot_vertices_min_edge_clearance_cm": 42.205607891082764,
+      "pelvis_game_cm": [
+        0.0,
+        -39.499996185302734,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 217,
+      "foot_vertices_min_edge_clearance_cm": 42.909300327301025,
+      "pelvis_game_cm": [
+        0.0,
+        -39.14814376831055,
+        14.999999046325684
+      ]
+    },
+    {
+      "frame": 218,
+      "foot_vertices_min_edge_clearance_cm": 44.668567180633545,
+      "pelvis_game_cm": [
+        0.0,
+        -38.268516540527344,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 219,
+      "foot_vertices_min_edge_clearance_cm": 46.95559740066528,
+      "pelvis_game_cm": [
+        0.0,
+        -37.124996185302734,
+        14.999999046325684
+      ]
+    },
+    {
+      "frame": 220,
+      "foot_vertices_min_edge_clearance_cm": 46.95559740066528,
+      "pelvis_game_cm": [
+        0.0,
+        -35.98147964477539,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 221,
+      "foot_vertices_min_edge_clearance_cm": 46.95559740066528,
+      "pelvis_game_cm": [
+        0.0,
+        -35.10185241699219,
+        14.999999046325684
+      ]
+    },
+    {
+      "frame": 222,
+      "foot_vertices_min_edge_clearance_cm": 46.95559740066528,
+      "pelvis_game_cm": [
+        0.0,
+        -34.750003814697266,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 223,
+      "foot_vertices_min_edge_clearance_cm": 47.6593017578125,
+      "pelvis_game_cm": [
+        0.0,
+        -34.39814758300781,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 224,
+      "foot_vertices_min_edge_clearance_cm": 49.41856861114502,
+      "pelvis_game_cm": [
+        0.0,
+        -33.51851272583008,
+        14.999999046325684
+      ]
+    },
+    {
+      "frame": 225,
+      "foot_vertices_min_edge_clearance_cm": 51.705601811409,
+      "pelvis_game_cm": [
+        0.0,
+        -32.375,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 226,
+      "foot_vertices_min_edge_clearance_cm": 51.705604791641235,
+      "pelvis_game_cm": [
+        0.0,
+        -31.231477737426758,
+        14.999999046325684
+      ]
+    },
+    {
+      "frame": 227,
+      "foot_vertices_min_edge_clearance_cm": 51.705601811409,
+      "pelvis_game_cm": [
+        0.0,
+        -30.351850509643555,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 228,
+      "foot_vertices_min_edge_clearance_cm": 51.705601811409,
+      "pelvis_game_cm": [
+        0.0,
+        -30.000001907348633,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 229,
+      "foot_vertices_min_edge_clearance_cm": 52.40930616855621,
+      "pelvis_game_cm": [
+        0.0,
+        -29.64814567565918,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 230,
+      "foot_vertices_min_edge_clearance_cm": 54.168567061424255,
+      "pelvis_game_cm": [
+        0.0,
+        -28.768518447875977,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 231,
+      "foot_vertices_min_edge_clearance_cm": 56.45560622215271,
+      "pelvis_game_cm": [
+        0.0,
+        -27.625,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 232,
+      "foot_vertices_min_edge_clearance_cm": 56.45560324192047,
+      "pelvis_game_cm": [
+        0.0,
+        -26.481475830078125,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 233,
+      "foot_vertices_min_edge_clearance_cm": 56.45560920238495,
+      "pelvis_game_cm": [
+        0.0,
+        -25.601852416992188,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 234,
+      "foot_vertices_min_edge_clearance_cm": 56.45560622215271,
+      "pelvis_game_cm": [
+        0.0,
+        -25.25,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 235,
+      "foot_vertices_min_edge_clearance_cm": 57.15930759906769,
+      "pelvis_game_cm": [
+        0.0,
+        -24.898147583007812,
+        14.999999046325684
+      ]
+    },
+    {
+      "frame": 236,
+      "foot_vertices_min_edge_clearance_cm": 58.91856253147125,
+      "pelvis_game_cm": [
+        0.0,
+        -24.01852035522461,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 237,
+      "foot_vertices_min_edge_clearance_cm": 61.20559871196747,
+      "pelvis_game_cm": [
+        0.0,
+        -22.875,
+        14.999999046325684
+      ]
+    },
+    {
+      "frame": 238,
+      "foot_vertices_min_edge_clearance_cm": 61.20560169219971,
+      "pelvis_game_cm": [
+        0.0,
+        -21.731483459472656,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 239,
+      "foot_vertices_min_edge_clearance_cm": 61.20560169219971,
+      "pelvis_game_cm": [
+        0.0,
+        -20.851852416992188,
+        14.999999046325684
+      ]
+    },
+    {
+      "frame": 240,
+      "foot_vertices_min_edge_clearance_cm": 61.205604672431946,
+      "pelvis_game_cm": [
+        0.0,
+        -20.500001907348633,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 241,
+      "foot_vertices_min_edge_clearance_cm": 61.90930902957916,
+      "pelvis_game_cm": [
+        0.0,
+        -20.148149490356445,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 242,
+      "foot_vertices_min_edge_clearance_cm": 63.668566942214966,
+      "pelvis_game_cm": [
+        0.0,
+        -19.26852035522461,
+        14.999999046325684
+      ]
+    },
+    {
+      "frame": 243,
+      "foot_vertices_min_edge_clearance_cm": 65.95560312271118,
+      "pelvis_game_cm": [
+        0.0,
+        -18.125,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 244,
+      "foot_vertices_min_edge_clearance_cm": 65.95560312271118,
+      "pelvis_game_cm": [
+        0.0,
+        -16.981481552124023,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 245,
+      "foot_vertices_min_edge_clearance_cm": 65.95560014247894,
+      "pelvis_game_cm": [
+        0.0,
+        -16.10185432434082,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 246,
+      "foot_vertices_min_edge_clearance_cm": 65.95560312271118,
+      "pelvis_game_cm": [
+        0.0,
+        -15.750000953674316,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 247,
+      "foot_vertices_min_edge_clearance_cm": 66.6593074798584,
+      "pelvis_game_cm": [
+        0.0,
+        -15.398147583007812,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 248,
+      "foot_vertices_min_edge_clearance_cm": 68.41856837272644,
+      "pelvis_game_cm": [
+        0.0,
+        -14.51852035522461,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 249,
+      "foot_vertices_min_edge_clearance_cm": 70.70560455322266,
+      "pelvis_game_cm": [
+        0.0,
+        -13.375000953674316,
+        14.999999046325684
+      ]
+    },
+    {
+      "frame": 250,
+      "foot_vertices_min_edge_clearance_cm": 70.70561051368713,
+      "pelvis_game_cm": [
+        0.0,
+        -12.23148250579834,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 251,
+      "foot_vertices_min_edge_clearance_cm": 70.70560455322266,
+      "pelvis_game_cm": [
+        0.0,
+        -11.351852416992188,
+        14.999999046325684
+      ]
+    },
+    {
+      "frame": 252,
+      "foot_vertices_min_edge_clearance_cm": 70.70561051368713,
+      "pelvis_game_cm": [
+        0.0,
+        -11.0,
+        14.999999046325684
+      ]
+    },
+    {
+      "frame": 253,
+      "foot_vertices_min_edge_clearance_cm": 71.40931487083435,
+      "pelvis_game_cm": [
+        0.0,
+        -10.648146629333496,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 254,
+      "foot_vertices_min_edge_clearance_cm": 73.16856384277344,
+      "pelvis_game_cm": [
+        0.0,
+        -9.768518447875977,
+        14.999999046325684
+      ]
+    },
+    {
+      "frame": 255,
+      "foot_vertices_min_edge_clearance_cm": 75.45560300350189,
+      "pelvis_game_cm": [
+        0.0,
+        -8.625000953674316,
+        14.999999046325684
+      ]
+    },
+    {
+      "frame": 256,
+      "foot_vertices_min_edge_clearance_cm": 75.45560151338577,
+      "pelvis_game_cm": [
+        0.0,
+        -7.481480598449707,
+        14.999999046325684
+      ]
+    },
+    {
+      "frame": 257,
+      "foot_vertices_min_edge_clearance_cm": 75.45560300350189,
+      "pelvis_game_cm": [
+        0.0,
+        -6.6018524169921875,
+        14.999999046325684
+      ]
+    },
+    {
+      "frame": 258,
+      "foot_vertices_min_edge_clearance_cm": 75.45560300350189,
+      "pelvis_game_cm": [
+        0.0,
+        -6.249999523162842,
+        14.999999046325684
+      ]
+    },
+    {
+      "frame": 259,
+      "foot_vertices_min_edge_clearance_cm": 76.15930736064911,
+      "pelvis_game_cm": [
+        0.0,
+        -5.8981475830078125,
+        14.999999046325684
+      ]
+    },
+    {
+      "frame": 260,
+      "foot_vertices_min_edge_clearance_cm": 77.91856527328491,
+      "pelvis_game_cm": [
+        0.0,
+        -5.018518447875977,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 261,
+      "foot_vertices_min_edge_clearance_cm": 80.20560145378113,
+      "pelvis_game_cm": [
+        0.0,
+        -3.875,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 262,
+      "foot_vertices_min_edge_clearance_cm": 80.20560294389725,
+      "pelvis_game_cm": [
+        0.0,
+        -2.7314815521240234,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 263,
+      "foot_vertices_min_edge_clearance_cm": 80.20560443401337,
+      "pelvis_game_cm": [
+        0.0,
+        -1.8518520593643188,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 264,
+      "foot_vertices_min_edge_clearance_cm": 80.20559996366501,
+      "pelvis_game_cm": [
+        0.0,
+        -1.4999998807907104,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 265,
+      "foot_vertices_min_edge_clearance_cm": 80.90931177139282,
+      "pelvis_game_cm": [
+        0.0,
+        -1.148148536682129,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 266,
+      "foot_vertices_min_edge_clearance_cm": 82.66856670379639,
+      "pelvis_game_cm": [
+        0.0,
+        -0.26851874589920044,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 267,
+      "foot_vertices_min_edge_clearance_cm": 84.9556028842926,
+      "pelvis_game_cm": [
+        0.0,
+        0.8750001192092896,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 268,
+      "foot_vertices_min_edge_clearance_cm": 84.95559990406036,
+      "pelvis_game_cm": [
+        0.0,
+        2.0185184478759766,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 269,
+      "foot_vertices_min_edge_clearance_cm": 84.95559990406036,
+      "pelvis_game_cm": [
+        0.0,
+        2.8981480598449707,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 270,
+      "foot_vertices_min_edge_clearance_cm": 84.9556028842926,
+      "pelvis_game_cm": [
+        0.0,
+        3.25,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 271,
+      "foot_vertices_min_edge_clearance_cm": 85.30745804309845,
+      "pelvis_game_cm": [
+        0.0,
+        3.60185170173645,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 272,
+      "foot_vertices_min_edge_clearance_cm": 86.18708550930023,
+      "pelvis_game_cm": [
+        0.0,
+        4.481481552124023,
+        14.999999046325684
+      ]
+    },
+    {
+      "frame": 273,
+      "foot_vertices_min_edge_clearance_cm": 87.3306006193161,
+      "pelvis_game_cm": [
+        0.0,
+        5.624999523162842,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 274,
+      "foot_vertices_min_edge_clearance_cm": 88.47412317991257,
+      "pelvis_game_cm": [
+        0.0,
+        6.768519401550293,
+        14.999999046325684
+      ]
+    },
+    {
+      "frame": 275,
+      "foot_vertices_min_edge_clearance_cm": 89.35375362634659,
+      "pelvis_game_cm": [
+        0.0,
+        7.6481475830078125,
+        15.000000953674316
+      ]
+    },
+    {
+      "frame": 276,
+      "foot_vertices_min_edge_clearance_cm": 89.7056020796299,
+      "pelvis_game_cm": [
+        0.0,
+        8.0,
+        15.80000114440918
+      ]
+    }
+  ],
+  "tail": [
+    {
+      "frame": 1,
+      "x_width_game_cm": 4.430827498435974,
+      "bone_length_sum_cm": 27.150795968075304
+    },
+    {
+      "frame": 12,
+      "x_width_game_cm": 14.453672245144844,
+      "bone_length_sum_cm": 27.15077355687317
+    },
+    {
+      "frame": 61,
+      "x_width_game_cm": 4.430827498435974,
+      "bone_length_sum_cm": 27.150795968075304
+    }
+  ],
+  "scope": "Surface intersection checks of head vs ring and support foot vertex bounds. Does not certify all skin self-intersections."
+}

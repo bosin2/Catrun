@@ -29,3 +29,11 @@ Thumbs.db
 # Generated Python caches
 __pycache__/
 *.py[cod]
+
+# Cat Audio Director: share only reviewed, credential-free project configuration.
+!/.codex/
+/.codex/*
+!/.codex/config.toml
+!/.codex/agents/
+/.codex/agents/*
+!/.codex/agents/cat_audio_*.toml

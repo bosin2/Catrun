@@ -1,0 +1,19 @@
+{
+  "source": "C:\\Users\\whghk\\Desktop\\CastleKit\\BlackCat\\Final\\SK_BlackCat_Final.blend",
+  "source_sha256": "07a220d70764ff0cda34e77da3344797847b77547de8df7aa88a5eb6df8c3327",
+  "original_rest_matrix_max_error": 0.0,
+  "deform_bones": 89,
+  "controls": 49,
+  "vertices": 5873,
+  "triangles": 11458,
+  "mouth_seam_edges": 9,
+  "replaced_lid_vertices": 2112,
+  "new_lid_vertices": 340,
+  "shape_keys": [
+    "Basis",
+    "Blink_L_Half",
+    "Blink_L_Closed",
+    "Blink_R_Half",
+    "Blink_R_Closed"
+  ]
+}

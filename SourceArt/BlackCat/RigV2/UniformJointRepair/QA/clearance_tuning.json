@@ -1,0 +1,38 @@
+[
+  {
+    "gain": 0,
+    "max": 21,
+    "total": 136,
+    "limb_max": 3
+  },
+  {
+    "gain": 0.3,
+    "max": 2,
+    "total": 4,
+    "limb_max": 2
+  },
+  {
+    "gain": 0.6,
+    "max": 0,
+    "total": 0,
+    "limb_max": 0
+  },
+  {
+    "gain": 0.9,
+    "max": 10,
+    "total": 86,
+    "limb_max": 5
+  },
+  {
+    "gain": 1.2,
+    "max": 24,
+    "total": 278,
+    "limb_max": 12
+  },
+  {
+    "gain": 1.5,
+    "max": 46,
+    "total": 564,
+    "limb_max": 22
+  }
+]

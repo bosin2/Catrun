@@ -1,0 +1,8 @@
+00:05.282  blend            | Read blend: "C:\Users\whghk\Desktop\CastleKit\BlackCat\Final\SK_BlackCat_Final.blend"
+C:\Users\whghk\.codex\worktrees\110f\Catrun\SourceArt\BlackCat\RigV2\Scripts\build_rig_v2.py:232: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0
+  mat=bpy.data.materials.new(name);mat.diffuse_color=(*color,1);mat.use_nodes=True
+정보: 저장함: "SK_BlackCat_RigV2.blend"임
+RIG_V2_BUILT {"source": "C:\\Users\\whghk\\Desktop\\CastleKit\\BlackCat\\Final\\SK_BlackCat_Final.blend", "source_sha256": "07a220d70764ff0cda34e77da3344797847b77547de8df7aa88a5eb6df8c3327", "original_rest_matrix_max_error": 0.0, "deform_bones": 89, "controls": 49, "vertices": 5873, "triangles": 11458, "mouth_seam_edges": 9, "replaced_lid_vertices": 2112, "new_lid_vertices": 340, "shape_keys": ["Basis", "Blink_L_Half", "Blink_L_Closed", "Blink_R_Half", "Blink_R_Closed"]}
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 02:38:20)
+
+Blender quit

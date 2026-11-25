@@ -1,0 +1,82 @@
+{
+  "AN_BlackCat_Elevator_LookPrepare": {
+    "finite": true,
+    "min_mesh_game_z_cm": 0.14661946333944798,
+    "max_contact_error_cm": 0,
+    "max_foot_step_cm": 3.6393016630348557e-06,
+    "max_body_outside_platform_cm": 0,
+    "frames": 43
+  },
+  "AN_BlackCat_Elevator_JumpGrab": {
+    "finite": true,
+    "min_mesh_game_z_cm": 0.1466201152652502,
+    "max_contact_error_cm": 1.221986075256521e-05,
+    "max_foot_step_cm": 10.769526783347631,
+    "max_body_outside_platform_cm": 0,
+    "frames": 25
+  },
+  "AN_BlackCat_Elevator_HangPull": {
+    "finite": true,
+    "min_mesh_game_z_cm": 76.66298151016235,
+    "max_contact_error_cm": 1.6676656369566464e-05,
+    "max_foot_step_cm": 1.419746398609323,
+    "max_body_outside_platform_cm": 0,
+    "frames": 31
+  },
+  "AN_BlackCat_Elevator_ReleaseLand": {
+    "finite": true,
+    "min_mesh_game_z_cm": 0.14662016183137894,
+    "max_contact_error_cm": 1.4234314243899881e-05,
+    "max_foot_step_cm": 8.963724035156268,
+    "max_body_outside_platform_cm": 0,
+    "frames": 48
+  },
+  "AN_BlackCat_Elevator_StartleTail": {
+    "finite": true,
+    "min_mesh_game_z_cm": 0.14661992900073528,
+    "max_contact_error_cm": 0,
+    "max_foot_step_cm": 3.996623662529042e-06,
+    "max_body_outside_platform_cm": 0,
+    "frames": 61
+  },
+  "AN_BlackCat_Elevator_PeekDown": {
+    "finite": true,
+    "min_mesh_game_z_cm": 0.14661205932497978,
+    "max_contact_error_cm": 0,
+    "max_foot_step_cm": 2.3095400350581934,
+    "max_body_outside_platform_cm": 4.453372955322266,
+    "frames": 276
+  },
+  "AN_BlackCat_Elevator_RideBalance": {
+    "finite": true,
+    "min_mesh_game_z_cm": 0.14661983586847782,
+    "max_contact_error_cm": 0,
+    "max_foot_step_cm": 4.1019083342755445e-06,
+    "max_body_outside_platform_cm": 0,
+    "frames": 91
+  },
+  "AN_BlackCat_Elevator_LoafIdle": {
+    "finite": true,
+    "min_mesh_game_z_cm": 5.9604644775390625e-06,
+    "max_contact_error_cm": 0,
+    "max_foot_step_cm": 0,
+    "max_body_outside_platform_cm": 0,
+    "frames": 241
+  },
+  "AN_BlackCat_Elevator_LoafStartleRise": {
+    "finite": true,
+    "min_mesh_game_z_cm": 1.3969838619232178e-06,
+    "max_contact_error_cm": 0,
+    "max_foot_step_cm": 1.8373802684519212,
+    "max_body_outside_platform_cm": 0,
+    "frames": 82
+  },
+  "AN_BlackCat_Elevator_MASTER_JumpPullLand": {
+    "finite": true,
+    "min_mesh_game_z_cm": 0.1466201152652502,
+    "max_contact_error_cm": 1.6676656369566464e-05,
+    "max_foot_step_cm": 10.769526783347631,
+    "max_body_outside_platform_cm": 0,
+    "frames": 102
+  }
+}

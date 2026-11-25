@@ -70,13 +70,16 @@ def main():
     box = mesh.get_bounding_box()
     assert all(abs(a-b) < .2 for a,b in zip(vec(box.max-box.min), [168,28,226])), str(box)
     spec = [('SM_Tutorial_BedroomDoorLining', LINING, (-130,465,0), 0),
-            ('SM_Tutorial_CatHoleTrim_Bedroom', TRIM, (-270,450,0), 180),
-            ('SM_Tutorial_CatHoleTrim_Corridor', TRIM, (-270,480,0), 0)]
+            ('SM_Tutorial_CatHoleTrim_Bedroom', TRIM, (-270,449.8,0), 180),
+            ('SM_Tutorial_CatHoleTrim_Corridor', TRIM, (-270,480.2,0), 0)]
     if name == 'MainMenu':
         # Menu has a separately authored static bedroom door; only its matching
         # cat-hole trim is in scope. Adopt its existing actor rather than duplicate.
-        spec = [('SM_CatHoleTrim_Stage1', TRIM, (-270,450,0), 180),
-                ('SM_MainMenu_CatHoleTrim_Outside', TRIM, (-270,480,0), 0)]
+        spec = [('SM_CatHoleTrim_Stage1', TRIM, (-270,449.8,0), 180),
+                ('SM_MainMenu_CatHoleTrim_Outside', TRIM, (-270,480.2,0), 0)]
+    if name == 'SoundTest_Tutorial':
+        spec = [(label, asset, (-270,450 if yaw == 180 else 480,0) if asset == TRIM else loc, yaw)
+                for label, asset, loc, yaw in spec]
     rows = []
     for label, asset, location, yaw in spec:
         a = actors.get(label)
@@ -86,11 +89,11 @@ def main():
                 assert vec(a.get_actor_location()) == [-270,450,0]
                 a.tags = list(a.tags) + [OWN]
             if a is None:
-                a = ACT.spawn_actor_from_class(u.StaticMeshActor, u.Vector(*location), u.Rotator(0,yaw,0))
+                a = ACT.spawn_actor_from_class(u.StaticMeshActor, u.Vector(*location), u.Rotator(pitch=0,yaw=yaw,roll=0))
                 a.set_actor_label(label); a.tags = [OWN]
             assert OWN in map(str,a.tags), 'Do not replace an unowned actor'
             a.set_actor_location(u.Vector(*location), False, False)
-            a.set_actor_rotation(u.Rotator(0,yaw,0), False)
+            a.set_actor_rotation(u.Rotator(pitch=0,yaw=yaw,roll=0), False)
             a.set_actor_scale3d(u.Vector(1,1,1))
             c = a.get_component_by_class(u.StaticMeshComponent)
             c.set_static_mesh(u.load_asset(asset))
@@ -102,6 +105,8 @@ def main():
         c = a.get_component_by_class(u.StaticMeshComponent)
         assert package(c.static_mesh) == asset and c.get_collision_enabled() == u.CollisionEnabled.NO_COLLISION, (label, package(c.static_mesh), asset, str(c.get_collision_enabled()))
         assert vec(a.get_actor_location()) == list(location) and vec(a.get_actor_scale3d()) == [1,1,1]
+        rotation = a.get_actor_rotation()
+        assert abs(rotation.pitch) < .001 and abs(rotation.roll) < .001 and abs(abs(rotation.yaw)-yaw) < .001
         rows.append({'label':label,'mesh':asset,'location':vec(a.get_actor_location()),
                      'yaw':a.get_actor_rotation().yaw,'collision':str(c.get_collision_enabled())})
     after = {a.get_path_name():transform(a) for a in ACT.get_all_level_actors() if OWN not in map(str,a.tags) and a != adopted}

@@ -1,0 +1,14 @@
+00:04.718  blend            | Read blend: "C:\Users\whghk\.codex\worktrees\110f\Catrun\SourceArt\BlackCat\RigV2\SK_BlackCat_RigV2.blend"
+Info: Saved as "SK_BlackCat_UniformJointRepair.blend"
+UNIFORM_LIMBS_BUILT
+Info: Saved as "SK_BlackCat_UniformJointRepair.blend"
+SURFACE_GUIDES_ADDED 28
+Traceback (most recent call last):
+  File "C:\Users\whghk\.codex\worktrees\110f\Catrun\SourceArt\BlackCat\RigV2\Scripts\finish_uniform.py", line 13, in <module>
+    t=bm.faces.new([row[0],row[j],row[j+1]]);t.material_index=mat;t.smooth=False
+ValueError: faces.new(...): face already exists
+
+Error: script failed, file: 'SourceArt/BlackCat/RigV2/Scripts/finish_uniform.py', exiting.
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 02:38:20)
+
+Blender quit

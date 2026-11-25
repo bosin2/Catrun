@@ -1,0 +1,26 @@
+[
+  {
+    "action": "AN_BlackCat_Elevator_LookPrepare",
+    "stationary_support_samples": 168,
+    "max_stance_displacement_game_cm": 3.6393016630348557e-06,
+    "method": "Adjacent frames whose ankle height is within 0.01cm of planted baseline. Swing frames excluded."
+  },
+  {
+    "action": "AN_BlackCat_Elevator_StartleTail",
+    "stationary_support_samples": 240,
+    "max_stance_displacement_game_cm": 3.996623662529042e-06,
+    "method": "Adjacent frames whose ankle height is within 0.01cm of planted baseline. Swing frames excluded."
+  },
+  {
+    "action": "AN_BlackCat_Elevator_PeekDown",
+    "stationary_support_samples": 692,
+    "max_stance_displacement_game_cm": 2.0631129887374818e-05,
+    "method": "Adjacent frames whose ankle height is within 0.01cm of planted baseline. Swing frames excluded."
+  },
+  {
+    "action": "AN_BlackCat_Elevator_RideBalance",
+    "stationary_support_samples": 360,
+    "max_stance_displacement_game_cm": 4.1019083342755445e-06,
+    "method": "Adjacent frames whose ankle height is within 0.01cm of planted baseline. Swing frames excluded."
+  }
+]

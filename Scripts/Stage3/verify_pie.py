@@ -11,6 +11,11 @@ ED=u.get_editor_subsystem(u.UnrealEditorSubsystem);LE=u.get_editor_subsystem(u.L
 SYS=u.load_object(None,'/Script/Engine.Default__SubsystemBlueprintLibrary')
 S={'phase':'startup','started':time.monotonic(),'changed':time.monotonic(),'checks':[],'scope':__doc__}
 S['command_line']=SL.get_command_line()
+# Plan coordinates retain their original positive-Y convention. Wrappers may
+# reflect the saved map while actor-derived locations remain world coordinates.
+PLAN_Y_SIGN=1
+
+def plan_y(y):return y*PLAN_Y_SIGN
 def persist(): (OUT/'report.json').write_text(json.dumps({k:v for k,v in S.items() if k!='handle'},ensure_ascii=False,indent=2),encoding='utf8')
 def phase(name):S['phase']=name;S['changed']=time.monotonic();persist()
 def check(name,ok,detail=None):
@@ -63,17 +68,21 @@ def step(w):
                 S['device']=0;phase('device_position')
             return
         for _ in range(8):
-            pos=statue.get_actor_location();move(cat,pos.x,pos.y-85)
-            if not puzzle.try_push_statue(index,cat,u.Vector(0,1,0),.05):break
+            pos=statue.get_actor_location();move(cat,pos.x,pos.y-plan_y(85))
+            if not puzzle.try_push_statue(index,cat,u.Vector(0,PLAN_Y_SIGN,0),.05):break
         return
     if p=='wait_d1':
         if not links[0].get_editor_property('bCompleted') or str(puzzle.get_editor_property('Reveal').get_editor_property('Phase')).find('INACTIVE')<0:return
         check('D1 fully recessed',links[0].get_editor_property('GateOffset')<=-280)
         phase('push2');return
     if p=='device_position':
-        i=S['device'];d=director.get_editor_property('Devices')[i];h=d.get_editor_property('Housing').get_actor_location()
-        move(cat,h.x,h.y+60);check('Device'+str(i+1)+' rejects rear interaction',not director.can_release(i,cat))
-        move(cat,h.x-10,h.y-70);phase('device_release');return
+        i=S['device'];d=director.get_editor_property('Devices')[i];housing=d.get_editor_property('Housing');h=housing.get_actor_location()
+        # CanRelease defines the public face in housing-local +Y, regardless
+        # of a positive-scale assembly's world yaw.
+        rear=h-housing.get_actor_right_vector()*60
+        front=h+housing.get_actor_forward_vector()*10+housing.get_actor_right_vector()*70
+        move(cat,rear.x,rear.y);check('Device'+str(i+1)+' rejects rear interaction',not director.can_release(i,cat))
+        move(cat,front.x,front.y);phase('device_release');return
     if p=='device_release':
         if time.monotonic()-S['changed']<.2:return
         i=S['device'];check('Device'+str(i+1)+' reachable from front',director.can_release(i,cat))
@@ -124,7 +133,7 @@ def step(w):
     if p=='wait_d2':
         if not links[1].get_editor_property('bCompleted') or str(puzzle.get_editor_property('Reveal').get_editor_property('Phase')).find('INACTIVE')<0:return
         check('All three releases and P2 open D2',director.all_released() and links[1].get_editor_property('GateOffset')<=-280)
-        move(cat,-200,3720);phase('final_gate');return
+        move(cat,-200,plan_y(3720));phase('final_gate');return
     if p=='final_gate':
         if time.monotonic()-S['changed']<5:return
         check('Final gate opens',director.get_editor_property('bFinalGateOpen'))
@@ -135,9 +144,9 @@ def step(w):
         S['exit_walk_start']=xyz(cat.get_actor_location());phase('walk_exit');return
     if p=='walk_exit':
         if flow(w).get_editor_property('bStageComplete'):
-            check('Physical walk through final gate completes Stage3',cat.get_actor_location().y>4090,xyz(cat.get_actor_location()))
+            check('Physical walk through final gate completes Stage3',PLAN_Y_SIGN*cat.get_actor_location().y>4090,xyz(cat.get_actor_location()))
             shot(w,'Completion');phase('complete_wait');return
-        cat.add_movement_input(u.Vector(0,1,0),1.,False);return
+        cat.add_movement_input(u.Vector(0,PLAN_Y_SIGN,0),1.,False);return
     if p=='complete_wait' and time.monotonic()-S['changed']>2:finish()
 def tick(_dt):
     try:

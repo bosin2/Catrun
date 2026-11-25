@@ -1,0 +1,26 @@
+00:15.578  blend            | Read blend: "C:\Users\whghk\.codex\worktrees\110f\Catrun\SourceArt\BlackCat\RigV2\SK_BlackCat_RigV2.blend"
+Info: Saved as "SK_BlackCat_UniformJointRepair.blend"
+UNIFORM_LIMBS_BUILT
+Info: Saved as "SK_BlackCat_UniformJointRepair.blend"
+SURFACE_GUIDES_ADDED 28
+Info: Saved as "SK_BlackCat_UniformJointRepair.blend"
+{"SK_BlackCat_BellClapper_V2": {"pass": true, "errors": [], "warnings": ["asset lowest point z=0.042 (not resting on ground plane z=0)"]}, "SK_BlackCat_RigV2": {"pass": true, "errors": [], "warnings": ["SK_BlackCat_RigV2: ~37.24% UV overlap (ok only if mirrored/stacked on purpose; bakes break)", "SK_BlackCat_RigV2: duplicate verts=8 loose verts=0", "2 parts fully enclosed, not touching (eyes/internals?): ['SK_BlackCat_RigV2', 'SK_BlackCat_RigV2']"]}}
+00:35.390  render           | Saved: 'C:\Users\whghk\.codex\worktrees\110f\Catrun\SourceArt\BlackCat\RigV2\UniformJointRepair\Previews\gray_forearm_L_0.png'
+00:35.953  render           | Saved: 'C:\Users\whghk\.codex\worktrees\110f\Catrun\SourceArt\BlackCat\RigV2\UniformJointRepair\Previews\gray_forearm_L_5.png'
+00:37.125  render           | Saved: 'C:\Users\whghk\.codex\worktrees\110f\Catrun\SourceArt\BlackCat\RigV2\UniformJointRepair\Previews\gray_forearm_L_60.png'
+00:38.921  render           | Saved: 'C:\Users\whghk\.codex\worktrees\110f\Catrun\SourceArt\BlackCat\RigV2\UniformJointRepair\Previews\gray_paw_F_L_45.png'
+GRAY_CASES_DONE
+SCANNED forearm_L max_overlap 36
+SCANNED forearm_R max_overlap 23
+SCANNED paw_F_L max_overlap 0
+SCANNED paw_F_R max_overlap 3
+SCANNED shin_L max_overlap 33
+SCANNED shin_R max_overlap 50
+SCANNED hock_L max_overlap 2
+SCANNED hock_R max_overlap 3
+SCANNED paw_H_L max_overlap 0
+SCANNED paw_H_R max_overlap 0
+SCAN_COMPLETE
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 02:38:20)
+
+Blender quit

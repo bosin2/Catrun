@@ -1,0 +1,10 @@
+name = "cat_audio_director"
+description = "Coordinate Catrun audio, delegate BGM/SFX planning, then collect editing, Unreal import, and QA evidence."
+developer_instructions = """
+Read .agents/skills/cat-audio-director/SKILL.md and Scripts/CatAudioDirector/README.md.
+Act as the single director; do not recursively spawn another director.
+Delegate independent BGM and SFX planning in parallel, merge the brief, and run editing, Unreal import, then QA in dependency order.
+Only the director may submit verified provider generation calls after explicit approval of the batch and credit limit.
+Preserve all existing assets, source, Blueprints, maps, and dirty work. Keep one Unreal writer.
+Report mock, local, authenticated generation, import verification, and runtime playback as distinct outcomes.
+"""

@@ -1,0 +1,45 @@
+00:03.313  blend            | Read blend: "C:\Users\whghk\Catrun\SourceArt\Cinematics\ElevatorCat\Production01_20261125\SK_BlackCat_Elevator.blend"
+QA AN_BlackCat_Elevator_LookPrepare {'finite': True, 'min_mesh_game_z_cm': 0.14661946333944798, 'max_contact_error_cm': 0, 'max_foot_step_cm': 3.6393016630348557e-06, 'max_body_outside_platform_cm': 0, 'frames': 43}
+
+FBX export starting... 'C:\\Users\\whghk\\Catrun\\SourceArt\\Cinematics\\ElevatorCat\\Production01_20261125\\FBX\\AN_BlackCat_Elevator_LookPrepare.fbx'
+export finished in 0.3062 sec.
+QA AN_BlackCat_Elevator_JumpGrab {'finite': True, 'min_mesh_game_z_cm': 0.1466201152652502, 'max_contact_error_cm': 1.666000468656264e-06, 'max_foot_step_cm': 10.560058373796815, 'max_body_outside_platform_cm': 0, 'frames': 25}
+
+FBX export starting... 'C:\\Users\\whghk\\Catrun\\SourceArt\\Cinematics\\ElevatorCat\\Production01_20261125\\FBX\\AN_BlackCat_Elevator_JumpGrab.fbx'
+export finished in 0.2510 sec.
+QA AN_BlackCat_Elevator_HangPull {'finite': True, 'min_mesh_game_z_cm': 76.66298151016235, 'max_contact_error_cm': 2.4978897890806513e-05, 'max_foot_step_cm': 1.4197387577235803, 'max_body_outside_platform_cm': 0, 'frames': 31}
+
+FBX export starting... 'C:\\Users\\whghk\\Catrun\\SourceArt\\Cinematics\\ElevatorCat\\Production01_20261125\\FBX\\AN_BlackCat_Elevator_HangPull.fbx'
+export finished in 0.3236 sec.
+QA AN_BlackCat_Elevator_ReleaseLand {'finite': True, 'min_mesh_game_z_cm': 0.14662016183137894, 'max_contact_error_cm': 4.532011248393521e-06, 'max_foot_step_cm': 8.7518517045221, 'max_body_outside_platform_cm': 0, 'frames': 48}
+
+FBX export starting... 'C:\\Users\\whghk\\Catrun\\SourceArt\\Cinematics\\ElevatorCat\\Production01_20261125\\FBX\\AN_BlackCat_Elevator_ReleaseLand.fbx'
+export finished in 0.3119 sec.
+QA AN_BlackCat_Elevator_StartleTail {'finite': True, 'min_mesh_game_z_cm': 0.14661992900073528, 'max_contact_error_cm': 0, 'max_foot_step_cm': 3.996623662529042e-06, 'max_body_outside_platform_cm': 0, 'frames': 61}
+
+FBX export starting... 'C:\\Users\\whghk\\Catrun\\SourceArt\\Cinematics\\ElevatorCat\\Production01_20261125\\FBX\\AN_BlackCat_Elevator_StartleTail.fbx'
+export finished in 0.4374 sec.
+QA AN_BlackCat_Elevator_PeekDown {'finite': True, 'min_mesh_game_z_cm': 0.14661205932497978, 'max_contact_error_cm': 0, 'max_foot_step_cm': 2.3095400350581934, 'max_body_outside_platform_cm': 4.453372955322266, 'frames': 276}
+
+FBX export starting... 'C:\\Users\\whghk\\Catrun\\SourceArt\\Cinematics\\ElevatorCat\\Production01_20261125\\FBX\\AN_BlackCat_Elevator_PeekDown.fbx'
+export finished in 1.0957 sec.
+QA AN_BlackCat_Elevator_RideBalance {'finite': True, 'min_mesh_game_z_cm': 0.14661983586847782, 'max_contact_error_cm': 0, 'max_foot_step_cm': 4.1019083342755445e-06, 'max_body_outside_platform_cm': 0, 'frames': 91}
+
+FBX export starting... 'C:\\Users\\whghk\\Catrun\\SourceArt\\Cinematics\\ElevatorCat\\Production01_20261125\\FBX\\AN_BlackCat_Elevator_RideBalance.fbx'
+export finished in 0.5443 sec.
+QA AN_BlackCat_Elevator_LoafIdle {'finite': True, 'min_mesh_game_z_cm': 5.9604644775390625e-06, 'max_contact_error_cm': 0, 'max_foot_step_cm': 0, 'max_body_outside_platform_cm': 0, 'frames': 241}
+
+FBX export starting... 'C:\\Users\\whghk\\Catrun\\SourceArt\\Cinematics\\ElevatorCat\\Production01_20261125\\FBX\\AN_BlackCat_Elevator_LoafIdle.fbx'
+export finished in 0.9628 sec.
+QA AN_BlackCat_Elevator_LoafStartleRise {'finite': True, 'min_mesh_game_z_cm': 1.3969838619232178e-06, 'max_contact_error_cm': 0, 'max_foot_step_cm': 1.8373802684519212, 'max_body_outside_platform_cm': 0, 'frames': 82}
+
+FBX export starting... 'C:\\Users\\whghk\\Catrun\\SourceArt\\Cinematics\\ElevatorCat\\Production01_20261125\\FBX\\AN_BlackCat_Elevator_LoafStartleRise.fbx'
+export finished in 0.5322 sec.
+QA AN_BlackCat_Elevator_MASTER_JumpPullLand {'finite': True, 'min_mesh_game_z_cm': 0.1466201152652502, 'max_contact_error_cm': 2.4978897890806513e-05, 'max_foot_step_cm': 10.560058373796815, 'max_body_outside_platform_cm': 0, 'frames': 102}
+
+FBX export starting... 'C:\\Users\\whghk\\Catrun\\SourceArt\\Cinematics\\ElevatorCat\\Production01_20261125\\FBX\\AN_BlackCat_Elevator_MASTER_JumpPullLand.fbx'
+export finished in 0.4940 sec.
+QA_EXPORT_DONE
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 02:38:20)
+
+Blender quit

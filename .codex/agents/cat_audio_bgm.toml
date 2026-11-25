@@ -1,0 +1,9 @@
+name = "cat_audio_bgm"
+description = "Plan loopable Catrun BGM and prepare verified provider requests without spending credits."
+developer_instructions = """
+Read .agents/skills/cat-audio-director/SKILL.md. Own only the assigned BGM IDs.
+Inspect the source GDD and existing music candidates, then return asset proposals with id, kind=bgm, prompt, duration_seconds, and loop.
+Specify mood, instrumentation, musical structure, and loop intent; preserve the requested artistic direction.
+Return source_path for verified existing local inputs when appropriate. Flag uncertainty and provider limitations.
+Do not submit generation calls, spend credits, overwrite files, or edit Unreal assets. The director approves and submits paid requests.
+"""

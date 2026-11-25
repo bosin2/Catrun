@@ -1,0 +1,526 @@
+{
+  "ik": {
+    "F_L": {
+      "pole_angle": 1.5707963267948966,
+      "joint_position_error_m": 6.753443764901505e-07,
+      "target_error_m": 1.3560261371136677e-08
+    },
+    "H_L": {
+      "pole_angle": -1.5707963267948966,
+      "joint_position_error_m": 2.61423092746835e-07,
+      "target_error_m": 7.508562643358995e-09
+    },
+    "F_R": {
+      "pole_angle": 1.5707963267948966,
+      "joint_position_error_m": 6.753443764901505e-07,
+      "target_error_m": 1.3560261371136677e-08
+    },
+    "H_R": {
+      "pole_angle": -1.5707963267948966,
+      "joint_position_error_m": 2.61423092746835e-07,
+      "target_error_m": 7.508562643358995e-09
+    }
+  },
+  "poses": {
+    "neutral": {
+      "finite": true,
+      "bounds_min": [
+        -0.06250352412462234,
+        -0.11600004136562347,
+        -0.0009001889266073704
+      ],
+      "bounds_max": [
+        0.06250352412462234,
+        0.11699998378753662,
+        0.22499939799308777
+      ],
+      "foot_target_errors": {
+        "paw_F_L": 1.1926748300777466e-08,
+        "paw_F_R": 1.041250292910165e-08,
+        "paw_H_L": 7.508562643358995e-09,
+        "paw_H_R": 7.031331244176952e-09
+      }
+    },
+    "blink_0.25": {
+      "finite": true,
+      "bounds_min": [
+        -0.06250352412462234,
+        -0.11600004136562347,
+        -0.0009001889266073704
+      ],
+      "bounds_max": [
+        0.06250352412462234,
+        0.11699998378753662,
+        0.22499939799308777
+      ],
+      "foot_target_errors": {
+        "paw_F_L": 1.1926748300777466e-08,
+        "paw_F_R": 1.041250292910165e-08,
+        "paw_H_L": 7.508562643358995e-09,
+        "paw_H_R": 7.031331244176952e-09
+      }
+    },
+    "blink_0.5": {
+      "finite": true,
+      "bounds_min": [
+        -0.06250352412462234,
+        -0.11600004136562347,
+        -0.0009001889266073704
+      ],
+      "bounds_max": [
+        0.06250352412462234,
+        0.11699998378753662,
+        0.22499939799308777
+      ],
+      "foot_target_errors": {
+        "paw_F_L": 1.1926748300777466e-08,
+        "paw_F_R": 1.041250292910165e-08,
+        "paw_H_L": 7.508562643358995e-09,
+        "paw_H_R": 7.031331244176952e-09
+      }
+    },
+    "blink_0.75": {
+      "finite": true,
+      "bounds_min": [
+        -0.06250352412462234,
+        -0.11600004136562347,
+        -0.0009001889266073704
+      ],
+      "bounds_max": [
+        0.06250352412462234,
+        0.11699998378753662,
+        0.22499939799308777
+      ],
+      "foot_target_errors": {
+        "paw_F_L": 1.1926748300777466e-08,
+        "paw_F_R": 1.041250292910165e-08,
+        "paw_H_L": 7.508562643358995e-09,
+        "paw_H_R": 7.031331244176952e-09
+      }
+    },
+    "blink_1.0": {
+      "finite": true,
+      "bounds_min": [
+        -0.06250352412462234,
+        -0.11600004136562347,
+        -0.0009001889266073704
+      ],
+      "bounds_max": [
+        0.06250352412462234,
+        0.11699998378753662,
+        0.22499939799308777
+      ],
+      "foot_target_errors": {
+        "paw_F_L": 1.1926748300777466e-08,
+        "paw_F_R": 1.041250292910165e-08,
+        "paw_H_L": 7.508562643358995e-09,
+        "paw_H_R": 7.031331244176952e-09
+      }
+    },
+    "jaw": {
+      "finite": true,
+      "bounds_min": [
+        -0.06250352412462234,
+        -0.11600004136562347,
+        -0.0009001889266073704
+      ],
+      "bounds_max": [
+        0.06250352412462234,
+        0.11699998378753662,
+        0.22499939799308777
+      ],
+      "foot_target_errors": {
+        "paw_F_L": 1.1926748300777466e-08,
+        "paw_F_R": 1.041250292910165e-08,
+        "paw_H_L": 7.508562643358995e-09,
+        "paw_H_R": 7.031331244176952e-09
+      }
+    },
+    "crouch": {
+      "finite": true,
+      "bounds_min": [
+        -0.06250352412462234,
+        -0.11600004136562347,
+        -0.0076950667425990105
+      ],
+      "bounds_max": [
+        0.06250352412462234,
+        0.11699999123811722,
+        0.2049994170665741
+      ],
+      "foot_target_errors": {
+        "paw_F_L": 1.5472026362060287e-06,
+        "paw_F_R": 1.5472026362060287e-06,
+        "paw_H_L": 1.9493320123196497e-06,
+        "paw_H_R": 1.9492525865350833e-06
+      }
+    },
+    "reach": {
+      "finite": true,
+      "bounds_min": [
+        -0.06250352412462234,
+        -0.11600004136562347,
+        -0.0009001889266073704
+      ],
+      "bounds_max": [
+        0.06250352412462234,
+        0.11699998378753662,
+        0.22499939799308777
+      ],
+      "foot_target_errors": {
+        "paw_F_L": 2.141964175015835e-06,
+        "paw_F_R": 1.041250292910165e-08,
+        "paw_H_L": 7.508562643358995e-09,
+        "paw_H_R": 7.031331244176952e-09
+      }
+    },
+    "side_bend": {
+      "finite": true,
+      "bounds_min": [
+        -0.12715980410575867,
+        -0.09430111944675446,
+        -0.0008999891579151154
+      ],
+      "bounds_max": [
+        0.04800000041723251,
+        0.11699998378753662,
+        0.23370714485645294
+      ],
+      "foot_target_errors": {
+        "paw_F_L": 0.011678834463354309,
+        "paw_F_R": 0.003940557363109185,
+        "paw_H_L": 7.508562643358995e-09,
+        "paw_H_R": 7.031331244176952e-09
+      }
+    },
+    "twist60": {
+      "finite": true,
+      "bounds_min": [
+        -0.1388227641582489,
+        -0.11814211308956146,
+        -0.004519983194768429
+      ],
+      "bounds_max": [
+        0.059519149363040924,
+        0.11699998378753662,
+        0.2058904767036438
+      ],
+      "foot_target_errors": {
+        "paw_F_L": 0.03275303556842164,
+        "paw_F_R": 1.7071424778386354e-08,
+        "paw_H_L": 7.508562643358995e-09,
+        "paw_H_R": 7.031331244176952e-09
+      }
+    },
+    "arch": {
+      "finite": true,
+      "bounds_min": [
+        -0.06250352412462234,
+        -0.14579571783542633,
+        -0.013200625777244568
+      ],
+      "bounds_max": [
+        0.06250352412462234,
+        0.11699998378753662,
+        0.19063594937324524
+      ],
+      "foot_target_errors": {
+        "paw_F_L": 3.3220421143431117e-07,
+        "paw_F_R": 3.3023495581291503e-07,
+        "paw_H_L": 7.508562643358995e-09,
+        "paw_H_R": 7.031331244176952e-09
+      }
+    }
+  },
+  "drivers": [
+    {
+      "path": "pose.bones[\"root\"].constraints[\"V2 CTRL_world\"].influence",
+      "valid": true
+    },
+    {
+      "path": "pose.bones[\"pelvis\"].constraints[\"V2 CTRL_body\"].influence",
+      "valid": true
+    },
+    {
+      "path": "pose.bones[\"neck\"].constraints[\"V2 CTRL_neck\"].influence",
+      "valid": true
+    },
+    {
+      "path": "pose.bones[\"head\"].constraints[\"V2 CTRL_head\"].influence",
+      "valid": true
+    },
+    {
+      "path": "pose.bones[\"ear_L\"].constraints[\"V2 CTRL_ear_L\"].influence",
+      "valid": true
+    },
+    {
+      "path": "pose.bones[\"ear_tip_L\"].constraints[\"V2 CTRL_ear_tip_L\"].influence",
+      "valid": true
+    },
+    {
+      "path": "pose.bones[\"ear_R\"].constraints[\"V2 CTRL_ear_R\"].influence",
+      "valid": true
+    },
+    {
+      "path": "pose.bones[\"ear_tip_R\"].constraints[\"V2 CTRL_ear_tip_R\"].influence",
+      "valid": true
+    },
+    {
+      "path": "pose.bones[\"collar\"].constraints[\"V2 CTRL_collar\"].influence",
+      "valid": true
+    },
+    {
+      "path": "pose.bones[\"bell\"].constraints[\"V2 CTRL_bell\"].influence",
+      "valid": true
+    },
+    {
+      "path": "pose.bones[\"scapula_L\"].constraints[\"V2 CTRL_scapula_L\"].influence",
+      "valid": true
+    },
+    {
+      "path": "pose.bones[\"upperarm_L\"].constraints[\"V2 CTRL_upperarm_L\"].influence",
+      "valid": true
+    },
+    {
+      "path": "pose.bones[\"forearm_L\"].constraints[\"V2 CTRL_forearm_L\"].influence",
+      "valid": true
+    },
+    {
+      "path": "pose.bones[\"paw_F_L\"].constraints[\"V2 CTRL_paw_F_L\"].influence",
+      "valid": true
+    },
+    {
+      "path": "pose.bones[\"toes_F_L\"].constraints[\"V2 CTRL_toes_F_L\"].influence",
+      "valid": true
+    },
+    {
+      "path": "pose.bones[\"scapula_R\"].constraints[\"V2 CTRL_scapula_R\"].influence",
+      "valid": true
+    },
+    {
+      "path": "pose.bones[\"upperarm_R\"].constraints[\"V2 CTRL_upperarm_R\"].influence",
+      "valid": true
+    },
+    {
+      "path": "pose.bones[\"forearm_R\"].constraints[\"V2 CTRL_forearm_R\"].influence",
+      "valid": true
+    },
+    {
+      "path": "pose.bones[\"paw_F_R\"].constraints[\"V2 CTRL_paw_F_R\"].influence",
+      "valid": true
+    },
+    {
+      "path": "pose.bones[\"toes_F_R\"].constraints[\"V2 CTRL_toes_F_R\"].influence",
+      "valid": true
+    },
+    {
+      "path": "pose.bones[\"thigh_L\"].constraints[\"V2 CTRL_thigh_L\"].influence",
+      "valid": true
+    },
+    {
+      "path": "pose.bones[\"shin_L\"].constraints[\"V2 CTRL_shin_L\"].influence",
+      "valid": true
+    },
+    {
+      "path": "pose.bones[\"hock_L\"].constraints[\"V2 CTRL_hock_L\"].influence",
+      "valid": true
+    },
+    {
+      "path": "pose.bones[\"paw_H_L\"].constraints[\"V2 CTRL_paw_H_L\"].influence",
+      "valid": true
+    },
+    {
+      "path": "pose.bones[\"toes_H_L\"].constraints[\"V2 CTRL_toes_H_L\"].influence",
+      "valid": true
+    },
+    {
+      "path": "pose.bones[\"thigh_R\"].constraints[\"V2 CTRL_thigh_R\"].influence",
+      "valid": true
+    },
+    {
+      "path": "pose.bones[\"shin_R\"].constraints[\"V2 CTRL_shin_R\"].influence",
+      "valid": true
+    },
+    {
+      "path": "pose.bones[\"hock_R\"].constraints[\"V2 CTRL_hock_R\"].influence",
+      "valid": true
+    },
+    {
+      "path": "pose.bones[\"paw_H_R\"].constraints[\"V2 CTRL_paw_H_R\"].influence",
+      "valid": true
+    },
+    {
+      "path": "pose.bones[\"toes_H_R\"].constraints[\"V2 CTRL_toes_H_R\"].influence",
+      "valid": true
+    },
+    {
+      "path": "pose.bones[\"tail_01\"].constraints[\"V2 CTRL_tail_01\"].influence",
+      "valid": true
+    },
+    {
+      "path": "pose.bones[\"tail_02\"].constraints[\"V2 CTRL_tail_02\"].influence",
+      "valid": true
+    },
+    {
+      "path": "pose.bones[\"tail_03\"].constraints[\"V2 CTRL_tail_03\"].influence",
+      "valid": true
+    },
+    {
+      "path": "pose.bones[\"tail_04\"].constraints[\"V2 CTRL_tail_04\"].influence",
+      "valid": true
+    },
+    {
+      "path": "pose.bones[\"tail_05\"].constraints[\"V2 CTRL_tail_05\"].influence",
+      "valid": true
+    },
+    {
+      "path": "pose.bones[\"tail_06\"].constraints[\"V2 CTRL_tail_06\"].influence",
+      "valid": true
+    },
+    {
+      "path": "pose.bones[\"tail_07\"].constraints[\"V2 CTRL_tail_07\"].influence",
+      "valid": true
+    },
+    {
+      "path": "pose.bones[\"jaw\"].constraints[\"V2 CTRL_jaw\"].influence",
+      "valid": true
+    },
+    {
+      "path": "pose.bones[\"tongue\"].constraints[\"V2 CTRL_tongue\"].influence",
+      "valid": true
+    },
+    {
+      "path": "pose.bones[\"CTRL_jaw\"].rotation_euler",
+      "valid": true
+    },
+    {
+      "path": "pose.bones[\"CTRL_tongue\"].location",
+      "valid": true
+    },
+    {
+      "path": "pose.bones[\"MCH_lumbar\"].rotation_euler",
+      "valid": true
+    },
+    {
+      "path": "pose.bones[\"MCH_lumbar\"].rotation_euler",
+      "valid": true
+    },
+    {
+      "path": "pose.bones[\"MCH_lumbar\"].rotation_euler",
+      "valid": true
+    },
+    {
+      "path": "pose.bones[\"lumbar\"].constraints[\"V2 MCH_lumbar\"].influence",
+      "valid": true
+    },
+    {
+      "path": "pose.bones[\"MCH_spine\"].rotation_euler",
+      "valid": true
+    },
+    {
+      "path": "pose.bones[\"MCH_spine\"].rotation_euler",
+      "valid": true
+    },
+    {
+      "path": "pose.bones[\"MCH_spine\"].rotation_euler",
+      "valid": true
+    },
+    {
+      "path": "pose.bones[\"spine\"].constraints[\"V2 MCH_spine\"].influence",
+      "valid": true
+    },
+    {
+      "path": "pose.bones[\"MCH_chest\"].rotation_euler",
+      "valid": true
+    },
+    {
+      "path": "pose.bones[\"MCH_chest\"].rotation_euler",
+      "valid": true
+    },
+    {
+      "path": "pose.bones[\"MCH_chest\"].rotation_euler",
+      "valid": true
+    },
+    {
+      "path": "pose.bones[\"chest\"].constraints[\"V2 MCH_chest\"].influence",
+      "valid": true
+    },
+    {
+      "path": "pose.bones[\"forearm_L\"].constraints[\"V2 planted F\"].influence",
+      "valid": true
+    },
+    {
+      "path": "pose.bones[\"paw_F_L\"].constraints[\"V2 planted paw orientation\"].influence",
+      "valid": true
+    },
+    {
+      "path": "pose.bones[\"hock_L\"].constraints[\"V2 planted H\"].influence",
+      "valid": true
+    },
+    {
+      "path": "pose.bones[\"paw_H_L\"].constraints[\"V2 planted paw orientation\"].influence",
+      "valid": true
+    },
+    {
+      "path": "pose.bones[\"forearm_R\"].constraints[\"V2 planted F\"].influence",
+      "valid": true
+    },
+    {
+      "path": "pose.bones[\"paw_F_R\"].constraints[\"V2 planted paw orientation\"].influence",
+      "valid": true
+    },
+    {
+      "path": "pose.bones[\"hock_R\"].constraints[\"V2 planted H\"].influence",
+      "valid": true
+    },
+    {
+      "path": "pose.bones[\"paw_H_R\"].constraints[\"V2 planted paw orientation\"].influence",
+      "valid": true
+    },
+    {
+      "path": "pose.bones[\"eye_L\"].rotation_euler",
+      "valid": true
+    },
+    {
+      "path": "pose.bones[\"eye_L\"].rotation_euler",
+      "valid": true
+    },
+    {
+      "path": "pose.bones[\"eye_R\"].rotation_euler",
+      "valid": true
+    },
+    {
+      "path": "pose.bones[\"eye_R\"].rotation_euler",
+      "valid": true
+    },
+    {
+      "path": "key_blocks[\"Blink_L_Half\"].value",
+      "valid": true
+    },
+    {
+      "path": "key_blocks[\"Blink_L_Closed\"].value",
+      "valid": true
+    },
+    {
+      "path": "key_blocks[\"Blink_R_Half\"].value",
+      "valid": true
+    },
+    {
+      "path": "key_blocks[\"Blink_R_Closed\"].value",
+      "valid": true
+    },
+    {
+      "path": "key_blocks[\"Corrective_neck_Pos\"].value",
+      "valid": true
+    },
+    {
+      "path": "key_blocks[\"Corrective_neck_Neg\"].value",
+      "valid": true
+    }
+  ],
+  "ik_neutral_dimensions": [
+    0.1250070482492447,
+    0.2330000251531601,
+    0.22589958691969514
+  ]
+}

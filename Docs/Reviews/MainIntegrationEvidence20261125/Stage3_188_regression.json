@@ -1,0 +1,2013 @@
+{
+  "phase": "shutdown",
+  "started": 35574.859,
+  "changed": 35788.89,
+  "checks": [
+    {
+      "name": "Stage3 live timer",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Actual player camera uses corrected minus45 yaw",
+      "passed": true,
+      "detail": {
+        "actual_yaw": -44.99999827040015,
+        "expected_yaw": -45.0
+      }
+    },
+    {
+      "name": "Before interaction S3_Release1_Housing remains visible and opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Before interaction S3_Release1_Ring remains visible and opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Before interaction S3_Release1_Pin remains visible and opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Before interaction S3_Release2_Housing remains visible and opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Before interaction S3_Release2_Ring remains visible and opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Before interaction S3_Release2_Pin remains visible and opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Before interaction S3_Release3_Housing remains visible and opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Before interaction S3_Release3_Ring remains visible and opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Before interaction S3_Release3_Pin remains visible and opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Before interaction S3_D0 remains opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Before interaction S3_D0_Frame remains opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Before interaction S3_D1_Frame remains opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Before interaction S3_D1_Bars remains opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Before interaction S3_D2_Frame remains opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Before interaction S3_D2_Bars remains opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Before interaction S3_FinalGate_Leaf_L remains opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Before interaction S3_FinalGate_Leaf_R remains opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Grand rug runtime nonblocking",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Stage3 camera arm remains fixed",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Stage3 manual clip planes survive BeginPlay",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Timer advances in real game time",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Patrols move",
+      "passed": true,
+      "detail": {
+        "S3_Armor_LobbyPost": 0.0,
+        "S3_Armor_LobbyPatrol": 140.62668237037533,
+        "S3_Armor_CentralPost": 0.0,
+        "S3_Armor_ControlPatrol": 375.1165482333373,
+        "S3_Armor_GateLeft": 617.089071780173,
+        "S3_Armor_GateRight": 616.9675802463353,
+        "S3_Candle_Exhibition": 206.60581188581685,
+        "S3_Candle_WarehouseNorth": 0.0,
+        "S3_Candle_WarehouseSouth": 0.0,
+        "S3_Candle_GateLeft": 208.4349926803933,
+        "S3_Candle_GateRight": 208.43499268039272
+      }
+    },
+    {
+      "name": "All three patrolling candles move",
+      "passed": true,
+      "detail": {
+        "S3_Armor_LobbyPost": 0.0,
+        "S3_Armor_LobbyPatrol": 140.62668237037533,
+        "S3_Armor_CentralPost": 0.0,
+        "S3_Armor_ControlPatrol": 375.1165482333373,
+        "S3_Armor_GateLeft": 617.089071780173,
+        "S3_Armor_GateRight": 616.9675802463353,
+        "S3_Candle_Exhibition": 206.60581188581685,
+        "S3_Candle_WarehouseNorth": 0.0,
+        "S3_Candle_WarehouseSouth": 0.0,
+        "S3_Candle_GateLeft": 208.4349926803933,
+        "S3_Candle_GateRight": 208.43499268039272
+      }
+    },
+    {
+      "name": "D0 closed leaf blocks pawns",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "D0 closed capsule blocked A to B",
+      "passed": true,
+      "detail": {
+        "start": [
+          260.00000256714065,
+          -649.9999962348603,
+          24.25
+        ],
+        "end": [
+          40.00000256714077,
+          -650.0000037651397,
+          24.25
+        ]
+      }
+    },
+    {
+      "name": "D0 closed capsule blocked B to A",
+      "passed": true,
+      "detail": {
+        "start": [
+          40.00000256714077,
+          -650.0000037651397,
+          24.25
+        ],
+        "end": [
+          260.00000256714065,
+          -649.9999962348603,
+          24.25
+        ]
+      }
+    },
+    {
+      "name": "D0 native SetOpen opens state",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "D0 native opening releases collision",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "D0 native opening reaches configured angle",
+      "passed": true,
+      "detail": {
+        "yaw_change": -90.00000250447812,
+        "expected": -90.0
+      }
+    },
+    {
+      "name": "D0 physical traversal walk_a_to_b",
+      "passed": true,
+      "detail": {
+        "actual": [
+          48.35953629884071,
+          -650.0000034790049,
+          26.15000057220459
+        ],
+        "target": [
+          40.00000256714077,
+          -650.0000037651397,
+          24.25
+        ],
+        "seconds": 2.7945004031062126
+      }
+    },
+    {
+      "name": "D0 physical traversal walk_b_to_a",
+      "passed": true,
+      "detail": {
+        "actual": [
+          253.39654239090504,
+          -649.9999964608872,
+          26.15000057220459
+        ],
+        "target": [
+          260.00000256714065,
+          -649.9999962348603,
+          24.25
+        ],
+        "seconds": 2.779222995042801
+      }
+    },
+    {
+      "name": "D0 native close restores closed state",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "D0 native close restores collision",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "D0 native close restores saved leaf pose",
+      "passed": true,
+      "detail": {
+        "position_error_cm": 0.0,
+        "rotation_error_degrees": 0.0
+      }
+    },
+    {
+      "name": "New furniture traversal LobbyLeft",
+      "passed": true,
+      "detail": {
+        "route": "LobbyLeft",
+        "start": [
+          -270,
+          -250
+        ],
+        "end": [
+          -270,
+          -740
+        ],
+        "actual": [
+          -270.0,
+          -731.7479932597613,
+          26.149999856948853
+        ],
+        "seconds": 6.294084899127483
+      }
+    },
+    {
+      "name": "New furniture traversal LobbyRightGap",
+      "passed": true,
+      "detail": {
+        "route": "LobbyRightGap",
+        "start": [
+          625,
+          -420
+        ],
+        "end": [
+          625,
+          -740
+        ],
+        "actual": [
+          625.0,
+          -732.2618784085103,
+          26.15000057220459
+        ],
+        "seconds": 4.156297922134399
+      }
+    },
+    {
+      "name": "New furniture traversal LowerStrategy",
+      "passed": true,
+      "detail": {
+        "route": "LowerStrategy",
+        "start": [
+          -210,
+          -850
+        ],
+        "end": [
+          -210,
+          -1510
+        ],
+        "actual": [
+          -210.0,
+          -1516.982951865607,
+          26.15000057220459
+        ],
+        "seconds": 8.747485533356667
+      }
+    },
+    {
+      "name": "New furniture traversal LowerBench",
+      "passed": true,
+      "detail": {
+        "route": "LowerBench",
+        "start": [
+          145,
+          -1010
+        ],
+        "end": [
+          145,
+          -1450
+        ],
+        "actual": [
+          145.0,
+          -1440.0947559066303,
+          26.15000057220459
+        ],
+        "seconds": 5.6728503331542015
+      }
+    },
+    {
+      "name": "New furniture traversal WarehouseNorthOpening",
+      "passed": true,
+      "detail": {
+        "route": "WarehouseNorthOpening",
+        "start": [
+          1000,
+          -1320
+        ],
+        "end": [
+          1000,
+          -1660
+        ],
+        "actual": [
+          1000.0,
+          -1647.442922141649,
+          26.150044441223145
+        ],
+        "seconds": 4.3602279126644135
+      }
+    },
+    {
+      "name": "New furniture traversal WarehouseBenchFront",
+      "passed": true,
+      "detail": {
+        "route": "WarehouseBenchFront",
+        "start": [
+          610,
+          -1320
+        ],
+        "end": [
+          930,
+          -1320
+        ],
+        "actual": [
+          938.9625471504644,
+          -1320.0,
+          26.15000057220459
+        ],
+        "seconds": 4.499108046293259
+      }
+    },
+    {
+      "name": "New furniture traversal ExhibitionLeftReturn",
+      "passed": true,
+      "detail": {
+        "route": "ExhibitionLeftReturn",
+        "start": [
+          -1050,
+          -2038
+        ],
+        "end": [
+          -1050,
+          -1480
+        ],
+        "actual": [
+          -1050.0,
+          -1487.5832117423226,
+          26.15000057220459
+        ],
+        "seconds": 7.213009491562843
+      }
+    },
+    {
+      "name": "New furniture traversal ExhibitionShieldCorner",
+      "passed": true,
+      "detail": {
+        "route": "ExhibitionShieldCorner",
+        "start": [
+          -1050,
+          -2040
+        ],
+        "end": [
+          -920,
+          -2040
+        ],
+        "actual": [
+          -932.4294306970944,
+          -2040.0,
+          26.15000057220459
+        ],
+        "seconds": 1.7843413650989532
+      }
+    },
+    {
+      "name": "New furniture traversal P1LeftDockBypass",
+      "passed": true,
+      "detail": {
+        "route": "P1LeftDockBypass",
+        "start": [
+          -900,
+          -2050
+        ],
+        "end": [
+          -900,
+          -2350
+        ],
+        "actual": [
+          -900.0,
+          -2344.169280789811,
+          26.15000057220459
+        ],
+        "seconds": 4.004864856600761
+      }
+    },
+    {
+      "name": "New furniture traversal ExhibitionBridgeIntoRoom",
+      "passed": true,
+      "detail": {
+        "route": "ExhibitionBridgeIntoRoom",
+        "start": [
+          -300,
+          -1425
+        ],
+        "end": [
+          -600,
+          -1425
+        ],
+        "actual": [
+          -597.4238342307694,
+          -1425.0,
+          26.15000057220459
+        ],
+        "seconds": 4.123557925224304
+      }
+    },
+    {
+      "name": "New furniture traversal ExhibitionBridgeOutOfRoom",
+      "passed": true,
+      "detail": {
+        "route": "ExhibitionBridgeOutOfRoom",
+        "start": [
+          -600,
+          -1425
+        ],
+        "end": [
+          -300,
+          -1425
+        ],
+        "actual": [
+          -302.4664164781384,
+          -1425.0,
+          26.15000057220459
+        ],
+        "seconds": 4.10268372297287
+      }
+    },
+    {
+      "name": "push1 seated through native pushes",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Dock1 presenter ticking",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Dock1 cosmetic latch reached closed state",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Dock1 Fork closed pose",
+      "passed": true,
+      "detail": {
+        "error_cm": 0.0,
+        "actual": [
+          -700.0,
+          -2250.0,
+          137.99999952316284
+        ],
+        "expected": [
+          -700.0,
+          -2250.0,
+          137.99999952316284
+        ]
+      }
+    },
+    {
+      "name": "Dock1 Fork remains nonblocking",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Dock1 Pin closed pose",
+      "passed": true,
+      "detail": {
+        "error_cm": 0.0,
+        "actual": [
+          -700.0,
+          -2250.0,
+          137.99999952316284
+        ],
+        "expected": [
+          -700.0,
+          -2250.0,
+          137.99999952316284
+        ]
+      }
+    },
+    {
+      "name": "Dock1 Pin remains nonblocking",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Dock1 ChainTerminal closed pose",
+      "passed": true,
+      "detail": {
+        "error_cm": 0.0,
+        "actual": [
+          -601.4658689498901,
+          -2160.1293206214905,
+          125.68399906158447
+        ],
+        "expected": [
+          -601.4658689498901,
+          -2160.1293206214905,
+          125.68399906158447
+        ]
+      }
+    },
+    {
+      "name": "Dock1 ChainTerminal remains nonblocking",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Dock1 uses closed source chain",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "D1 fully recessed",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "push2 seated through native pushes",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "P2 alone leaves D2 closed",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Device1 rejects rear interaction",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Device1 reachable from front",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Device1 activates",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Device1 rejects concurrent activation",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Activation waits for physical pull",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "During pull0 S3_Release1_Housing remains visible and opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "During pull0 S3_Release1_Ring remains visible and opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "During pull0 S3_Release1_Pin remains visible and opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "During pull0 S3_Release2_Housing remains visible and opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "During pull0 S3_Release2_Ring remains visible and opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "During pull0 S3_Release2_Pin remains visible and opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "During pull0 S3_Release3_Housing remains visible and opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "During pull0 S3_Release3_Ring remains visible and opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "During pull0 S3_Release3_Pin remains visible and opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "During pull0 S3_D0 remains opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "During pull0 S3_D0_Frame remains opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "During pull0 S3_D1_Frame remains opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "During pull0 S3_D1_Bars remains opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "During pull0 S3_D2_Frame remains opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "During pull0 S3_D2_Bars remains opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "During pull0 S3_FinalGate_Leaf_L remains opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "During pull0 S3_FinalGate_Leaf_R remains opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Interrupted pull does not commit",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Animation takeover restores movement",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Animation takeover releases input",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Device1 rejects rear interaction",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Device1 reachable from front",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Device1 activates",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Device1 rejects concurrent activation",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Activation waits for physical pull",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Pause freezes interaction animation",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Device1 animation sampled",
+      "passed": true,
+      "detail": 25
+    },
+    {
+      "name": "Device1 pull commits once",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Device1 cannot activate twice",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Device1 restores movement",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Device1 restores action availability",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "D2 stays locked until all devices",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Device2 rejects rear interaction",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Device2 reachable from front",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Device2 activates",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Device2 rejects concurrent activation",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Activation waits for physical pull",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "During pull1 S3_Release1_Housing remains visible and opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "During pull1 S3_Release1_Ring remains visible and opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "During pull1 S3_Release1_Pin remains visible and opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "During pull1 S3_Release2_Housing remains visible and opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "During pull1 S3_Release2_Ring remains visible and opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "During pull1 S3_Release2_Pin remains visible and opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "During pull1 S3_Release3_Housing remains visible and opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "During pull1 S3_Release3_Ring remains visible and opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "During pull1 S3_Release3_Pin remains visible and opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "During pull1 S3_D0 remains opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "During pull1 S3_D0_Frame remains opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "During pull1 S3_D1_Frame remains opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "During pull1 S3_D1_Bars remains opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "During pull1 S3_D2_Frame remains opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "During pull1 S3_D2_Bars remains opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "During pull1 S3_FinalGate_Leaf_L remains opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "During pull1 S3_FinalGate_Leaf_R remains opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Device2 animation sampled",
+      "passed": true,
+      "detail": 11
+    },
+    {
+      "name": "Device2 pull commits once",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Device2 cannot activate twice",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Device2 restores movement",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Device2 restores action availability",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "D2 stays locked until all devices",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Device3 rejects rear interaction",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Device3 reachable from front",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Device3 activates",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Device3 rejects concurrent activation",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Activation waits for physical pull",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "During pull2 S3_Release1_Housing remains visible and opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "During pull2 S3_Release1_Ring remains visible and opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "During pull2 S3_Release1_Pin remains visible and opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "During pull2 S3_Release2_Housing remains visible and opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "During pull2 S3_Release2_Ring remains visible and opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "During pull2 S3_Release2_Pin remains visible and opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "During pull2 S3_Release3_Housing remains visible and opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "During pull2 S3_Release3_Ring remains visible and opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "During pull2 S3_Release3_Pin remains visible and opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "During pull2 S3_D0 remains opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "During pull2 S3_D0_Frame remains opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "During pull2 S3_D1_Frame remains opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "During pull2 S3_D1_Bars remains opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "During pull2 S3_D2_Frame remains opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "During pull2 S3_D2_Bars remains opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "During pull2 S3_FinalGate_Leaf_L remains opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "During pull2 S3_FinalGate_Leaf_R remains opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Device3 animation sampled",
+      "passed": true,
+      "detail": 12
+    },
+    {
+      "name": "Device3 pull commits once",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Device3 cannot activate twice",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Device3 restores movement",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Device3 restores action availability",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "After all interactions S3_Release1_Housing remains visible and opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "After all interactions S3_Release1_Ring remains visible and opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "After all interactions S3_Release1_Pin remains visible and opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "After all interactions S3_Release2_Housing remains visible and opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "After all interactions S3_Release2_Ring remains visible and opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "After all interactions S3_Release2_Pin remains visible and opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "After all interactions S3_Release3_Housing remains visible and opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "After all interactions S3_Release3_Ring remains visible and opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "After all interactions S3_Release3_Pin remains visible and opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "After all interactions S3_D0 remains opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "After all interactions S3_D0_Frame remains opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "After all interactions S3_D1_Frame remains opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "After all interactions S3_D1_Bars remains opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "After all interactions S3_D2_Frame remains opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "After all interactions S3_D2_Bars remains opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "After all interactions S3_FinalGate_Leaf_L remains opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "After all interactions S3_FinalGate_Leaf_R remains opaque",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Dock2 presenter ticking",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Dock2 cosmetic latch reached closed state",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Dock2 Fork closed pose",
+      "passed": true,
+      "detail": {
+        "error_cm": 0.0,
+        "actual": [
+          760.0,
+          -2420.0,
+          137.99999952316284
+        ],
+        "expected": [
+          760.0,
+          -2420.0,
+          137.99999952316284
+        ]
+      }
+    },
+    {
+      "name": "Dock2 Fork remains nonblocking",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Dock2 Pin closed pose",
+      "passed": true,
+      "detail": {
+        "error_cm": 0.0,
+        "actual": [
+          760.0,
+          -2420.0,
+          137.99999952316284
+        ],
+        "expected": [
+          760.0,
+          -2420.0,
+          137.99999952316284
+        ]
+      }
+    },
+    {
+      "name": "Dock2 Pin remains nonblocking",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Dock2 ChainTerminal closed pose",
+      "passed": true,
+      "detail": {
+        "error_cm": 0.0,
+        "actual": [
+          858.5341310501099,
+          -2330.1293206214905,
+          125.68399906158447
+        ],
+        "expected": [
+          858.5341310501099,
+          -2330.1293206214905,
+          125.68399906158447
+        ]
+      }
+    },
+    {
+      "name": "Dock2 ChainTerminal remains nonblocking",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Dock2 uses closed source chain",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Upper corridor cannot directly shortcut into altar",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Corrected layout traversal MainEntryIntoAltar",
+      "passed": true,
+      "detail": {
+        "route": "MainEntryIntoAltar",
+        "start": [
+          100,
+          -1850
+        ],
+        "end": [
+          100,
+          -2025
+        ],
+        "actual": [
+          100.0,
+          -2036.8191244043599,
+          26.150036811828613
+        ],
+        "seconds": 2.696823939681053
+      }
+    },
+    {
+      "name": "Corrected layout traversal AltarLeftElbow",
+      "passed": true,
+      "detail": {
+        "route": "AltarLeftElbow",
+        "start": [
+          100,
+          -2025
+        ],
+        "end": [
+          -250,
+          -2025
+        ],
+        "actual": [
+          -252.57576110960918,
+          -2025.0,
+          26.15000057220459
+        ],
+        "seconds": 4.927541345357895
+      }
+    },
+    {
+      "name": "Corrected layout traversal LeftElbowToUpper",
+      "passed": true,
+      "detail": {
+        "route": "LeftElbowToUpper",
+        "start": [
+          -250,
+          -2025
+        ],
+        "end": [
+          -250,
+          -2220
+        ],
+        "actual": [
+          -250.0,
+          -2209.4999992996645,
+          26.15000057220459
+        ],
+        "seconds": 2.7939487397670746
+      }
+    },
+    {
+      "name": "Corrected layout traversal UpperPastD2",
+      "passed": true,
+      "detail": {
+        "route": "UpperPastD2",
+        "start": [
+          -250,
+          -2220
+        ],
+        "end": [
+          -250,
+          -2830
+        ],
+        "actual": [
+          -250.0,
+          -2820.9975083507784,
+          26.15000057220459
+        ],
+        "seconds": 8.032226771116257
+      }
+    },
+    {
+      "name": "Corrected layout traversal UpperIntoGateHall",
+      "passed": true,
+      "detail": {
+        "route": "UpperIntoGateHall",
+        "start": [
+          -250,
+          -2830
+        ],
+        "end": [
+          -250,
+          -3000
+        ],
+        "actual": [
+          -250.0,
+          -3007.6578887142427,
+          26.15000057220459
+        ],
+        "seconds": 2.713391035795212
+      }
+    },
+    {
+      "name": "All three releases and P2 open D2",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Final gate opens",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "Final gate clears 600 cm passage",
+      "passed": true,
+      "detail": {
+        "left": [
+          -560.0,
+          -3950.0,
+          0.0
+        ],
+        "right": [
+          60.0,
+          -3950.0,
+          0.0
+        ]
+      }
+    },
+    {
+      "name": "Physical walk through final gate completes Stage3",
+      "passed": true,
+      "detail": {
+        "cat": [
+          -250.0,
+          -4090.963004978351,
+          26.15000057220459
+        ],
+        "entry_threshold_y": -4040.0,
+        "exit_center": [
+          -250.0,
+          -4090.0,
+          60.0
+        ]
+      }
+    }
+  ],
+  "scope": "Reflected Stage3: unchanged 176-check layout/native suite plus D0 and camera.\n\nNPC motion is observed before deterministic fixtures disable NPC tick/collision.\nD0 uses native SetOpen, capsule blocking and physical walks from both sides;\nthis does not test armor OpenFrom hinge selection or hand-driven animation.\nNo assets, map or user settings are saved. Run alone for animation sampling.\n",
+  "command_line": "-RenderOffscreen -d3d12 -windowed -ResX=1280 -ResY=720 -NoSplash -NoSound -unattended -nop4 -NoSaveConfig -SaveToUserDir -UserDir=C:\\Users\\whghk\\Catrun\\Saved\\Stage3Integration20261125\\Stage3OrientationRegression01User -ini:EditorSettings:[/Script/UnrealEd.EditorPerformanceSettings]:bThrottleCPUWhenNotForeground=False -ExecCmds=\"Slate.bAllowThrottling 0,t.IdleWhenNotForeground 0,py C:/Users/whghk/Catrun/Scripts/Stage3/OrientationFix20261125/regression.py\" -abslog=C:\\Users\\whghk\\Catrun\\Saved\\Stage3Integration20261125\\Stage3OrientationRegression01.log",
+  "route_checks": [
+    {
+      "route": "LobbyLeft",
+      "start": [
+        -270,
+        -250
+      ],
+      "end": [
+        -270,
+        -740
+      ],
+      "actual": [
+        -270.0,
+        -731.7479932597613,
+        26.149999856948853
+      ],
+      "seconds": 6.294084899127483
+    },
+    {
+      "route": "LobbyRightGap",
+      "start": [
+        625,
+        -420
+      ],
+      "end": [
+        625,
+        -740
+      ],
+      "actual": [
+        625.0,
+        -732.2618784085103,
+        26.15000057220459
+      ],
+      "seconds": 4.156297922134399
+    },
+    {
+      "route": "LowerStrategy",
+      "start": [
+        -210,
+        -850
+      ],
+      "end": [
+        -210,
+        -1510
+      ],
+      "actual": [
+        -210.0,
+        -1516.982951865607,
+        26.15000057220459
+      ],
+      "seconds": 8.747485533356667
+    },
+    {
+      "route": "LowerBench",
+      "start": [
+        145,
+        -1010
+      ],
+      "end": [
+        145,
+        -1450
+      ],
+      "actual": [
+        145.0,
+        -1440.0947559066303,
+        26.15000057220459
+      ],
+      "seconds": 5.6728503331542015
+    },
+    {
+      "route": "WarehouseNorthOpening",
+      "start": [
+        1000,
+        -1320
+      ],
+      "end": [
+        1000,
+        -1660
+      ],
+      "actual": [
+        1000.0,
+        -1647.442922141649,
+        26.150044441223145
+      ],
+      "seconds": 4.3602279126644135
+    },
+    {
+      "route": "WarehouseBenchFront",
+      "start": [
+        610,
+        -1320
+      ],
+      "end": [
+        930,
+        -1320
+      ],
+      "actual": [
+        938.9625471504644,
+        -1320.0,
+        26.15000057220459
+      ],
+      "seconds": 4.499108046293259
+    },
+    {
+      "route": "ExhibitionLeftReturn",
+      "start": [
+        -1050,
+        -2038
+      ],
+      "end": [
+        -1050,
+        -1480
+      ],
+      "actual": [
+        -1050.0,
+        -1487.5832117423226,
+        26.15000057220459
+      ],
+      "seconds": 7.213009491562843
+    },
+    {
+      "route": "ExhibitionShieldCorner",
+      "start": [
+        -1050,
+        -2040
+      ],
+      "end": [
+        -920,
+        -2040
+      ],
+      "actual": [
+        -932.4294306970944,
+        -2040.0,
+        26.15000057220459
+      ],
+      "seconds": 1.7843413650989532
+    },
+    {
+      "route": "P1LeftDockBypass",
+      "start": [
+        -900,
+        -2050
+      ],
+      "end": [
+        -900,
+        -2350
+      ],
+      "actual": [
+        -900.0,
+        -2344.169280789811,
+        26.15000057220459
+      ],
+      "seconds": 4.004864856600761
+    },
+    {
+      "route": "ExhibitionBridgeIntoRoom",
+      "start": [
+        -300,
+        -1425
+      ],
+      "end": [
+        -600,
+        -1425
+      ],
+      "actual": [
+        -597.4238342307694,
+        -1425.0,
+        26.15000057220459
+      ],
+      "seconds": 4.123557925224304
+    },
+    {
+      "route": "ExhibitionBridgeOutOfRoom",
+      "start": [
+        -600,
+        -1425
+      ],
+      "end": [
+        -300,
+        -1425
+      ],
+      "actual": [
+        -302.4664164781384,
+        -1425.0,
+        26.15000057220459
+      ],
+      "seconds": 4.10268372297287
+    }
+  ],
+  "layout_route_checks": [
+    {
+      "route": "MainEntryIntoAltar",
+      "start": [
+        100,
+        -1850
+      ],
+      "end": [
+        100,
+        -2025
+      ],
+      "actual": [
+        100.0,
+        -2036.8191244043599,
+        26.150036811828613
+      ],
+      "seconds": 2.696823939681053
+    },
+    {
+      "route": "AltarLeftElbow",
+      "start": [
+        100,
+        -2025
+      ],
+      "end": [
+        -250,
+        -2025
+      ],
+      "actual": [
+        -252.57576110960918,
+        -2025.0,
+        26.15000057220459
+      ],
+      "seconds": 4.927541345357895
+    },
+    {
+      "route": "LeftElbowToUpper",
+      "start": [
+        -250,
+        -2025
+      ],
+      "end": [
+        -250,
+        -2220
+      ],
+      "actual": [
+        -250.0,
+        -2209.4999992996645,
+        26.15000057220459
+      ],
+      "seconds": 2.7939487397670746
+    },
+    {
+      "route": "UpperPastD2",
+      "start": [
+        -250,
+        -2220
+      ],
+      "end": [
+        -250,
+        -2830
+      ],
+      "actual": [
+        -250.0,
+        -2820.9975083507784,
+        26.15000057220459
+      ],
+      "seconds": 8.032226771116257
+    },
+    {
+      "route": "UpperIntoGateHall",
+      "start": [
+        -250,
+        -2830
+      ],
+      "end": [
+        -250,
+        -3000
+      ],
+      "actual": [
+        -250.0,
+        -3007.6578887142427,
+        26.15000057220459
+      ],
+      "seconds": 2.713391035795212
+    }
+  ],
+  "plan_y_sign": -1,
+  "expected_checks": 188,
+  "clock0": 1198.2734375,
+  "game0": 2.126616135239601,
+  "npc0": {
+    "S3_Armor_LobbyPost": [
+      -180.0,
+      -650.0,
+      102.4000015258789
+    ],
+    "S3_Armor_LobbyPatrol": [
+      340.0,
+      -650.0,
+      102.4000015258789
+    ],
+    "S3_Armor_CentralPost": [
+      660.0,
+      -1650.0,
+      102.4000015258789
+    ],
+    "S3_Armor_ControlPatrol": [
+      520.0,
+      -2140.0,
+      102.4000015258789
+    ],
+    "S3_Armor_GateLeft": [
+      -573.8471529632332,
+      -3836.5648734906335,
+      102.4000015258789
+    ],
+    "S3_Armor_GateRight": [
+      83.80079226062618,
+      -3837.2597917052353,
+      102.4000015258789
+    ],
+    "S3_Candle_Exhibition": [
+      -850.0,
+      -1531.7699527740479,
+      0.0
+    ],
+    "S3_Candle_WarehouseNorth": [
+      380.0,
+      -1310.0,
+      0.0
+    ],
+    "S3_Candle_WarehouseSouth": [
+      1135.0,
+      -855.0,
+      0.0
+    ],
+    "S3_Candle_GateLeft": [
+      -590.0,
+      -3211.769952774048,
+      0.0
+    ],
+    "S3_Candle_GateRight": [
+      90.0,
+      -3211.769952774048,
+      0.0
+    ]
+  },
+  "cat_start": [
+    150.0,
+    -110.0,
+    26.2
+  ],
+  "orientation_camera_checked": true,
+  "observed_frame_ms": [
+    174.37800765037537,
+    400.0000059604645,
+    223.22289645671844,
+    167.34980046749115,
+    400.0000059604645,
+    185.34040451049805,
+    123.80489706993103,
+    122.86800146102905,
+    88.90490233898163,
+    44.14759948849678,
+    67.56970286369324,
+    96.44560515880585,
+    92.53780543804169,
+    116.55469983816147,
+    92.35969930887222,
+    128.02240252494812,
+    86.99789643287659,
+    104.75079715251923,
+    172.76079952716827,
+    24.99619871377945,
+    63.08549642562866,
+    35.73869913816452,
+    33.85750204324722,
+    39.75469991564751,
+    41.2370003759861,
+    18.18300038576126,
+    31.539198011159897,
+    19.90010216832161,
+    31.87989816069603,
+    35.50500050187111,
+    24.450398981571198,
+    34.30120274424553,
+    31.04889765381813,
+    34.63020175695419,
+    32.99370035529137,
+    25.45350044965744,
+    35.097599029541016,
+    39.1944982111454,
+    25.049399584531784,
+    31.267199665308,
+    34.10310298204422,
+    30.890997499227524,
+    32.95130282640457,
+    34.07609835267067,
+    18.56670156121254,
+    52.70559713244438,
+    32.02050179243088,
+    36.97650134563446,
+    32.37059712409973,
+    111.56229674816132,
+    145.6243097782135,
+    20.453497767448425,
+    137.9626989364624,
+    24.873699992895126,
+    190.2884989976883,
+    22.769000381231308,
+    37.96199709177017,
+    203.06700468063354,
+    63.28649818897247,
+    59.8967969417572,
+    35.08290275931358,
+    155.78040480613708,
+    35.42650118470192,
+    46.86550050973892,
+    48.752497881650925,
+    46.629201620817184,
+    51.29389837384224,
+    52.744701504707336,
+    48.072699457407,
+    56.02230131626129,
+    28.000298887491226,
+    43.22030022740364,
+    41.47019982337952,
+    24.217799305915833,
+    42.59970039129257,
+    56.66020140051842,
+    18.385298550128937,
+    53.58540266752243,
+    51.785700023174286,
+    32.01479837298393,
+    51.05059966444969,
+    45.96349969506264,
+    49.16350170969963
+  ],
+  "last_perf_game": 8.140991069376469,
+  "d0_original_cat": [
+    150.0,
+    -110.0,
+    26.2
+  ],
+  "d0_observed_initially_open": false,
+  "d0_state": "restore_closed",
+  "d0_game_start": 19.747233346104622,
+  "d0_closed_location": [
+    150.00000013006846,
+    -578.8,
+    0.0
+  ],
+  "d0_closed_rotation": [
+    -0.0,
+    -89.99999803884897,
+    -0.0
+  ],
+  "d0_complete": true,
+  "route_index": 11,
+  "route_phase": "start",
+  "route_time": 75.8424592167139,
+  "routes_complete": true,
+  "dock1_checked": true,
+  "device": 2,
+  "original_anim_class": "/Game/Characters/BlackCat/Final/Animations/ABP_Cat_Final.ABP_Cat_Final_C",
+  "animation_samples": [
+    {
+      "time": 0.23485970497131348,
+      "head": [
+        364.9999997282486,
+        -2184.9565240586385,
+        24.80741750145193
+      ],
+      "ring": [
+        365.0,
+        -2197.0,
+        27.5
+      ]
+    },
+    {
+      "time": 0.27232620120048523,
+      "head": [
+        364.9999997282486,
+        -2184.9565240586385,
+        24.80741750145193
+      ],
+      "ring": [
+        365.0,
+        -2197.0,
+        27.5
+      ]
+    },
+    {
+      "time": 0.5371493101119995,
+      "head": [
+        364.9999997282486,
+        -2185.3233112023468,
+        24.50931905116408
+      ],
+      "ring": [
+        365.0,
+        -2197.0,
+        27.5
+      ]
+    },
+    {
+      "time": 0.7723554372787476,
+      "head": [
+        364.9999997282486,
+        -2185.6831400447045,
+        24.148671751830797
+      ],
+      "ring": [
+        365.0,
+        -2197.0,
+        27.5
+      ]
+    },
+    {
+      "time": 0.9616043567657471,
+      "head": [
+        364.9999997282486,
+        -2185.6891994445537,
+        24.14189139798188
+      ],
+      "ring": [
+        365.0,
+        -2197.0,
+        27.5
+      ]
+    },
+    {
+      "time": 1.1644244194030762,
+      "head": [
+        364.9999997282486,
+        -2185.202571814266,
+        24.614278237225093
+      ],
+      "ring": [
+        365.0,
+        -2197.0,
+        27.5
+      ]
+    },
+    {
+      "time": 1.404419183731079,
+      "head": [
+        364.9999997282486,
+        -2184.196361738922,
+        25.261465496902048
+      ],
+      "ring": [
+        364.99999999771074,
+        -2196.811864257549,
+        29.251904865159304
+      ]
+    },
+    {
+      "time": 1.6695510149002075,
+      "head": [
+        364.9999997282486,
+        -2184.1419102853315,
+        25.28697612742932
+      ],
+      "ring": [
+        364.99999998723786,
+        -2195.9511681275644,
+        32.20926244487373
+      ]
+    },
+    {
+      "time": 1.8518216609954834,
+      "head": [
+        364.9999997282486,
+        -2184.3233232683488,
+        25.19864017923562
+      ],
+      "ring": [
+        364.99999998618415,
+        -2195.864571750164,
+        32.41191893815994
+      ]
+    },
+    {
+      "time": 2.1616108417510986,
+      "head": [
+        364.9999997282486,
+        -2184.791168952712,
+        24.923228731143375
+      ],
+      "ring": [
+        364.99999998618415,
+        -2195.864571750164,
+        32.41191893815994
+      ]
+    },
+    {
+      "time": 2.2908709049224854,
+      "head": [
+        364.9999997282486,
+        -2184.923555923858,
+        24.831356761114765
+      ],
+      "ring": [
+        364.99999998618415,
+        -2195.864571750164,
+        32.41191893815994
+      ]
+    },
+    {
+      "time": 2.4000000953674316,
+      "head": [
+        364.9999997282486,
+        -2184.9565240586385,
+        24.80741750145193
+      ],
+      "ring": [
+        364.99999998618415,
+        -2195.864571750164,
+        32.41191893815994
+      ]
+    }
+  ],
+  "interruption_checked": true,
+  "paused_position": 0.5502119660377502,
+  "pause_checked": true,
+  "shot_Contact": true,
+  "shot_Pull": true,
+  "dock2_checked": true,
+  "elbow_index": 5,
+  "elbow_state": "start",
+  "elbow_game_start": 127.90292280167341,
+  "elbow_complete": true,
+  "final_gate_staging": [
+    -250.0,
+    -3670.0
+  ],
+  "exit_walk_start": [
+    -250.0,
+    -3670.0,
+    26.15000057220459
+  ],
+  "success": true,
+  "error": null
+}

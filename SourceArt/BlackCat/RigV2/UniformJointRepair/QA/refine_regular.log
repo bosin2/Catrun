@@ -1,0 +1,7 @@
+00:06.656  blend            | Read blend: "C:\Users\whghk\.codex\worktrees\110f\Catrun\SourceArt\BlackCat\RigV2\SK_BlackCat_RigV2.blend"
+정보: 저장함: "SK_BlackCat_UniformJointRepair.blend"임
+UNIFORM_LIMBS_BUILT
+정보: 저장함: "SK_BlackCat_UniformJointRepair.blend"임
+SURFACE_GUIDES_ADDED 28
+{"SK_BlackCat_BellClapper_V2": {"pass": true, "errors": [], "warnings": ["asset lowest point z=0.042 (not resting on ground plane z=0)"]}, "SK_BlackCat_RigV2": {"pass": true, "errors": [], "warnings": ["SK_BlackCat_RigV2: unused material slot(s) ['Bell_Clapper'] (extra draw calls in some exporters)", "SK_BlackCat_RigV2: ~35.76% UV overlap (ok only if mirrored/stacked on purpose; bakes break)", "SK_BlackCat_RigV2: duplicate verts=8 loose verts=0", "2 parts fully enclosed, not touching (eyes/internals?): ['SK_BlackCat_RigV2', 'SK_BlackCat_RigV2']"]}}
+Calloc returns null: len=12960000 in Combined, total 117484476

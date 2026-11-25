@@ -1,0 +1,10 @@
+00:06.938  blend            | Read blend: "C:\Users\whghk\.codex\worktrees\110f\Catrun\SourceArt\BlackCat\RigV2\UniformJointRepair\SK_BlackCat_UniformJointRepair.blend"
+{"SK_BlackCat_BellClapper_V2": {"pass": true, "errors": [], "warnings": ["asset lowest point z=0.042 (not resting on ground plane z=0)"]}, "SK_BlackCat_RigV2": {"pass": false, "errors": ["SK_BlackCat_RigV2: degenerate faces=2 zero-len edges=0", "z-fighting: SK_BlackCat_RigV2 (1 overlapping coplanar tri pairs)"], "warnings": ["SK_BlackCat_RigV2: unused material slot(s) ['Bell_Clapper'] (extra draw calls in some exporters)", "SK_BlackCat_RigV2: ~32.94% UV overlap (ok only if mirrored/stacked on purpose; bakes break)", "SK_BlackCat_RigV2: duplicate verts=8 loose verts=0", "2 parts fully enclosed, not touching (eyes/internals?): ['SK_BlackCat_RigV2', 'SK_BlackCat_RigV2']"]}}
+00:22.844  render           | Saved: 'C:\Users\whghk\.codex\worktrees\110f\Catrun\SourceArt\BlackCat\RigV2\UniformJointRepair\Previews\gray_forearm_L_0.png'
+00:23.031  render           | Saved: 'C:\Users\whghk\.codex\worktrees\110f\Catrun\SourceArt\BlackCat\RigV2\UniformJointRepair\Previews\gray_forearm_L_5.png'
+00:23.235  render           | Saved: 'C:\Users\whghk\.codex\worktrees\110f\Catrun\SourceArt\BlackCat\RigV2\UniformJointRepair\Previews\gray_forearm_L_60.png'
+00:23.406  render           | Saved: 'C:\Users\whghk\.codex\worktrees\110f\Catrun\SourceArt\BlackCat\RigV2\UniformJointRepair\Previews\gray_paw_F_L_45.png'
+GRAY_CASES_DONE
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 02:38:20)
+
+Blender quit

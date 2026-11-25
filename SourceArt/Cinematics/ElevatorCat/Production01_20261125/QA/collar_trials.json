@@ -1,0 +1,137 @@
+[
+  {
+    "angle": -40,
+    "y": 0,
+    "collar_arm_intersections": 0
+  },
+  {
+    "angle": -40,
+    "y": 0.004,
+    "collar_arm_intersections": 0
+  },
+  {
+    "angle": -40,
+    "y": 0.008,
+    "collar_arm_intersections": 0
+  },
+  {
+    "angle": -30,
+    "y": 0,
+    "collar_arm_intersections": 0
+  },
+  {
+    "angle": -30,
+    "y": 0.004,
+    "collar_arm_intersections": 0
+  },
+  {
+    "angle": -30,
+    "y": 0.008,
+    "collar_arm_intersections": 0
+  },
+  {
+    "angle": -20,
+    "y": 0,
+    "collar_arm_intersections": 10
+  },
+  {
+    "angle": -20,
+    "y": 0.004,
+    "collar_arm_intersections": 0
+  },
+  {
+    "angle": -20,
+    "y": 0.008,
+    "collar_arm_intersections": 0
+  },
+  {
+    "angle": -10,
+    "y": 0,
+    "collar_arm_intersections": 54
+  },
+  {
+    "angle": -10,
+    "y": 0.004,
+    "collar_arm_intersections": 0
+  },
+  {
+    "angle": -10,
+    "y": 0.008,
+    "collar_arm_intersections": 0
+  },
+  {
+    "angle": 0,
+    "y": 0,
+    "collar_arm_intersections": 70
+  },
+  {
+    "angle": 0,
+    "y": 0.004,
+    "collar_arm_intersections": 48
+  },
+  {
+    "angle": 0,
+    "y": 0.008,
+    "collar_arm_intersections": 0
+  },
+  {
+    "angle": 10,
+    "y": 0,
+    "collar_arm_intersections": 108
+  },
+  {
+    "angle": 10,
+    "y": 0.004,
+    "collar_arm_intersections": 64
+  },
+  {
+    "angle": 10,
+    "y": 0.008,
+    "collar_arm_intersections": 8
+  },
+  {
+    "angle": 20,
+    "y": 0,
+    "collar_arm_intersections": 193
+  },
+  {
+    "angle": 20,
+    "y": 0.004,
+    "collar_arm_intersections": 82
+  },
+  {
+    "angle": 20,
+    "y": 0.008,
+    "collar_arm_intersections": 24
+  },
+  {
+    "angle": 30,
+    "y": 0,
+    "collar_arm_intersections": 178
+  },
+  {
+    "angle": 30,
+    "y": 0.004,
+    "collar_arm_intersections": 126
+  },
+  {
+    "angle": 30,
+    "y": 0.008,
+    "collar_arm_intersections": 42
+  },
+  {
+    "angle": 40,
+    "y": 0,
+    "collar_arm_intersections": 100
+  },
+  {
+    "angle": 40,
+    "y": 0.004,
+    "collar_arm_intersections": 71
+  },
+  {
+    "angle": 40,
+    "y": 0.008,
+    "collar_arm_intersections": 22
+  }
+]

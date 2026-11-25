@@ -1,0 +1,20 @@
+{
+  "original_preservation_pass": true,
+  "animation_only_fbx_count": 10,
+  "bone_count": 78,
+  "vertices": 7485,
+  "triangles": 14910,
+  "material_slots": 7,
+  "max_grip_marker_error_game_cm": 1.6676656369566464e-05,
+  "min_head_ring_clearance_game_cm": 2.0956242457032204,
+  "head_ring_surface_intersections": 0,
+  "min_support_foot_edge_margin_game_cm": 13.705599308013916,
+  "max_fbx_joint_error_game_cm": 0.00011810888807845264,
+  "max_fbx_rest_error_game_cm": 0.00010794860289260646,
+  "max_fbx_skinning_matrix_error": 3.874301910400391e-06,
+  "max_boundary_matrix_delta": 2.384185791015625e-07,
+  "tail_puff_delivered": false,
+  "unreal_runtime_verified": false,
+  "skin_self_intersections_zero": false,
+  "visual_check": "All 15fps preview samples, three views, reviewed in sequential temporal sheets; close renders for grip/landing/startle. Not a full 30fps real-time playback observation."
+}

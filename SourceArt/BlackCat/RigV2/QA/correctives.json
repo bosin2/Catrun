@@ -1,0 +1,72 @@
+[
+  {
+    "name": "Corrective_forearm_L_Pos",
+    "affected_vertices": 261,
+    "max_delta_m": 0.0025
+  },
+  {
+    "name": "Corrective_forearm_L_Neg",
+    "affected_vertices": 261,
+    "max_delta_m": 0.0025
+  },
+  {
+    "name": "Corrective_forearm_R_Pos",
+    "affected_vertices": 227,
+    "max_delta_m": 0.0025
+  },
+  {
+    "name": "Corrective_forearm_R_Neg",
+    "affected_vertices": 227,
+    "max_delta_m": 0.0025000000000000005
+  },
+  {
+    "name": "Corrective_shin_L_Pos",
+    "affected_vertices": 166,
+    "max_delta_m": 0.0025
+  },
+  {
+    "name": "Corrective_shin_L_Neg",
+    "affected_vertices": 167,
+    "max_delta_m": 0.0025000000000000005
+  },
+  {
+    "name": "Corrective_shin_R_Pos",
+    "affected_vertices": 143,
+    "max_delta_m": 0.0025000000000000005
+  },
+  {
+    "name": "Corrective_shin_R_Neg",
+    "affected_vertices": 143,
+    "max_delta_m": 0.0025000000000000005
+  },
+  {
+    "name": "Corrective_hock_L_Pos",
+    "affected_vertices": 157,
+    "max_delta_m": 0.0025000000000000005
+  },
+  {
+    "name": "Corrective_hock_L_Neg",
+    "affected_vertices": 157,
+    "max_delta_m": 0.0025000000000000005
+  },
+  {
+    "name": "Corrective_hock_R_Pos",
+    "affected_vertices": 149,
+    "max_delta_m": 0.0025
+  },
+  {
+    "name": "Corrective_hock_R_Neg",
+    "affected_vertices": 149,
+    "max_delta_m": 0.0025
+  },
+  {
+    "name": "Corrective_neck_Pos",
+    "affected_vertices": 60,
+    "max_delta_m": 0.00010116363289652095
+  },
+  {
+    "name": "Corrective_neck_Neg",
+    "affected_vertices": 60,
+    "max_delta_m": 0.00010405813892723004
+  }
+]

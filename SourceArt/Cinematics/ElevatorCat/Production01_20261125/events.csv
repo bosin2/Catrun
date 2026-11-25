@@ -1,0 +1,18 @@
+﻿clip,event,frame,seconds
+MASTER,takeoff,7,0.2
+MASTER,both_front_paws_grab,24,0.7666666666666667
+MASTER,pull_start,29,0.9333333333333333
+MASTER,pull_full,48,1.5666666666666667
+MASTER,release,55,1.8
+MASTER,landing,73,2.4
+MASTER,settled,102,3.3666666666666667
+C05,cabin_start_impact,9,0.26666666666666666
+C05,tail_flick_peak,12,0.36666666666666664
+C06,edge_arrival,103,3.4
+C06,look_down,133,4.4
+C06,retreat,174,5.766666666666667
+C09,loaf_read,"[1, 37]","[0.0, 1.2]"
+C09,lock_impact,38,1.2333333333333334
+C09,eyes_open,39,1.2666666666666666
+C09,rise,42,1.3666666666666667
+C09,standing,59,1.9333333333333333

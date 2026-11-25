@@ -1,0 +1,5 @@
+00:03.969  blend            | Read blend: "C:\Users\whghk\Catrun\SourceArt\Cinematics\ElevatorCat\Production01_20261125\SK_BlackCat_Elevator.blend"
+GEOMETRY_QA 0 13.705599308013916 [{'frame': 1, 'x_width_game_cm': 4.430827498435974, 'bone_length_sum_cm': 27.150801629024553}, {'frame': 12, 'x_width_game_cm': 16.84933565557003, 'bone_length_sum_cm': 27.150772472031726}, {'frame': 61, 'x_width_game_cm': 4.430827498435974, 'bone_length_sum_cm': 27.150801629024553}]
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 02:38:20)
+
+Blender quit

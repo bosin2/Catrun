@@ -1,0 +1,12 @@
+{
+  "source_sha256_before": "07a220d70764ff0cda34e77da3344797847b77547de8df7aa88a5eb6df8c3327",
+  "source_sha256_after": "07a220d70764ff0cda34e77da3344797847b77547de8df7aa88a5eb6df8c3327",
+  "elevator_sha256_before": "5b1bdad7fe62f9afbf2f630ad36bab828720638063c8b4139a409cd69870e3ef",
+  "elevator_sha256_after": "5b1bdad7fe62f9afbf2f630ad36bab828720638063c8b4139a409cd69870e3ef",
+  "source_data_before": "857f01077da884ee5780d62de0d23f1ee2cc8cd9d8870eb18a608bc8c3a32cb8",
+  "source_data_after": "857f01077da884ee5780d62de0d23f1ee2cc8cd9d8870eb18a608bc8c3a32cb8",
+  "bones": 78,
+  "original_actions": 11,
+  "new_actions": 10,
+  "geometry_changed": false
+}

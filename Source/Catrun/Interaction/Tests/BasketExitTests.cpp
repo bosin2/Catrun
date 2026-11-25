@@ -257,6 +257,7 @@ bool FCatrunBasketComplexSupportTest::RunTest(const FString&)
 		TestFalse(TEXT("Grounded origin retains the same former surface range"),
 			Bounds.Actions->IsBasketExitPathClear(FVector(-82,0,-64)));
 		Bounds.Floor->SetActorLocation(FVector(0,0,-83)); // surface -73, just inside the old range
+		Bounds.Actions->ExitWorldDirection=FVector(1,0,0); // Explicit direction; no automatic exit selection.
 		Bounds.Actions->UpdateExitCandidate(true);
 		TestTrue(TEXT("Exit and origin still accept a supported floor inside the old lower bound"),Bounds.Actions->CanExit);
 		Bounds.Actions->AbortBasket();
@@ -467,37 +468,47 @@ bool FCatrunBasketCandidateRegressionTest::RunTest(const FString&)
  FMinimalViewInfo View; View.Rotation=FRotator(-55,0,0); F.PC->PlayerCameraManager->SetCameraCachePOV(View);
  F.Basket->OpenDirectionLocal=FVector(1,0,0);
  F.Basket->TryOccupy(F.Cat); F.Actions->EnterBasket(F.Basket,FVector(82,0,26)); F.Actions->FinishEnter();
- TestTrue(TEXT("Initial exit returns toward the approach side"),F.Actions->ExitWorldDirection.Equals(FVector(1,0,0),.001));
- const FKey Keys[]={EKeys::W,EKeys::D,EKeys::S,EKeys::A};
- for (int32 I=0;I<4;++I)
+ TestTrue(TEXT("No exit is selected before a deliberate direction input"),F.Actions->ExitWorldDirection.IsNearlyZero() && !F.Actions->CanExit);
+ auto Release=[&]{F.Keys({});F.Actions->UpdateExitCandidate(true);};
+ for (float Yaw : {-135.f,17.f,83.f})
  {
-  F.Keys({Keys[I]}); F.Actions->UpdateExitCandidate(true);
-  const FVector Direction=FRotator(0,I*90.f,0).Vector();
-  TestTrue(TEXT("Each single key selects a distinct supported exit"),F.Actions->CanExit && F.Actions->ExitWorldDirection.Equals(Direction,.001));
-  TestTrue(TEXT("The real capsule lands at floor plus 26cm"),F.Actions->ExitWorldLocation.Equals(Direction*82+FVector(0,0,26),.01));
+  View.Rotation=FRotator(-55,Yaw,0);F.PC->PlayerCameraManager->SetCameraCachePOV(View);
+  F.Basket->SetActorRotation(FRotator(0,Yaw+23,0));
+  const FKey Keys[]={EKeys::W,EKeys::D,EKeys::S,EKeys::A};
+  const FVector2D Inputs[]={FVector2D(1,0),FVector2D(0,1),FVector2D(-1,0),FVector2D(0,-1)};
+  for (int32 I=0;I<4;++I)
+  {
+   Release();F.Keys({Keys[I]});F.Actions->UpdateExitCandidate(true);
+   const FVector Expected=CatrunBasket::MovementDirection(Inputs[I],View.Rotation);
+   TestTrue(TEXT("WASD follows camera walking axes even at non-45-degree yaw and rotated basket"),F.Actions->ExitWorldDirection.Equals(Expected,.001));
+   TestTrue(TEXT("Clear requested direction is usable"),F.Actions->CanExit);
+   TestFalse(TEXT("Holding unchanged key does not repeat collision queries"),F.Actions->UpdateExitCandidate(false));
+   F.Actions->UpdatePreview();
+   TestTrue(TEXT("Only one ring and one arc are rendered"),F.Actions->ExitPreview && F.Actions->ExitPreview->GetInstanceCount()==48);
+  }
+  Release();F.Keys({EKeys::W,EKeys::D});F.Actions->UpdateExitCandidate(true);
+  TestTrue(TEXT("Diagonal is the same normalized sum used for normal walking"),F.Actions->ExitWorldDirection.Equals(CatrunBasket::MovementDirection(FVector2D(1,1),View.Rotation),.001));
  }
- F.Keys({EKeys::S}); F.Actions->UpdateExitCandidate(true);
- F.Keys({}); TestFalse(TEXT("Unchanged selection avoids another physical query before 0.2s"),F.Actions->UpdateExitCandidate(false));
- F.Keys({EKeys::W,EKeys::S,EKeys::A,EKeys::D}); F.Actions->UpdateExitCandidate(true);
- TestTrue(TEXT("Opposing keys retain the selected exit"),F.Actions->ExitWorldDirection.Equals(FVector(-1,0,0),.001));
- F.Keys({EKeys::S,EKeys::A}); F.Actions->UpdateExitCandidate(true);
- TestTrue(TEXT("A chord retains its held single-key selection instead of producing a diagonal"),F.Actions->ExitWorldDirection.Equals(FVector(-1,0,0),.001));
+ Release();const FVector Previous=F.Actions->ExitWorldDirection;
+ TestFalse(TEXT("Released selection stays cached"),F.Actions->UpdateExitCandidate(false));
  auto Remap=FCatrunKeyboardBindings();Remap.Keys[0]=EKeys::I;Remap.Keys[1]=EKeys::K;Remap.Keys[2]=EKeys::J;Remap.Keys[3]=EKeys::L;
  TestTrue(TEXT("Bindings can be remapped"),Settings->SetKeyboardBindings(Remap,Error));
- F.Keys({EKeys::W});F.Actions->UpdateExitCandidate(true);
- TestTrue(TEXT("Old keys do not select exits after remapping"),F.Actions->ExitWorldDirection.Equals(FVector(-1,0,0),.001));
- F.Keys({EKeys::I});F.Actions->UpdateExitCandidate(true);
- TestTrue(TEXT("Rebound single forward key works"),F.Actions->ExitWorldDirection.Equals(FVector(1,0,0),.001));
- F.Keys({EKeys::K});F.Actions->UpdateExitCandidate(true);F.Actions->UpdatePreview();
- auto* Blocker=F.Box(FVector(-41,0,26),FVector(2,25,24));
+ F.Keys({EKeys::D});F.Actions->UpdateExitCandidate(true);
+ TestTrue(TEXT("Old right key cannot change direction"),F.Actions->ExitWorldDirection.Equals(Previous,.001));
+ Release();F.Keys({EKeys::L});F.Actions->UpdateExitCandidate(true);
+ TestTrue(TEXT("Rebound right key follows normal walking right"),F.Actions->ExitWorldDirection.Equals(CatrunBasket::MovementDirection(FVector2D(0,1),View.Rotation),.001));
+ Release();const FVector Blocked=F.Actions->ExitWorldDirection;
+ auto* Blocker=F.Box(Blocked*41+FVector(0,0,26),FVector(3,3,24));
  F.Actions->ExitBasket();
- TestEqual(TEXT("Confirm immediately rechecks a new blocker"),F.Actions->BasketPhase,ECatrunBasketPhase::Hidden);
- TestFalse(TEXT("Blocked selection cannot retain a green preview"),F.Actions->CanExit || F.Actions->ExitPreview->IsVisible());
+ TestEqual(TEXT("Confirm rechecks blocker without an unexpected jump"),F.Actions->BasketPhase,ECatrunBasketPhase::Hidden);
+ TestTrue(TEXT("Blocked direction stays selected; no automatic alternative"),!F.Actions->CanExit && F.Actions->ExitWorldDirection.Equals(Blocked,.001));
+ F.Actions->TickComponent(.3f,LEVELTICK_All,nullptr);
+ TestTrue(TEXT("Background check never redirects the player"),F.Actions->ExitWorldDirection.Equals(Blocked,.001));
  Blocker->Destroy();F.Actions->UpdateExitCandidate(true);
- TestTrue(TEXT("Removing the blocker makes the same selected exit available"),F.Actions->CanExit);
- Cast<UBoxComponent>(F.Floor->GetRootComponent())->SetBoxExtent(FVector(30,60,10));F.Floor->SetActorLocation(FVector(-82,0,-10));
- F.Actions->UpdateExitCandidate(true);TestFalse(TEXT("Supported landing cannot hide an unsupported origin"),F.Actions->CanExit);
- F.Floor->Destroy();F.Actions->UpdateExitCandidate(true);TestFalse(TEXT("Absent floor rejects exit"),F.Actions->CanExit);
+ TestTrue(TEXT("Same requested exit opens when obstruction is removed"),F.Actions->CanExit && F.Actions->ExitWorldDirection.Equals(Blocked,.001));
+ F.Floor->Destroy();F.Actions->UpdateExitCandidate(true);
+ TestTrue(TEXT("No floor blocks selected exit without redirecting it"),!F.Actions->CanExit && F.Actions->ExitWorldDirection.Equals(Blocked,.001));
+ F.Actions->ExitBasket();TestEqual(TEXT("Unsupported selection keeps cat hidden"),F.Actions->BasketPhase,ECatrunBasketPhase::Hidden);
  F.Actions->AbortBasket();return true;
 }
 
@@ -530,6 +541,7 @@ bool FCatrunBasketRestoreRegressionTest::RunTest(const FString&)
 	F.Basket->ExternalBody = nullptr;
 	F.Actions->UpdateExitCandidate(true);
 	TestTrue(TEXT("Removing external body restores candidate availability"), F.Actions->CanExit);
+	F.Actions->ExitWorldDirection = FVector(-1,0,0);
 	F.Actions->ExitBasket();
 	TestEqual(TEXT("Normal confirmation starts after blocker removal"), F.Actions->BasketPhase, ECatrunBasketPhase::Exiting);
 	// The same obstruction arriving after confirmation must still be rejected at completion.
@@ -633,22 +645,6 @@ bool FCatrunBasketLateLandingSupportTest::RunTest(const FString&)
 	return true;
 }
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FBasketDirectionTest, "Catrun.Basket.SingleKeyCameraDirections",
-	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
-bool FBasketDirectionTest::RunTest(const FString&)
-{
- const FVector Front(1,0,0);
- const FVector W=CatrunBasket::SelectDirection(-45,1,0,Front,Front);
- const FVector D=CatrunBasket::SelectDirection(-45,0,1,Front,Front);
- TestTrue(TEXT("Single W follows camera forward"),W.Equals(FVector(1,-1,0).GetSafeNormal(),.001));
- TestTrue(TEXT("Single D follows camera right"),D.Equals(FVector(1,1,0).GetSafeNormal(),.001));
- TestTrue(TEXT("W+D keeps a held D selection"),CatrunBasket::SelectDirection(-45,1,1,D,Front).Equals(D,.001));
- TestTrue(TEXT("New chord prefers forward instead of synthesizing a diagonal"),CatrunBasket::SelectDirection(-45,1,1,Front,Front).Equals(W,.001));
- TestTrue(TEXT("Release retains selection"),CatrunBasket::SelectDirection(0,0,0,D,Front).Equals(D));
- TestTrue(TEXT("S can select the former rear"),CatrunBasket::SelectDirection(0,-1,0,D,Front).Equals(-Front,.001));
- return true;
-}
-
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FBasketArcTest, "Catrun.Basket.ArcEndpoints",
 	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 bool FBasketArcTest::RunTest(const FString&)
@@ -658,30 +654,6 @@ bool FBasketArcTest::RunTest(const FString&)
 	TestTrue(TEXT("Arc ends at landing circle"), CatrunBasket::ArcPoint(A,B,90,1).Equals(B));
 	TestTrue(TEXT("Middle rises above both endpoints"), CatrunBasket::ArcPoint(A,B,90,.5).Z>A.Z);
 	return true;
-}
-
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FBasketFiveDirectionsTest, "Catrun.Basket.AllSidesFourDistinctKeys",
-	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
-bool FBasketFiveDirectionsTest::RunTest(const FString&)
-{
- for (float CameraYaw:{-135.f,-45.f,0.f,17.f,90.f}) for (int32 Yaw=-180;Yaw<180;Yaw+=7)
- {
-  const FVector Opening=FRotator(0,Yaw,0).Vector();
-  for (int32 I=0;I<8;++I) TestTrue(TEXT("All physical approach sides are admitted"),CatrunBasket::IsDirectionAllowed(FRotator(0,Yaw+I*45,0).Vector(),Opening,CameraYaw));
-  TArray<FVector> Directions;
-  for (const FVector2D Axis:{FVector2D(1,0),FVector2D(0,1),FVector2D(-1,0),FVector2D(0,-1)})
-  {
-   const FVector D=CatrunBasket::SelectDirection(CameraYaw,Axis.X,Axis.Y,Opening,Opening);
-   TestTrue(TEXT("Each key produces a unit planar direction"),FMath::IsNearlyEqual(D.Size(),1.,.001) && FMath::IsNearlyZero(D.Z));
-   const FRotationMatrix Camera(FRotator(0,CameraYaw,0));
-   const FVector Expected=Camera.GetUnitAxis(EAxis::X)*Axis.X+Camera.GetUnitAxis(EAxis::Y)*Axis.Y;
-   TestTrue(TEXT("Basket rotation cannot rotate or quantize screen-relative movement"),D.Equals(Expected,.001));
-   for (const FVector& Previous:Directions) TestFalse(TEXT("The four single keys never alias"),D.Equals(Previous,.001));
-   Directions.Add(D);
-  }
- }
- TestFalse(TEXT("Zero input is not a physical approach"),CatrunBasket::IsDirectionAllowed(FVector::ZeroVector,FVector::ForwardVector,0));
- return true;
 }
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FBasketConfiguredDirectionTest, "Catrun.Basket.ExplicitDirectionOverridesCloth",
@@ -725,8 +697,6 @@ bool FBasketConfiguredDirectionTest::RunTest(const FString&)
 			CatrunBasket::IsDirectionAllowed(Direction, Basket->GetOpenDirection(), -135), Allowed[Sector]);
 	}
 	const FVector South = FRotator(0, 45, 0).Vector();
-	TestTrue(TEXT("S replaces A when A is the configured front"),
-		CatrunBasket::SelectDirection(-135, -1, 0, ExpectedFront, Basket->GetOpenDirection()).Equals(South, .001));
 	Basket->SetActorRotation(FRotator(0, 90, 0));
 	Basket->SetActorScale3D(FVector(2, 3, 1));
 	TestTrue(TEXT("Rotating the basket rotates its configured front; size does not distort it"),

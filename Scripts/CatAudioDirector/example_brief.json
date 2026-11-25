@@ -1,0 +1,7 @@
+{
+  "description": "무료 기술 검증용 신호. 실제 BGM/SFX가 아님.",
+  "assets": [
+    {"id": "BGM_Castle_Stealth", "kind": "bgm", "prompt": "귀여운 고양이의 마왕성 잠입. 조용한 피치카토, 방울 효과음을 가리지 않는 편곡, 보컬 없음.", "duration_seconds": 4, "loop": true},
+    {"id": "SFX_Cat_Bell", "kind": "sfx", "prompt": "작고 맑은 고양이 목방울 한 번. 과도한 잔향 없이 게임 유인 행동에 사용.", "duration_seconds": 1, "loop": false}
+  ]
+}

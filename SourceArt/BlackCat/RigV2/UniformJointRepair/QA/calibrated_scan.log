@@ -1,0 +1,23 @@
+00:03.609  blend            | Read blend: "C:\Users\whghk\.codex\worktrees\110f\Catrun\SourceArt\BlackCat\RigV2\UniformJointRepair\SK_BlackCat_UniformJointRepair.blend"
+Info: Saved as "SK_BlackCat_UniformJointRepair.blend"
+GAIN {'gain': 0, 'max': 21, 'total': 136, 'limb_max': 3}
+GAIN {'gain': 0.3, 'max': 2, 'total': 4, 'limb_max': 2}
+GAIN {'gain': 0.6, 'max': 0, 'total': 0, 'limb_max': 0}
+GAIN {'gain': 0.9, 'max': 10, 'total': 86, 'limb_max': 5}
+GAIN {'gain': 1.2, 'max': 24, 'total': 278, 'limb_max': 12}
+GAIN {'gain': 1.5, 'max': 46, 'total': 564, 'limb_max': 22}
+Info: Saved as "SK_BlackCat_UniformJointRepair.blend"
+SCANNED forearm_L max_overlap 6
+SCANNED forearm_R max_overlap 6
+SCANNED paw_F_L max_overlap 0
+SCANNED paw_F_R max_overlap 0
+SCANNED shin_L max_overlap 36
+SCANNED shin_R max_overlap 36
+SCANNED hock_L max_overlap 0
+SCANNED hock_R max_overlap 0
+SCANNED paw_H_L max_overlap 0
+SCANNED paw_H_R max_overlap 0
+SCAN_COMPLETE
+Blender 5.2.1 LTS (hash 9e2066aef7ef built 2026-08-25 02:38:20)
+
+Blender quit

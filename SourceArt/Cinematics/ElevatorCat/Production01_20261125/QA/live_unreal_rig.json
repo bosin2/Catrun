@@ -1,0 +1,24 @@
+[
+  {
+    "status": "fulfilled",
+    "value": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"returnValue\":[\"root\",\"pelvis\",\"lumbar\",\"spine\",\"chest\",\"neck\",\"head\",\"ear_L\",\"ear_tip_L\",\"ear_R\",\"ear_tip_R\",\"Lid_Upper_L_00\",\"Lid_Upper_L_01\",\"Lid_Upper_L_02\",\"Lid_Upper_L_03\",\"Lid_Upper_L_04\",\"Lid_Upper_L_05\",\"Lid_Upper_L_06\",\"Lid_Upper_L_07\",\"Lid_Lower_L_00\",\"Lid_Lower_L_01\",\"Lid_Lower_L_02\",\"Lid_Lower_L_03\",\"Lid_Lower_L_04\",\"Lid_Lower_L_05\",\"Lid_Lower_L_06\",\"Lid_Lower_L_07\",\"Lid_Upper_R_00\",\"Lid_Upper_R_01\",\"Lid_Upper_R_02\",\"Lid_Upper_R_03\",\"Lid_Upper_R_04\",\"Lid_Upper_R_05\",\"Lid_Upper_R_06\",\"Lid_Upper_R_07\",\"Lid_Lower_R_00\",\"Lid_Lower_R_01\",\"Lid_Lower_R_02\",\"Lid_Lower_R_03\",\"Lid_Lower_R_04\",\"Lid_Lower_R_05\",\"Lid_Lower_R_06\",\"Lid_Lower_R_07\",\"collar\",\"bell\",\"breath_rib_L\",\"breath_rib_R\",\"scapula_L\",\"upperarm_L\",\"forearm_L\",\"paw_F_L\",\"toes_F_L\",\"scapula_R\",\"upperarm_R\",\"forearm_R\",\"paw_F_R\",\"toes_F_R\",\"breath_back_front\",\"breath_back_mid\",\"abdomen\",\"breath_back_rear\",\"thigh_L\",\"shin_L\",\"hock_L\",\"paw_H_L\",\"toes_H_L\",\"thigh_R\",\"shin_R\",\"hock_R\",\"paw_H_R\",\"toes_H_R\",\"tail_01\",\"tail_02\",\"tail_03\",\"tail_04\",\"tail_05\",\"tail_06\",\"tail_07\"]}"
+        }
+      ]
+    }
+  },
+  {
+    "status": "fulfilled",
+    "value": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"returnValue\":{\"refPath\":\"/Game/Characters/BlackCat/Final/Skeletons/SKEL_BlackCat_Final.SKEL_BlackCat_Final\"}}"
+        }
+      ]
+    }
+  }
+]
