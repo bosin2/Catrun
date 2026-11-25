@@ -1,0 +1,1438 @@
+{
+  "scope": "Touch 1-19 transition only, per-region self-intersections and evaluated foot height",
+  "seam_walk120_touch1": {
+    "max_body_vertex_delta_mm": 3.332000937312528e-05,
+    "max_bone_matrix_delta": 6.556510925292969e-07
+  },
+  "sample_count": 19,
+  "module_sha256": "d51c2810ec92274dc1c2d5cc9d8d7f7da7cdc003588decc3b23a86bbe206d759",
+  "pose_sha256": "0220c6a94aec84a2442f1236f8ee89082149dc1ff9ebdab0c50265e6e49c3ce6",
+  "max_intersections": {
+    "F_L": 0,
+    "F_R": 0,
+    "H_L": 0,
+    "H_R": 0,
+    "BODY": 0
+  },
+  "max_near_zero_triangles": {
+    "F_L": 0,
+    "F_R": 0,
+    "H_L": 0,
+    "H_R": 0,
+    "BODY": 0
+  },
+  "lowest_foot_z_mm": {
+    "F_L": -6.124375673266513e-06,
+    "F_R": -4.7981738582336675e-06,
+    "H_L": -4.211407222953767e-06,
+    "H_R": -2.6109026052267836e-06
+  },
+  "rows": [
+    {
+      "frame": 1,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 2.8637790497520327e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 2.863780418402285e-05,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 3.3655736877480064e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 3.3655760286106094e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.290376704658364e-05,
+          "near_zero_triangles": 0
+        }
+      },
+      "feet": {
+        "F_L": {
+          "min_z_mm": 9.057375602424145,
+          "max_z_mm": 26.613613590598106,
+          "center_xyz": [
+            0.029405073379166424,
+            -0.0206811927491799,
+            0.01767448865575716
+          ]
+        },
+        "F_R": {
+          "min_z_mm": 0.00014873879194965411,
+          "max_z_mm": 8.00014566630125,
+          "center_xyz": [
+            -0.027999990270473063,
+            -0.0521466126665473,
+            0.004000147222538608
+          ]
+        },
+        "H_L": {
+          "min_z_mm": 1.7056092619895935,
+          "max_z_mm": 13.017441146075726,
+          "center_xyz": [
+            0.028607835643924773,
+            -0.00467230414506048,
+            0.007290845853276551
+          ]
+        },
+        "H_R": {
+          "min_z_mm": 0.00010429323538119206,
+          "max_z_mm": 7.00010359287262,
+          "center_xyz": [
+            -0.027999984857160598,
+            0.04861327679827809,
+            0.0035001039104547438
+          ]
+        }
+      },
+      "body_min_z_mm": 0.00010429323538119206
+    },
+    {
+      "frame": 2,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 2.8637808397331776e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 2.8637806125309667e-05,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 3.3655757525262715e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 3.365575994147767e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.290106914124234e-05,
+          "near_zero_triangles": 0
+        }
+      },
+      "feet": {
+        "F_L": {
+          "min_z_mm": 12.282312847673893,
+          "max_z_mm": 20.282309502363205,
+          "center_xyz": [
+            0.029405079199932516,
+            -0.01826489402446896,
+            0.016282310767564923
+          ]
+        },
+        "F_R": {
+          "min_z_mm": 0.000126875931982795,
+          "max_z_mm": 8.000128902494907,
+          "center_xyz": [
+            -0.027999994112178683,
+            -0.0521466163918376,
+            0.0040001276377577
+          ]
+        },
+        "H_L": {
+          "min_z_mm": 3.2914404291659594,
+          "max_z_mm": 10.29143575578928,
+          "center_xyz": [
+            0.028607833199203014,
+            -0.003642235998995602,
+            0.0067914380197180435
+          ]
+        },
+        "H_R": {
+          "min_z_mm": 0.00010124593785576508,
+          "max_z_mm": 7.000098004937172,
+          "center_xyz": [
+            -0.027999984158668667,
+            0.048613267950713634,
+            0.0035000996498872894
+          ]
+        }
+      },
+      "body_min_z_mm": 0.00010124593785576508
+    },
+    {
+      "frame": 3,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 2.863780635676381e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 2.8637803627072975e-05,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 3.365575261694639e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 3.365576913944293e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.289320251464818e-05,
+          "near_zero_triangles": 0
+        }
+      },
+      "feet": {
+        "F_L": {
+          "min_z_mm": 12.28230819106102,
+          "max_z_mm": 20.282309502363205,
+          "center_xyz": [
+            0.0294050769880414,
+            -0.01826489227823913,
+            0.016282308322843164
+          ]
+        },
+        "F_R": {
+          "min_z_mm": 0.00013357400518998475,
+          "max_z_mm": 8.000132627785206,
+          "center_xyz": [
+            -0.027999992365948856,
+            -0.05214661732316017,
+            0.0040001329123002805
+          ]
+        },
+        "H_L": {
+          "min_z_mm": 3.291441360488534,
+          "max_z_mm": 10.29143575578928,
+          "center_xyz": [
+            0.02860783168580383,
+            -0.003642235998995602,
+            0.006791438645450398
+          ]
+        },
+        "H_R": {
+          "min_z_mm": 0.00010284037443852867,
+          "max_z_mm": 7.000100798904896,
+          "center_xyz": [
+            -0.027999984158668667,
+            0.04861327190883458,
+            0.0035001018929770034
+          ]
+        }
+      },
+      "body_min_z_mm": 0.00010284037443852867
+    },
+    {
+      "frame": 4,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 2.8637809063761594e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 2.8637816216798218e-05,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 3.365575368949066e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 3.365577647954724e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.288098079003631e-05,
+          "near_zero_triangles": 0
+        }
+      },
+      "feet": {
+        "F_L": {
+          "min_z_mm": 12.640836648643017,
+          "max_z_mm": 20.64083330333233,
+          "center_xyz": [
+            0.02882870496250689,
+            -0.018748759059235454,
+            0.016640834452118725
+          ]
+        },
+        "F_R": {
+          "min_z_mm": 0.00012796331816389284,
+          "max_z_mm": 8.000128902494907,
+          "center_xyz": [
+            -0.02799999457783997,
+            -0.05214662291109562,
+            0.004000128027513483
+          ]
+        },
+        "H_L": {
+          "min_z_mm": 3.8229168858379126,
+          "max_z_mm": 10.822911746799946,
+          "center_xyz": [
+            0.028780269320122898,
+            -0.003158472594805062,
+            0.007322914025280625
+          ]
+        },
+        "H_R": {
+          "min_z_mm": 9.85413848297867e-05,
+          "max_z_mm": 7.000097073614597,
+          "center_xyz": [
+            -0.027999983460176736,
+            0.04861327190883458,
+            0.003500097773736943
+          ]
+        }
+      },
+      "body_min_z_mm": 9.85413848297867e-05
+    },
+    {
+      "frame": 5,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 2.8637806490130572e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 2.86378241014471e-05,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 3.365575641991601e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 3.3380193666855755e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.28650154987068e-05,
+          "near_zero_triangles": 0
+        }
+      },
+      "feet": {
+        "F_L": {
+          "min_z_mm": 13.347320258617401,
+          "max_z_mm": 21.347317844629288,
+          "center_xyz": [
+            0.027342265006154776,
+            -0.019996634568087757,
+            0.017347318469546735
+          ]
+        },
+        "F_R": {
+          "min_z_mm": 0.00012891739231690735,
+          "max_z_mm": 8.000129833817482,
+          "center_xyz": [
+            -0.027999992365948856,
+            -0.052146622678264976,
+            0.004000129070595548
+          ]
+        },
+        "H_L": {
+          "min_z_mm": 5.134138744324446,
+          "max_z_mm": 12.134132906794548,
+          "center_xyz": [
+            0.029234877787530422,
+            -0.001883097575046122,
+            0.008634136116597801
+          ]
+        },
+        "H_R": {
+          "min_z_mm": 0.00010050621312984731,
+          "max_z_mm": 7.000097073614597,
+          "center_xyz": [
+            -0.02799998508999124,
+            0.048613267950713634,
+            0.003500098682708064
+          ]
+        }
+      },
+      "body_min_z_mm": 0.00010050621312984731
+    },
+    {
+      "frame": 6,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 2.8637802230861355e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 2.8637819329316744e-05,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 3.365574846391865e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 3.060884651338655e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.284585967930411e-05,
+          "near_zero_triangles": 0
+        }
+      },
+      "feet": {
+        "F_L": {
+          "min_z_mm": 13.115989044308662,
+          "max_z_mm": 21.1159884929657,
+          "center_xyz": [
+            0.02530978195136413,
+            -0.02170291228685528,
+            0.017115988302975893
+          ]
+        },
+        "F_R": {
+          "min_z_mm": 0.00012855976194714458,
+          "max_z_mm": 8.000130765140057,
+          "center_xyz": [
+            -0.0279999925987795,
+            -0.05214661522768438,
+            0.004000129755584503
+          ]
+        },
+        "H_L": {
+          "min_z_mm": 6.441135425120592,
+          "max_z_mm": 13.44112865626812,
+          "center_xyz": [
+            0.02987759478855878,
+            -7.998303044587374e-05,
+            0.009941131982486695
+          ]
+        },
+        "H_R": {
+          "min_z_mm": 0.00010415388373985479,
+          "max_z_mm": 7.0001003332436085,
+          "center_xyz": [
+            -0.027999982063192874,
+            0.04861327190883458,
+            0.00350010229158082
+          ]
+        }
+      },
+      "body_min_z_mm": 0.00010415388373985479
+    },
+    {
+      "frame": 7,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 2.8637795950548907e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 2.8637811894186213e-05,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 3.365576172484152e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 2.76238996044502e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.282419703794484e-05,
+          "near_zero_triangles": 0
+        }
+      },
+      "feet": {
+        "F_L": {
+          "min_z_mm": 10.501967743039131,
+          "max_z_mm": 18.501967191696167,
+          "center_xyz": [
+            0.023095291922800243,
+            -0.023561990936286747,
+            0.014501967350952327
+          ]
+        },
+        "F_R": {
+          "min_z_mm": 0.000124655670674656,
+          "max_z_mm": 8.000128902494907,
+          "center_xyz": [
+            -0.02799999015405774,
+            -0.052146618254482746,
+            0.004000126353002287
+          ]
+        },
+        "H_L": {
+          "min_z_mm": 6.645727436989546,
+          "max_z_mm": 13.645721599459648,
+          "center_xyz": [
+            0.03061437455471605,
+            0.001987006049603224,
+            0.010145724547328427
+          ]
+        },
+        "H_R": {
+          "min_z_mm": 0.00010645774040085598,
+          "max_z_mm": 7.000104058533907,
+          "center_xyz": [
+            -0.0279999811318703,
+            0.048613279359415174,
+            0.003500105244573337
+          ]
+        }
+      },
+      "body_min_z_mm": 0.00010645774040085598
+    },
+    {
+      "frame": 8,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 2.863780499656407e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 2.863781289032376e-05,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 3.365575108540579e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 2.4580507963067376e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.280079465263763e-05,
+          "near_zero_triangles": 0
+        }
+      },
+      "feet": {
+        "F_L": {
+          "min_z_mm": 5.934958811849356,
+          "max_z_mm": 13.934958726167679,
+          "center_xyz": [
+            0.02106281276792288,
+            -0.02526826167013496,
+            0.009934958565281704
+          ]
+        },
+        "F_R": {
+          "min_z_mm": 0.00012501330104441877,
+          "max_z_mm": 8.000127039849758,
+          "center_xyz": [
+            -0.02799999399576336,
+            -0.05214661522768438,
+            0.00400012606615352
+          ]
+        },
+        "H_L": {
+          "min_z_mm": 5.232561379671097,
+          "max_z_mm": 12.232556939125061,
+          "center_xyz": [
+            0.03135114093311131,
+            0.00405399187002331,
+            0.008732559392228723
+          ]
+        },
+        "H_R": {
+          "min_z_mm": 0.0001035425825079983,
+          "max_z_mm": 7.000100798904896,
+          "center_xyz": [
+            -0.027999981539323926,
+            0.04861327190883458,
+            0.0035001022177754137
+          ]
+        }
+      },
+      "body_min_z_mm": 0.0001035425825079983
+    },
+    {
+      "frame": 9,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 2.8637816695661914e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 2.863780808304195e-05,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 3.324643562824054e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 2.1509237052235036e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.27760202606809e-05,
+          "near_zero_triangles": 0
+        }
+      },
+      "feet": {
+        "F_L": {
+          "min_z_mm": 1.7192480154335499,
+          "max_z_mm": 9.719246998429298,
+          "center_xyz": [
+            0.019576375314500183,
+            -0.026516135199926794,
+            0.005719247070373967
+          ]
+        },
+        "F_R": {
+          "min_z_mm": 0.00012678653149578167,
+          "max_z_mm": 8.000129833817482,
+          "center_xyz": [
+            -0.027999991609249264,
+            -0.05214661452919245,
+            0.004000128179792561
+          ]
+        },
+        "H_L": {
+          "min_z_mm": 2.8712742496281862,
+          "max_z_mm": 9.87127423286438,
+          "center_xyz": [
+            0.0319938677130267,
+            0.005857109208591282,
+            0.006371274532284588
+          ]
+        },
+        "H_R": {
+          "min_z_mm": 0.00010382667170460991,
+          "max_z_mm": 7.000101264566183,
+          "center_xyz": [
+            -0.027999986719805747,
+            0.04861328029073775,
+            0.003500102531162952
+          ]
+        }
+      },
+      "body_min_z_mm": 0.00010382667170460991
+    },
+    {
+      "frame": 10,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 2.863781725612052e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 2.863781811162677e-05,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 3.186491521264625e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.8745710184496234e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.275081663383063e-05,
+          "near_zero_triangles": 0
+        }
+      },
+      "feet": {
+        "F_L": {
+          "min_z_mm": 3.3158835677227216e-06,
+          "max_z_mm": 8.000005036592484,
+          "center_xyz": [
+            0.018999998515937477,
+            -0.02700000221375376,
+            0.004000003708991229
+          ]
+        },
+        "F_R": {
+          "min_z_mm": 0.0001235976725411092,
+          "max_z_mm": 8.000127971172333,
+          "center_xyz": [
+            -0.027999996091239154,
+            -0.052146615693345666,
+            0.00400012566335306
+          ]
+        },
+        "H_L": {
+          "min_z_mm": 0.8143361774273217,
+          "max_z_mm": 7.814337499439716,
+          "center_xyz": [
+            0.03244847268797457,
+            0.007132482249289751,
+            0.0043143365473952144
+          ]
+        },
+        "H_R": {
+          "min_z_mm": 0.00010109209824804566,
+          "max_z_mm": 7.000099401921034,
+          "center_xyz": [
+            -0.027999980375170708,
+            0.048613274935632944,
+            0.0035001003192731694
+          ]
+        }
+      },
+      "body_min_z_mm": 3.3158835677227216e-06
+    },
+    {
+      "frame": 11,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 2.863779333960531e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 2.8637817426801656e-05,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 2.9482241044843126e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.5595263531102186e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.272557138109091e-05,
+          "near_zero_triangles": 0
+        }
+      },
+      "feet": {
+        "F_L": {
+          "min_z_mm": 5.080435627746738e-06,
+          "max_z_mm": 8.000004105269909,
+          "center_xyz": [
+            0.01899999938905239,
+            -0.027000001748092473,
+            0.004000004251021316
+          ]
+        },
+        "F_R": {
+          "min_z_mm": 1.0389958042651415,
+          "max_z_mm": 9.039001539349556,
+          "center_xyz": [
+            -0.027501452714204788,
+            -0.05075364629738033,
+            0.00503899873001501
+          ]
+        },
+        "H_L": {
+          "min_z_mm": 1.5244738804653934e-06,
+          "max_z_mm": 7.000006269663572,
+          "center_xyz": [
+            0.032620909507386386,
+            0.007616240065544844,
+            0.003500003775581295
+          ]
+        },
+        "H_R": {
+          "min_z_mm": 0.6729975575581193,
+          "max_z_mm": 7.672997657209635,
+          "center_xyz": [
+            -0.02819853730034083,
+            0.04685168294236064,
+            0.004172997625573771
+          ]
+        }
+      },
+      "body_min_z_mm": 1.5244738804653934e-06
+    },
+    {
+      "frame": 12,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 2.863782084132134e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 2.863780397692049e-05,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 2.6527747140664348e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.1926589854196844e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.27010817473046e-05,
+          "near_zero_triangles": 0
+        }
+      },
+      "feet": {
+        "F_L": {
+          "min_z_mm": 5.4367594870541325e-06,
+          "max_z_mm": 8.000005036592484,
+          "center_xyz": [
+            0.019000002997927368,
+            -0.027000001748092473,
+            0.004000004810746249
+          ]
+        },
+        "F_R": {
+          "min_z_mm": 3.5000769421458244,
+          "max_z_mm": 11.500082910060883,
+          "center_xyz": [
+            -0.026215740654151887,
+            -0.04716127854771912,
+            0.007500080173485912
+          ]
+        },
+        "H_L": {
+          "min_z_mm": 1.3592060810196926e-07,
+          "max_z_mm": 7.000005338340998,
+          "center_xyz": [
+            0.03262090892530978,
+            0.007616243790835142,
+            0.0035000025844201255
+          ]
+        },
+        "H_R": {
+          "min_z_mm": 2.3570661433041096,
+          "max_z_mm": 9.357066825032234,
+          "center_xyz": [
+            -0.02872199914418161,
+            0.042207489372231066,
+            0.0058570667169988155
+          ]
+        }
+      },
+      "body_min_z_mm": 1.3592060810196926e-07
+    },
+    {
+      "frame": 13,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 2.8637812102716726e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 2.6820281127458576e-05,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 2.3700108694488286e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.479519442693484e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.267789269676469e-05,
+          "near_zero_triangles": 0
+        }
+      },
+      "feet": {
+        "F_L": {
+          "min_z_mm": -1.8935977230682965e-06,
+          "max_z_mm": 8.00000037997961,
+          "center_xyz": [
+            0.018999999039806426,
+            -0.027000003610737622,
+            0.003999998954124673
+          ]
+        },
+        "F_R": {
+          "min_z_mm": 5.667895078659058,
+          "max_z_mm": 13.667902909219265,
+          "center_xyz": [
+            -0.024457716441247612,
+            -0.04224925197195262,
+            0.009667899284977466
+          ]
+        },
+        "H_L": {
+          "min_z_mm": -2.6330670976904e-07,
+          "max_z_mm": 7.00000673532486,
+          "center_xyz": [
+            0.03262090974021703,
+            0.007616245886310935,
+            0.003500003106193361
+          ]
+        },
+        "H_R": {
+          "min_z_mm": 4.1911909356713295,
+          "max_z_mm": 11.191193014383316,
+          "center_xyz": [
+            -0.029462075093761086,
+            0.03564155625645071,
+            0.0076911921496503055
+          ]
+        }
+      },
+      "body_min_z_mm": -1.8935977230682965e-06
+    },
+    {
+      "frame": 14,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 2.863781474949203e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 2.6973590152665662e-05,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 2.1159940199199564e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.660731111701047e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.265658225119236e-05,
+          "near_zero_triangles": 0
+        }
+      },
+      "feet": {
+        "F_L": {
+          "min_z_mm": -3.787180791192668e-06,
+          "max_z_mm": 7.999999448657036,
+          "center_xyz": [
+            0.01899999484885484,
+            -0.027000001980923116,
+            0.0039999973466620375
+          ]
+        },
+        "F_R": {
+          "min_z_mm": 5.667868070304394,
+          "max_z_mm": 13.667874969542027,
+          "center_xyz": [
+            -0.02254227048251778,
+            -0.03689735382795334,
+            0.009667871345300227
+          ]
+        },
+        "H_L": {
+          "min_z_mm": -1.6876420261269232e-06,
+          "max_z_mm": 7.00000673532486,
+          "center_xyz": [
+            0.032620912534184754,
+            0.007616250077262521,
+            0.0035000023515892043
+          ]
+        },
+        "H_R": {
+          "min_z_mm": 5.000047385692596,
+          "max_z_mm": 12.000050395727158,
+          "center_xyz": [
+            -0.03031044197268784,
+            0.02811476110946387,
+            0.008500048570567742
+          ]
+        }
+      },
+      "body_min_z_mm": -3.787180791192668e-06
+    },
+    {
+      "frame": 15,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 2.863781831807164e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 2.863781572482438e-05,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.9011086323661945e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.4536843595316865e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.263795628844729e-05,
+          "near_zero_triangles": 0
+        }
+      },
+      "feet": {
+        "F_L": {
+          "min_z_mm": 3.725286745748235e-08,
+          "max_z_mm": 8.000001311302185,
+          "center_xyz": [
+            0.01899999938905239,
+            -0.026999998255632818,
+            0.00400000047637139
+          ]
+        },
+        "F_R": {
+          "min_z_mm": 3.500003134831786,
+          "max_z_mm": 11.500006541609764,
+          "center_xyz": [
+            -0.02078425872605294,
+            -0.031985334935598075,
+            0.0075000052456744015
+          ]
+        },
+        "H_L": {
+          "min_z_mm": -4.211407222953767e-06,
+          "max_z_mm": 7.000005804002285,
+          "center_xyz": [
+            0.03262091346550733,
+            0.007616244605742395,
+            0.0035000005965121206
+          ]
+        },
+        "H_R": {
+          "min_z_mm": 4.191149026155472,
+          "max_z_mm": 11.19115762412548,
+          "center_xyz": [
+            -0.03115881618577987,
+            0.02058796293567866,
+            0.0076911531505174935
+          ]
+        }
+      },
+      "body_min_z_mm": -4.211407222953767e-06
+    },
+    {
+      "frame": 16,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 2.8637812168118403e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 2.863781421000879e-05,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.733087935279334e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.5027764354621513e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.262228205240176e-05,
+          "near_zero_triangles": 0
+        }
+      },
+      "feet": {
+        "F_L": {
+          "min_z_mm": -5.1930539868294545e-06,
+          "max_z_mm": 7.999997586011887,
+          "center_xyz": [
+            0.019000000320374966,
+            -0.027000001980923116,
+            0.003999995891470293
+          ]
+        },
+        "F_R": {
+          "min_z_mm": 1.0388805530965328,
+          "max_z_mm": 9.038885124027729,
+          "center_xyz": [
+            -0.01949853968108073,
+            -0.028392964508384466,
+            0.005038883049564902
+          ]
+        },
+        "H_L": {
+          "min_z_mm": -3.796643888165363e-06,
+          "max_z_mm": 7.0000081323087215,
+          "center_xyz": [
+            0.03262090927455574,
+            0.007616247516125441,
+            0.0035000019913997704
+          ]
+        },
+        "H_R": {
+          "min_z_mm": 2.3569902405142784,
+          "max_z_mm": 9.357002563774586,
+          "center_xyz": [
+            -0.03189889120403677,
+            0.014022032264620066,
+            0.0058569961111061275
+          ]
+        }
+      },
+      "body_min_z_mm": -5.1930539868294545e-06
+    },
+    {
+      "frame": 17,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 2.8637802751947093e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 2.8637781983212433e-05,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.615425531999596e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.3695781699043603e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.2610388818749e-05,
+          "near_zero_triangles": 0
+        }
+      },
+      "feet": {
+        "F_L": {
+          "min_z_mm": -6.124375673266513e-06,
+          "max_z_mm": 7.999996654689312,
+          "center_xyz": [
+            0.018999999098014086,
+            -0.026999999186955392,
+            0.003999994960148051
+          ]
+        },
+        "F_R": {
+          "min_z_mm": -4.7981738582336675e-06,
+          "max_z_mm": 7.999997586011887,
+          "center_xyz": [
+            -0.018999999796506017,
+            -0.02699999639298767,
+            0.003999996307771314
+          ]
+        },
+        "H_L": {
+          "min_z_mm": -2.4114292784815916e-06,
+          "max_z_mm": 7.000006269663572,
+          "center_xyz": [
+            0.032620908692479134,
+            0.007616247050464153,
+            0.0035000017248084103
+          ]
+        },
+        "H_R": {
+          "min_z_mm": 0.6729037850163877,
+          "max_z_mm": 7.672912906855345,
+          "center_xyz": [
+            -0.032422355259768665,
+            0.009377831243909895,
+            0.0041729083604877815
+          ]
+        }
+      },
+      "body_min_z_mm": -6.124375673266513e-06
+    },
+    {
+      "frame": 18,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 2.8637793832037557e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 2.8637800272342362e-05,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.5468186546906816e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.2865553854512867e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.260282888641028e-05,
+          "near_zero_triangles": 0
+        }
+      },
+      "feet": {
+        "F_L": {
+          "min_z_mm": -1.8253922817734747e-06,
+          "max_z_mm": 8.00000037997961,
+          "center_xyz": [
+            0.018999999796506017,
+            -0.026999998022802174,
+            0.003999999079387445
+          ]
+        },
+        "F_R": {
+          "min_z_mm": -2.9355282649135006e-06,
+          "max_z_mm": 8.00000037997961,
+          "center_xyz": [
+            -0.018999998457729816,
+            -0.027000004425644875,
+            0.0039999985778704505
+          ]
+        },
+        "H_L": {
+          "min_z_mm": -2.9756526132018735e-06,
+          "max_z_mm": 7.00000673532486,
+          "center_xyz": [
+            0.03262091230135411,
+            0.007616247516125441,
+            0.003500001803273256
+          ]
+        },
+        "H_R": {
+          "min_z_mm": -2.6109026052267836e-06,
+          "max_z_mm": 7.000007666647434,
+          "center_xyz": [
+            -0.032620908110402524,
+            0.007616249728016555,
+            0.0035000024165486865
+          ]
+        }
+      },
+      "body_min_z_mm": -2.9756526132018735e-06
+    },
+    {
+      "frame": 19,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 2.8637808447125265e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 2.8637808447125265e-05,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.5241417533843012e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.2484601282975e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.260020436234791e-05,
+          "near_zero_triangles": 0
+        }
+      },
+      "feet": {
+        "F_L": {
+          "min_z_mm": -2.004206578476442e-06,
+          "max_z_mm": 7.999998517334461,
+          "center_xyz": [
+            0.019000000087544322,
+            -0.026999999885447323,
+            0.003999998179730013
+          ]
+        },
+        "F_R": {
+          "min_z_mm": -2.004206578476442e-06,
+          "max_z_mm": 7.999998517334461,
+          "center_xyz": [
+            -0.019000000087544322,
+            -0.026999999885447323,
+            0.003999998179730013
+          ]
+        },
+        "H_L": {
+          "min_z_mm": 4.274054887787315e-06,
+          "max_z_mm": 7.000013720244169,
+          "center_xyz": [
+            0.0326209079939872,
+            0.007616247283294797,
+            0.0035000087746878683
+          ]
+        },
+        "H_R": {
+          "min_z_mm": 4.274054887787315e-06,
+          "max_z_mm": 7.000013720244169,
+          "center_xyz": [
+            -0.0326209079939872,
+            0.007616247283294797,
+            0.0035000087746878683
+          ]
+        }
+      },
+      "body_min_z_mm": -2.004206578476442e-06
+    }
+  ]
+}

@@ -9,6 +9,7 @@
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "CatrunLevelFlow.generated.h"
 
+class ACatrunElevatorTransition;
 class UBoxComponent;
 class UCatrunNoticeWidget;
 class UCatrunPlayHUD;
@@ -234,6 +235,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Level Flow")
 	bool ShouldSkipStageIntro();
 	bool IsStage2PortalArrival() const;
+	bool IsStage3ElevatorArrival() const;
+	bool ClaimElevatorArrival(ACatrunElevatorTransition& Owner);
+	void ReleaseElevatorArrival(const ACatrunElevatorTransition& Owner);
+	bool HasPendingElevatorArrival() const { return ElevatorArrivalOwner.IsValid(); }
 	float GetRestartFadeInDuration();
 	UFUNCTION(BlueprintPure, Category="Catrun|Stage Clock")
 	FCatrunStageClockState GetStageClockState() const;
@@ -278,6 +283,8 @@ private:
     bool bStageTitlePending = false;
     bool bArrivalTitleReleased = false;
     TWeakObjectPtr<UCatrunExitTransitionComponent> ArrivalTitleOwner;
+	TWeakObjectPtr<ACatrunElevatorTransition> ElevatorArrivalOwner;
+	bool bElevatorArrivalReleased = false;
 	bool bControlsOffered = false;
 	float RestartFadeInDuration = 0.f;
 	TWeakObjectPtr<UCameraComponent> GameplayCamera;

@@ -1,0 +1,30 @@
+{
+  "scope": "Per-region self-intersections, including every integer frame; does not certify cross-region or retained original face intersections",
+  "sample_count": 297,
+  "triangles": 568,
+  "module_sha256": "ba2f8913a4dc0a83f576f3221a8c43dcc83382cb314486b2def3c54fe2cf301d",
+  "pose_sha256": "392d62054dae7219e65490fd6e5b5c3428be2f17dea6e5a5e039a58eb7c4c321",
+  "max_intersections": {
+    "F_L": 0,
+    "F_R": 0,
+    "H_L": 0,
+    "H_R": 0,
+    "BODY": 0
+  },
+  "max_near_zero_triangles": {
+    "F_L": 0,
+    "F_R": 0,
+    "H_L": 0,
+    "H_R": 0,
+    "BODY": 0
+  },
+  "min_region_z_mm": {
+    "F_L": -2.0003042777716473e-05,
+    "F_R": -1.4415107330023602e-05,
+    "H_L": -6.042420785945524e-06,
+    "H_R": -5.382494450145714e-06,
+    "BODY": 2.064220607280731
+  },
+  "floor_penetration_gt_0_2mm": [],
+  "bad_frames": []
+}

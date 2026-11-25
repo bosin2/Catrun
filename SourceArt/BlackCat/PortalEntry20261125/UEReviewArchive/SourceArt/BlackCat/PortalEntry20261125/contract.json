@@ -1,0 +1,64 @@
+{
+  "production_status": "received_and_reviewed",
+  "source_chat": "01a2107b-42cf-7283-91ba-0c114fc29bba",
+  "handoff_sha256": "ea95018baf4cf295cbe32c0a59fd28669ef64d0f6228fa2d391063903388a4e9",
+  "clips": {
+    "probe": {
+      "file": "AN_BlackCat_PortalPawEar.fbx",
+      "sha256": "9cfc776fc9cd5d7b6417236d7aa2a138302b9c64b51a0917652982b1d73c504e",
+      "asset": "AN_BlackCat_PortalPawEar",
+      "import_settings": {
+        "import_uniform_scale": 100,
+        "convert_scene": true,
+        "force_front_x_axis": false,
+        "convert_scene_unit": true,
+        "preserve_local_transform": false
+      }
+    },
+    "prep": {
+      "file": "AN_BlackCat_PortalCrouchWiggle.fbx",
+      "sha256": "a8fd6b9af6f4d383c23ea7f4b21fbe1f87b944072a03dbc55d735770d87172ea",
+      "asset": "AN_BlackCat_PortalCrouchWiggle",
+      "import_settings": {
+        "import_uniform_scale": 100,
+        "convert_scene": true,
+        "force_front_x_axis": false,
+        "convert_scene_unit": true,
+        "preserve_local_transform": false
+      }
+    },
+    "takeoff": {
+      "file": "AN_BlackCat_PortalTakeoffBridge.fbx",
+      "sha256": "466b599e0cab3fd8d7772b3619296996558bf82e098f41ae500f2a66f0c9725c",
+      "asset": "AN_BlackCat_PortalTakeoffBridge",
+      "import_settings": {
+        "import_uniform_scale": 100,
+        "convert_scene": true,
+        "force_front_x_axis": false,
+        "convert_scene_unit": true,
+        "preserve_local_transform": false
+      }
+    }
+  },
+  "probe_frames": 48,
+  "prep_frames": 36,
+  "takeoff_frames": 9,
+  "takeoff_liftoff_frame": 6,
+  "jump_air_source_frame": 18,
+  "contact_frame": 12,
+  "contact_bone": "paw_F_L",
+  "contact_point_blender_local_m": [
+    0.02599998749792576,
+    -0.05012799799442291,
+    -9.080395102500916e-09
+  ],
+  "air_frames": 39,
+  "arc_height_cm": 80.0,
+  "surface_review_note": [
+    "Original mesh/weights/materials/bind and 14 original actions are preserved, without any sitting-body mesh or RigV2 bones.",
+    "The original skin still pinches around the proximal folded limbs during deep compression; animation-only export cannot repair that topology. Geometry-free compatibility passes do not mean surface-art approval.",
+    "No UE import or Sequencer runtime validation performed in this workspace. Coordinator must verify retargeting translation modes, actual world foot contact and scale.",
+    "World path is not baked. Existing airborne source requires Sequencer upward/forward travel; video previews show local animation in place.",
+    "Blender FBX QA uses anim_offset=0 and restores original use_connect=False; importer defaults otherwise shift timing/constrain translated bones."
+  ]
+}

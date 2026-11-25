@@ -1,0 +1,14 @@
+{
+  "status": "reported_by_integrating_chat_not_independently_retested_here",
+  "source_chat": "01a21157-6b87-7bb0-8ad2-1b7f5c569e9e",
+  "ue_import": "success",
+  "existing_skeleton_mesh_and_jump_hashes": "unchanged",
+  "durations_seconds": [1.6, 1.2, 0.3],
+  "scale_and_root_motion": "reported_normal",
+  "ue_source_pose_join_max_position_cm": {
+    "clip1_to_clip2": 0.000036,
+    "clip2_to_bridge": 0.000011,
+    "bridge_to_existing_jump_source_frame_18": 0.00841
+  },
+  "stage1_continuous_playback": "recording_in_progress_at_last_report"
+}

@@ -1,0 +1,61 @@
+{
+  "joins": [
+    {
+      "from": "AN_Portal_WalkReview",
+      "to": "AN_Portal_SeatedListenTouch",
+      "all_bones": 112,
+      "max_position_error_m": 2.2351741790771484e-08,
+      "max_matrix_error": 6.556510925292969e-07
+    },
+    {
+      "from": "AN_Portal_SeatedListenTouch",
+      "to": "AN_Portal_HipsBackWiggle",
+      "all_bones": 112,
+      "max_position_error_m": 3.6166026888317614e-08,
+      "max_matrix_error": 4.470348358154297e-07
+    },
+    {
+      "from": "AN_Portal_HipsBackWiggle",
+      "to": "AN_Portal_SeatedTakeoff",
+      "all_bones": 112,
+      "max_position_error_m": 3.073364496231079e-08,
+      "max_matrix_error": 7.450580596923828e-07
+    },
+    {
+      "from": "AN_Portal_SeatedTakeoff",
+      "to": "AN_Portal_AirReach",
+      "all_bones": 112,
+      "max_position_error_m": 1.4901161193847656e-08,
+      "max_matrix_error": 1.1920928955078125e-07
+    }
+  ],
+  "prepare_mesh_forepaw_max_displacement_m": {
+    "L": 6.835888574854875e-08,
+    "R": 4.6856937119035814e-08
+  },
+  "prepare_face_portal_clearance": [
+    {
+      "frame": 1,
+      "min_y": -0.08652245998382568,
+      "clearance_to_portal_m": 0.018477540016174313
+    },
+    {
+      "frame": 14,
+      "min_y": -0.10120226442813873,
+      "clearance_to_portal_m": 0.003797735571861263
+    },
+    {
+      "frame": 38,
+      "min_y": -0.10120226442813873,
+      "clearance_to_portal_m": 0.003797735571861263
+    },
+    {
+      "frame": 53,
+      "min_y": -0.10120227187871933,
+      "clearance_to_portal_m": 0.0037977281212806663
+    }
+  ],
+  "original_bones_preserved": 78,
+  "original_bind_max_matrix_difference": 0.0,
+  "original_parents_preserved": true
+}

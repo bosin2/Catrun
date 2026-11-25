@@ -1,0 +1,171 @@
+{
+  "AN_BlackCat_PortalPawEar": {
+    "bones": 78,
+    "meshes": 0,
+    "actions": 1,
+    "range": [
+      1.0,
+      49.0
+    ],
+    "scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "max_position_error_m": 5.526000750299888e-07,
+    "max_rotation_error_degrees": 1.0017912643434101e-05,
+    "max_scale_error": 1.0132789611816406e-06,
+    "max_rest_matrix_error": 2.205371856689453e-06,
+    "max_root_motion_m": 0.0,
+    "bone_names_match": true,
+    "hierarchy_match": true
+  },
+  "AN_BlackCat_PortalCrouchWiggle": {
+    "bones": 78,
+    "meshes": 0,
+    "actions": 1,
+    "range": [
+      1.0,
+      37.0
+    ],
+    "scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "max_position_error_m": 5.686408848491962e-07,
+    "max_rotation_error_degrees": 1.0017912643434101e-05,
+    "max_scale_error": 1.0132789611816406e-06,
+    "max_rest_matrix_error": 2.205371856689453e-06,
+    "max_root_motion_m": 0.0,
+    "bone_names_match": true,
+    "hierarchy_match": true
+  },
+  "AN_BlackCat_PortalTakeoffBridge": {
+    "bones": 78,
+    "meshes": 0,
+    "actions": 1,
+    "range": [
+      1.0,
+      10.0
+    ],
+    "scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "max_position_error_m": 5.517961844776317e-07,
+    "max_rotation_error_degrees": 1.0017912643434101e-05,
+    "max_scale_error": 1.430511474609375e-06,
+    "max_rest_matrix_error": 2.205371856689453e-06,
+    "max_root_motion_m": 0.0,
+    "bone_names_match": true,
+    "hierarchy_match": true
+  },
+  "fbx_settings": {
+    "original": {
+      "UpAxis": [
+        2
+      ],
+      "UpAxisSign": [
+        1
+      ],
+      "FrontAxis": [
+        1
+      ],
+      "FrontAxisSign": [
+        1
+      ],
+      "CoordAxis": [
+        0
+      ],
+      "CoordAxisSign": [
+        -1
+      ],
+      "OriginalUpAxis": [
+        -1
+      ],
+      "OriginalUpAxisSign": [
+        1
+      ],
+      "UnitScaleFactor": [
+        100.0
+      ],
+      "OriginalUnitScaleFactor": [
+        100.0
+      ],
+      "AmbientColor": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "DefaultCamera": [
+        "Producer Perspective"
+      ],
+      "TimeMode": [
+        6
+      ],
+      "TimeSpanStart": [
+        0
+      ],
+      "TimeSpanStop": [
+        46186158000
+      ],
+      "CustomFrameRate": [
+        30.0
+      ]
+    },
+    "new": {
+      "UpAxis": [
+        2
+      ],
+      "UpAxisSign": [
+        1
+      ],
+      "FrontAxis": [
+        1
+      ],
+      "FrontAxisSign": [
+        1
+      ],
+      "CoordAxis": [
+        0
+      ],
+      "CoordAxisSign": [
+        -1
+      ],
+      "OriginalUpAxis": [
+        -1
+      ],
+      "OriginalUpAxisSign": [
+        1
+      ],
+      "UnitScaleFactor": [
+        100.0
+      ],
+      "OriginalUnitScaleFactor": [
+        100.0
+      ],
+      "AmbientColor": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "DefaultCamera": [
+        "Producer Perspective"
+      ],
+      "TimeMode": [
+        6
+      ],
+      "TimeSpanStart": [
+        0
+      ],
+      "TimeSpanStop": [
+        46186158000
+      ],
+      "CustomFrameRate": [
+        30.0
+      ]
+    }
+  }
+}

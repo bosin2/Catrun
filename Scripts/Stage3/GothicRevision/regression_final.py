@@ -34,7 +34,7 @@ def step(world):
         arm=camera.get_component_by_class(u.SpringArmComponent)
         view=camera.get_component_by_class(u.CameraComponent)
         test.check('Stage3 camera arm remains fixed',not arm.get_editor_property('do_collision_test'))
-        test.check('Stage3 manual clip planes survive BeginPlay',not view.get_editor_property('auto_calculate_ortho_planes') and not view.get_editor_property('update_ortho_planes') and view.get_editor_property('ortho_near_clip_plane')==-2000.)
+        test.check('Stage3 manual clip planes survive BeginPlay',not view.get_editor_property('auto_calculate_ortho_planes') and not view.get_editor_property('update_ortho_planes') and view.get_editor_property('ortho_near_clip_plane')==-4000.)
     if phase=='device_playing':
         key='pull%d'%test.S['device']
         if key not in seen:seen.add(key);verify_devices(world,'During '+key)

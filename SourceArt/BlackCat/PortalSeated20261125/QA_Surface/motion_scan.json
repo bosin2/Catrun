@@ -1,0 +1,6162 @@
+{
+  "self_intersections_only_no_cross_region_intersections": true,
+  "sample_count": 80,
+  "max_intersections": {
+    "F_L": 89,
+    "F_R": 108,
+    "H_L": 61,
+    "H_R": 56,
+    "BODY": 0
+  },
+  "bad_frames": [
+    {
+      "kind": "AN_Portal_HipsBackWiggle",
+      "frame": 1,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.5705654584511313e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.334298342973879e-06,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 20,
+          "examples": [
+            [
+              392,
+              427
+            ],
+            [
+              393,
+              427
+            ],
+            [
+              376,
+              427
+            ],
+            [
+              376,
+              428
+            ],
+            [
+              377,
+              428
+            ]
+          ],
+          "min_triangle_area": 1.284222329155539e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 31,
+          "examples": [
+            [
+              527,
+              556
+            ],
+            [
+              527,
+              557
+            ],
+            [
+              527,
+              540
+            ],
+            [
+              510,
+              555
+            ],
+            [
+              510,
+              556
+            ]
+          ],
+          "min_triangle_area": 1.0750712783446814e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.260019126167309e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_HipsBackWiggle",
+      "frame": 3,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.5939771058955336e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.947958352649115e-06,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 29,
+          "examples": [
+            [
+              392,
+              425
+            ],
+            [
+              391,
+              426
+            ],
+            [
+              391,
+              425
+            ],
+            [
+              391,
+              427
+            ],
+            [
+              391,
+              428
+            ]
+          ],
+          "min_triangle_area": 1.5939787769846776e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 27,
+          "examples": [
+            [
+              536,
+              539
+            ],
+            [
+              527,
+              542
+            ],
+            [
+              527,
+              559
+            ],
+            [
+              539,
+              551
+            ],
+            [
+              539,
+              550
+            ]
+          ],
+          "min_triangle_area": 1.593977867856448e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.266586976102416e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_HipsBackWiggle",
+      "frame": 5,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.5939771636998263e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.2893826435422595e-05,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 61,
+          "examples": [
+            [
+              376,
+              427
+            ],
+            [
+              376,
+              426
+            ],
+            [
+              377,
+              427
+            ],
+            [
+              377,
+              426
+            ],
+            [
+              377,
+              428
+            ]
+          ],
+          "min_triangle_area": 8.661685345954662e-06,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 21,
+          "examples": [
+            [
+              536,
+              539
+            ],
+            [
+              527,
+              542
+            ],
+            [
+              527,
+              558
+            ],
+            [
+              527,
+              559
+            ],
+            [
+              510,
+              557
+            ]
+          ],
+          "min_triangle_area": 1.5939776509540256e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.282560697571045e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_HipsBackWiggle",
+      "frame": 7,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.5939778785256404e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.578742544539111e-05,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 22,
+          "examples": [
+            [
+              395,
+              427
+            ],
+            [
+              395,
+              428
+            ],
+            [
+              380,
+              429
+            ],
+            [
+              380,
+              430
+            ],
+            [
+              380,
+              431
+            ]
+          ],
+          "min_triangle_area": 1.3143780437085851e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 13,
+          "examples": [
+            [
+              507,
+              554
+            ],
+            [
+              507,
+              553
+            ],
+            [
+              525,
+              540
+            ],
+            [
+              525,
+              556
+            ],
+            [
+              525,
+              557
+            ]
+          ],
+          "min_triangle_area": 1.4205551922738998e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.302379396652948e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_HipsBackWiggle",
+      "frame": 9,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.593977399842276e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.5939770328606707e-05,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 5,
+          "examples": [
+            [
+              394,
+              427
+            ],
+            [
+              395,
+              427
+            ],
+            [
+              396,
+              427
+            ],
+            [
+              396,
+              428
+            ],
+            [
+              396,
+              429
+            ]
+          ],
+          "min_triangle_area": 3.777191936782368e-06,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 13,
+          "examples": [
+            [
+              506,
+              554
+            ],
+            [
+              506,
+              553
+            ],
+            [
+              525,
+              556
+            ],
+            [
+              525,
+              540
+            ],
+            [
+              525,
+              557
+            ]
+          ],
+          "min_triangle_area": 9.612204938256371e-06,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.321516306006971e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_HipsBackWiggle",
+      "frame": 11,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.593977148203687e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 6.539796071274569e-06,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.3616040499857535e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 10,
+          "examples": [
+            [
+              525,
+              556
+            ],
+            [
+              525,
+              555
+            ],
+            [
+              525,
+              557
+            ],
+            [
+              523,
+              555
+            ],
+            [
+              523,
+              554
+            ]
+          ],
+          "min_triangle_area": 4.59116805743915e-06,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.336691460492905e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_HipsBackWiggle",
+      "frame": 13,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 5,
+          "examples": [
+            [
+              162,
+              195
+            ],
+            [
+              161,
+              195
+            ],
+            [
+              163,
+              197
+            ],
+            [
+              163,
+              195
+            ],
+            [
+              163,
+              196
+            ]
+          ],
+          "min_triangle_area": 1.5939767520432732e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 9,
+          "examples": [
+            [
+              294,
+              325
+            ],
+            [
+              294,
+              308
+            ],
+            [
+              292,
+              306
+            ],
+            [
+              292,
+              323
+            ],
+            [
+              293,
+              324
+            ]
+          ],
+          "min_triangle_area": 6.8763665090087984e-06,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.5939791985454514e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.5939782101175307e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.345411502559944e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_HipsBackWiggle",
+      "frame": 15,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 8,
+          "examples": [
+            [
+              162,
+              195
+            ],
+            [
+              161,
+              195
+            ],
+            [
+              146,
+              195
+            ],
+            [
+              146,
+              196
+            ],
+            [
+              164,
+              197
+            ]
+          ],
+          "min_triangle_area": 1.5939774289365765e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 15,
+          "examples": [
+            [
+              295,
+              325
+            ],
+            [
+              295,
+              308
+            ],
+            [
+              294,
+              325
+            ],
+            [
+              294,
+              308
+            ],
+            [
+              292,
+              323
+            ]
+          ],
+          "min_triangle_area": 8.409500834971386e-06,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.5939785787751122e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.5939772524908882e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.350977503292196e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_HipsBackWiggle",
+      "frame": 17,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 7,
+          "examples": [
+            [
+              162,
+              195
+            ],
+            [
+              161,
+              195
+            ],
+            [
+              146,
+              195
+            ],
+            [
+              146,
+              196
+            ],
+            [
+              163,
+              197
+            ]
+          ],
+          "min_triangle_area": 1.593977027692397e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 15,
+          "examples": [
+            [
+              295,
+              325
+            ],
+            [
+              295,
+              308
+            ],
+            [
+              294,
+              325
+            ],
+            [
+              294,
+              308
+            ],
+            [
+              293,
+              325
+            ]
+          ],
+          "min_triangle_area": 9.341917720354412e-06,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.5939790877622226e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.5939777570740622e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.3632915135464e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_HipsBackWiggle",
+      "frame": 19,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 7,
+          "examples": [
+            [
+              162,
+              195
+            ],
+            [
+              161,
+              195
+            ],
+            [
+              146,
+              196
+            ],
+            [
+              146,
+              195
+            ],
+            [
+              163,
+              196
+            ]
+          ],
+          "min_triangle_area": 1.5939766368275644e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 15,
+          "examples": [
+            [
+              295,
+              325
+            ],
+            [
+              295,
+              308
+            ],
+            [
+              294,
+              325
+            ],
+            [
+              294,
+              308
+            ],
+            [
+              292,
+              323
+            ]
+          ],
+          "min_triangle_area": 8.707895356521861e-06,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.5939785787751122e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.5939774192172357e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.354864084983635e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_HipsBackWiggle",
+      "frame": 21,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 8,
+          "examples": [
+            [
+              162,
+              195
+            ],
+            [
+              161,
+              195
+            ],
+            [
+              146,
+              197
+            ],
+            [
+              146,
+              196
+            ],
+            [
+              146,
+              195
+            ]
+          ],
+          "min_triangle_area": 1.593976333706981e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 15,
+          "examples": [
+            [
+              295,
+              325
+            ],
+            [
+              295,
+              308
+            ],
+            [
+              294,
+              325
+            ],
+            [
+              294,
+              308
+            ],
+            [
+              292,
+              306
+            ]
+          ],
+          "min_triangle_area": 7.452718879870091e-06,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.5939787499055845e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.5939774192172357e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.338599575714663e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_HipsBackWiggle",
+      "frame": 23,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 10,
+          "examples": [
+            [
+              162,
+              195
+            ],
+            [
+              161,
+              195
+            ],
+            [
+              146,
+              197
+            ],
+            [
+              146,
+              196
+            ],
+            [
+              146,
+              195
+            ]
+          ],
+          "min_triangle_area": 1.4156621102349524e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 11,
+          "examples": [
+            [
+              294,
+              325
+            ],
+            [
+              294,
+              308
+            ],
+            [
+              292,
+              306
+            ],
+            [
+              292,
+              323
+            ],
+            [
+              276,
+              324
+            ]
+          ],
+          "min_triangle_area": 6.872104644680395e-06,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.5939785787751122e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.5939779282045402e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.330770793764299e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_HipsBackWiggle",
+      "frame": 25,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 8,
+          "examples": [
+            [
+              162,
+              195
+            ],
+            [
+              161,
+              195
+            ],
+            [
+              146,
+              197
+            ],
+            [
+              146,
+              196
+            ],
+            [
+              146,
+              195
+            ]
+          ],
+          "min_triangle_area": 1.593976333706981e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 15,
+          "examples": [
+            [
+              295,
+              325
+            ],
+            [
+              295,
+              308
+            ],
+            [
+              294,
+              325
+            ],
+            [
+              294,
+              308
+            ],
+            [
+              292,
+              306
+            ]
+          ],
+          "min_triangle_area": 7.452718879870091e-06,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.5939787499055845e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.5939774192172357e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.338599575714663e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_HipsBackWiggle",
+      "frame": 27,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 7,
+          "examples": [
+            [
+              162,
+              195
+            ],
+            [
+              161,
+              195
+            ],
+            [
+              146,
+              196
+            ],
+            [
+              146,
+              195
+            ],
+            [
+              163,
+              196
+            ]
+          ],
+          "min_triangle_area": 1.5939766368275644e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 15,
+          "examples": [
+            [
+              295,
+              325
+            ],
+            [
+              295,
+              308
+            ],
+            [
+              294,
+              325
+            ],
+            [
+              294,
+              308
+            ],
+            [
+              292,
+              323
+            ]
+          ],
+          "min_triangle_area": 8.707895356521861e-06,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.5939785787751122e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.5939774192172357e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.354864084983635e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_HipsBackWiggle",
+      "frame": 29,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 7,
+          "examples": [
+            [
+              162,
+              195
+            ],
+            [
+              161,
+              195
+            ],
+            [
+              146,
+              195
+            ],
+            [
+              146,
+              196
+            ],
+            [
+              163,
+              197
+            ]
+          ],
+          "min_triangle_area": 1.593977027692397e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 15,
+          "examples": [
+            [
+              295,
+              325
+            ],
+            [
+              295,
+              308
+            ],
+            [
+              294,
+              325
+            ],
+            [
+              294,
+              308
+            ],
+            [
+              293,
+              325
+            ]
+          ],
+          "min_triangle_area": 9.341917720354412e-06,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.5939790877622226e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.5939777570740622e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.3632915135464e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_HipsBackWiggle",
+      "frame": 31,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 7,
+          "examples": [
+            [
+              162,
+              195
+            ],
+            [
+              161,
+              195
+            ],
+            [
+              146,
+              196
+            ],
+            [
+              146,
+              195
+            ],
+            [
+              163,
+              196
+            ]
+          ],
+          "min_triangle_area": 1.5939766368275644e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 15,
+          "examples": [
+            [
+              295,
+              325
+            ],
+            [
+              295,
+              308
+            ],
+            [
+              294,
+              325
+            ],
+            [
+              294,
+              308
+            ],
+            [
+              292,
+              323
+            ]
+          ],
+          "min_triangle_area": 8.707895356521861e-06,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.5939785787751122e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.5939774192172357e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.354864084983635e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_HipsBackWiggle",
+      "frame": 33,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 8,
+          "examples": [
+            [
+              162,
+              195
+            ],
+            [
+              161,
+              195
+            ],
+            [
+              146,
+              197
+            ],
+            [
+              146,
+              196
+            ],
+            [
+              146,
+              195
+            ]
+          ],
+          "min_triangle_area": 1.593976333706981e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 15,
+          "examples": [
+            [
+              295,
+              325
+            ],
+            [
+              295,
+              308
+            ],
+            [
+              294,
+              325
+            ],
+            [
+              294,
+              308
+            ],
+            [
+              292,
+              306
+            ]
+          ],
+          "min_triangle_area": 7.452718879870091e-06,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.5939787499055845e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.5939774192172357e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.338599575714663e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_HipsBackWiggle",
+      "frame": 35,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 10,
+          "examples": [
+            [
+              162,
+              195
+            ],
+            [
+              161,
+              195
+            ],
+            [
+              146,
+              197
+            ],
+            [
+              146,
+              196
+            ],
+            [
+              146,
+              195
+            ]
+          ],
+          "min_triangle_area": 1.4156621102349524e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 11,
+          "examples": [
+            [
+              294,
+              325
+            ],
+            [
+              294,
+              308
+            ],
+            [
+              292,
+              306
+            ],
+            [
+              292,
+              323
+            ],
+            [
+              276,
+              324
+            ]
+          ],
+          "min_triangle_area": 6.872104644680395e-06,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.5939785787751122e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.5939779282045402e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.330770793764299e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_HipsBackWiggle",
+      "frame": 37,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 8,
+          "examples": [
+            [
+              162,
+              195
+            ],
+            [
+              161,
+              195
+            ],
+            [
+              146,
+              196
+            ],
+            [
+              146,
+              195
+            ],
+            [
+              164,
+              197
+            ]
+          ],
+          "min_triangle_area": 1.5939773528615782e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 15,
+          "examples": [
+            [
+              294,
+              325
+            ],
+            [
+              294,
+              308
+            ],
+            [
+              295,
+              325
+            ],
+            [
+              295,
+              308
+            ],
+            [
+              293,
+              325
+            ]
+          ],
+          "min_triangle_area": 7.740115042552952e-06,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.5939787499055845e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.5939774192172357e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.342339964015103e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_HipsBackWiggle",
+      "frame": 39,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 8,
+          "examples": [
+            [
+              162,
+              195
+            ],
+            [
+              161,
+              195
+            ],
+            [
+              146,
+              196
+            ],
+            [
+              146,
+              195
+            ],
+            [
+              164,
+              197
+            ]
+          ],
+          "min_triangle_area": 1.5939771100601937e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 15,
+          "examples": [
+            [
+              295,
+              325
+            ],
+            [
+              295,
+              308
+            ],
+            [
+              294,
+              325
+            ],
+            [
+              294,
+              308
+            ],
+            [
+              292,
+              323
+            ]
+          ],
+          "min_triangle_area": 8.072731977753326e-06,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.5939785787751122e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.5939774192172357e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.346630324171513e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_HipsBackWiggle",
+      "frame": 41,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 8,
+          "examples": [
+            [
+              162,
+              195
+            ],
+            [
+              161,
+              195
+            ],
+            [
+              146,
+              196
+            ],
+            [
+              146,
+              195
+            ],
+            [
+              164,
+              197
+            ]
+          ],
+          "min_triangle_area": 1.5939771100601937e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 15,
+          "examples": [
+            [
+              295,
+              325
+            ],
+            [
+              295,
+              308
+            ],
+            [
+              294,
+              325
+            ],
+            [
+              294,
+              308
+            ],
+            [
+              292,
+              323
+            ]
+          ],
+          "min_triangle_area": 8.072731977753326e-06,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.5939785787751122e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.5939774192172357e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.346630324171513e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_HipsBackWiggle",
+      "frame": 43,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 10,
+          "examples": [
+            [
+              161,
+              195
+            ],
+            [
+              144,
+              195
+            ],
+            [
+              145,
+              195
+            ],
+            [
+              146,
+              197
+            ],
+            [
+              146,
+              196
+            ]
+          ],
+          "min_triangle_area": 1.593977186135234e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 15,
+          "examples": [
+            [
+              294,
+              308
+            ],
+            [
+              295,
+              325
+            ],
+            [
+              295,
+              308
+            ],
+            [
+              292,
+              323
+            ],
+            [
+              278,
+              325
+            ]
+          ],
+          "min_triangle_area": 8.97898271604772e-06,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.593979540806532e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.5939782101175307e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.343672442664053e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_HipsBackWiggle",
+      "frame": 45,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 10,
+          "examples": [
+            [
+              146,
+              195
+            ],
+            [
+              146,
+              197
+            ],
+            [
+              146,
+              196
+            ],
+            [
+              161,
+              195
+            ],
+            [
+              144,
+              195
+            ]
+          ],
+          "min_triangle_area": 1.41269875932557e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 21,
+          "examples": [
+            [
+              295,
+              310
+            ],
+            [
+              295,
+              309
+            ],
+            [
+              295,
+              325
+            ],
+            [
+              295,
+              308
+            ],
+            [
+              294,
+              308
+            ]
+          ],
+          "min_triangle_area": 6.602407097921244e-06,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.2739544137590393e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.2980315888163222e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.3362532800357e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_HipsBackWiggle",
+      "frame": 47,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 14,
+          "examples": [
+            [
+              161,
+              195
+            ],
+            [
+              144,
+              195
+            ],
+            [
+              148,
+              197
+            ],
+            [
+              148,
+              198
+            ],
+            [
+              147,
+              197
+            ]
+          ],
+          "min_triangle_area": 8.997217062817904e-06,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 22,
+          "examples": [
+            [
+              281,
+              311
+            ],
+            [
+              281,
+              294
+            ],
+            [
+              278,
+              325
+            ],
+            [
+              295,
+              310
+            ],
+            [
+              295,
+              309
+            ]
+          ],
+          "min_triangle_area": 1.8749196076839248e-06,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 4,
+          "examples": [
+            [
+              413,
+              427
+            ],
+            [
+              396,
+              427
+            ],
+            [
+              396,
+              428
+            ],
+            [
+              396,
+              429
+            ]
+          ],
+          "min_triangle_area": 7.868388840765526e-07,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 5,
+          "examples": [
+            [
+              522,
+              555
+            ],
+            [
+              522,
+              557
+            ],
+            [
+              523,
+              556
+            ],
+            [
+              523,
+              555
+            ],
+            [
+              523,
+              557
+            ]
+          ],
+          "min_triangle_area": 6.137464706087179e-07,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.326578424323032e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_HipsBackWiggle",
+      "frame": 49,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 17,
+          "examples": [
+            [
+              147,
+              197
+            ],
+            [
+              147,
+              198
+            ],
+            [
+              142,
+              177
+            ],
+            [
+              142,
+              176
+            ],
+            [
+              142,
+              193
+            ]
+          ],
+          "min_triangle_area": 4.889945284457319e-06,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 28,
+          "examples": [
+            [
+              266,
+              269
+            ],
+            [
+              281,
+              296
+            ],
+            [
+              281,
+              311
+            ],
+            [
+              264,
+              267
+            ],
+            [
+              264,
+              326
+            ]
+          ],
+          "min_triangle_area": 5.791355311531932e-06,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 18,
+          "examples": [
+            [
+              394,
+              427
+            ],
+            [
+              395,
+              427
+            ],
+            [
+              395,
+              428
+            ],
+            [
+              396,
+              428
+            ],
+            [
+              396,
+              430
+            ]
+          ],
+          "min_triangle_area": 8.031353999820297e-06,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 23,
+          "examples": [
+            [
+              523,
+              555
+            ],
+            [
+              522,
+              555
+            ],
+            [
+              522,
+              554
+            ],
+            [
+              522,
+              553
+            ],
+            [
+              539,
+              553
+            ]
+          ],
+          "min_triangle_area": 5.0737075275034104e-06,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.316936989045856e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_HipsBackWiggle",
+      "frame": 51,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 17,
+          "examples": [
+            [
+              142,
+              177
+            ],
+            [
+              142,
+              176
+            ],
+            [
+              142,
+              193
+            ],
+            [
+              143,
+              193
+            ],
+            [
+              143,
+              194
+            ]
+          ],
+          "min_triangle_area": 1.373772811362513e-06,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 31,
+          "examples": [
+            [
+              266,
+              269
+            ],
+            [
+              281,
+              296
+            ],
+            [
+              281,
+              310
+            ],
+            [
+              281,
+              311
+            ],
+            [
+              280,
+              310
+            ]
+          ],
+          "min_triangle_area": 3.4498267335546248e-06,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 37,
+          "examples": [
+            [
+              438,
+              466
+            ],
+            [
+              438,
+              467
+            ],
+            [
+              438,
+              465
+            ],
+            [
+              442,
+              453
+            ],
+            [
+              455,
+              466
+            ]
+          ],
+          "min_triangle_area": 1.1514185002838266e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 56,
+          "examples": [
+            [
+              572,
+              579
+            ],
+            [
+              553,
+              583
+            ],
+            [
+              553,
+              566
+            ],
+            [
+              560,
+              572
+            ],
+            [
+              560,
+              573
+            ]
+          ],
+          "min_triangle_area": 1.3066958649220344e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.309592845803695e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_HipsBackWiggle",
+      "frame": 53,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 17,
+          "examples": [
+            [
+              144,
+              194
+            ],
+            [
+              143,
+              193
+            ],
+            [
+              143,
+              194
+            ],
+            [
+              142,
+              177
+            ],
+            [
+              142,
+              176
+            ]
+          ],
+          "min_triangle_area": 1.3675542336012612e-06,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 31,
+          "examples": [
+            [
+              266,
+              269
+            ],
+            [
+              281,
+              296
+            ],
+            [
+              281,
+              310
+            ],
+            [
+              281,
+              311
+            ],
+            [
+              280,
+              310
+            ]
+          ],
+          "min_triangle_area": 2.0903501109399923e-06,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 32,
+          "examples": [
+            [
+              438,
+              466
+            ],
+            [
+              438,
+              464
+            ],
+            [
+              438,
+              465
+            ],
+            [
+              380,
+              430
+            ],
+            [
+              380,
+              431
+            ]
+          ],
+          "min_triangle_area": 1.3438489380517403e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 43,
+          "examples": [
+            [
+              553,
+              583
+            ],
+            [
+              553,
+              566
+            ],
+            [
+              576,
+              597
+            ],
+            [
+              576,
+              598
+            ],
+            [
+              577,
+              597
+            ]
+          ],
+          "min_triangle_area": 1.55411261978197e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.306678908239257e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_SeatedListenTouch",
+      "frame": 11,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.5939774456135233e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.593975883187201e-05,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 5,
+          "examples": [
+            [
+              394,
+              429
+            ],
+            [
+              395,
+              429
+            ],
+            [
+              396,
+              430
+            ],
+            [
+              396,
+              429
+            ],
+            [
+              396,
+              431
+            ]
+          ],
+          "min_triangle_area": 3.5666121788916997e-06,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 13,
+          "examples": [
+            [
+              525,
+              555
+            ],
+            [
+              525,
+              556
+            ],
+            [
+              525,
+              557
+            ],
+            [
+              523,
+              555
+            ],
+            [
+              523,
+              553
+            ]
+          ],
+          "min_triangle_area": 4.9239355012225515e-06,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.260022067012749e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_SeatedListenTouch",
+      "frame": 13,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.593978221965712e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.5939772966110333e-05,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 11,
+          "examples": [
+            [
+              378,
+              429
+            ],
+            [
+              378,
+              430
+            ],
+            [
+              379,
+              430
+            ],
+            [
+              394,
+              427
+            ],
+            [
+              394,
+              428
+            ]
+          ],
+          "min_triangle_area": 5.194178201251907e-06,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 13,
+          "examples": [
+            [
+              508,
+              554
+            ],
+            [
+              508,
+              553
+            ],
+            [
+              525,
+              556
+            ],
+            [
+              525,
+              555
+            ],
+            [
+              525,
+              554
+            ]
+          ],
+          "min_triangle_area": 1.462301138333749e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.260017266661808e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_SeatedListenTouch",
+      "frame": 15,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.593977505960499e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.0836783941197417e-05,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 16,
+          "examples": [
+            [
+              394,
+              427
+            ],
+            [
+              378,
+              428
+            ],
+            [
+              378,
+              429
+            ],
+            [
+              378,
+              430
+            ],
+            [
+              396,
+              432
+            ]
+          ],
+          "min_triangle_area": 2.3830154824730915e-06,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 25,
+          "examples": [
+            [
+              506,
+              567
+            ],
+            [
+              506,
+              583
+            ],
+            [
+              506,
+              566
+            ],
+            [
+              507,
+              567
+            ],
+            [
+              539,
+              567
+            ]
+          ],
+          "min_triangle_area": 6.872862405554149e-06,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.260018562647223e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_SeatedListenTouch",
+      "frame": 17,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.593978372936205e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.265735493638961e-06,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 20,
+          "examples": [
+            [
+              392,
+              427
+            ],
+            [
+              393,
+              427
+            ],
+            [
+              376,
+              427
+            ],
+            [
+              376,
+              428
+            ],
+            [
+              377,
+              428
+            ]
+          ],
+          "min_triangle_area": 1.2530595409482264e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 33,
+          "examples": [
+            [
+              527,
+              556
+            ],
+            [
+              526,
+              556
+            ],
+            [
+              526,
+              540
+            ],
+            [
+              526,
+              557
+            ],
+            [
+              506,
+              583
+            ]
+          ],
+          "min_triangle_area": 1.041156458794423e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.260015529283685e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_SeatedListenTouch",
+      "frame": 19,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.3505213566444188e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 1,
+          "examples": [
+            [
+              264,
+              267
+            ]
+          ],
+          "min_triangle_area": 2.763146276701887e-06,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 20,
+          "examples": [
+            [
+              392,
+              427
+            ],
+            [
+              393,
+              427
+            ],
+            [
+              376,
+              427
+            ],
+            [
+              376,
+              428
+            ],
+            [
+              377,
+              428
+            ]
+          ],
+          "min_triangle_area": 1.2842227985125046e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 31,
+          "examples": [
+            [
+              527,
+              556
+            ],
+            [
+              527,
+              557
+            ],
+            [
+              527,
+              540
+            ],
+            [
+              510,
+              555
+            ],
+            [
+              510,
+              556
+            ]
+          ],
+          "min_triangle_area": 1.0750728692788222e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.260020436234791e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_SeatedListenTouch",
+      "frame": 21,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.3505213566444188e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 1,
+          "examples": [
+            [
+              264,
+              267
+            ]
+          ],
+          "min_triangle_area": 2.763146276701887e-06,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 20,
+          "examples": [
+            [
+              392,
+              427
+            ],
+            [
+              393,
+              427
+            ],
+            [
+              376,
+              427
+            ],
+            [
+              376,
+              428
+            ],
+            [
+              377,
+              428
+            ]
+          ],
+          "min_triangle_area": 1.2842227985125046e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 31,
+          "examples": [
+            [
+              527,
+              556
+            ],
+            [
+              527,
+              557
+            ],
+            [
+              527,
+              540
+            ],
+            [
+              510,
+              555
+            ],
+            [
+              510,
+              556
+            ]
+          ],
+          "min_triangle_area": 1.0750728692788222e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.260020436234791e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_SeatedListenTouch",
+      "frame": 23,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.3505213566444188e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 1,
+          "examples": [
+            [
+              264,
+              267
+            ]
+          ],
+          "min_triangle_area": 2.763146276701887e-06,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 20,
+          "examples": [
+            [
+              392,
+              427
+            ],
+            [
+              393,
+              427
+            ],
+            [
+              376,
+              427
+            ],
+            [
+              376,
+              428
+            ],
+            [
+              377,
+              428
+            ]
+          ],
+          "min_triangle_area": 1.2842227985125046e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 31,
+          "examples": [
+            [
+              527,
+              556
+            ],
+            [
+              527,
+              557
+            ],
+            [
+              527,
+              540
+            ],
+            [
+              510,
+              555
+            ],
+            [
+              510,
+              556
+            ]
+          ],
+          "min_triangle_area": 1.0750728692788222e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.260020436234791e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_SeatedListenTouch",
+      "frame": 25,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.3505213566444188e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 1,
+          "examples": [
+            [
+              264,
+              267
+            ]
+          ],
+          "min_triangle_area": 2.763146276701887e-06,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 20,
+          "examples": [
+            [
+              392,
+              427
+            ],
+            [
+              393,
+              427
+            ],
+            [
+              376,
+              427
+            ],
+            [
+              376,
+              428
+            ],
+            [
+              377,
+              428
+            ]
+          ],
+          "min_triangle_area": 1.2842227985125046e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 31,
+          "examples": [
+            [
+              527,
+              556
+            ],
+            [
+              527,
+              557
+            ],
+            [
+              527,
+              540
+            ],
+            [
+              510,
+              555
+            ],
+            [
+              510,
+              556
+            ]
+          ],
+          "min_triangle_area": 1.0750728692788222e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.260020436234791e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_SeatedListenTouch",
+      "frame": 27,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.3505213566444188e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 1,
+          "examples": [
+            [
+              264,
+              267
+            ]
+          ],
+          "min_triangle_area": 2.763146276701887e-06,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 20,
+          "examples": [
+            [
+              392,
+              427
+            ],
+            [
+              393,
+              427
+            ],
+            [
+              376,
+              427
+            ],
+            [
+              376,
+              428
+            ],
+            [
+              377,
+              428
+            ]
+          ],
+          "min_triangle_area": 1.2842227985125046e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 31,
+          "examples": [
+            [
+              527,
+              556
+            ],
+            [
+              527,
+              557
+            ],
+            [
+              527,
+              540
+            ],
+            [
+              510,
+              555
+            ],
+            [
+              510,
+              556
+            ]
+          ],
+          "min_triangle_area": 1.0750728692788222e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.260020436234791e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_SeatedListenTouch",
+      "frame": 29,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.3505213566444188e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 1,
+          "examples": [
+            [
+              264,
+              267
+            ]
+          ],
+          "min_triangle_area": 2.763146276701887e-06,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 20,
+          "examples": [
+            [
+              392,
+              427
+            ],
+            [
+              393,
+              427
+            ],
+            [
+              376,
+              427
+            ],
+            [
+              376,
+              428
+            ],
+            [
+              377,
+              428
+            ]
+          ],
+          "min_triangle_area": 1.2842227985125046e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 31,
+          "examples": [
+            [
+              527,
+              556
+            ],
+            [
+              527,
+              557
+            ],
+            [
+              527,
+              540
+            ],
+            [
+              510,
+              555
+            ],
+            [
+              510,
+              556
+            ]
+          ],
+          "min_triangle_area": 1.0750728692788222e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.260020436234791e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_SeatedListenTouch",
+      "frame": 31,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.3505213566444188e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 1,
+          "examples": [
+            [
+              264,
+              267
+            ]
+          ],
+          "min_triangle_area": 2.763146276701887e-06,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 20,
+          "examples": [
+            [
+              392,
+              427
+            ],
+            [
+              393,
+              427
+            ],
+            [
+              376,
+              427
+            ],
+            [
+              376,
+              428
+            ],
+            [
+              377,
+              428
+            ]
+          ],
+          "min_triangle_area": 1.2842227985125046e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 31,
+          "examples": [
+            [
+              527,
+              556
+            ],
+            [
+              527,
+              557
+            ],
+            [
+              527,
+              540
+            ],
+            [
+              510,
+              555
+            ],
+            [
+              510,
+              556
+            ]
+          ],
+          "min_triangle_area": 1.0750728692788222e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.260020436234791e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_SeatedListenTouch",
+      "frame": 33,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.3505213566444188e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 1,
+          "examples": [
+            [
+              264,
+              267
+            ]
+          ],
+          "min_triangle_area": 2.763146276701887e-06,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 20,
+          "examples": [
+            [
+              392,
+              427
+            ],
+            [
+              393,
+              427
+            ],
+            [
+              376,
+              427
+            ],
+            [
+              376,
+              428
+            ],
+            [
+              377,
+              428
+            ]
+          ],
+          "min_triangle_area": 1.2842227985125046e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 31,
+          "examples": [
+            [
+              527,
+              556
+            ],
+            [
+              527,
+              557
+            ],
+            [
+              527,
+              540
+            ],
+            [
+              510,
+              555
+            ],
+            [
+              510,
+              556
+            ]
+          ],
+          "min_triangle_area": 1.0750728692788222e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.260020436234791e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_SeatedListenTouch",
+      "frame": 35,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.3505213566444188e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 1,
+          "examples": [
+            [
+              264,
+              267
+            ]
+          ],
+          "min_triangle_area": 2.763146276701887e-06,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 20,
+          "examples": [
+            [
+              392,
+              427
+            ],
+            [
+              393,
+              427
+            ],
+            [
+              376,
+              427
+            ],
+            [
+              376,
+              428
+            ],
+            [
+              377,
+              428
+            ]
+          ],
+          "min_triangle_area": 1.2842227985125046e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 31,
+          "examples": [
+            [
+              527,
+              556
+            ],
+            [
+              527,
+              557
+            ],
+            [
+              527,
+              540
+            ],
+            [
+              510,
+              555
+            ],
+            [
+              510,
+              556
+            ]
+          ],
+          "min_triangle_area": 1.0750728692788222e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.260020436234791e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_SeatedListenTouch",
+      "frame": 37,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.3505213566444188e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 1,
+          "examples": [
+            [
+              264,
+              267
+            ]
+          ],
+          "min_triangle_area": 2.763146276701887e-06,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 20,
+          "examples": [
+            [
+              392,
+              427
+            ],
+            [
+              393,
+              427
+            ],
+            [
+              376,
+              427
+            ],
+            [
+              376,
+              428
+            ],
+            [
+              377,
+              428
+            ]
+          ],
+          "min_triangle_area": 1.2842227985125046e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 31,
+          "examples": [
+            [
+              527,
+              556
+            ],
+            [
+              527,
+              557
+            ],
+            [
+              527,
+              540
+            ],
+            [
+              510,
+              555
+            ],
+            [
+              510,
+              556
+            ]
+          ],
+          "min_triangle_area": 1.0750728692788222e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.260020436234791e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_SeatedListenTouch",
+      "frame": 39,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.3505213566444188e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 1,
+          "examples": [
+            [
+              264,
+              267
+            ]
+          ],
+          "min_triangle_area": 2.763146276701887e-06,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 20,
+          "examples": [
+            [
+              392,
+              427
+            ],
+            [
+              393,
+              427
+            ],
+            [
+              376,
+              427
+            ],
+            [
+              376,
+              428
+            ],
+            [
+              377,
+              428
+            ]
+          ],
+          "min_triangle_area": 1.2842227985125046e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 31,
+          "examples": [
+            [
+              527,
+              556
+            ],
+            [
+              527,
+              557
+            ],
+            [
+              527,
+              540
+            ],
+            [
+              510,
+              555
+            ],
+            [
+              510,
+              556
+            ]
+          ],
+          "min_triangle_area": 1.0750728692788222e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.260020436234791e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_SeatedListenTouch",
+      "frame": 41,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.3505213566444188e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 1,
+          "examples": [
+            [
+              264,
+              267
+            ]
+          ],
+          "min_triangle_area": 2.763146276701887e-06,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 20,
+          "examples": [
+            [
+              392,
+              427
+            ],
+            [
+              393,
+              427
+            ],
+            [
+              376,
+              427
+            ],
+            [
+              376,
+              428
+            ],
+            [
+              377,
+              428
+            ]
+          ],
+          "min_triangle_area": 1.2842227985125046e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 31,
+          "examples": [
+            [
+              527,
+              556
+            ],
+            [
+              527,
+              557
+            ],
+            [
+              527,
+              540
+            ],
+            [
+              510,
+              555
+            ],
+            [
+              510,
+              556
+            ]
+          ],
+          "min_triangle_area": 1.0750728692788222e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.260020436234791e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_SeatedListenTouch",
+      "frame": 43,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.5705672240143003e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.334330969663547e-06,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 20,
+          "examples": [
+            [
+              392,
+              427
+            ],
+            [
+              393,
+              427
+            ],
+            [
+              376,
+              427
+            ],
+            [
+              376,
+              428
+            ],
+            [
+              377,
+              428
+            ]
+          ],
+          "min_triangle_area": 1.2842229046860985e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 31,
+          "examples": [
+            [
+              527,
+              556
+            ],
+            [
+              527,
+              557
+            ],
+            [
+              527,
+              540
+            ],
+            [
+              510,
+              555
+            ],
+            [
+              510,
+              556
+            ]
+          ],
+          "min_triangle_area": 1.0750721209263707e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.260020116390243e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_SeatedListenTouch",
+      "frame": 45,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.5271285355414015e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 8.35729821413895e-06,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 20,
+          "examples": [
+            [
+              392,
+              427
+            ],
+            [
+              393,
+              427
+            ],
+            [
+              376,
+              427
+            ],
+            [
+              376,
+              428
+            ],
+            [
+              377,
+              428
+            ]
+          ],
+          "min_triangle_area": 1.2842211367385554e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 31,
+          "examples": [
+            [
+              527,
+              556
+            ],
+            [
+              527,
+              557
+            ],
+            [
+              527,
+              540
+            ],
+            [
+              510,
+              555
+            ],
+            [
+              510,
+              556
+            ]
+          ],
+          "min_triangle_area": 1.0750723632538104e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.260020116390243e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_SeatedListenTouch",
+      "frame": 47,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.123919719859495e-06,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 6.422090716906112e-06,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 20,
+          "examples": [
+            [
+              392,
+              427
+            ],
+            [
+              393,
+              427
+            ],
+            [
+              376,
+              427
+            ],
+            [
+              376,
+              428
+            ],
+            [
+              377,
+              428
+            ]
+          ],
+          "min_triangle_area": 1.2842217618026143e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 31,
+          "examples": [
+            [
+              527,
+              556
+            ],
+            [
+              527,
+              557
+            ],
+            [
+              527,
+              540
+            ],
+            [
+              510,
+              555
+            ],
+            [
+              510,
+              556
+            ]
+          ],
+          "min_triangle_area": 1.075073533313495e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.260019799253169e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_SeatedListenTouch",
+      "frame": 49,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 43,
+          "examples": [
+            [
+              174,
+              177
+            ],
+            [
+              167,
+              181
+            ],
+            [
+              167,
+              180
+            ],
+            [
+              167,
+              197
+            ],
+            [
+              167,
+              196
+            ]
+          ],
+          "min_triangle_area": 4.732891596165061e-06,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 4.878473891648072e-06,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 20,
+          "examples": [
+            [
+              392,
+              427
+            ],
+            [
+              393,
+              427
+            ],
+            [
+              376,
+              427
+            ],
+            [
+              376,
+              428
+            ],
+            [
+              377,
+              428
+            ]
+          ],
+          "min_triangle_area": 1.2842205116745298e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 31,
+          "examples": [
+            [
+              527,
+              556
+            ],
+            [
+              527,
+              557
+            ],
+            [
+              527,
+              540
+            ],
+            [
+              510,
+              555
+            ],
+            [
+              510,
+              556
+            ]
+          ],
+          "min_triangle_area": 1.075073533313495e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.260019799253169e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_SeatedListenTouch",
+      "frame": 51,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 64,
+          "examples": [
+            [
+              167,
+              228
+            ],
+            [
+              152,
+              228
+            ],
+            [
+              138,
+              144
+            ],
+            [
+              138,
+              151
+            ],
+            [
+              138,
+              191
+            ]
+          ],
+          "min_triangle_area": 7.403242775048275e-06,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 4.629911020890819e-06,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 20,
+          "examples": [
+            [
+              392,
+              427
+            ],
+            [
+              393,
+              427
+            ],
+            [
+              376,
+              427
+            ],
+            [
+              376,
+              428
+            ],
+            [
+              377,
+              428
+            ]
+          ],
+          "min_triangle_area": 1.2842247798786597e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 31,
+          "examples": [
+            [
+              527,
+              556
+            ],
+            [
+              527,
+              557
+            ],
+            [
+              527,
+              540
+            ],
+            [
+              510,
+              555
+            ],
+            [
+              510,
+              556
+            ]
+          ],
+          "min_triangle_area": 1.0750717087110796e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.260020116390243e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_SeatedListenTouch",
+      "frame": 53,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.5939765707412204e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 4.629911020890819e-06,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 20,
+          "examples": [
+            [
+              392,
+              427
+            ],
+            [
+              393,
+              427
+            ],
+            [
+              376,
+              427
+            ],
+            [
+              376,
+              428
+            ],
+            [
+              377,
+              428
+            ]
+          ],
+          "min_triangle_area": 1.2842247798786597e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 31,
+          "examples": [
+            [
+              527,
+              556
+            ],
+            [
+              527,
+              557
+            ],
+            [
+              527,
+              540
+            ],
+            [
+              510,
+              555
+            ],
+            [
+              510,
+              556
+            ]
+          ],
+          "min_triangle_area": 1.0750717087110796e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.260020116390243e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_SeatedListenTouch",
+      "frame": 55,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.593975483928476e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 4.629911020890819e-06,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 20,
+          "examples": [
+            [
+              392,
+              427
+            ],
+            [
+              393,
+              427
+            ],
+            [
+              376,
+              427
+            ],
+            [
+              376,
+              428
+            ],
+            [
+              377,
+              428
+            ]
+          ],
+          "min_triangle_area": 1.2842247798786597e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 31,
+          "examples": [
+            [
+              527,
+              556
+            ],
+            [
+              527,
+              557
+            ],
+            [
+              527,
+              540
+            ],
+            [
+              510,
+              555
+            ],
+            [
+              510,
+              556
+            ]
+          ],
+          "min_triangle_area": 1.0750717087110796e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.260020116390243e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_SeatedListenTouch",
+      "frame": 57,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.5939749747086766e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 4.629911020890819e-06,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 20,
+          "examples": [
+            [
+              392,
+              427
+            ],
+            [
+              393,
+              427
+            ],
+            [
+              376,
+              427
+            ],
+            [
+              376,
+              428
+            ],
+            [
+              377,
+              428
+            ]
+          ],
+          "min_triangle_area": 1.2842247798786597e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 31,
+          "examples": [
+            [
+              527,
+              556
+            ],
+            [
+              527,
+              557
+            ],
+            [
+              527,
+              540
+            ],
+            [
+              510,
+              555
+            ],
+            [
+              510,
+              556
+            ]
+          ],
+          "min_triangle_area": 1.0750717087110796e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.260020116390243e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_SeatedListenTouch",
+      "frame": 59,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.5939749747086766e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 4.629911020890819e-06,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 20,
+          "examples": [
+            [
+              392,
+              427
+            ],
+            [
+              393,
+              427
+            ],
+            [
+              376,
+              427
+            ],
+            [
+              376,
+              428
+            ],
+            [
+              377,
+              428
+            ]
+          ],
+          "min_triangle_area": 1.2842247798786597e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 31,
+          "examples": [
+            [
+              527,
+              556
+            ],
+            [
+              527,
+              557
+            ],
+            [
+              527,
+              540
+            ],
+            [
+              510,
+              555
+            ],
+            [
+              510,
+              556
+            ]
+          ],
+          "min_triangle_area": 1.0750717087110796e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.260020116390243e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_SeatedListenTouch",
+      "frame": 61,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.5939749747086766e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 4.629911020890819e-06,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 20,
+          "examples": [
+            [
+              392,
+              427
+            ],
+            [
+              393,
+              427
+            ],
+            [
+              376,
+              427
+            ],
+            [
+              376,
+              428
+            ],
+            [
+              377,
+              428
+            ]
+          ],
+          "min_triangle_area": 1.2842247798786597e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 31,
+          "examples": [
+            [
+              527,
+              556
+            ],
+            [
+              527,
+              557
+            ],
+            [
+              527,
+              540
+            ],
+            [
+              510,
+              555
+            ],
+            [
+              510,
+              556
+            ]
+          ],
+          "min_triangle_area": 1.0750717087110796e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.260020116390243e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_SeatedListenTouch",
+      "frame": 63,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.5939749747086766e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 4.629911020890819e-06,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 20,
+          "examples": [
+            [
+              392,
+              427
+            ],
+            [
+              393,
+              427
+            ],
+            [
+              376,
+              427
+            ],
+            [
+              376,
+              428
+            ],
+            [
+              377,
+              428
+            ]
+          ],
+          "min_triangle_area": 1.2842247798786597e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 31,
+          "examples": [
+            [
+              527,
+              556
+            ],
+            [
+              527,
+              557
+            ],
+            [
+              527,
+              540
+            ],
+            [
+              510,
+              555
+            ],
+            [
+              510,
+              556
+            ]
+          ],
+          "min_triangle_area": 1.0750717087110796e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.260020116390243e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_SeatedListenTouch",
+      "frame": 65,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.593978679990904e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 4.629911020890819e-06,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 20,
+          "examples": [
+            [
+              392,
+              427
+            ],
+            [
+              393,
+              427
+            ],
+            [
+              376,
+              427
+            ],
+            [
+              376,
+              428
+            ],
+            [
+              377,
+              428
+            ]
+          ],
+          "min_triangle_area": 1.2842247798786597e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 31,
+          "examples": [
+            [
+              527,
+              556
+            ],
+            [
+              527,
+              557
+            ],
+            [
+              527,
+              540
+            ],
+            [
+              510,
+              555
+            ],
+            [
+              510,
+              556
+            ]
+          ],
+          "min_triangle_area": 1.0750717087110796e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.260020116390243e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_SeatedListenTouch",
+      "frame": 67,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.5939783610745334e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 4.629911020890819e-06,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 20,
+          "examples": [
+            [
+              392,
+              427
+            ],
+            [
+              393,
+              427
+            ],
+            [
+              376,
+              427
+            ],
+            [
+              376,
+              428
+            ],
+            [
+              377,
+              428
+            ]
+          ],
+          "min_triangle_area": 1.2842247798786597e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 31,
+          "examples": [
+            [
+              527,
+              556
+            ],
+            [
+              527,
+              557
+            ],
+            [
+              527,
+              540
+            ],
+            [
+              510,
+              555
+            ],
+            [
+              510,
+              556
+            ]
+          ],
+          "min_triangle_area": 1.0750717087110796e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.260020116390243e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_SeatedListenTouch",
+      "frame": 69,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 10,
+          "examples": [
+            [
+              137,
+              148
+            ],
+            [
+              137,
+              149
+            ],
+            [
+              136,
+              148
+            ],
+            [
+              136,
+              149
+            ],
+            [
+              148,
+              151
+            ]
+          ],
+          "min_triangle_area": 1.5939801953233774e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 4.629911020890819e-06,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 20,
+          "examples": [
+            [
+              392,
+              427
+            ],
+            [
+              393,
+              427
+            ],
+            [
+              376,
+              427
+            ],
+            [
+              376,
+              428
+            ],
+            [
+              377,
+              428
+            ]
+          ],
+          "min_triangle_area": 1.2842247798786597e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 31,
+          "examples": [
+            [
+              527,
+              556
+            ],
+            [
+              527,
+              557
+            ],
+            [
+              527,
+              540
+            ],
+            [
+              510,
+              555
+            ],
+            [
+              510,
+              556
+            ]
+          ],
+          "min_triangle_area": 1.0750717087110796e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.260020116390243e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_SeatedListenTouch",
+      "frame": 71,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 56,
+          "examples": [
+            [
+              137,
+              150
+            ],
+            [
+              137,
+              149
+            ],
+            [
+              137,
+              148
+            ],
+            [
+              137,
+              146
+            ],
+            [
+              137,
+              147
+            ]
+          ],
+          "min_triangle_area": 1.1573079391868756e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 5.021519955292612e-06,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 20,
+          "examples": [
+            [
+              392,
+              427
+            ],
+            [
+              393,
+              427
+            ],
+            [
+              376,
+              427
+            ],
+            [
+              376,
+              428
+            ],
+            [
+              377,
+              428
+            ]
+          ],
+          "min_triangle_area": 1.28421936879128e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 31,
+          "examples": [
+            [
+              527,
+              556
+            ],
+            [
+              527,
+              557
+            ],
+            [
+              527,
+              540
+            ],
+            [
+              510,
+              555
+            ],
+            [
+              510,
+              556
+            ]
+          ],
+          "min_triangle_area": 1.0750721209263707e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.260020116390243e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_SeatedListenTouch",
+      "frame": 73,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 39,
+          "examples": [
+            [
+              167,
+              178
+            ],
+            [
+              167,
+              195
+            ],
+            [
+              166,
+              179
+            ],
+            [
+              166,
+              178
+            ],
+            [
+              166,
+              195
+            ]
+          ],
+          "min_triangle_area": 1.4130565222041992e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 5.992634841033811e-06,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 20,
+          "examples": [
+            [
+              392,
+              427
+            ],
+            [
+              393,
+              427
+            ],
+            [
+              376,
+              427
+            ],
+            [
+              376,
+              428
+            ],
+            [
+              377,
+              428
+            ]
+          ],
+          "min_triangle_area": 1.2842243792025852e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 31,
+          "examples": [
+            [
+              527,
+              556
+            ],
+            [
+              527,
+              557
+            ],
+            [
+              527,
+              540
+            ],
+            [
+              510,
+              555
+            ],
+            [
+              510,
+              556
+            ]
+          ],
+          "min_triangle_area": 1.075070708539742e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.260020433527319e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_SeatedListenTouch",
+      "frame": 75,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 11,
+          "examples": [
+            [
+              161,
+              176
+            ],
+            [
+              165,
+              180
+            ],
+            [
+              165,
+              197
+            ],
+            [
+              165,
+              196
+            ],
+            [
+              162,
+              195
+            ]
+          ],
+          "min_triangle_area": 2.561150448374676e-06,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 7.237844307705147e-06,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 20,
+          "examples": [
+            [
+              392,
+              427
+            ],
+            [
+              393,
+              427
+            ],
+            [
+              376,
+              427
+            ],
+            [
+              376,
+              428
+            ],
+            [
+              377,
+              428
+            ]
+          ],
+          "min_triangle_area": 1.2842211367385554e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 31,
+          "examples": [
+            [
+              527,
+              556
+            ],
+            [
+              527,
+              557
+            ],
+            [
+              527,
+              540
+            ],
+            [
+              510,
+              555
+            ],
+            [
+              510,
+              556
+            ]
+          ],
+          "min_triangle_area": 1.075073533313495e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.260020433527319e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_SeatedListenTouch",
+      "frame": 77,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.36699246670822e-06,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 8.433565490821011e-06,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 20,
+          "examples": [
+            [
+              392,
+              427
+            ],
+            [
+              393,
+              427
+            ],
+            [
+              376,
+              427
+            ],
+            [
+              376,
+              428
+            ],
+            [
+              377,
+              428
+            ]
+          ],
+          "min_triangle_area": 1.2842217618026143e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 31,
+          "examples": [
+            [
+              527,
+              556
+            ],
+            [
+              527,
+              557
+            ],
+            [
+              527,
+              540
+            ],
+            [
+              510,
+              555
+            ],
+            [
+              510,
+              556
+            ]
+          ],
+          "min_triangle_area": 1.0750722783097867e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.260020116390243e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_SeatedListenTouch",
+      "frame": 79,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.5651779763535408e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.218098515182562e-06,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 20,
+          "examples": [
+            [
+              392,
+              427
+            ],
+            [
+              393,
+              427
+            ],
+            [
+              376,
+              427
+            ],
+            [
+              376,
+              428
+            ],
+            [
+              377,
+              428
+            ]
+          ],
+          "min_triangle_area": 1.2842231771780115e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 31,
+          "examples": [
+            [
+              527,
+              556
+            ],
+            [
+              527,
+              557
+            ],
+            [
+              527,
+              540
+            ],
+            [
+              510,
+              555
+            ],
+            [
+              510,
+              556
+            ]
+          ],
+          "min_triangle_area": 1.0750722783097867e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.260020116390243e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_SeatedListenTouch",
+      "frame": 81,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.5705672240143003e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.334330969663547e-06,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 20,
+          "examples": [
+            [
+              392,
+              427
+            ],
+            [
+              393,
+              427
+            ],
+            [
+              376,
+              427
+            ],
+            [
+              376,
+              428
+            ],
+            [
+              377,
+              428
+            ]
+          ],
+          "min_triangle_area": 1.2842229046860985e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 31,
+          "examples": [
+            [
+              527,
+              556
+            ],
+            [
+              527,
+              557
+            ],
+            [
+              527,
+              540
+            ],
+            [
+              510,
+              555
+            ],
+            [
+              510,
+              556
+            ]
+          ],
+          "min_triangle_area": 1.0750721209263707e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.260020116390243e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_SeatedListenTouch",
+      "frame": 83,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.5705672240143003e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.334330969663547e-06,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 20,
+          "examples": [
+            [
+              392,
+              427
+            ],
+            [
+              393,
+              427
+            ],
+            [
+              376,
+              427
+            ],
+            [
+              376,
+              428
+            ],
+            [
+              377,
+              428
+            ]
+          ],
+          "min_triangle_area": 1.2842229046860985e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 31,
+          "examples": [
+            [
+              527,
+              556
+            ],
+            [
+              527,
+              557
+            ],
+            [
+              527,
+              540
+            ],
+            [
+              510,
+              555
+            ],
+            [
+              510,
+              556
+            ]
+          ],
+          "min_triangle_area": 1.0750721209263707e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.260020116390243e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_SeatedListenTouch",
+      "frame": 85,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.5705672240143003e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.334330969663547e-06,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 20,
+          "examples": [
+            [
+              392,
+              427
+            ],
+            [
+              393,
+              427
+            ],
+            [
+              376,
+              427
+            ],
+            [
+              376,
+              428
+            ],
+            [
+              377,
+              428
+            ]
+          ],
+          "min_triangle_area": 1.2842229046860985e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 31,
+          "examples": [
+            [
+              527,
+              556
+            ],
+            [
+              527,
+              557
+            ],
+            [
+              527,
+              540
+            ],
+            [
+              510,
+              555
+            ],
+            [
+              510,
+              556
+            ]
+          ],
+          "min_triangle_area": 1.0750721209263707e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.260020116390243e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_SeatedListenTouch",
+      "frame": 87,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.5705672240143003e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.334330969663547e-06,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 20,
+          "examples": [
+            [
+              392,
+              427
+            ],
+            [
+              393,
+              427
+            ],
+            [
+              376,
+              427
+            ],
+            [
+              376,
+              428
+            ],
+            [
+              377,
+              428
+            ]
+          ],
+          "min_triangle_area": 1.2842229046860985e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 31,
+          "examples": [
+            [
+              527,
+              556
+            ],
+            [
+              527,
+              557
+            ],
+            [
+              527,
+              540
+            ],
+            [
+              510,
+              555
+            ],
+            [
+              510,
+              556
+            ]
+          ],
+          "min_triangle_area": 1.0750721209263707e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.260020116390243e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_SeatedListenTouch",
+      "frame": 89,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.5705672240143003e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.334330969663547e-06,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 20,
+          "examples": [
+            [
+              392,
+              427
+            ],
+            [
+              393,
+              427
+            ],
+            [
+              376,
+              427
+            ],
+            [
+              376,
+              428
+            ],
+            [
+              377,
+              428
+            ]
+          ],
+          "min_triangle_area": 1.2842229046860985e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 31,
+          "examples": [
+            [
+              527,
+              556
+            ],
+            [
+              527,
+              557
+            ],
+            [
+              527,
+              540
+            ],
+            [
+              510,
+              555
+            ],
+            [
+              510,
+              556
+            ]
+          ],
+          "min_triangle_area": 1.0750721209263707e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.260020116390243e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_SeatedListenTouch",
+      "frame": 91,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.5705672240143003e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.334330969663547e-06,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 20,
+          "examples": [
+            [
+              392,
+              427
+            ],
+            [
+              393,
+              427
+            ],
+            [
+              376,
+              427
+            ],
+            [
+              376,
+              428
+            ],
+            [
+              377,
+              428
+            ]
+          ],
+          "min_triangle_area": 1.2842229046860985e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 31,
+          "examples": [
+            [
+              527,
+              556
+            ],
+            [
+              527,
+              557
+            ],
+            [
+              527,
+              540
+            ],
+            [
+              510,
+              555
+            ],
+            [
+              510,
+              556
+            ]
+          ],
+          "min_triangle_area": 1.0750721209263707e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.260020116390243e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_SeatedTakeoff",
+      "frame": 1,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 17,
+          "examples": [
+            [
+              144,
+              194
+            ],
+            [
+              143,
+              193
+            ],
+            [
+              143,
+              194
+            ],
+            [
+              142,
+              177
+            ],
+            [
+              142,
+              176
+            ]
+          ],
+          "min_triangle_area": 1.3675387483246476e-06,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 31,
+          "examples": [
+            [
+              266,
+              269
+            ],
+            [
+              281,
+              296
+            ],
+            [
+              281,
+              310
+            ],
+            [
+              281,
+              311
+            ],
+            [
+              280,
+              310
+            ]
+          ],
+          "min_triangle_area": 2.090360363532319e-06,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 32,
+          "examples": [
+            [
+              438,
+              466
+            ],
+            [
+              438,
+              464
+            ],
+            [
+              438,
+              465
+            ],
+            [
+              380,
+              430
+            ],
+            [
+              380,
+              431
+            ]
+          ],
+          "min_triangle_area": 1.3438481062987596e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 43,
+          "examples": [
+            [
+              553,
+              583
+            ],
+            [
+              553,
+              566
+            ],
+            [
+              576,
+              597
+            ],
+            [
+              576,
+              598
+            ],
+            [
+              577,
+              597
+            ]
+          ],
+          "min_triangle_area": 1.5541138445518276e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.30668345164468e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_SeatedTakeoff",
+      "frame": 3,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 89,
+          "examples": [
+            [
+              138,
+              141
+            ],
+            [
+              159,
+              178
+            ],
+            [
+              159,
+              179
+            ],
+            [
+              159,
+              162
+            ],
+            [
+              159,
+              180
+            ]
+          ],
+          "min_triangle_area": 6.80481211378926e-06,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 108,
+          "examples": [
+            [
+              280,
+              293
+            ],
+            [
+              294,
+              313
+            ],
+            [
+              295,
+              312
+            ],
+            [
+              295,
+              313
+            ],
+            [
+              281,
+              292
+            ]
+          ],
+          "min_triangle_area": 4.18489001737143e-06,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 35,
+          "examples": [
+            [
+              442,
+              453
+            ],
+            [
+              438,
+              466
+            ],
+            [
+              438,
+              467
+            ],
+            [
+              438,
+              465
+            ],
+            [
+              455,
+              466
+            ]
+          ],
+          "min_triangle_area": 1.0252330289456849e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 55,
+          "examples": [
+            [
+              572,
+              579
+            ],
+            [
+              553,
+              583
+            ],
+            [
+              553,
+              566
+            ],
+            [
+              577,
+              597
+            ],
+            [
+              577,
+              598
+            ]
+          ],
+          "min_triangle_area": 9.932506894797752e-06,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.303561193985458e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_SeatedTakeoff",
+      "frame": 5,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 22,
+          "examples": [
+            [
+              157,
+              172
+            ],
+            [
+              160,
+              193
+            ],
+            [
+              158,
+              172
+            ],
+            [
+              158,
+              191
+            ],
+            [
+              158,
+              190
+            ]
+          ],
+          "min_triangle_area": 1.2694704575002041e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 10,
+          "examples": [
+            [
+              264,
+              312
+            ],
+            [
+              264,
+              313
+            ],
+            [
+              295,
+              310
+            ],
+            [
+              295,
+              327
+            ],
+            [
+              280,
+              327
+            ]
+          ],
+          "min_triangle_area": 1.2961751582449188e-05,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 11,
+          "examples": [
+            [
+              419,
+              477
+            ],
+            [
+              420,
+              479
+            ],
+            [
+              420,
+              478
+            ],
+            [
+              420,
+              477
+            ],
+            [
+              417,
+              450
+            ]
+          ],
+          "min_triangle_area": 3.0375282227857203e-06,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 15,
+          "examples": [
+            [
+              546,
+              601
+            ],
+            [
+              546,
+              603
+            ],
+            [
+              546,
+              602
+            ],
+            [
+              548,
+              580
+            ],
+            [
+              548,
+              578
+            ]
+          ],
+          "min_triangle_area": 3.627279326974795e-06,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.295556460126246e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_SeatedTakeoff",
+      "frame": 7,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 19,
+          "examples": [
+            [
+              191,
+              212
+            ],
+            [
+              191,
+              229
+            ],
+            [
+              191,
+              213
+            ],
+            [
+              191,
+              214
+            ],
+            [
+              192,
+              213
+            ]
+          ],
+          "min_triangle_area": 1.5939791869854198e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 5,
+          "examples": [
+            [
+              315,
+              338
+            ],
+            [
+              315,
+              355
+            ],
+            [
+              315,
+              356
+            ],
+            [
+              315,
+              357
+            ],
+            [
+              316,
+              357
+            ]
+          ],
+          "min_triangle_area": 2.4606153690151127e-06,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.5939785330037553e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.593976864458264e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.284660892817126e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    },
+    {
+      "kind": "AN_Portal_SeatedTakeoff",
+      "frame": 9,
+      "regions": {
+        "F_L": {
+          "intersection_pairs": 19,
+          "examples": [
+            [
+              188,
+              193
+            ],
+            [
+              188,
+              227
+            ],
+            [
+              188,
+              228
+            ],
+            [
+              187,
+              227
+            ],
+            [
+              187,
+              210
+            ]
+          ],
+          "min_triangle_area": 1.5939768393967165e-05,
+          "near_zero_triangles": 0
+        },
+        "F_R": {
+          "intersection_pairs": 7,
+          "examples": [
+            [
+              315,
+              356
+            ],
+            [
+              315,
+              357
+            ],
+            [
+              315,
+              355
+            ],
+            [
+              315,
+              338
+            ],
+            [
+              316,
+              357
+            ]
+          ],
+          "min_triangle_area": 8.811546163993442e-06,
+          "near_zero_triangles": 0
+        },
+        "H_L": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.5939780196121105e-05,
+          "near_zero_triangles": 0
+        },
+        "H_R": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 1.5939775255953713e-05,
+          "near_zero_triangles": 0
+        },
+        "BODY": {
+          "intersection_pairs": 0,
+          "examples": [],
+          "min_triangle_area": 9.273145633083181e-05,
+          "near_zero_triangles": 0
+        }
+      }
+    }
+  ]
+}

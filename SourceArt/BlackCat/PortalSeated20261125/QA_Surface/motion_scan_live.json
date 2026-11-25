@@ -1,0 +1,11 @@
+{
+  "self_intersections_only_no_cross_region_intersections": true,
+  "max_intersections": {
+    "F_L": 0,
+    "F_R": 0,
+    "H_L": 0,
+    "H_R": 0,
+    "BODY": 0
+  },
+  "bad_frames": []
+}

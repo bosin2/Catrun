@@ -5,6 +5,7 @@
 #include "CatrunMarkSubsystem.generated.h"
 
 class ACatrunArmor;
+class ACatrunElevatorTransition;
 class ACatrunStageExit;
 class UPointLightComponent;
 class UStaticMeshComponent;
@@ -33,6 +34,8 @@ public:
     // Only the opted-in Stage1 doorway registers the local cat as a candidate.
     void ObserveCorridor(ACatrunStageExit& Exit, APawn& Cat);
     void LeaveCorridor(const ACatrunStageExit& Exit);
+    void ObserveElevatorCorridor(ACatrunElevatorTransition& Elevator);
+    void LeaveElevatorCorridor(const ACatrunElevatorTransition& Elevator);
     void RefreshCorridor();
     static bool IsExcludedFromPerception(const AActor* Subject);
     void ApplyMark(APawn& Cat);
@@ -51,9 +54,13 @@ private:
 	void DestroyVisual();
 	void UpdateVisual();
 	void UpdateFollowingArmor(const APawn& Cat);
+    void RefreshElevatorCorridor();
+    void ForgetCorridorCat(APawn& Cat, const TCHAR* Reason);
 
     TWeakObjectPtr<ACatrunStageExit> Corridor;
     TWeakObjectPtr<APawn> CorridorCandidate;
+    TWeakObjectPtr<ACatrunElevatorTransition> ElevatorCorridor;
+    TWeakObjectPtr<APawn> ElevatorAdmittedCat;
     bool bCorridorAdmitted = false;
     bool bMarked = false;
 	float FollowTimer = 0.f;

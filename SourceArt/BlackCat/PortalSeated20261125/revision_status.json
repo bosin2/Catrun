@@ -1,0 +1,8 @@
+{
+  "status": "revised_blender_motion_and_new_rig_ready_for_review",
+  "ready_for_new_rig_import_review": true,
+  "ready_for_existing_78_bone_animation_only_import": false,
+  "visual_user_approval": false,
+  "ue_runtime_verified": false,
+  "supersedes": "PortalEntry20261125 standing ground-tap clips; latest user requires seated tilt then vertical portal contact"
+}

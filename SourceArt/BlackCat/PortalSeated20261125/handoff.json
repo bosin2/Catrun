@@ -1,0 +1,320 @@
+{
+  "status": "revised_blender_motion_and_new_rig_ready_for_review",
+  "ready_for_new_rig_import_review": true,
+  "ready_for_existing_78_bone_animation_only_import": false,
+  "visual_user_approval": false,
+  "ue_runtime_verified": false,
+  "supersedes": "PortalEntry20261125 standing ground-tap clips; latest user requires seated tilt then vertical portal contact",
+  "blend": "C:\\Users\\whghk\\.codex\\worktrees\\110f\\Catrun\\SourceArt\\BlackCat\\PortalSeated20261125\\SK_BlackCat_SeatedPortal_Review.blend",
+  "full_sequence_blend": "C:\\Users\\whghk\\.codex\\worktrees\\110f\\Catrun\\SourceArt\\BlackCat\\PortalSeated20261125\\SC_BlackCat_PortalReview.blend",
+  "normal_speed_video": "C:\\Users\\whghk\\.codex\\worktrees\\110f\\Catrun\\SourceArt\\BlackCat\\PortalSeated20261125\\Previews\\PortalSeated_30fps.mp4",
+  "mesh_fbx": "C:\\Users\\whghk\\.codex\\worktrees\\110f\\Catrun\\SourceArt\\BlackCat\\PortalSeated20261125\\FBX\\SK_BlackCat_SeatedPortal_NewRig.fbx",
+  "clips": [
+    {
+      "action": "AN_Portal_SeatedListenTouch",
+      "fbx": "C:\\Users\\whghk\\.codex\\worktrees\\110f\\Catrun\\SourceArt\\BlackCat\\PortalSeated20261125\\FBX\\AN_Portal_SeatedListenTouch.fbx",
+      "start": 1,
+      "end": 91,
+      "fps": 30,
+      "duration_seconds": 3.0,
+      "sha256": "77723bbdd83051c8b3ce528a08c9d156a453f9f03e64e9eb3b58327f4fcd49d7",
+      "beats": {
+        "sit": [
+          1,
+          19
+        ],
+        "ear": [
+          20,
+          27
+        ],
+        "head_tilt": [
+          24,
+          32
+        ],
+        "hold": [
+          32,
+          43
+        ],
+        "paw_reach": [
+          46,
+          57
+        ],
+        "contact": [
+          57,
+          64
+        ],
+        "return": [
+          65,
+          79
+        ],
+        "used_paw": "paw_F_L",
+        "palm_center_local_m": [
+          0.042,
+          -0.105,
+          0.068
+        ]
+      }
+    },
+    {
+      "action": "AN_Portal_HipsBackWiggle",
+      "fbx": "C:\\Users\\whghk\\.codex\\worktrees\\110f\\Catrun\\SourceArt\\BlackCat\\PortalSeated20261125\\FBX\\AN_Portal_HipsBackWiggle.fbx",
+      "start": 1,
+      "end": 53,
+      "fps": 30,
+      "duration_seconds": 1.7333333333333334,
+      "sha256": "d9ad39703d214c5ea887c5d31bba90ac74f55cf7e447ece3111bf13b2c21c9dc",
+      "beats": {
+        "hips_back": [
+          1,
+          14
+        ],
+        "two_wiggles": [
+          14,
+          38
+        ],
+        "sway_extrema": [
+          17,
+          23,
+          29,
+          35
+        ],
+        "sway_amplitude_m": 0.009,
+        "stop": [
+          38,
+          41
+        ],
+        "compression": [
+          41,
+          53
+        ],
+        "front_paws_locked": true
+      }
+    },
+    {
+      "action": "AN_Portal_SeatedTakeoff",
+      "fbx": "C:\\Users\\whghk\\.codex\\worktrees\\110f\\Catrun\\SourceArt\\BlackCat\\PortalSeated20261125\\FBX\\AN_Portal_SeatedTakeoff.fbx",
+      "start": 1,
+      "end": 13,
+      "fps": 30,
+      "duration_seconds": 0.4,
+      "sha256": "ee609c1cbd8a41bb7a4a2db76c020f935d6e41875235b1c711d8fe3f2c728d29",
+      "beats": {
+        "front_paws_extend": [
+          1,
+          6
+        ],
+        "last_hind_support_frame": 9,
+        "first_hind_liftoff_frame": 10,
+        "next": "AN_Portal_AirReach",
+        "next_frame": 1,
+        "minimum_blend_frames": 0
+      }
+    },
+    {
+      "action": "AN_Portal_AirReach",
+      "fbx": "C:\\Users\\whghk\\.codex\\worktrees\\110f\\Catrun\\SourceArt\\BlackCat\\PortalSeated20261125\\FBX\\AN_Portal_AirReach.fbx",
+      "start": 1,
+      "end": 19,
+      "fps": 30,
+      "duration_seconds": 0.6,
+      "sha256": "dda12d88dfd6e7b8a73e27752a5a9527da447f5a08b368de2e9c317b84eb761e",
+      "beats": {
+        "existing_PortalJumpIn_used": false,
+        "note": "Custom reaching airborne pose; supersedes previous f18 JumpIn join."
+      }
+    },
+    {
+      "action": "AN_Portal_WalkReview",
+      "fbx": "C:\\Users\\whghk\\.codex\\worktrees\\110f\\Catrun\\SourceArt\\BlackCat\\PortalSeated20261125\\FBX\\AN_Portal_WalkReview.fbx",
+      "start": 1,
+      "end": 121,
+      "fps": 30,
+      "duration_seconds": 4.0,
+      "sha256": "59bc0dd1ce89dc5c7483833e06168a6a28570a3fb41b633cfc0ceb8d1392d4f8",
+      "beats": {
+        "last_step_flows_into_seated_clip": true,
+        "final_frame_matches_touch_first": true
+      }
+    }
+  ],
+  "fps": 30,
+  "preview_frames": 293,
+  "preview_video_duration_seconds": 9.766666666666667,
+  "body_triangles": 632,
+  "retained_face_and_accessory_triangles": 8256,
+  "total_triangles": 8888,
+  "original_bone_count": 78,
+  "additional_surface_bones": 34,
+  "total_bones": 112,
+  "original_bind_unchanged": true,
+  "original_parents_unchanged": true,
+  "root_motion_in_individual_clips": false,
+  "preview_only_actor_trajectory": true,
+  "recommended_ue_import": {
+    "import_uniform_scale": 100,
+    "scale_verified_in_ue": false,
+    "basis": "same export axis/unit contract as previously UE-verified original source",
+    "convert_scene": true,
+    "convert_scene_unit": true,
+    "force_front_x_axis": false,
+    "preserve_local_transform": false,
+    "sample_rate": 30,
+    "compression": "Preserve per-frame keys; default key reduction previously caused visible foot drift on this small rig."
+  },
+  "preview_sequence_1based": {
+    "walk": [
+      1,
+      120
+    ],
+    "seated": [
+      121,
+      210
+    ],
+    "prepare": [
+      211,
+      262
+    ],
+    "takeoff": [
+      263,
+      274
+    ],
+    "flight": [
+      275,
+      293
+    ]
+  },
+  "qa": {
+    "native": {
+      "joins": [
+        {
+          "from": "AN_Portal_WalkReview",
+          "to": "AN_Portal_SeatedListenTouch",
+          "all_bones": 112,
+          "max_position_error_m": 2.2351741790771484e-08,
+          "max_matrix_error": 6.556510925292969e-07
+        },
+        {
+          "from": "AN_Portal_SeatedListenTouch",
+          "to": "AN_Portal_HipsBackWiggle",
+          "all_bones": 112,
+          "max_position_error_m": 3.6166026888317614e-08,
+          "max_matrix_error": 4.470348358154297e-07
+        },
+        {
+          "from": "AN_Portal_HipsBackWiggle",
+          "to": "AN_Portal_SeatedTakeoff",
+          "all_bones": 112,
+          "max_position_error_m": 3.073364496231079e-08,
+          "max_matrix_error": 7.450580596923828e-07
+        },
+        {
+          "from": "AN_Portal_SeatedTakeoff",
+          "to": "AN_Portal_AirReach",
+          "all_bones": 112,
+          "max_position_error_m": 1.4901161193847656e-08,
+          "max_matrix_error": 1.1920928955078125e-07
+        }
+      ],
+      "prepare_mesh_forepaw_max_displacement_m": {
+        "L": 6.835888574854875e-08,
+        "R": 4.6856937119035814e-08
+      },
+      "prepare_face_portal_clearance": [
+        {
+          "frame": 1,
+          "min_y": -0.08652245998382568,
+          "clearance_to_portal_m": 0.018477540016174313
+        },
+        {
+          "frame": 14,
+          "min_y": -0.10120226442813873,
+          "clearance_to_portal_m": 0.003797735571861263
+        },
+        {
+          "frame": 38,
+          "min_y": -0.10120226442813873,
+          "clearance_to_portal_m": 0.003797735571861263
+        },
+        {
+          "frame": 53,
+          "min_y": -0.10120227187871933,
+          "clearance_to_portal_m": 0.0037977281212806663
+        }
+      ],
+      "original_bones_preserved": 78,
+      "original_bind_max_matrix_difference": 0.0,
+      "original_parents_preserved": true
+    },
+    "native_reopen_pixel_max_differences": {
+      "179": 0,
+      "268": 0,
+      "280": 0
+    },
+    "contact_max_plane_error_m": 4.172325138163124e-09,
+    "body_min_z_by_clip": {
+      "AN_Portal_SeatedListenTouch": -6.124375673266513e-09,
+      "AN_Portal_HipsBackWiggle": -6.660817675196995e-09,
+      "AN_Portal_SeatedTakeoff": -1.7359881310241576e-09
+    },
+    "fbx_roundtrip": "C:\\Users\\whghk\\.codex\\worktrees\\110f\\Catrun\\SourceArt\\BlackCat\\PortalSeated20261125\\QA\\fbx_roundtrip.json",
+    "surface_scan": "C:\\Users\\whghk\\.codex\\worktrees\\110f\\Catrun\\SourceArt\\BlackCat\\PortalSeated20261125\\QA_Surface\\motion_scan_all_frames.json",
+    "retained_structural": "C:\\Users\\whghk\\.codex\\worktrees\\110f\\Catrun\\SourceArt\\BlackCat\\PortalSeated20261125\\QA_Retained\\classified_structural.json",
+    "walk_sit_transition_final": "C:\\Users\\whghk\\.codex\\worktrees\\110f\\Catrun\\SourceArt\\BlackCat\\PortalSeated20261125\\QA_Surface\\walk_sit_transition_final.json"
+  },
+  "limitations": [
+    "Requires new 112-bone mesh and skeleton as an isolated asset, not only animation imports on the old 78-bone mesh.",
+    "Existing UE map, skeleton, mesh and sequences were not modified.",
+    "Checks cover authored poses; they do not guarantee every arbitrary pose or all cross-part intersections.",
+    "Flat-color stacked UVs and ten hidden back-to-back eyelid cap pairs are retained intentionally.",
+    "Normal-speed video was generated; visual assessment used rendered keyposes and frame sequences, not a claim of full normal-speed playback perception."
+  ],
+  "skill_inventory": "C:\\Users\\whghk\\.codex\\worktrees\\110f\\Catrun\\SourceArt\\BlackCat\\PortalSeated20261125\\skill_inventory.json",
+  "readme": "C:\\Users\\whghk\\.codex\\worktrees\\110f\\Catrun\\SourceArt\\BlackCat\\PortalSeated20261125\\README_KO.md",
+  "files": [
+    {
+      "path": "C:\\Users\\whghk\\.codex\\worktrees\\110f\\Catrun\\SourceArt\\BlackCat\\PortalSeated20261125\\SK_BlackCat_SeatedPortal_Review.blend",
+      "bytes": 8734923,
+      "sha256": "7b8698965406eda3df018cd49e83ba1e66930b7201089da500a63d9cc4c285b6"
+    },
+    {
+      "path": "C:\\Users\\whghk\\.codex\\worktrees\\110f\\Catrun\\SourceArt\\BlackCat\\PortalSeated20261125\\SC_BlackCat_PortalReview.blend",
+      "bytes": 10579880,
+      "sha256": "4b9581ee4b5a1876a9df01c93d8ccbeb26d41895282e2ffa7be67692007858fc"
+    },
+    {
+      "path": "C:\\Users\\whghk\\.codex\\worktrees\\110f\\Catrun\\SourceArt\\BlackCat\\PortalSeated20261125\\Previews\\PortalSeated_30fps.mp4",
+      "bytes": 589751,
+      "sha256": "a40b091bfebe21c837a1d3acff91598a12306b05db5f43d25aff6d2ec2e8b583"
+    },
+    {
+      "path": "C:\\Users\\whghk\\.codex\\worktrees\\110f\\Catrun\\SourceArt\\BlackCat\\PortalSeated20261125\\FBX\\AN_Portal_AirReach.fbx",
+      "bytes": 842940,
+      "sha256": "dda12d88dfd6e7b8a73e27752a5a9527da447f5a08b368de2e9c317b84eb761e"
+    },
+    {
+      "path": "C:\\Users\\whghk\\.codex\\worktrees\\110f\\Catrun\\SourceArt\\BlackCat\\PortalSeated20261125\\FBX\\AN_Portal_HipsBackWiggle.fbx",
+      "bytes": 1063804,
+      "sha256": "d9ad39703d214c5ea887c5d31bba90ac74f55cf7e447ece3111bf13b2c21c9dc"
+    },
+    {
+      "path": "C:\\Users\\whghk\\.codex\\worktrees\\110f\\Catrun\\SourceArt\\BlackCat\\PortalSeated20261125\\FBX\\AN_Portal_SeatedListenTouch.fbx",
+      "bytes": 1280252,
+      "sha256": "77723bbdd83051c8b3ce528a08c9d156a453f9f03e64e9eb3b58327f4fcd49d7"
+    },
+    {
+      "path": "C:\\Users\\whghk\\.codex\\worktrees\\110f\\Catrun\\SourceArt\\BlackCat\\PortalSeated20261125\\FBX\\AN_Portal_SeatedTakeoff.fbx",
+      "bytes": 796156,
+      "sha256": "ee609c1cbd8a41bb7a4a2db76c020f935d6e41875235b1c711d8fe3f2c728d29"
+    },
+    {
+      "path": "C:\\Users\\whghk\\.codex\\worktrees\\110f\\Catrun\\SourceArt\\BlackCat\\PortalSeated20261125\\FBX\\AN_Portal_WalkReview.fbx",
+      "bytes": 1441532,
+      "sha256": "59bc0dd1ce89dc5c7483833e06168a6a28570a3fb41b633cfc0ceb8d1392d4f8"
+    },
+    {
+      "path": "C:\\Users\\whghk\\.codex\\worktrees\\110f\\Catrun\\SourceArt\\BlackCat\\PortalSeated20261125\\FBX\\SK_BlackCat_SeatedPortal_NewRig.fbx",
+      "bytes": 664588,
+      "sha256": "acb04d086f6f24e6e1aa1c8065bbe7cfe8c3b197178f8e9fb64d782cad694984"
+    }
+  ]
+}

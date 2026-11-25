@@ -1,0 +1,16 @@
+{
+  "compact_rest_applied": true,
+  "native_pose_max_position_error_m": 4.931614657816934e-08,
+  "native_pose_max_matrix_error": 1.4901161193847656e-06,
+  "mesh_max_vertex_error_m": {
+    "SK_BlackCat_Final": 1.0667608079680323e-07,
+    "BlackCat_PortalBody": 8.353402813066114e-07
+  },
+  "bones": 108,
+  "mesh_triangles": {
+    "SK_BlackCat_Final": 8256,
+    "BlackCat_PortalBody": 568
+  },
+  "original_78_bind_changed_for_short_proportions": true,
+  "old_source_actions_removed_from_compact_copy": true
+}

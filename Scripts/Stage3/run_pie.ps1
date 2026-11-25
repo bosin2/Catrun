@@ -5,7 +5,7 @@ $stage3Out=Join-Path $stage3Root 'Saved\Stage3Integration20261125'
 $stage3User=Join-Path $stage3Out ($Name+'User')
 New-Item -ItemType Directory -Force -Path $stage3User | Out-Null
 $stage3Arguments=@(
-    ('"{0}\Catrun.uproject"' -f $stage3Root),'-RenderOffscreen',('-'+$Renderer),'-windowed','-ResX=1280','-ResY=720',
+    ('"{0}\Catrun.uproject"' -f $stage3Root),'/Game/Maps/Stage3','-RenderOffscreen',('-'+$Renderer),'-windowed','-ResX=1280','-ResY=720',
     '-NoSplash','-NoSound','-unattended','-nop4','-NoSaveConfig','-SaveToUserDir',('-UserDir="{0}"' -f $stage3User),
     '-ini:EditorSettings:[/Script/UnrealEd.EditorPerformanceSettings]:bThrottleCPUWhenNotForeground=False',
     ('-ExecCmds="Slate.bAllowThrottling 0,t.IdleWhenNotForeground 0,py {0}/Scripts/Stage3/{1}"' -f $stage3Root.Replace('\','/'),$Script),

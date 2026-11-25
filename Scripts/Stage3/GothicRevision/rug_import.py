@@ -318,6 +318,11 @@ def place(import_report=None, floor_offset_cm=.2):
     if max(abs(actual[r][i]-report['mesh']['bounds_cm'][r][i]) for r in range(2) for i in range(3))>.05:
         raise RuntimeError('Rug mesh bounds changed after import validation')
     actors={a.get_actor_label():a for a in act.get_all_level_actors()}
+    old=actors.get(LABEL)
+    if old:
+        existing_center,existing_extent=old.get_actor_bounds(False)
+        if abs(2*max(existing_extent.x,existing_extent.y)-1500.)<1.:
+            raise RuntimeError('The existing Stage3 rug is already extended to 1500cm. This legacy 900cm placement would reset its scale and materials. Preserve the current actor; a new delivery requires a separately reviewed root-owned placement path.')
     reflected=any('Stage3ReferenceOrientationYMinus20261125' in map(str,a.tags) for a in actors.values())
     placement_yaw=report['mesh']['placement_yaw']
     if reflected:
@@ -331,7 +336,6 @@ def place(import_report=None, floor_offset_cm=.2):
         center,extent=actor.get_actor_bounds(False);lo=center-extent;hi=center+extent
         if lo.x>=rug_x0-.05 and hi.x<=rug_x1+.05 and lo.y>=rug_y0-.05 and hi.y<=rug_y1+.05:
             axis.append(actor)
-    old=actors.get(LABEL)
     if old and OWNER not in [str(t) for t in old.tags]:raise RuntimeError('Refusing unowned rug actor')
     if old:actor=old
     else:

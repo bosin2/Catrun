@@ -1,4 +1,4 @@
-"""Centimetre layout recovered from the user's v3 dimensions and original plan.
+"""Canonical centimetre contract, including the approved Core01 revision.
 
 These are canonical DRAWING coordinates: right = +X, up = +Y. The final
 Stage3 map uses world (X,-Y,Z), applied once by OrientationFix20261125/apply.py,
@@ -7,6 +7,14 @@ Do not treat these canonical Y values as saved-map world coordinates.
 Room bounds are outer bounds,
 not a promise of interior clearance. These coordinates resolve adjacency; the
 dimensions and goal/door relationships come from the original conversations.
+
+2026-11-25 Core01 supersedes the original 15x11m gate hall and single altar L:
+the saved hall is 15x17m with five pillars per side and six B1 wall runs.
+Authority: IntegrationRevision20261125/altar.py, GateHallRevision20261125/plan.py
+and its applied plan.json, PlacementRevision20261125/apply.py. This module is
+a coordinate reference, NOT a complete recipe to regenerate the saved map.
+Basket body/cloth/animations, extended pillar bodies, backdrop, Gothic material,
+cutaway, lighting, sound and gate FX are maintained by their separate patches.
 """
 ROOMS = {
     'Entrance': (0,0,300,200),
@@ -19,7 +27,7 @@ ROOMS = {
     'ControlAnnex': (-400,1950,150,2100),
     'ControlRoom': (-50,1950,950,2550),
     'UpperCorridor': (-400,2100,-100,2900),
-    'GateHall': (-1000,2900,500,4000),
+    'GateHall': (-1000,2900,500,4600),
 }
 # Circulation pieces recover the reference plan's two stepped connections.
 # They are not additional named rooms in EXPECTED_SIZES. The 550x150 annex
@@ -29,7 +37,25 @@ CONNECTORS = {
     'ExhibitionBridge': (-550,1300,-400,1600),
     'MainEntry': (-50,1800,500,1950),
 }
-EXPECTED_SIZES = [(300,200),(1100,600),(700,800),(600,1100),(900,700),(1250,300),(700,150),(550,150),(1000,600),(300,800),(1500,1100)]
+EXPECTED_SIZES = [(300,200),(1100,600),(700,800),(600,1100),(900,700),(1250,300),(700,150),(550,150),(1000,600),(300,800),(1500,1700)]
+# Exact applied GateHallRevision plan.json values; all canonical drawing space.
+GATE_CENTER_X = (ROOMS['GateHall'][0] + ROOMS['GateHall'][2]) / 2
+GATE_PILLAR_X = (GATE_CENTER_X - 470, GATE_CENTER_X + 470)
+GATE_PILLAR_ROWS = tuple(ROOMS['GateHall'][1] + offset for offset in (250,550,825,1125,1425))
+GATE_PILLAR_TOP_CM = 900  # Original shaft and decorated capital, with the top visible.
+FINAL_GATE_Y = ROOMS['GateHall'][3] - 50
+FINAL_EXIT_Y = ROOMS['GateHall'][3] + 90
+GATE_RUG_RECT = (-400,2950,-100,4450)
+# Same six boxes as IntegrationRevision20261125/altar.py. Lower horizontal
+# pieces are 120cm long and abut the verticals: no 30x30 corner double coverage.
+ALTAR_WALL_BOXES = (
+    ('UpperLeft',(110,2375,140,2550)),
+    ('UpperRight',(610,2375,640,2550)),
+    ('LowerLeftVertical',(110,2100,140,2250)),
+    ('LowerLeftHorizontal',(140,2100,260,2130)),
+    ('LowerRightVertical',(610,2100,640,2250)),
+    ('LowerRightHorizontal',(490,2100,610,2130)),
+)
 # Continuous internal walls. Openings reserve a complete 200 cm portal module.
 # orientation, fixed axis coordinate, start, end, [(center, type, identifier)]
 INTERNAL = [
@@ -43,8 +69,12 @@ INTERNAL = [
     ('h',1950,500,950,[]),
     # The main room's west wall is now an exterior boundary above the elbow.
     ('h',2300,-400,-100,[(-250,'gate','D2')]),
-    # Open L-shaped 150 x 150 cm structure around objective E3.
-    ('v',275,2175,2325,[]),('h',2325,275,425,[]),
+]
+# INTERNAL uses the centre line of a 30cm wall. Keep the exact B1 box union
+# while allowing existing offline wall/door consumers to read the new layout.
+INTERNAL += [
+    ('v',(x0+x1)/2,y0,y1,[]) if y1-y0 > x1-x0 else ('h',(y0+y1)/2,x0,x1,[])
+    for _,(x0,y0,x1,y1) in ALTAR_WALL_BOXES
 ]
 PROPS = [
     ('Display1','SM_S3_WeaponDisplay',(-950,1640,0),90),
@@ -60,24 +90,38 @@ PROPS = [
     ('Weapons','SM_S3_WeaponRack',(-1050,2280,0),0),
     ('Console','SM_S3_GateControlConsole',(320,2480,0),0),
 ]
-DEVICES = [(100,370,0),(1090,1660,0),(375,2240,0)]
-STATUES = [((-700,1430,0),(-700,2250,0),'D1'),((760,2140,0),(760,2420,0),'D2')]
+DEVICES = [(100,370,0),(1090,1660,0),(375,2290,0)]
+# Functional trios, including all links and Stage3-only body/cloth assets, are
+# authored by PlacementRevision20261125/apply.py, not legacy build_map.py.
+BASKETS = (
+    ('Lobby',(-170,345,0)),
+    ('Exhibition',(-970,2195,0)),
+    ('Warehouse',(605,1410,0)),
+    ('ControlAnnex',(-304,2045,0)),
+)
+# P1 rear clearance is 120 cm: 1510 - 60 cm body half-depth - 1330 wall face.
+# A 40 cm cat capsule must be able to walk behind the weight before pushing.
+STATUES = [((-700,1510,0),(-700,2250,0),'D1'),((760,2140,0),(760,2420,0),'D2')]
 ARMORS = [
     ('LobbyPost',(-180,650,100),0,[]),
     ('LobbyPatrol',(340,650,100),0,[(340,650,100),(620,650,100)]),
     ('CentralPost',(660,1650,100),0,[]),
-    ('ControlPatrol',(520,2140,100),90,[(520,2140,100),(520,2380,100),(150,2380,100),(150,2100,100)]),
-    ('GateLeft',(-770,3850,100),0,[(-770,3850,100),(-280,3850,100)]),
-    ('GateRight',(280,3850,100),180,[(280,3850,100),(-220,3850,100)]),
+    ('ControlPatrol',(550,2190,100),90,[(550,2190,100),(550,2380,100),(200,2380,100),(200,2190,100)]),
+    ('GateLeft',(-770,4450,100),0,[(-770,4450,100),(-280,4450,100)]),
+    ('GateRight',(280,4450,100),180,[(280,4450,100),(-220,4450,100)]),
 ]
 CANDLES = [
     # L-shaped patrol stays left of the P1 push lane and below the display's
     # south end on its horizontal leg. Runtime clearance is checked separately.
     ('Exhibition',(-850,1670,100),90,[(-850,1410,100),(-1050,1410,100),(-850,1410,100),(-850,2140,100)]),
+    # Actual saved label: S3_Placement_Candle_ExhibitionNorth. Fixed enemy,
+    # not decorative lighting; placement patch duplicates the existing candle.
+    ('ExhibitionNorth',(-895,2310,0),90,[]),
     ('WarehouseNorth',(380,1310,100),-35,[]),
     ('WarehouseSouth',(1135,855,100),145,[]),
-    ('GateLeft',(-590,3350,100),0,[(-590,3210,100),(-790,3400,100),(-590,3600,100),(-430,3400,100)]),
-    ('GateRight',(90,3350,100),180,[(90,3210,100),(290,3400,100),(90,3600,100),(-70,3400,100)]),
+    # Applied plan.json rectangles clear the pillars; supersede old diamonds.
+    ('GateLeft',(-870,3300,0),0,[(-870,3300,0),(-570,3300,0),(-570,3600,0),(-870,3600,0)]),
+    ('GateRight',(70,3300,0),180,[(70,3300,0),(370,3300,0),(370,3600,0),(70,3600,0)]),
 ]
 
 def cells():

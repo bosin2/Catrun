@@ -179,6 +179,7 @@ void ACatrunArmor::CatchOwnerChanged(UObject* CaptureOwner)
 
 void ACatrunArmor::OnSoundHeard_Implementation(const FCatrunSoundEvent& Event, float RemainingBudget)
 {
+	if (bIgnoreFootstepSounds && Event.Kind == ECatrunSoundKind::Footstep) return;
 	if (bWaitingForCapture) return;
 	if (UCatrunPuzzleSuspension::IsSuspended(this)) return;
     AActor* Source = Event.Instigator.Get();

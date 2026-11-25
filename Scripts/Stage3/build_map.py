@@ -1,4 +1,12 @@
-"""Author Stage3 from recovered room dimensions without altering earlier levels."""
+"""LEGACY bootstrap generator; DO NOT REGENERATE THE CURRENT SAVED STAGE3.
+
+layout.py tracks approved Core01 coordinates, but this historical generator
+does not reproduce the later Gothic materials/lighting, B1 actor identities,
+basket body/cloth links, extended pillar bodies/backdrop, cutaway or gate FX.
+Use the scoped IntegrationRevision20261125, GateHallRevision20261125 and
+PlacementRevision20261125 patches for maintenance of the existing map.
+Coordinate alignment below is documentation/maintenance, not rebuild approval.
+"""
 import sys, json, math, traceback
 from pathlib import Path
 import unreal as u
@@ -175,7 +183,7 @@ def characters():
         a=bp('/Game/Characters/LivingArmor/Blueprints/BP_LivingArmor','Armor_'+label,pos,yaw)
         c=a.get_component_by_class(u.SkeletalMeshComponent);c.set_skeletal_mesh_asset(load(armor_source+'/Meshes/SK_LivingArmor_Stage2_A'))
         c.set_editor_property('override_materials',[]);c.set_material(3,material)
-        points=[spawn(u.CatrunPatrolPoint,label+f'_Route{i}',p) for i,p in enumerate(route)]
+        points=[spawn(u.CatrunPatrolPoint,'Armor_'+label+f'_Route{i}',p) for i,p in enumerate(route)]
         a.set_editor_property('PatrolPoints',points);a.set_editor_property('bPatrolLoop',len(points)>2)
     for label,pos,yaw,route in L.CANDLES:
         pos=(pos[0],pos[1],0)
@@ -183,28 +191,26 @@ def characters():
         a.get_editor_property('BlockingCapsule').set_relative_location(u.Vector(0,0,62.25),False,False)
         c=a.get_editor_property('Body');c.set_skeletal_mesh_asset(load(candle_source+'/Meshes/SK_CandleMonster_Stage2_A'));c.set_editor_property('override_materials',[])
         c.set_material(0,candle_mats['WarmWax']);c.set_material(2,candle_mats['WaxPool'])
-        points=[spawn(u.TargetPoint,label+f'_Route{i}',(p[0],p[1],0)) for i,p in enumerate(route)]
+        points=[spawn(u.TargetPoint,'Candle_'+label+f'_Route{i}',(p[0],p[1],0)) for i,p in enumerate(route)]
         a.set_editor_property('PatrolPoints',points);a.set_editor_property('bPatrolEnabled',bool(points));a.set_editor_property('bPatrolLoop',len(points)>2)
 
 def main():
+    # No ownership-marker override: this bootstrap may create a NEW map only.
+    # Guard precedes all level loads, actor deletions and asset/map saves.
+    path='/Game/Maps/Stage3'
+    if EA.does_asset_exist(path):
+        raise RuntimeError('Existing /Game/Maps/Stage3 is protected: do not regenerate it with build_map.py. Use the scoped incremental Stage3 patches instead; map_ownership.json cannot override this guard.')
     gate_x0,gate_y0,gate_x1,gate_y1=L.ROOMS['GateHall']
-    gate_x=(gate_x0+gate_x1)/2
-    final_gate_y=gate_y1-50
+    gate_x=L.GATE_CENTER_X
+    final_gate_y=L.FINAL_GATE_Y
     exhibit_x0,exhibit_y0,_,exhibit_y1=L.ROOMS['Exhibition']
     d2=[(center,fixed) for orient,fixed,start,end,openings in L.INTERNAL
         for center,kind,label in openings if label=='D2' and orient=='h']
     assert len(d2)==1
     d2_x,d2_y=d2[0]
-    path='/Game/Maps/Stage3'
     marker=OUT/'map_ownership.json'
-    if EA.does_asset_exist(path):
-        assert marker.exists() and json.loads(marker.read_text())['map']==path,'Refusing to overwrite an unowned Stage3 map'
-        assert LEVEL.load_level(path)
-        for a in list(ACT.get_all_level_actors()):
-            if 'CatrunStage3_20261125' in map(str,a.tags) or a.get_actor_label()=='S3_Minimap':assert ACT.destroy_actor(a)
-    else:
-        marker.write_text(json.dumps({'map':path,'run':'20261125'}),encoding='utf8')
-        assert LEVEL.new_level(path)
+    marker.write_text(json.dumps({'map':path,'run':'20261125'}),encoding='utf8')
+    assert LEVEL.new_level(path)
     world=u.get_editor_subsystem(u.UnrealEditorSubsystem).get_editor_world()
     world.get_world_settings().set_editor_property('default_game_mode',EA.load_blueprint_class('/Game/Blueprints/GameModes/GM_Cat'))
     for i,(x,y,w,h) in enumerate(L.floor_rectangles()):
@@ -262,8 +268,8 @@ def main():
         keeper.attach_to_actor(GATES['D2'],u.Name('None'),u.AttachmentRule.KEEP_WORLD,u.AttachmentRule.KEEP_WORLD,u.AttachmentRule.KEEP_WORLD,False)
         d=u.CatrunReleaseDevice();d.set_editor_property('Housing',h);d.set_editor_property('Ring',r);d.set_editor_property('Pin',p);d.set_editor_property('LockBolt',bolt);d.set_editor_property('ChainLinks',chain);devices.append(d)
     director.set_editor_property('Devices',devices)
-    for x in [gate_x-470,gate_x+470]:
-        for j,y in enumerate([gate_y0+250,gate_y0+550,gate_y0+825]):
+    for x in L.GATE_PILLAR_X:
+        for j,y in enumerate(L.GATE_PILLAR_ROWS):
             for part,z in [('Base',0),('ShaftLower',40),('ShaftUpper',300),('Capital',840)]:
                 static(f'GrandPillar_{x}_{j}_{part}','SM_S3_GrandPillar_'+part,(x,y,z),folder='GateHall',tags=('SoundObstacle',),occlusion=True)
     for part,z in [('LowerFrame',0),('UpperFrame',300)]:static('FinalGate_'+part,'SM_S3_FinalGate_'+part,(gate_x,final_gate_y,z),180,folder='GateHall',tags=('SoundWall',),occlusion=True)
@@ -296,7 +302,7 @@ def main():
     grid=spawn(u.SoundGridManager,'SoundGrid');grid.set_editor_property('Settings',load('/Game/Systems/Sound/DA_SoundSettings'))
     bp('/Game/Systems/Sound/Visual/Bluprints/BP_CatrunSoundController','SoundVisual')
     characters()
-    ex=spawn(u.CatrunStageExit,'FinalExit',(gate_x,gate_y1+90,60));ex.get_editor_property('Trigger').set_box_extent(u.Vector(250,45,80));ex.set_editor_property('bRequireCenterInside',True)
+    ex=spawn(u.CatrunStageExit,'FinalExit',(gate_x,L.FINAL_EXIT_Y,60));ex.get_editor_property('Trigger').set_box_extent(u.Vector(250,45,80));ex.set_editor_property('bRequireCenterInside',True)
     grid.build_grid();assert grid.has_grid()
     REPORT['grid']=json.loads(grid.call_method('ExportBakedGridSnapshot'))
     REPORT['bounds']=[{'label':a.get_actor_label(),'min':xyz(a.get_actor_bounds(False)[0]-a.get_actor_bounds(False)[1]),'max':xyz(a.get_actor_bounds(False)[0]+a.get_actor_bounds(False)[1]),'tags':[str(t) for t in a.tags]} for a in ACT.get_all_level_actors() if isinstance(a,u.StaticMeshActor)]

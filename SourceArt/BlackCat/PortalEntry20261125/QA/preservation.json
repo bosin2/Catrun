@@ -1,0 +1,74 @@
+{
+  "original_asset_unchanged": {
+    "vertices": true,
+    "faces": true,
+    "weights": true,
+    "bind": true,
+    "object_transforms": true
+  },
+  "original_actions_unchanged": {
+    "AN_BlackCat_BasketEnter": true,
+    "AN_BlackCat_BellShake": true,
+    "AN_BlackCat_CautiousWalk": true,
+    "AN_BlackCat_Idle": true,
+    "AN_BlackCat_JumpDown": true,
+    "AN_BlackCat_Landing": true,
+    "AN_BlackCat_PortalInspect": true,
+    "AN_BlackCat_PortalJumpIn": true,
+    "AN_BlackCat_Run": true,
+    "AN_BlackCat_Sleep": true,
+    "AN_BlackCat_StairDown_Trot": true,
+    "AN_BlackCat_StandUp": true,
+    "AN_BlackCat_WakeUp": true,
+    "AN_BlackCat_Walk": true
+  },
+  "source_hashes": {
+    "vertices": "73bea244d0a33eecd249c3b87195581fe287378e6b98d72a6bc899b7e730a55f",
+    "faces": "5899aaef728f804089aaba753ce3c1f7a4a6a17a8d66e84d7d9c67a7fbdba3f3",
+    "weights": "1af769c6fb9cfc1f8a9bea9ea6dcef303aa12c626e61be65675c7e272e912de6",
+    "bind": "8adaa26b1d8867d355e41a5a13f3d553655e492e3711d62722c0d22dfc097542",
+    "object_transforms": "f9d1f83df12bd2a4747281df0ba168242306925c61122c556a085cd14d0355d1",
+    "actions": {
+      "AN_BlackCat_BasketEnter": "7873ba603963346a9db5da1645f32b33d6096a28fd787fdbb03824bbfdc67f2f",
+      "AN_BlackCat_BellShake": "32456f0bcb739d8793af52b9f0ee7b938f541943952e1dcba1b201f3b3a98fda",
+      "AN_BlackCat_CautiousWalk": "ec051cd5d8dcd59c18e47e66a7185d1838feb5ae026cc922640cf173826d3f98",
+      "AN_BlackCat_Idle": "e7aff24a43979f4b8a11a9956c52451cd58eca7fbd0acdbca17cfa812fc76c62",
+      "AN_BlackCat_JumpDown": "0fe4e0d44c81eed7d0f5fbe03764c76fad371bfdf52c377056823f4f09383c90",
+      "AN_BlackCat_Landing": "07d64962a5a029c0cc2980d73df837a219138e76e6953d4193945c24e7273342",
+      "AN_BlackCat_PortalInspect": "a9dad0ced5643659f434225100de4c9af40d0a040c6c8563d2361593f1788397",
+      "AN_BlackCat_PortalJumpIn": "405f079c78af539fe93ace3ed3cf6725cafb5a73fc1e4180ca11caf5ef6a6006",
+      "AN_BlackCat_Run": "b232755cb8e2193ab08988f153a4c6f5940ecb97172054b140fe9adb77cfecf7",
+      "AN_BlackCat_Sleep": "989382619083b04c73fcb646eab520c0c555ef7469cbc48d8c6442400d51aa5a",
+      "AN_BlackCat_StairDown_Trot": "03a70372c93e2d28a787d2ea43ee948559ea9aeb543d48370f35033c1d8638e4",
+      "AN_BlackCat_StandUp": "8705baf8181d6393062bc8558544ba6b326b55995ed51db2e84e18692f4c6626",
+      "AN_BlackCat_WakeUp": "4c6135451ad59ad11becef869ab4a73ee7387bac5ef1fff69d5e65561f135294",
+      "AN_BlackCat_Walk": "5f83c62bcec7f6b4913dfd19aece412a484e9b2bfdef2017d7a7755d8ecbaf5c"
+    }
+  },
+  "delivery_hashes": {
+    "vertices": "73bea244d0a33eecd249c3b87195581fe287378e6b98d72a6bc899b7e730a55f",
+    "faces": "5899aaef728f804089aaba753ce3c1f7a4a6a17a8d66e84d7d9c67a7fbdba3f3",
+    "weights": "1af769c6fb9cfc1f8a9bea9ea6dcef303aa12c626e61be65675c7e272e912de6",
+    "bind": "8adaa26b1d8867d355e41a5a13f3d553655e492e3711d62722c0d22dfc097542",
+    "object_transforms": "f9d1f83df12bd2a4747281df0ba168242306925c61122c556a085cd14d0355d1",
+    "actions": {
+      "AN_BlackCat_BasketEnter": "7873ba603963346a9db5da1645f32b33d6096a28fd787fdbb03824bbfdc67f2f",
+      "AN_BlackCat_BellShake": "32456f0bcb739d8793af52b9f0ee7b938f541943952e1dcba1b201f3b3a98fda",
+      "AN_BlackCat_CautiousWalk": "ec051cd5d8dcd59c18e47e66a7185d1838feb5ae026cc922640cf173826d3f98",
+      "AN_BlackCat_Idle": "e7aff24a43979f4b8a11a9956c52451cd58eca7fbd0acdbca17cfa812fc76c62",
+      "AN_BlackCat_JumpDown": "0fe4e0d44c81eed7d0f5fbe03764c76fad371bfdf52c377056823f4f09383c90",
+      "AN_BlackCat_Landing": "07d64962a5a029c0cc2980d73df837a219138e76e6953d4193945c24e7273342",
+      "AN_BlackCat_PortalCrouchWiggle": "afe370412a2c735f154dcb33bafabb3c5ae22fb86af0cc320a376c70dafc15de",
+      "AN_BlackCat_PortalInspect": "a9dad0ced5643659f434225100de4c9af40d0a040c6c8563d2361593f1788397",
+      "AN_BlackCat_PortalJumpIn": "405f079c78af539fe93ace3ed3cf6725cafb5a73fc1e4180ca11caf5ef6a6006",
+      "AN_BlackCat_PortalPawEar": "11c7454c25ec32b295359bee1d23dc9db15a8093fe8f6d4e12eeb50a0b68e3e9",
+      "AN_BlackCat_PortalTakeoffBridge": "15245bb8562d6deb36d7c4179310844100c7bd75bc92cc6d6b2557882fc68814",
+      "AN_BlackCat_Run": "b232755cb8e2193ab08988f153a4c6f5940ecb97172054b140fe9adb77cfecf7",
+      "AN_BlackCat_Sleep": "989382619083b04c73fcb646eab520c0c555ef7469cbc48d8c6442400d51aa5a",
+      "AN_BlackCat_StairDown_Trot": "03a70372c93e2d28a787d2ea43ee948559ea9aeb543d48370f35033c1d8638e4",
+      "AN_BlackCat_StandUp": "8705baf8181d6393062bc8558544ba6b326b55995ed51db2e84e18692f4c6626",
+      "AN_BlackCat_WakeUp": "4c6135451ad59ad11becef869ab4a73ee7387bac5ef1fff69d5e65561f135294",
+      "AN_BlackCat_Walk": "5f83c62bcec7f6b4913dfd19aece412a484e9b2bfdef2017d7a7755d8ecbaf5c"
+    }
+  }
+}

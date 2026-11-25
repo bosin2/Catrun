@@ -1,0 +1,122 @@
+{
+  "AN_BlackCat_SitEarTail": {
+    "frames": [
+      1,
+      121
+    ],
+    "min_z_m": 0.0001999995729420334,
+    "lowest_point": {
+      "object": "BlackCat_SeatedBody",
+      "frame": 1,
+      "vertex": 13,
+      "position": [
+        -0.01784784346818924,
+        -0.03028765320777893,
+        0.0001999995729420334
+      ],
+      "weights": [
+        [
+          "paw_F_R",
+          1.0
+        ]
+      ]
+    },
+    "max_bone_scale_error": 5.662441253662109e-06,
+    "loop_matrix_difference": 0.0,
+    "max_paw_anchor_displacement_m": 0.0,
+    "tail_tip_z_range_m": [
+      0.00803831685334444,
+      0.019022200256586075
+    ]
+  },
+  "AN_BlackCat_SitEarTilt": {
+    "frames": [
+      1,
+      121
+    ],
+    "min_z_m": 0.0001999995729420334,
+    "lowest_point": {
+      "object": "BlackCat_SeatedBody",
+      "frame": 1,
+      "vertex": 13,
+      "position": [
+        -0.01784784346818924,
+        -0.03028765320777893,
+        0.0001999995729420334
+      ],
+      "weights": [
+        [
+          "paw_F_R",
+          1.0
+        ]
+      ]
+    },
+    "max_bone_scale_error": 5.662441253662109e-06,
+    "loop_matrix_difference": 0.0,
+    "max_paw_anchor_displacement_m": 0.0,
+    "tail_tip_z_range_m": [
+      0.00803831685334444,
+      0.00803831685334444
+    ]
+  },
+  "AN_BlackCat_SitPose": {
+    "frames": [
+      1,
+      31
+    ],
+    "min_z_m": 0.0001999995729420334,
+    "lowest_point": {
+      "object": "BlackCat_SeatedBody",
+      "frame": 1,
+      "vertex": 13,
+      "position": [
+        -0.01784784346818924,
+        -0.03028765320777893,
+        0.0001999995729420334
+      ],
+      "weights": [
+        [
+          "paw_F_R",
+          1.0
+        ]
+      ]
+    },
+    "max_bone_scale_error": 5.662441253662109e-06,
+    "loop_matrix_difference": 0.0,
+    "max_paw_anchor_displacement_m": 0.0,
+    "tail_tip_z_range_m": [
+      0.00803831685334444,
+      0.00803831685334444
+    ]
+  },
+  "AN_BlackCat_SitTailTap": {
+    "frames": [
+      1,
+      121
+    ],
+    "min_z_m": 0.0001999995729420334,
+    "lowest_point": {
+      "object": "BlackCat_SeatedBody",
+      "frame": 1,
+      "vertex": 13,
+      "position": [
+        -0.01784784346818924,
+        -0.03028765320777893,
+        0.0001999995729420334
+      ],
+      "weights": [
+        [
+          "paw_F_R",
+          1.0
+        ]
+      ]
+    },
+    "max_bone_scale_error": 5.662441253662109e-06,
+    "loop_matrix_difference": 0.0,
+    "max_paw_anchor_displacement_m": 0.0,
+    "tail_tip_z_range_m": [
+      0.00803831685334444,
+      0.019022200256586075
+    ]
+  }
+}

@@ -1,0 +1,216 @@
+[
+  {
+    "action": "touch",
+    "frame": 49,
+    "counts": {
+      "F_L": {
+        "outside_body_pairs": 1,
+        "inside_body_pairs": 0,
+        "outside_examples": [
+          [
+            178,
+            181
+          ]
+        ]
+      },
+      "F_R": {
+        "outside_body_pairs": 0,
+        "inside_body_pairs": 0,
+        "outside_examples": []
+      },
+      "H_L": {
+        "outside_body_pairs": 0,
+        "inside_body_pairs": 0,
+        "outside_examples": []
+      },
+      "H_R": {
+        "outside_body_pairs": 0,
+        "inside_body_pairs": 0,
+        "outside_examples": []
+      }
+    }
+  },
+  {
+    "action": "touch",
+    "frame": 69,
+    "counts": {
+      "F_L": {
+        "outside_body_pairs": 2,
+        "inside_body_pairs": 0,
+        "outside_examples": [
+          [
+            181,
+            195
+          ],
+          [
+            178,
+            181
+          ]
+        ]
+      },
+      "F_R": {
+        "outside_body_pairs": 0,
+        "inside_body_pairs": 0,
+        "outside_examples": []
+      },
+      "H_L": {
+        "outside_body_pairs": 0,
+        "inside_body_pairs": 0,
+        "outside_examples": []
+      },
+      "H_R": {
+        "outside_body_pairs": 0,
+        "inside_body_pairs": 0,
+        "outside_examples": []
+      }
+    }
+  },
+  {
+    "action": "touch",
+    "frame": 71,
+    "counts": {
+      "F_L": {
+        "outside_body_pairs": 2,
+        "inside_body_pairs": 0,
+        "outside_examples": [
+          [
+            181,
+            196
+          ],
+          [
+            181,
+            195
+          ]
+        ]
+      },
+      "F_R": {
+        "outside_body_pairs": 0,
+        "inside_body_pairs": 0,
+        "outside_examples": []
+      },
+      "H_L": {
+        "outside_body_pairs": 0,
+        "inside_body_pairs": 0,
+        "outside_examples": []
+      },
+      "H_R": {
+        "outside_body_pairs": 0,
+        "inside_body_pairs": 0,
+        "outside_examples": []
+      }
+    }
+  },
+  {
+    "action": "touch",
+    "frame": 75,
+    "counts": {
+      "F_L": {
+        "outside_body_pairs": 4,
+        "inside_body_pairs": 0,
+        "outside_examples": [
+          [
+            164,
+            197
+          ],
+          [
+            164,
+            196
+          ],
+          [
+            164,
+            195
+          ],
+          [
+            181,
+            195
+          ]
+        ]
+      },
+      "F_R": {
+        "outside_body_pairs": 0,
+        "inside_body_pairs": 0,
+        "outside_examples": []
+      },
+      "H_L": {
+        "outside_body_pairs": 0,
+        "inside_body_pairs": 0,
+        "outside_examples": []
+      },
+      "H_R": {
+        "outside_body_pairs": 0,
+        "inside_body_pairs": 0,
+        "outside_examples": []
+      }
+    }
+  },
+  {
+    "action": "launch",
+    "frame": 2,
+    "counts": {
+      "F_L": {
+        "outside_body_pairs": 2,
+        "inside_body_pairs": 0,
+        "outside_examples": [
+          [
+            190,
+            193
+          ],
+          [
+            193,
+            215
+          ]
+        ]
+      },
+      "F_R": {
+        "outside_body_pairs": 0,
+        "inside_body_pairs": 0,
+        "outside_examples": []
+      },
+      "H_L": {
+        "outside_body_pairs": 0,
+        "inside_body_pairs": 0,
+        "outside_examples": []
+      },
+      "H_R": {
+        "outside_body_pairs": 0,
+        "inside_body_pairs": 0,
+        "outside_examples": []
+      }
+    }
+  },
+  {
+    "action": "launch",
+    "frame": 3,
+    "counts": {
+      "F_L": {
+        "outside_body_pairs": 2,
+        "inside_body_pairs": 0,
+        "outside_examples": [
+          [
+            193,
+            215
+          ],
+          [
+            190,
+            193
+          ]
+        ]
+      },
+      "F_R": {
+        "outside_body_pairs": 0,
+        "inside_body_pairs": 0,
+        "outside_examples": []
+      },
+      "H_L": {
+        "outside_body_pairs": 0,
+        "inside_body_pairs": 0,
+        "outside_examples": []
+      },
+      "H_R": {
+        "outside_body_pairs": 0,
+        "inside_body_pairs": 0,
+        "outside_examples": []
+      }
+    }
+  }
+]

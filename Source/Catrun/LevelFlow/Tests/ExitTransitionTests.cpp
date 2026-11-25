@@ -3,6 +3,7 @@
 #include "CoreGlobals.h"
 #include "CatrunExitTestTypes.h"
 #include "CatrunCheckpointTestBackend.h"
+#include "LevelFlow/CatrunElevatorTransition.h"
 #include "Interaction/CatrunPuzzleSuspension.h"
 #include "Monster/CatrunRestartSubsystem.h"
 #include "Monster/CatrunCandle.h"
@@ -621,6 +622,44 @@ bool FCatrunArrivalTitleGateTest::RunTest(const FString&)
         TestTrue(TEXT("After cleanup exactly one title is delivered"), Flow->ConsumeStageTitle(Title));
         TestFalse(TEXT("Duplicate finish cannot replay title"), Flow->ConsumeStageTitle(Title));
     }
+    return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunElevatorArrivalTitleGateTest, "Catrun.LevelFlow.Stage3ElevatorArrivalTitleGate", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FCatrunElevatorArrivalTitleGateTest::RunTest(const FString&)
+{
+    FExitLeaseFixture F;
+    auto* Settings = GetMutableDefault<UCatrunLevelFlowSettings>();
+    Settings->Stages[0].StageId = TEXT("Stage3");
+    F.World->URL.AddOption(TEXT("FromStage2Elevator"));
+    FCheckpointBackend Backend;
+    Backend.bExists = false;
+    auto* Session = F.Track(Backend);
+    Session->AcceptTravel(F.World->GetOutermost()->GetName(), false, false, ECatrunArrivalRestart::Clear);
+    F.Gameplay->Tags.Add(TEXT("CatrunGameplayCamera"));
+    auto* Flow = UCatrunLevelFlowSubsystem::Get(F.World);
+    FText Title;
+    TestFalse(TEXT("Route defers title before arrival director's lease"), Flow->ConsumeStageTitle(Title));
+    auto* Director = F.World->SpawnActorDeferred<ACatrunElevatorTransition>(ACatrunElevatorTransition::StaticClass(), FTransform::Identity);
+    if (!TestNotNull(TEXT("Elevator director"), Director)) return false;
+    Director->bArrivalSide = true;
+    Director->FinishSpawning(FTransform::Identity);
+    TestTrue(TEXT("Arrival director claims the title window"), Flow->HasPendingElevatorArrival());
+    FText Failure;
+    if (!TestTrue(TEXT("Actual arrival lease acquired"), Director->ExitTransition->AcquireExitLease(F.Cat, Failure))) return false;
+    Flow->ReleaseElevatorArrival(*Director);
+    TestTrue(TEXT("A live arrival lease retains the title window"), Flow->HasPendingElevatorArrival());
+    TestFalse(TEXT("Arrival presentation has not exposed the title"), Flow->ConsumeStageTitle(Title));
+    auto* Cinematic = F.World->SpawnActor<ACameraActor>();
+    Director->ExitTransition->RememberOwnedViewTarget(Cinematic);
+    F.PC->SetViewTarget(Cinematic);
+    F.PC->SetViewTargetWithBlend(F.Gameplay, .2f);
+    Director->ExitTransition->ReleaseExitLease(false);
+    Flow->ReleaseElevatorArrival(*Director);
+    TestFalse(TEXT("Title still waits for the native gameplay camera blend"), Flow->ConsumeStageTitle(Title));
+    F.PC->PlayerCameraManager->UpdateCamera(.3f);
+    TestTrue(TEXT("Settled gameplay camera allows title"), Flow->ConsumeStageTitle(Title));
+    TestFalse(TEXT("Title is delivered exactly once"), Flow->ConsumeStageTitle(Title));
     return true;
 }
 

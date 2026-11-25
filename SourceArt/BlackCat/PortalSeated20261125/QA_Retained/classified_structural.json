@@ -1,0 +1,136 @@
+{
+  "pass": true,
+  "classification": "Bell_Clapper is an intentionally free internal bell part; inspected separately as required by asset-qa. Copies only; no scene or delivery mesh saved by this script.",
+  "main": {
+    "ok": true,
+    "pass": true,
+    "errors": [],
+    "warnings": [
+      "QA_FaceAndAttachments: unused material slot(s) ['Bell_Clapper'] (extra draw calls in some exporters)",
+      "QA_FaceAndAttachments: ~43.12% UV overlap (ok only if mirrored/stacked on purpose; bakes break)",
+      "BlackCat_PortalBody: ~81.08% UV overlap (ok only if mirrored/stacked on purpose; bakes break)",
+      "hidden back-to-back faces: QA_FaceAndAttachments (10 pairs) - delete to save tris"
+    ],
+    "ground_z": -0.0,
+    "zfighting": [],
+    "floating": [],
+    "back_to_back": [
+      {
+        "where": "QA_FaceAndAttachments",
+        "tri_pairs": 10
+      }
+    ],
+    "enclosed": [],
+    "objects": {
+      "QA_FaceAndAttachments": {
+        "verts": 4116,
+        "faces": 5125,
+        "tris": 8176,
+        "ngons": 0,
+        "boundary_edges": 0,
+        "nonmanifold_edges": 0,
+        "wire_edges": 0,
+        "loose_verts": 0,
+        "degenerate_faces": 0,
+        "zero_length_edges": 0,
+        "inconsistent_normals_edges": 0,
+        "duplicate_verts": 0,
+        "islands": 17,
+        "inside_out_islands": 0,
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "materials": 7,
+        "unweighted_verts": 0,
+        "verts_over_4_influences": 0,
+        "uv_maps": 1,
+        "uv_oob_pct": 0.0,
+        "uv_zero_area_faces": 0,
+        "uv_overlap_pct": 43.12,
+        "uv_coverage_pct": 45.6
+      },
+      "BlackCat_PortalBody": {
+        "verts": 326,
+        "faces": 632,
+        "tris": 632,
+        "ngons": 0,
+        "boundary_edges": 0,
+        "nonmanifold_edges": 0,
+        "wire_edges": 0,
+        "loose_verts": 0,
+        "degenerate_faces": 0,
+        "zero_length_edges": 0,
+        "inconsistent_normals_edges": 0,
+        "duplicate_verts": 0,
+        "islands": 5,
+        "inside_out_islands": 0,
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "materials": 1,
+        "unweighted_verts": 0,
+        "verts_over_4_influences": 0,
+        "uv_maps": 1,
+        "uv_oob_pct": 0.0,
+        "uv_zero_area_faces": 0,
+        "uv_overlap_pct": 81.08,
+        "uv_coverage_pct": 12.2
+      }
+    }
+  },
+  "clapper": {
+    "ok": true,
+    "pass": true,
+    "errors": [],
+    "warnings": [
+      "QA_BellClapper: unused material slot(s) ['Cat_Fur', 'Cat_Eye', 'Cat_Pupil', 'Cat_Nose', 'Collar_Red', 'Bell_Gold'] (extra draw calls in some exporters)",
+      "asset lowest point z=0.042 (not resting on ground plane z=0)"
+    ],
+    "ground_z": 0.042,
+    "zfighting": [],
+    "floating": [],
+    "back_to_back": [],
+    "enclosed": [],
+    "objects": {
+      "QA_BellClapper": {
+        "verts": 42,
+        "faces": 48,
+        "tris": 80,
+        "ngons": 0,
+        "boundary_edges": 0,
+        "nonmanifold_edges": 0,
+        "wire_edges": 0,
+        "loose_verts": 0,
+        "degenerate_faces": 0,
+        "zero_length_edges": 0,
+        "inconsistent_normals_edges": 0,
+        "duplicate_verts": 0,
+        "islands": 1,
+        "inside_out_islands": 0,
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "materials": 7,
+        "unweighted_verts": 0,
+        "verts_over_4_influences": 0,
+        "uv_maps": 1,
+        "uv_oob_pct": 0.0,
+        "uv_zero_area_faces": 0,
+        "uv_overlap_pct": 0.0,
+        "uv_coverage_pct": 0.0
+      }
+    }
+  },
+  "accepted_warnings": [
+    "UVs intentionally stack flat-color material islands; no texture bake in this revision.",
+    "Ten back-to-back pairs belong to retained hidden eyelid caps. They are internal, separated from visible green eye shells, and preserved for existing blink rig.",
+    "Bell clapper lowest point need not rest on world ground; it moves with the bell.",
+    "Unused material slots only on temporary QA copies made by splitting the bell clapper."
+  ]
+}

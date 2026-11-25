@@ -1,0 +1,150 @@
+{
+  "canonical_repository": "https://github.com/EL4CTEO/blender-skills",
+  "canonical_added_commit": "1a1cc6c49312f9f370aae86f52b7b907f29c94f6",
+  "additional_repository": "https://github.com/scenario-labs/skills/tree/main/skills/dcc/blender",
+  "total": 33,
+  "installed_skills": [
+    {
+      "name": "blender-addon-development",
+      "skill_md": "C:\\Users\\whghk\\.codex\\skills\\blender-addon-development\\SKILL.md"
+    },
+    {
+      "name": "blender-animation",
+      "skill_md": "C:\\Users\\whghk\\.codex\\skills\\blender-animation\\SKILL.md"
+    },
+    {
+      "name": "blender-asset-qa",
+      "skill_md": "C:\\Users\\whghk\\.codex\\skills\\blender-asset-qa\\SKILL.md"
+    },
+    {
+      "name": "blender-character-rigging",
+      "skill_md": "C:\\Users\\whghk\\.codex\\skills\\blender-character-rigging\\SKILL.md"
+    },
+    {
+      "name": "blender-clothing",
+      "skill_md": "C:\\Users\\whghk\\.codex\\skills\\blender-clothing\\SKILL.md"
+    },
+    {
+      "name": "blender-core",
+      "skill_md": "C:\\Users\\whghk\\.codex\\skills\\blender-core\\SKILL.md"
+    },
+    {
+      "name": "blender-environment-kits",
+      "skill_md": "C:\\Users\\whghk\\.codex\\skills\\blender-environment-kits\\SKILL.md"
+    },
+    {
+      "name": "blender-export-pipelines",
+      "skill_md": "C:\\Users\\whghk\\.codex\\skills\\blender-export-pipelines\\SKILL.md"
+    },
+    {
+      "name": "blender-facial-shapekeys",
+      "skill_md": "C:\\Users\\whghk\\.codex\\skills\\blender-facial-shapekeys\\SKILL.md"
+    },
+    {
+      "name": "blender-game-optimization",
+      "skill_md": "C:\\Users\\whghk\\.codex\\skills\\blender-game-optimization\\SKILL.md"
+    },
+    {
+      "name": "blender-geometry-nodes",
+      "skill_md": "C:\\Users\\whghk\\.codex\\skills\\blender-geometry-nodes\\SKILL.md"
+    },
+    {
+      "name": "blender-hair-grooming",
+      "skill_md": "C:\\Users\\whghk\\.codex\\skills\\blender-hair-grooming\\SKILL.md"
+    },
+    {
+      "name": "blender-hardsurface-modeling",
+      "skill_md": "C:\\Users\\whghk\\.codex\\skills\\blender-hardsurface-modeling\\SKILL.md"
+    },
+    {
+      "name": "blender-lighting-lookdev",
+      "skill_md": "C:\\Users\\whghk\\.codex\\skills\\blender-lighting-lookdev\\SKILL.md"
+    },
+    {
+      "name": "blender-pbr-materials",
+      "skill_md": "C:\\Users\\whghk\\.codex\\skills\\blender-pbr-materials\\SKILL.md"
+    },
+    {
+      "name": "blender-pipeline-automation",
+      "skill_md": "C:\\Users\\whghk\\.codex\\skills\\blender-pipeline-automation\\SKILL.md"
+    },
+    {
+      "name": "blender-rendering",
+      "skill_md": "C:\\Users\\whghk\\.codex\\skills\\blender-rendering\\SKILL.md"
+    },
+    {
+      "name": "blender-retopology-uv",
+      "skill_md": "C:\\Users\\whghk\\.codex\\skills\\blender-retopology-uv\\SKILL.md"
+    },
+    {
+      "name": "blender-scene-setup",
+      "skill_md": "C:\\Users\\whghk\\.codex\\skills\\blender-scene-setup\\SKILL.md"
+    },
+    {
+      "name": "blender-sculpting",
+      "skill_md": "C:\\Users\\whghk\\.codex\\skills\\blender-sculpting\\SKILL.md"
+    },
+    {
+      "name": "blender-simulation",
+      "skill_md": "C:\\Users\\whghk\\.codex\\skills\\blender-simulation\\SKILL.md"
+    },
+    {
+      "name": "blender-stylized-npr",
+      "skill_md": "C:\\Users\\whghk\\.codex\\skills\\blender-stylized-npr\\SKILL.md"
+    },
+    {
+      "name": "blender-texture-baking",
+      "skill_md": "C:\\Users\\whghk\\.codex\\skills\\blender-texture-baking\\SKILL.md"
+    },
+    {
+      "name": "blender-texturing",
+      "skill_md": "C:\\Users\\whghk\\.codex\\skills\\blender-texturing\\SKILL.md"
+    },
+    {
+      "name": "blender-time-of-day",
+      "skill_md": "C:\\Users\\whghk\\.codex\\skills\\blender-time-of-day\\SKILL.md"
+    },
+    {
+      "name": "blender-video-editing",
+      "skill_md": "C:\\Users\\whghk\\.codex\\skills\\blender-video-editing\\SKILL.md"
+    },
+    {
+      "name": "blender-weather-fx",
+      "skill_md": "C:\\Users\\whghk\\.codex\\skills\\blender-weather-fx\\SKILL.md"
+    },
+    {
+      "name": "blender-workflow-recipes",
+      "skill_md": "C:\\Users\\whghk\\.codex\\skills\\blender-workflow-recipes\\SKILL.md"
+    },
+    {
+      "name": "scenario-blender-animation",
+      "skill_md": "C:\\Users\\whghk\\.codex\\skills\\scenario-blender-animation\\SKILL.md"
+    },
+    {
+      "name": "scenario-blender-expert",
+      "skill_md": "C:\\Users\\whghk\\.codex\\skills\\scenario-blender-expert\\SKILL.md"
+    },
+    {
+      "name": "scenario-blender-previs-storyboard",
+      "skill_md": "C:\\Users\\whghk\\.codex\\skills\\scenario-blender-previs-storyboard\\SKILL.md"
+    },
+    {
+      "name": "scenario-blender-retopology",
+      "skill_md": "C:\\Users\\whghk\\.codex\\skills\\scenario-blender-retopology\\SKILL.md"
+    },
+    {
+      "name": "scenario-blender-rigging",
+      "skill_md": "C:\\Users\\whghk\\.codex\\skills\\scenario-blender-rigging\\SKILL.md"
+    }
+  ],
+  "applied_now": [
+    "blender-core",
+    "blender-asset-qa",
+    "blender-animation",
+    "blender-character-rigging",
+    "scenario-blender-expert",
+    "scenario-blender-animation",
+    "scenario-blender-rigging"
+  ],
+  "not_applied": "Human Rigify defaults, dense subdivision, automatic skeleton replacement, paid services"
+}

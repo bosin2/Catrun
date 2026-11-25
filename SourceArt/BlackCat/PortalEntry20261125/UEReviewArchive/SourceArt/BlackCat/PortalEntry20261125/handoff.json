@@ -1,0 +1,196 @@
+{
+  "status": "animation_files_ready_for_UE_integration_review",
+  "ready_for_import": true,
+  "visual_art_approval": false,
+  "producer_workspace": "C:\\Users\\whghk\\.codex\\worktrees\\110f\\Catrun",
+  "source_blend": "C:/Users/whghk/Desktop/CastleKit/BlackCat/PortalCinematic/SK_BlackCat_PortalCinematic.blend",
+  "blend": "C:\\Users\\whghk\\.codex\\worktrees\\110f\\Catrun\\SourceArt\\BlackCat\\PortalEntry20261125\\SK_BlackCat_PortalEntry_Actions.blend",
+  "target_skeleton": "/Game/Characters/BlackCat/Final/Skeletons/SKEL_BlackCat_Final",
+  "fps": 30,
+  "bone_count": 78,
+  "mesh_in_fbx": false,
+  "root_motion": false,
+  "object_scale": [
+    1,
+    1,
+    1
+  ],
+  "source_unit": "meter",
+  "fbx_axes": {
+    "forward": "-Y",
+    "up": "Z"
+  },
+  "fbx_unit_scale_factor": 100,
+  "recommended_ue_import": {
+    "import_uniform_scale": 100,
+    "convert_scene": true,
+    "force_front_x_axis": false,
+    "convert_scene_unit": true,
+    "preserve_local_transform": false,
+    "sample_rate": 30,
+    "note": "Matches original PortalJumpIn FBX axis/unit headers and coordinator-verified original UE import contract; UE runtime scale still must be checked."
+  },
+  "clips": [
+    {
+      "name": "AN_BlackCat_PortalPawEar",
+      "fbx": "C:\\Users\\whghk\\.codex\\worktrees\\110f\\Catrun\\SourceArt\\BlackCat\\PortalEntry20261125\\AN_BlackCat_PortalPawEar.fbx",
+      "blender_frames": [
+        1,
+        49
+      ],
+      "duration_seconds": 1.6,
+      "tap_paw": "paw_F_L",
+      "contact_blender_frame": 13,
+      "contact_source_frame_30fps": 12,
+      "contact_time_seconds": 0.4,
+      "contact_hold_blender_frames": [
+        13,
+        15
+      ],
+      "contact_point_blender_local_m": [
+        0.02599998749792576,
+        -0.05012799799442291,
+        -9.080395102500916e-09
+      ],
+      "ear_onset_blender_frame": 24,
+      "head_tilt_onset_blender_frame": 27,
+      "still_blender_frames": [
+        33,
+        49
+      ],
+      "contact_point_UE_skeletal_component_cm_before_relative_scale": [
+        2.599998749792576,
+        5.012799799442291,
+        -9.080395102500916e-07
+      ],
+      "contact_world_conversion": "Apply the actual SkeletalMesh component-to-world transform to the UE component point, including its relative scale 2. Do not infer world axes solely from actor forward."
+    },
+    {
+      "name": "AN_BlackCat_PortalCrouchWiggle",
+      "fbx": "C:\\Users\\whghk\\.codex\\worktrees\\110f\\Catrun\\SourceArt\\BlackCat\\PortalEntry20261125\\AN_BlackCat_PortalCrouchWiggle.fbx",
+      "blender_frames": [
+        1,
+        37
+      ],
+      "duration_seconds": 1.2,
+      "shoulder_lowering_blender_frames": [
+        1,
+        10
+      ],
+      "two_pelvis_sway_cycles_blender_frames": [
+        10,
+        26
+      ],
+      "wiggle_stops_blender_frame": 26,
+      "final_hind_compression_blender_frames": [
+        26,
+        37
+      ],
+      "next_clip": "AN_BlackCat_PortalTakeoffBridge",
+      "direct_join_to_original_jump": false
+    },
+    {
+      "name": "AN_BlackCat_PortalTakeoffBridge",
+      "fbx": "C:\\Users\\whghk\\.codex\\worktrees\\110f\\Catrun\\SourceArt\\BlackCat\\PortalEntry20261125\\AN_BlackCat_PortalTakeoffBridge.fbx",
+      "blender_frames": [
+        1,
+        10
+      ],
+      "duration_seconds": 0.3,
+      "last_hind_support_blender_frame": 7,
+      "first_sample_with_both_hind_soles_lifted_blender_frame": 8,
+      "hind_liftoff_source_frame_30fps": 6,
+      "hind_liftoff_seconds": 0.2,
+      "existing_jump_next_blender_frame": 19,
+      "existing_jump_next_source_frame_30fps": 18,
+      "existing_jump_next_source_time_seconds": 0.6,
+      "minimum_pose_blend_seconds": 0,
+      "note": "Endpoints match; use no pose crossfade or at most one frame. Old jump f12 is rejected because its thigh/upper-arm roots countertranslate while torso lowers."
+    }
+  ],
+  "existing_jump_reference": {
+    "last_hind_support_blender_frame": 18.5,
+    "last_hind_support_source_frame_30fps": 17.5,
+    "first_fully_airborne_blender_frame": 19,
+    "recommended_start_source_frame_30fps": 18,
+    "recommended_start_source_seconds": 0.6
+  },
+  "timing_suggestion_sequencer_30fps": {
+    "clip1": [
+      189,
+      237
+    ],
+    "clip2": [
+      237,
+      273
+    ],
+    "bridge": [
+      273,
+      282
+    ],
+    "existing_air_start": 282,
+    "tap_event": 201
+  },
+  "qa": {
+    "clip1_to_clip2_matrix_error": 0.0,
+    "clip2_to_bridge_matrix_error": 2.384185791015625e-07,
+    "bridge_to_existing_blender19_matrix_error": 2.384185791015625e-07,
+    "clip1_still_f33_f49_matrix_error": 0.0,
+    "clip2_front_foot_max_displacement_m": 8.786079596780802e-09,
+    "pelvis_x_extrema_frames": [
+      12,
+      16,
+      20,
+      24
+    ],
+    "pelvis_x_peak_to_peak_m": 0.006800000090152025,
+    "AN_BlackCat_PortalPawEar": {
+      "min_sole_z_m": -1.3620592653751373e-08
+    },
+    "AN_BlackCat_PortalCrouchWiggle": {
+      "min_sole_z_m": -1.280568540096283e-08
+    },
+    "AN_BlackCat_PortalTakeoffBridge": {
+      "min_sole_z_m": -1.280568540096283e-09
+    }
+  },
+  "fbx_roundtrip_qa": "C:\\Users\\whghk\\.codex\\worktrees\\110f\\Catrun\\SourceArt\\BlackCat\\PortalEntry20261125\\QA\\fbx_roundtrip.json",
+  "preservation_qa": "C:\\Users\\whghk\\.codex\\worktrees\\110f\\Catrun\\SourceArt\\BlackCat\\PortalEntry20261125\\QA\\preservation.json",
+  "normal_speed_full_body_video": "C:\\Users\\whghk\\.codex\\worktrees\\110f\\Catrun\\SourceArt\\BlackCat\\PortalEntry20261125\\Previews\\PortalEntry_30fps.mp4",
+  "known_limitations": [
+    "Original mesh/weights/materials/bind and 14 original actions are preserved, without any sitting-body mesh or RigV2 bones.",
+    "The original skin still pinches around the proximal folded limbs during deep compression; animation-only export cannot repair that topology. Geometry-free compatibility passes do not mean surface-art approval.",
+    "No UE import or Sequencer runtime validation performed in this workspace. Coordinator must verify retargeting translation modes, actual world foot contact and scale.",
+    "World path is not baked. Existing airborne source requires Sequencer upward/forward travel; video previews show local animation in place.",
+    "Blender FBX QA uses anim_offset=0 and restores original use_connect=False; importer defaults otherwise shift timing/constrain translated bones."
+  ],
+  "files": [
+    {
+      "path": "C:\\Users\\whghk\\.codex\\worktrees\\110f\\Catrun\\SourceArt\\BlackCat\\PortalEntry20261125\\SK_BlackCat_PortalEntry_Actions.blend",
+      "bytes": 7554473,
+      "sha256": "b8cc55c87ee4e4ab6fe062acbc17e4a5c79d9423cdefe092b913e32d982228ba"
+    },
+    {
+      "path": "C:\\Users\\whghk\\.codex\\worktrees\\110f\\Catrun\\SourceArt\\BlackCat\\PortalEntry20261125\\AN_BlackCat_PortalPawEar.fbx",
+      "bytes": 698444,
+      "sha256": "9cfc776fc9cd5d7b6417236d7aa2a138302b9c64b51a0917652982b1d73c504e"
+    },
+    {
+      "path": "C:\\Users\\whghk\\.codex\\worktrees\\110f\\Catrun\\SourceArt\\BlackCat\\PortalEntry20261125\\AN_BlackCat_PortalCrouchWiggle.fbx",
+      "bytes": 647740,
+      "sha256": "a8fd6b9af6f4d383c23ea7f4b21fbe1f87b944072a03dbc55d735770d87172ea"
+    },
+    {
+      "path": "C:\\Users\\whghk\\.codex\\worktrees\\110f\\Catrun\\SourceArt\\BlackCat\\PortalEntry20261125\\AN_BlackCat_PortalTakeoffBridge.fbx",
+      "bytes": 534428,
+      "sha256": "466b599e0cab3fd8d7772b3619296996558bf82e098f41ae500f2a66f0c9725c"
+    }
+  ],
+  "validation_against_UE_reference": {
+    "source": "C:/Users/whghk/.codex/worktrees/7b1c/Catrun/Saved/PortalEntry20261125/Reference/reference.json",
+    "existing_air_source_frame_30fps": 18,
+    "max_existing_source_bone_position_difference_cm": 0.009915711390697456,
+    "largest_difference_bone": "breath_back_front",
+    "note": "Blender-to-UE position conversion verified as (x,-y,z)*100. Existing UE compression differs slightly from Blender source; no direct UE playback validation claimed."
+  }
+}

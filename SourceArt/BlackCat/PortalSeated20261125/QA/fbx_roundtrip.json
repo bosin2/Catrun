@@ -1,0 +1,167 @@
+[
+  {
+    "file": "C:\\Users\\whghk\\.codex\\worktrees\\110f\\Catrun\\SourceArt\\BlackCat\\PortalSeated20261125\\FBX\\SK_BlackCat_SeatedPortal_NewRig.fbx",
+    "bones": 112,
+    "armature_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "max_bind_matrix_difference": 1.0848045349121094e-05,
+    "bind_errors": [],
+    "mesh_dimensions": {
+      "BlackCat_PortalBody": [
+        0.08811890333890915,
+        0.1265064775943756,
+        0.1223534420132637
+      ],
+      "SK_BlackCat_Final": [
+        0.1250070482492447,
+        0.23299995064735413,
+        0.18641267716884613
+      ]
+    },
+    "actions": [],
+    "pose_roundtrip": null
+  },
+  {
+    "file": "C:\\Users\\whghk\\.codex\\worktrees\\110f\\Catrun\\SourceArt\\BlackCat\\PortalSeated20261125\\FBX\\AN_Portal_SeatedListenTouch.fbx",
+    "bones": 112,
+    "armature_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "max_bind_matrix_difference": 2.384185791015625e-06,
+    "bind_errors": [],
+    "mesh_dimensions": {},
+    "actions": [
+      {
+        "name": "ARM_BlackCat_Final|Scene",
+        "range": [
+          1.0,
+          91.0
+        ]
+      }
+    ],
+    "pose_roundtrip": {
+      "max_position_error_m": 5.693268669984462e-07,
+      "max_rotation_error_degrees": 1.0017912643434101e-05,
+      "max_scale_error": 2.1457672119140625e-06,
+      "sampled_frames": 91,
+      "pass": true
+    }
+  },
+  {
+    "file": "C:\\Users\\whghk\\.codex\\worktrees\\110f\\Catrun\\SourceArt\\BlackCat\\PortalSeated20261125\\FBX\\AN_Portal_HipsBackWiggle.fbx",
+    "bones": 112,
+    "armature_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "max_bind_matrix_difference": 2.384185791015625e-06,
+    "bind_errors": [],
+    "mesh_dimensions": {},
+    "actions": [
+      {
+        "name": "ARM_BlackCat_Final|Scene",
+        "range": [
+          1.0,
+          53.0
+        ]
+      }
+    ],
+    "pose_roundtrip": {
+      "max_position_error_m": 5.472120498757429e-07,
+      "max_rotation_error_degrees": 1.0017912643434101e-05,
+      "max_scale_error": 2.2649765014648438e-06,
+      "sampled_frames": 53,
+      "pass": true
+    }
+  },
+  {
+    "file": "C:\\Users\\whghk\\.codex\\worktrees\\110f\\Catrun\\SourceArt\\BlackCat\\PortalSeated20261125\\FBX\\AN_Portal_SeatedTakeoff.fbx",
+    "bones": 112,
+    "armature_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "max_bind_matrix_difference": 2.384185791015625e-06,
+    "bind_errors": [],
+    "mesh_dimensions": {},
+    "actions": [
+      {
+        "name": "ARM_BlackCat_Final|Scene",
+        "range": [
+          1.0,
+          13.0
+        ]
+      }
+    ],
+    "pose_roundtrip": {
+      "max_position_error_m": 4.971273934129559e-07,
+      "max_rotation_error_degrees": 1.0017912643434101e-05,
+      "max_scale_error": 2.205371856689453e-06,
+      "sampled_frames": 13,
+      "pass": true
+    }
+  },
+  {
+    "file": "C:\\Users\\whghk\\.codex\\worktrees\\110f\\Catrun\\SourceArt\\BlackCat\\PortalSeated20261125\\FBX\\AN_Portal_AirReach.fbx",
+    "bones": 112,
+    "armature_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "max_bind_matrix_difference": 2.384185791015625e-06,
+    "bind_errors": [],
+    "mesh_dimensions": {},
+    "actions": [
+      {
+        "name": "ARM_BlackCat_Final|Scene",
+        "range": [
+          1.0,
+          19.0
+        ]
+      }
+    ],
+    "pose_roundtrip": {
+      "max_position_error_m": 4.6566128730773926e-07,
+      "max_rotation_error_degrees": 1.0017912643434101e-05,
+      "max_scale_error": 2.1457672119140625e-06,
+      "sampled_frames": 19,
+      "pass": true
+    }
+  },
+  {
+    "file": "C:\\Users\\whghk\\.codex\\worktrees\\110f\\Catrun\\SourceArt\\BlackCat\\PortalSeated20261125\\FBX\\AN_Portal_WalkReview.fbx",
+    "bones": 112,
+    "armature_scale": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "max_bind_matrix_difference": 2.384185791015625e-06,
+    "bind_errors": [],
+    "mesh_dimensions": {},
+    "actions": [
+      {
+        "name": "ARM_BlackCat_Final|Scene",
+        "range": [
+          1.0,
+          121.0
+        ]
+      }
+    ],
+    "pose_roundtrip": {
+      "max_position_error_m": 6.559384712151934e-07,
+      "max_rotation_error_degrees": 1.0017912643434101e-05,
+      "max_scale_error": 2.2649765014648438e-06,
+      "sampled_frames": 121,
+      "pass": true
+    }
+  }
+]

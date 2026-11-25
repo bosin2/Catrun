@@ -1,0 +1,11 @@
+{
+  "max_non_tail_matrix_difference": 0.0,
+  "source_unchanged": true,
+  "original_action_retained": "AN_BlackCat_Sleep",
+  "fixed_action": "AN_BlackCat_SleepTailFixed",
+  "frames": [
+    1,
+    241
+  ],
+  "fps": 30
+}

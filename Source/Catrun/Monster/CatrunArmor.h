@@ -58,6 +58,10 @@ public:
 	virtual ECatrunSoundTarget GetListenerGroup_Implementation() const override { return ECatrunSoundTarget::Minion; }
 	virtual void OnSoundHeard_Implementation(const FCatrunSoundEvent& Event, float RemainingBudget) override;
 
+	// Selected placed armors can require a deliberate lure instead of reacting to footsteps.
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "Armor|Hearing")
+	bool bIgnoreFootstepSounds = false;
+
 	virtual void Tick(float DeltaSeconds) override;
 
 	UFUNCTION(BlueprintPure, Category = "Armor")

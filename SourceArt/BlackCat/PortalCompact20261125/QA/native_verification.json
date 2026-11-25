@@ -1,0 +1,48 @@
+{
+  "joins": [
+    {
+      "from": "AN_CompactPortal_WalkReview",
+      "to": "AN_CompactPortal_SeatedListenTouch",
+      "max_position_error_m": 4.571136223000457e-08
+    },
+    {
+      "from": "AN_CompactPortal_SeatedListenTouch",
+      "to": "AN_CompactPortal_HipsBackWiggle",
+      "max_position_error_m": 6.451215745348203e-08
+    },
+    {
+      "from": "AN_CompactPortal_HipsBackWiggle",
+      "to": "AN_CompactPortal_SeatedTakeoff",
+      "max_position_error_m": 2.474795891439073e-07
+    },
+    {
+      "from": "AN_CompactPortal_SeatedTakeoff",
+      "to": "AN_CompactPortal_AirReach",
+      "max_position_error_m": 3.204615886152769e-08
+    }
+  ],
+  "prepare_forepaw_mesh_max_displacement_m": {
+    "L": 2.448342385087503e-08,
+    "R": 2.3750358173010836e-08
+  },
+  "prepare_clearance": [
+    {
+      "frame": 1,
+      "face_portal_gap_m": 0.01863264840841293
+    },
+    {
+      "frame": 14,
+      "face_portal_gap_m": 0.00580058795213699
+    },
+    {
+      "frame": 38,
+      "face_portal_gap_m": 0.00580058795213699
+    },
+    {
+      "frame": 53,
+      "face_portal_gap_m": 0.005800595402717587
+    }
+  ],
+  "bones": 108,
+  "root_motion": false
+}

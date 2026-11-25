@@ -1,4 +1,5 @@
 #include "CatrunExitTransitionComponent.h"
+#include "CatrunElevatorTransition.h"
 #include "CatrunLevelFlow.h"
 #include "Interaction/CatrunBasketInteractionComponent.h"
 #include "Interaction/CatrunPuzzleSuspension.h"
@@ -235,7 +236,10 @@ void UCatrunExitTransitionComponent::DeliverSaveResult(uint64 Lease,uint64 Reque
 
 bool UCatrunExitTransitionComponent::CanCommitExitTravel() const
 {
-    return IsCurrentLease(LeaseSerial) && bCheckpointReady && !bSavePending && !bTravelCommitted;
+    const auto* Elevator = Cast<ACatrunElevatorTransition>(GetOwner());
+    const bool bElevatorDeparture = Elevator && !Elevator->bArrivalSide
+        && Elevator->GetTransitionState() == ECatrunElevatorState::Travelling;
+    return IsCurrentLease(LeaseSerial) && (bCheckpointReady || bElevatorDeparture) && !bSavePending && !bTravelCommitted;
 }
 
 bool UCatrunExitTransitionComponent::CommitExitTravel()

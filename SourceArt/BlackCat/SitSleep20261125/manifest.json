@@ -1,0 +1,16 @@
+{
+  "status": "revision_for_visual_review",
+  "files": [
+    {
+      "path": "C:\\Users\\whghk\\.codex\\worktrees\\110f\\Catrun\\SourceArt\\BlackCat\\SitSleep20261125\\SK_BlackCat_SeatedLowPoly.blend",
+      "bytes": 798041,
+      "sha256": "d4398d1fcf6750eaabad5dd1bb7ee07664076f204284e42ccc5ba90b37423246"
+    },
+    {
+      "path": "C:\\Users\\whghk\\.codex\\worktrees\\110f\\Catrun\\SourceArt\\BlackCat\\SitSleep20261125\\SK_BlackCat_SleepTailFixed.blend",
+      "bytes": 4068889,
+      "sha256": "2dae32431610db7fc020bbb0b1a665e783948a20ece6a1ffc992ae7572973e10"
+    }
+  ],
+  "original_blend_sha256": "07a220d70764ff0cda34e77da3344797847b77547de8df7aa88a5eb6df8c3327"
+}

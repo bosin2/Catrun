@@ -3,6 +3,7 @@
 #include "CatrunProgressSave.h"
 #include "CatrunProgressWriter.h"
 #include "CatrunExitTransitionComponent.h"
+#include "CatrunElevatorTransition.h"
 #include "Interaction/CatrunPuzzleSuspension.h"
 #include "Interaction/CatrunBasketInteractionComponent.h"
 #include "Settings/CatrunUserSettings.h"
@@ -40,6 +41,7 @@ namespace
 	const FString ProgressSlot(TEXT("CatrunProgress"));
 	constexpr int32 ProgressUser = 0;
 	constexpr TCHAR Stage1PortalArrivalOption[] = TEXT("FromStage1Portal");
+	constexpr TCHAR Stage2ElevatorArrivalOption[] = TEXT("FromStage2Elevator");
 
 	UCatrunFlowSession* GetFlowSession(UWorld* World)
 	{
@@ -340,6 +342,32 @@ bool UCatrunLevelFlowSubsystem::IsStage2PortalArrival() const
 	return !Session || !Session->HasRestartArrivalIntent(Package);
 }
 
+bool UCatrunLevelFlowSubsystem::IsStage3ElevatorArrival() const
+{
+	const UWorld* World = GetWorld();
+	if (!World || !World->URL.HasOption(Stage2ElevatorArrivalOption) || bSkipStageIntro) return false;
+	const auto* Settings = GetDefault<UCatrunLevelFlowSettings>();
+	const int32 Index = Settings->FindStageIndex(World->GetOutermost()->GetName());
+	if (!Settings->Stages.IsValidIndex(Index) || Settings->Stages[Index].StageId != TEXT("Stage3")) return false;
+	const auto* Session = GetFlowSession(GetWorld());
+	return bRestartIntentResolved || !Session || !Session->HasRestartArrivalIntent(UWorld::RemovePIEPrefix(World->GetOutermost()->GetName()));
+}
+
+bool UCatrunLevelFlowSubsystem::ClaimElevatorArrival(ACatrunElevatorTransition& Owner)
+{
+	if (Owner.GetWorld() != GetWorld() || !IsStage3ElevatorArrival() || bElevatorArrivalReleased) return false;
+	if (ElevatorArrivalOwner.IsValid()) return ElevatorArrivalOwner.Get() == &Owner;
+	ElevatorArrivalOwner = &Owner;
+	return true;
+}
+
+void UCatrunLevelFlowSubsystem::ReleaseElevatorArrival(const ACatrunElevatorTransition& Owner)
+{
+	if (ElevatorArrivalOwner.Get(true) != &Owner || (Owner.ExitTransition && Owner.ExitTransition->HasExitLease())) return;
+	ElevatorArrivalOwner.Reset();
+	bElevatorArrivalReleased = true;
+}
+
 float UCatrunLevelFlowSubsystem::GetRestartFadeInDuration()
 {
 	ResolveRestartIntent();
@@ -619,7 +647,7 @@ bool ShouldHideGameplayPresentation(const UObject* Context, bool bAllowBlockedRe
     const auto* Flow = UCatrunLevelFlowSubsystem::Get(Context);
     if (Flow && Flow->IsMainMenuWorld()) return true;
     const auto* Restart = UCatrunRestartSubsystem::Get(Context);
-    if ((Flow && Flow->IsTransitioning()) || (Restart && Restart->IsCatching())
+    if ((Flow && (Flow->IsTransitioning() || Flow->HasPendingElevatorArrival())) || (Restart && Restart->IsCatching())
         || UCatrunPuzzleSuspension::IsSuspended(Context)) return true;
     const auto* PC = UGameplayStatics::GetPlayerController(World, 0);
     if (!IsValid(PC) || PC->bCinematicMode || PC->IsMoveInputIgnored() || PC->IsLookInputIgnored()) return true;
@@ -648,8 +676,16 @@ bool UCatrunLevelFlowSubsystem::IsGameplayTimeAdvancing() const
     const UWorld* World = GetWorld();
     if (!World || PlayableStage.IsNone() || bStageComplete || ShouldHideGameplayPresentation(this, false)) return false;
     const auto* Controller = UGameplayStatics::GetPlayerController(this, 0);
-    if (!Controller || !Controller->IsLocalController() || !Controller->PlayerCameraManager
-        || Controller->PlayerCameraManager->PendingViewTarget.Target) return false;
+    if (!Controller || !Controller->IsLocalController() || !Controller->PlayerCameraManager) return false;
+    if (const AActor* Target = Controller->PlayerCameraManager->PendingViewTarget.Target)
+    {
+        // Both ends of the elevator's warehouse blend give the player ordinary control.
+        const AActor* Current = Controller->PlayerCameraManager->ViewTarget.Target;
+        const APawn* Pawn = Controller->GetPawn();
+        if (!IsGameplayCameraOwner(Current, Pawn) || !IsGameplayCameraOwner(Target, Pawn)
+            || (!Current->ActorHasTag(TEXT("CatrunElevatorWarehouseCamera"))
+                && !Target->ActorHasTag(TEXT("CatrunElevatorWarehouseCamera")))) return false;
+    }
     const auto* Context = GEngine ? GEngine->GetWorldContextFromWorld(World) : nullptr;
     if (Context && (!Context->TravelURL.IsEmpty() || World->IsInSeamlessTravel())) return false;
     if (IsStage2PortalArrival() && !bArrivalTitleReleased
@@ -1251,6 +1287,12 @@ bool UCatrunLevelFlowSubsystem::IsTitleWindowOpen()
         if (ArrivalTitleOwner.IsValid() || GetWorld()->GetTimeSeconds() <= 2.f) return false;
         bArrivalTitleReleased = true;
     }
+    if (IsStage3ElevatorArrival() && !bElevatorArrivalReleased)
+    {
+        // Give the dock director time to acquire its arrival lease. A missing actor falls back to normal play.
+        if (ElevatorArrivalOwner.IsValid() || GetWorld()->GetTimeSeconds() <= 3.f) return false;
+        bElevatorArrivalReleased = true;
+    }
     const auto* PC = UGameplayStatics::GetPlayerController(this, 0);
     return !UCatrunLevelFlowLibrary::ShouldHideGameplayHUD(this) && PC && PC->PlayerCameraManager
         && !PC->PlayerCameraManager->PendingViewTarget.Target;
@@ -1323,8 +1365,14 @@ bool UCatrunLevelFlowSubsystem::CompleteStageForExit(UObject* Owner)
     if (ExitReservation.Get() != Owner || !Transition || !Transition->CanCommitExitTravel()) return false;
     const auto* Settings = GetDefault<UCatrunLevelFlowSettings>();
     const int32 Index = Settings->FindStageIndex(GetWorld()->GetOutermost()->GetName());
-    if (Index < 0 || !Settings->Stages.IsValidIndex(Index + 1) || Settings->Stages[Index].StageId != TEXT("Stage1")
-        || Settings->Stages[Index + 1].StageId != TEXT("Stage2")) return false;
+    if (Index < 0 || !Settings->Stages.IsValidIndex(Index + 1)) return false;
+    if (const auto* Elevator = Cast<ACatrunElevatorTransition>(Transition->GetOwner()))
+    {
+        if (Elevator->bArrivalSide || Settings->Stages[Index].StageId != TEXT("Stage2")
+            || Settings->Stages[Index + 1].StageId != TEXT("Stage3")) return false;
+        return CompleteStageInternal(Owner, nullptr, {}, Stage2ElevatorArrivalOption);
+    }
+    if (Settings->Stages[Index].StageId != TEXT("Stage1") || Settings->Stages[Index + 1].StageId != TEXT("Stage2")) return false;
     return CompleteStageInternal(Owner, nullptr, {}, Stage1PortalArrivalOption);
 }
 

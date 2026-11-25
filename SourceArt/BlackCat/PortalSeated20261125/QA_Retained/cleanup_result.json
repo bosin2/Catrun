@@ -1,0 +1,101 @@
+{
+  "limited_to_four_weights": 52,
+  "max_removed_weight": 0.03143565822392702,
+  "lower_lid_vertices_narrowed": 1056,
+  "lower_lid_cap_offset_m": 0.0003,
+  "geometry_deleted": 0,
+  "triangles_added": 0,
+  "intentional_detached_part": "Bell_Clapper: free clapper inside the gold bell, all 42 vertices weighted to bell",
+  "qa": {
+    "ok": true,
+    "pass": false,
+    "errors": [
+      "floating/detached part in SK_BlackCat_Final (42 verts at [0.0, -0.083, 0.046])"
+    ],
+    "warnings": [
+      "SK_BlackCat_Final: ~43.08% UV overlap (ok only if mirrored/stacked on purpose; bakes break)",
+      "BlackCat_PortalBody: ~81.08% UV overlap (ok only if mirrored/stacked on purpose; bakes break)",
+      "hidden back-to-back faces: SK_BlackCat_Final (10 pairs) - delete to save tris"
+    ],
+    "ground_z": -0.0,
+    "zfighting": [],
+    "floating": [
+      {
+        "object": "SK_BlackCat_Final",
+        "island_verts": 42,
+        "center": [
+          0.0,
+          -0.083,
+          0.046
+        ]
+      }
+    ],
+    "back_to_back": [
+      {
+        "where": "SK_BlackCat_Final",
+        "tri_pairs": 10
+      }
+    ],
+    "enclosed": [],
+    "objects": {
+      "SK_BlackCat_Final": {
+        "verts": 4158,
+        "faces": 5173,
+        "tris": 8256,
+        "ngons": 0,
+        "boundary_edges": 0,
+        "nonmanifold_edges": 0,
+        "wire_edges": 0,
+        "loose_verts": 0,
+        "degenerate_faces": 0,
+        "zero_length_edges": 0,
+        "inconsistent_normals_edges": 0,
+        "duplicate_verts": 0,
+        "islands": 18,
+        "inside_out_islands": 0,
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "materials": 7,
+        "unweighted_verts": 0,
+        "verts_over_4_influences": 0,
+        "uv_maps": 1,
+        "uv_oob_pct": 0.0,
+        "uv_zero_area_faces": 0,
+        "uv_overlap_pct": 43.08,
+        "uv_coverage_pct": 45.6
+      },
+      "BlackCat_PortalBody": {
+        "verts": 326,
+        "faces": 632,
+        "tris": 632,
+        "ngons": 0,
+        "boundary_edges": 0,
+        "nonmanifold_edges": 0,
+        "wire_edges": 0,
+        "loose_verts": 0,
+        "degenerate_faces": 0,
+        "zero_length_edges": 0,
+        "inconsistent_normals_edges": 0,
+        "duplicate_verts": 0,
+        "islands": 5,
+        "inside_out_islands": 0,
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "materials": 1,
+        "unweighted_verts": 0,
+        "verts_over_4_influences": 0,
+        "uv_maps": 1,
+        "uv_oob_pct": 0.0,
+        "uv_zero_area_faces": 0,
+        "uv_overlap_pct": 81.08,
+        "uv_coverage_pct": 12.2
+      }
+    }
+  }
+}

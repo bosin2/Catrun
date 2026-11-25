@@ -1,0 +1,22 @@
+{
+  "scope": "Per-region self-intersections, including every integer frame; does not certify cross-region or retained original face intersections",
+  "sample_count": 289,
+  "triangles": 632,
+  "module_sha256": "d51c2810ec92274dc1c2d5cc9d8d7f7da7cdc003588decc3b23a86bbe206d759",
+  "pose_sha256": "8b0a7f6a4c0fb613f2eee0aba257240e868bb4d23769ce8e705b541e3241839f",
+  "max_intersections": {
+    "F_L": 0,
+    "F_R": 0,
+    "H_L": 0,
+    "H_R": 0,
+    "BODY": 0
+  },
+  "max_near_zero_triangles": {
+    "F_L": 0,
+    "F_R": 0,
+    "H_L": 0,
+    "H_R": 0,
+    "BODY": 0
+  },
+  "bad_frames": []
+}

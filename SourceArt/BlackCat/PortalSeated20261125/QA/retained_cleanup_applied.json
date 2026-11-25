@@ -1,0 +1,9 @@
+{
+  "limited_to_four_weights": 52,
+  "max_removed_weight": 0.03143565822392702,
+  "lower_lid_vertices_narrowed": 1056,
+  "lower_lid_cap_offset_m": 0.0003,
+  "geometry_deleted": 0,
+  "triangles_added": 0,
+  "intentional_detached_part": "Bell_Clapper: free clapper inside the gold bell, all 42 vertices weighted to bell"
+}

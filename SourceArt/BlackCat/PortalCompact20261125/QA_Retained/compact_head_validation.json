@@ -1,0 +1,24 @@
+{
+  "samples": [
+    {
+      "kind": "walk",
+      "frame": 1,
+      "rigid_head_vertex_count": 1008,
+      "max_rigid_transform_error_m": 1.666000468656264e-08
+    },
+    {
+      "kind": "touch",
+      "frame": 32,
+      "rigid_head_vertex_count": 1008,
+      "max_rigid_transform_error_m": 1.7071424778386354e-08
+    },
+    {
+      "kind": "prepare",
+      "frame": 53,
+      "rigid_head_vertex_count": 1008,
+      "max_rigid_transform_error_m": 1.0536712127723509e-08
+    }
+  ],
+  "head_rest_geometry_edited": false,
+  "scope": "Connected head fur shell weights only; unchanged separate eye, ear, eyelid, collar, bell and tail islands"
+}

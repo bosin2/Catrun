@@ -1,0 +1,13 @@
+{
+  "head_shell_vertices": 803,
+  "head_weight_vertices_changed": 146,
+  "head_rest_geometry_changed": false,
+  "head_weights": "100 percent head on connected fur head shell only",
+  "limited_to_four_weights": 0,
+  "max_removed_weight": 0.0,
+  "lower_lid_vertices_narrowed": 1056,
+  "lower_lid_cap_offset_m": 0.0003,
+  "geometry_deleted": 0,
+  "triangles_added": 0,
+  "intentional_detached_part": "Bell_Clapper: free clapper inside the gold bell, all 42 vertices weighted to bell"
+}

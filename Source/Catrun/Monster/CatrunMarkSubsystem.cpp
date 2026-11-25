@@ -6,6 +6,7 @@
 #include "CatrunCandle.h"
 #include "CatrunRestartSubsystem.h"
 #include "LevelFlow/CatrunLevelFlow.h"
+#include "LevelFlow/CatrunElevatorTransition.h"
 #include "Interaction/CatrunBasketInteractionComponent.h"
 #include "Perception/CatrunCatQueries.h"
 #include "Sound/CatrunSoundSettings.h"
@@ -53,6 +54,7 @@ void UCatrunMarkSubsystem::LeaveCorridor(const ACatrunStageExit& Exit)
 
 void UCatrunMarkSubsystem::RefreshCorridor()
 {
+    RefreshElevatorCorridor();
     ACatrunStageExit* Exit = Corridor.Get();
     APawn* Cat = CorridorCandidate.Get();
     if (!IsValid(Exit) || Exit->IsActorBeingDestroyed() || !IsValid(Cat) || Cat->IsActorBeingDestroyed()
@@ -69,19 +71,58 @@ void UCatrunMarkSubsystem::RefreshCorridor()
         || UCatrunPuzzleSuspension::IsSuspended(this)) return;
     // Set before clearing. Detection and path callbacks may synchronously query admission again.
     bCorridorAdmitted = true;
-    for (TActorIterator<ACatrunArmor> It(GetWorld()); It; ++It) It->ForgetCorridorCat(*Cat);
+    ForgetCorridorCat(*Cat, TEXT("Stage1 corridor entry"));
+}
+
+void UCatrunMarkSubsystem::ObserveElevatorCorridor(ACatrunElevatorTransition& Elevator)
+{
+    if (Elevator.GetWorld() != GetWorld() || Elevator.bArrivalSide || ElevatorCorridor.IsValid()) return;
+    ElevatorCorridor = &Elevator;
+    RefreshElevatorCorridor();
+}
+
+void UCatrunMarkSubsystem::LeaveElevatorCorridor(const ACatrunElevatorTransition& Elevator)
+{
+    if (ElevatorCorridor.Get(true) != &Elevator) return;
+    ElevatorCorridor.Reset();
+    ElevatorAdmittedCat.Reset();
+}
+
+void UCatrunMarkSubsystem::RefreshElevatorCorridor()
+{
+    const auto* Elevator = ElevatorCorridor.Get();
+    if (!Elevator) return;
+    APawn* Cat = CatrunCat::Find(this);
+    if (!IsValid(Cat) || Cat->IsActorBeingDestroyed() || GetWorld()->bIsTearingDown || !Cat->IsLocallyControlled()
+        || !Elevator->IsInsideCorridor(*Cat))
+    {
+        ElevatorAdmittedCat.Reset();
+        return;
+    }
+    if (ElevatorAdmittedCat.Get() == Cat) return;
+    const auto* Restart = UCatrunRestartSubsystem::Get(this);
+    const auto* Actions = Cat->FindComponentByClass<UCatrunBasketInteractionComponent>();
+    if ((Restart && Restart->IsCatching()) || (Actions && (Actions->Busy || Actions->IsHidden))
+        || UCatrunPuzzleSuspension::IsSuspended(this)) return;
+    ElevatorAdmittedCat = Cat;
+    ForgetCorridorCat(*Cat, TEXT("Stage2 elevator corridor entry"));
+}
+
+void UCatrunMarkSubsystem::ForgetCorridorCat(APawn& Cat, const TCHAR* Reason)
+{
+    for (TActorIterator<ACatrunArmor> It(GetWorld()); It; ++It) It->ForgetCorridorCat(Cat);
     for (TActorIterator<ACatrunCandle> It(GetWorld()); It; ++It) It->ForgetCorridorCat();
-    ClearMark(TEXT("Stage1 corridor entry"));
+    ClearMark(Reason);
 }
 
 bool UCatrunMarkSubsystem::IsExcludedFromPerception(const AActor* Subject)
 {
     if (!Subject) return false;
     auto* Marks = Get(Subject);
-    if (!Marks || Marks->CorridorCandidate.Get() != Subject) return false;
+    if (!Marks || (!Marks->ElevatorCorridor.IsValid() && Marks->CorridorCandidate.Get() != Subject)) return false;
     // Recheck the current center even if perception runs before the exit actor's tick.
     Marks->RefreshCorridor();
-    return Marks->bCorridorAdmitted;
+    return Marks->ElevatorAdmittedCat.Get() == Subject || (Marks->CorridorCandidate.Get() == Subject && Marks->bCorridorAdmitted);
 }
 
 void UCatrunMarkSubsystem::ApplyMark(APawn& Cat)

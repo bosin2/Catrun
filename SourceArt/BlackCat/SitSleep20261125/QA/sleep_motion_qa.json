@@ -1,0 +1,12 @@
+{
+  "AN_BlackCat_Sleep": {
+    "min_tail_surface_z_m": 0.013820722699165344,
+    "max_adjacent_tail_segment_angle_degrees": 53.859432794473456,
+    "tail_loop_matrix_difference": 0.0
+  },
+  "AN_BlackCat_SleepTailFixed": {
+    "min_tail_surface_z_m": 0.0032261013984680176,
+    "max_adjacent_tail_segment_angle_degrees": 34.42673522837053,
+    "tail_loop_matrix_difference": 0.0
+  }
+}

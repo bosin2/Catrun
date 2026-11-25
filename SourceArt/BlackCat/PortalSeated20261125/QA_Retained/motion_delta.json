@@ -1,0 +1,37 @@
+{
+  "changes": {
+    "limited_to_four_weights": 52,
+    "max_removed_weight": 0.03143565822392702,
+    "lower_lid_vertices_narrowed": 1056,
+    "lower_lid_cap_offset_m": 0.0003,
+    "geometry_deleted": 0,
+    "triangles_added": 0,
+    "intentional_detached_part": "Bell_Clapper: free clapper inside the gold bell, all 42 vertices weighted to bell"
+  },
+  "frame_deltas": {
+    "152": {
+      "max_vertex_delta_m": 0.0011700563947530103,
+      "changed_over_1e5": 1068
+    },
+    "179": {
+      "max_vertex_delta_m": 0.0012020042389978842,
+      "changed_over_1e5": 1068
+    },
+    "223": {
+      "max_vertex_delta_m": 0.0014772664650062539,
+      "changed_over_1e5": 1070
+    },
+    "261": {
+      "max_vertex_delta_m": 0.00115125338674175,
+      "changed_over_1e5": 1067
+    },
+    "268": {
+      "max_vertex_delta_m": 0.0007532400834874619,
+      "changed_over_1e5": 1066
+    },
+    "280": {
+      "max_vertex_delta_m": 0.0003000013505968345,
+      "changed_over_1e5": 1063
+    }
+  }
+}

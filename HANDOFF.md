@@ -1,5 +1,16 @@
 # Catrun 작업 인계
 
+## 2026-11-25 — Stage2 → Stage3 승강기 시네마틱 최신 인계
+
+이 채팅의 상세 인계: [ElevatorTransition_Handoff_20261125.md](C:/Users/whghk/Catrun/Docs/Design/ElevatorTransition_Handoff_20261125.md).
+
+- 사용자가 요청한 전체 연출, 완료한 에셋/모션/Revision 2, 최신 수정과 남은 순서를 분리해 기록했다.
+- **Revision 3는 코드·별도 빌드·실제 PIE 58개 검사·아래 얼굴 샷 3장 확인까지 완료. main Stage2 카메라/태그 저장과 새 DLL 활성화는 아직 미실행이다.** 두 적용 스크립트의 dry-run은 통과했다.
+- 실제 프로젝트는 `C:\Users\whghk\Catrun`. 최초 cwd의 worktree 1166에 적용하지 않는다. 후보 프로젝트와 적용 명령은 상세 문서에 있다.
+- 현재 사용자 에디터는 이전 DLL을 사용한다. 다음 AI는 기존 작업을 보존하며 main 적용과 재시작 반영을 마무리한다. 이 승강기 작업의 커밋·푸시·다른 채팅 메시지 전송은 하지 않았다.
+- 검증 증거 복사본: `C:\Users\whghk\Catrun\Saved\ElevatorTransition\Revision3Handoff_20261125`.
+- 아래는 다른 작업과 과거 인계 기록이며 그대로 보존한다. 승강기 작업에는 위 상세 문서의 최신 상태를 우선 적용한다.
+
 ## 2026-11-25 — Stage3 통합·캠페인 연결·최종 회귀 완료
 
 - 사용자의 후속 지시로 중단됐던 검증을 재개하고, 완료된 제작 채팅의 Stage2 아트·바구니·게임플레이 확장과 Stage3 최종 납품을 통합했다. 최신 지시는 전체 점검 후 GitHub main 푸시까지 명시적으로 승인한다.

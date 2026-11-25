@@ -1,0 +1,45 @@
+from pathlib import Path
+import json,shutil,hashlib
+S=Path(__file__).resolve().parents[1]/'SitSleep';D=S.parents[1]/'SitSleep20261125';D.mkdir(exist_ok=True);(D/'Previews').mkdir(exist_ok=True);(D/'QA').mkdir(exist_ok=True)
+for src,dst in [('SK_BlackCat_Seated.blend','SK_BlackCat_SeatedLowPoly.blend'),('SK_BlackCat_SleepTailFixed.blend','SK_BlackCat_SleepTailFixed.blend')]:shutil.copy2(S/src,D/dst)
+for name in ['Sit_EarTail_30fps.mp4','Sit_EarTail.gif','Sleep_BeforeAfter.mp4','Sleep_BeforeAfter.png','sit_review_random.png','sit_review_wire.png']:shutil.copy2(S/'Previews'/name,D/'Previews'/name)
+shutil.copy2(S/'Previews'/'sit_frames'/'0000.png',D/'Previews'/'SeatedLowPoly.png')
+for name in ['sit_mesh_qa.json','sit_motion_qa.json','sleep_qa.json','sleep_motion_qa.json']:shutil.copy2(S/name,D/'QA'/name)
+text='''# BlackCat 앉기 / 귀 갸웃 / 꼬리 탁탁 / 수면 꼬리 수정본
+
+사진은 앉는 동작의 참고로만 사용합니다. 수정본은 원래 큰 머리와 각진 얼굴을 유지하고, 짧고 통통한 몸과 큼직한 로우폴리 면으로 다시 잡았습니다. 앞서 만든 길고 촘촘한 몸통 버전은 이 폴더의 납품본에 포함하지 않았습니다.
+
+## 파일
+
+- `SK_BlackCat_SeatedLowPoly.blend`: 앉기 전용 수정본. 원래 얼굴·귀·꼬리·목걸이·방울을 바탕으로, 앉은 몸통과 다리 표면을 별도로 구성했습니다. 78본 이름과 기준 자세를 사용하지만, 새 몸통은 이 앉기 자세에 맞춰 바인딩한 것이므로 기존 걷기/점프 메쉬의 공용 대체품이 아닙니다.
+- `SK_BlackCat_SleepTailFixed.blend`: 원본 전체 메쉬/리그와 기존 액션을 유지한 수면 꼬리 수정본. 새 액션 `AN_BlackCat_SleepTailFixed`를 사용하세요. 원본 `AN_BlackCat_Sleep`도 비교용으로 남아 있습니다.
+- `Previews/Sit_EarTail_30fps.mp4`: 실제 Blender 프레임으로 만든 정상 속도 4초 재생.
+- `Previews/Sleep_BeforeAfter.mp4`: 왼쪽 원본 / 오른쪽 꼬리 수정. 원본 30fps에서 두 프레임마다 렌더하여 15fps로 정상 속도 재생했습니다.
+
+## 앉기 액션
+
+모두 30fps이며, 프레임 1이 시작 시간 0초입니다.
+
+| 액션 | 프레임 | 내용 |
+|---|---|---|
+| AN_BlackCat_SitPose | 1–31 | 앉기 유지 |
+| AN_BlackCat_SitEarTilt | 1–121 | 한쪽 귀가 먼저 반응하고 작은 고개 갸웃 후 복귀 |
+| AN_BlackCat_SitTailTap | 1–121 | 바닥 쪽 꼬리 두 번 탁탁 |
+| AN_BlackCat_SitEarTail | 1–121 | 귀·고개·꼬리 조합 |
+
+현재 앉은 상태의 동작만 포함합니다. 서기→앉기 전환은 포함하지 않습니다. 눈은 열린 상태용이며, 겹치던 숨은 아래 눈꺼풀 셸을 앉기 사본에서 정리했습니다. 수면 파일의 눈꺼풀은 원본 그대로입니다.
+
+## 확인 결과와 한계
+
+- 앉기 전체 6,858 tris: 원본에서 유지한 얼굴/장식/꼬리 등 6,250, 새 몸통 580, 방울 내부 연결봉 28.
+- Blender asset QA: 오류 0. 겹쳐 깜빡이는 면, 떠 있는 부품, 뒤집힌 노멀, 4개 초과 웨이트 없음.
+- 남은 허용 경고: 방울 내부 연결봉의 평평한 뚜껑 2개가 n-gon이며 변형되지 않습니다. 원본 얼굴/장식 내부의 숨은 반대 방향 면 1쌍은 겉모습에 영향을 주지 않아 유지했습니다.
+- 앉기 4개 액션의 모든 정수 프레임 검사: 발 앵커 이동 0, 바닥 관통 없음, 반복 시작/끝 본 행렬 일치. 정상 속도 영상과 정면/측면/사선 및 와이어 프레임을 함께 검토했습니다. 이것이 임의의 모든 새 자세에 대한 무변형 보장은 아닙니다.
+- 수면 241프레임 검사: 꼬리 외 모든 본 행렬 차이 0. 꼬리는 바닥을 따라 느슨하게 내려오며, 인접 꼬리 마디의 최대 꺾임은 약 53.9도→34.4도로 줄었습니다. 꼬리 표면은 바닥 위에 있으며 반복 시작/끝 일치.
+- 원본 `C:/Users/whghk/Desktop/CastleKit/BlackCat/Final/SK_BlackCat_Final.blend`를 덮어쓰지 않았습니다.
+- UE 메쉬/스켈레톤/기존 애니메이션에는 적용하지 않았습니다. 이 폴더의 앉기 메쉬를 기존 애니메이션 전용 FBX처럼 취급하면 안 됩니다.
+
+포탈용 원본 호환 3개 FBX는 `../PortalEntry20261125/handoff.json`에서 별도로 관리하며, 이 앉기용 몸통은 포함하지 않습니다.
+'''
+(D/'README.md').write_text(text,encoding='utf8')
+files=[{'path':str(p),'bytes':p.stat().st_size,'sha256':hashlib.sha256(p.read_bytes()).hexdigest()} for p in D.glob('*.blend')];(D/'manifest.json').write_text(json.dumps({'status':'revision_for_visual_review','files':files,'original_blend_sha256':hashlib.sha256(Path('C:/Users/whghk/Desktop/CastleKit/BlackCat/Final/SK_BlackCat_Final.blend').read_bytes()).hexdigest()},indent=2),encoding='utf8');print(D);print(json.dumps(files,indent=2))
