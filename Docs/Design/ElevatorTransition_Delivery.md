@@ -48,3 +48,10 @@ Two parallel read-only reviewers checked runtime ownership/cleanup and scene fra
 - Reproduction: author_arrival_look.py is a separate one-time animation commandlet; author_revision2.py reuses that clip and applies the scene changes. Existing validated dust material is reused on later runs.
 - Latest visual evidence: `Runtime/12_CarefulStepOff00002.png`, `13_LookAroundLeft00001.png`, `13b_LookAroundRight00001.png`, `11_Stage3Gameplay00004.png`, `17_ReentryVisibleCat00001.png`, `18_ReentryRestoredCabin00001.png`. These are actual offscreen PIE editor captures, not concept renders. The 39-check run is fixture-assisted at the initial entry points; reentry/exit use real character movement.
 - Original BlackCat mesh, skeleton and source PortalInspect SHA256 rechecked unchanged. Task-owned test editors exited normally; no commit or publication was made.
+
+## Revision 3 (2026-11-25 23:35 KST): applied to main and verified after restart
+- Floor-level face shot restored, surroundings/minimap hidden from cabin entry, and F camera blend before the jump. Scope and limits: `ElevatorTransition_Handoff_20261125.md`.
+- Main Stage2: `E23_Shot_Below` moved to `(729,-1310,14)` with FOV 36, plus 31 visibility tags. 33 editor mutations; only `/Game/Maps/Stage2` saved. Receipt `Saved/ElevatorTransition/live_departure_apply.json`; read-only recheck after saving passed.
+- Active module is `UnrealEditor-Catrun_ElevatorRevision3.dll` (manifest committed, canonical DLL unchanged). The editor was closed normally with no unsaved changes and relaunched; PID 43664 loaded it.
+- Main-project offscreen PIE with isolated saves: 58 checks passed on d3d12 (`MainRevision3_02_D3D12.log`, `Runtime/report.json`); floor face shots inspected and matched against the candidate. The d3d11 run also passed 58 but rendered the face nearly black, probably missing indirect light, so use `-RHI d3d12` for visual review.
+- Limits: entry points are placement fixtures, not a full manual playthrough. No commit or push.

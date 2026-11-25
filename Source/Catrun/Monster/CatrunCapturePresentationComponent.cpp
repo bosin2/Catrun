@@ -13,6 +13,7 @@
 #include "Camera/CameraComponent.h"
 #include "Camera/PlayerCameraManager.h"
 #include "Components/PrimitiveComponent.h"
+#include "Components/SpotLightComponent.h"
 #include "Engine/World.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/PlayerController.h"
@@ -163,8 +164,26 @@ void UCatrunCapturePresentationComponent::CreateCamera()
 	{
 		View->GetCameraComponent()->bConstrainAspectRatio = false;
 		View->GetCameraComponent()->SetFieldOfView(60.f);
+		// Presentation-only key light: dark rooms otherwise show a black cat against black armor.
+		auto* Light = NewObject<USpotLightComponent>(View, TEXT("CaptureKeyLight"));
+		Light->SetMobility(EComponentMobility::Movable);
+		Light->SetupAttachment(View->GetRootComponent());
+		Light->SetRelativeLocation(FVector(-20.f, 130.f, 90.f));
+		Light->SetIntensityUnits(ELightUnits::Candelas);
+		Light->SetIntensity(0.f);
+		Light->SetLightColor(FLinearColor(1.f, .86f, .7f));
+		Light->SetOuterConeAngle(28.f);
+		Light->SetInnerConeAngle(9.f);
+		Light->SetSourceRadius(20.f);
+		Light->SetAttenuationRadius(1200.f);
+		Light->SetCastShadows(false);
+		Light->RegisterComponent();
+		KeyLight = Light;
 		PC->SetViewTarget(View);
+		// Gameplay is orthographic; without a cut the first perspective frame smears into motion blur.
+		PC->PlayerCameraManager->SetGameCameraCutThisFrame();
 	}
+	bCameraYawChosen = false;
 }
 
 void UCatrunCapturePresentationComponent::UpdateCamera(float DeltaTime)
@@ -178,34 +197,85 @@ void UCatrunCapturePresentationComponent::UpdateCamera(float DeltaTime)
 	Params.AddIgnoredActor(Camera.Get());
 	const auto Probe = FCollisionShape::MakeSphere(FMath::Max(1.f, CameraProbeRadius));
 	const float Distance = FMath::Max(Settings->CatchCameraDistance, FVector::Distance(ArmorFocus, Cat->GetActorLocation()) * 1.4f);
-	FVector Best = Camera->GetActorLocation();
-	float BestScore = -1.f;
-	for (float Yaw : {0.f, 45.f, -45.f, 90.f, -90.f, 180.f})
+	auto Blocked = [&](const FVector& Point) { return GetWorld()->OverlapBlockingTestByChannel(Point, FQuat::Identity, ECC_Camera, Probe, Params); };
+	// Furniture beside the cat can swallow the focus point; start the probe from a clear point of the pair.
+	FVector SweepStart = Focus;
+	for (const FVector& Start : {Focus, ArmorFocus, FVector(Focus + FVector(0,0,80)), FVector(ArmorFocus + FVector(0,0,60))})
+		if (!Blocked(Start)) { SweepStart = Start; break; }
+	// The armor ends on FramingTargetYaw. Composing for that heading keeps the shot stable while it turns.
+	const FRotationMatrix Heading(FRotator(0.f, FramingTargetYaw, 0.f));
+	auto Evaluate = [&](float Yaw, bool bNeedCat, FVector& Out)
 	{
-		FVector Offset = Armor->GetActorForwardVector() * Distance + Armor->GetActorRightVector() * Settings->CatchCameraSideOffset;
+		FVector Offset = Heading.GetUnitAxis(EAxis::X) * Distance + Heading.GetUnitAxis(EAxis::Y) * Settings->CatchCameraSideOffset;
 		Offset = Offset.RotateAngleAxis(Yaw, FVector::UpVector);
 		Offset.Z = Settings->CatchCameraHeight;
 		FVector Candidate = Focus + Offset;
 		FHitResult Hit;
-		if (GetWorld()->SweepSingleByChannel(Hit, Focus, Candidate, FQuat::Identity, ECC_Camera, Probe, Params))
+		if (GetWorld()->SweepSingleByChannel(Hit, SweepStart, Candidate, FQuat::Identity, ECC_Camera, Probe, Params))
 		{
-			if (Hit.bStartPenetrating) continue;
+			if (Hit.bStartPenetrating) return false;
 			Candidate = Hit.Location + Hit.Normal * 2.f;
 		}
-		if (GetWorld()->OverlapBlockingTestByChannel(Candidate, FQuat::Identity, ECC_Camera, Probe, Params)) continue;
-		if (GetWorld()->LineTraceTestByChannel(Candidate, ArmorFocus, ECC_Visibility, Params)
-			|| GetWorld()->LineTraceTestByChannel(Candidate, Cat->GetActorLocation(), ECC_Visibility, Params)) continue;
-		const float Score = FVector::DistSquared(Candidate, Focus) / (1.f + FMath::Abs(Yaw) / 180.f);
-		if (Score > BestScore) { Best = Candidate; BestScore = Score; }
+		if (Blocked(Candidate) || GetWorld()->LineTraceTestByChannel(Candidate, ArmorFocus, ECC_Visibility, Params)
+			|| (bNeedCat && GetWorld()->LineTraceTestByChannel(Candidate, Cat->GetActorLocation(), ECC_Visibility, Params))) return false;
+		Out = Candidate;
+		return true;
+	};
+	FVector Best = Camera->GetActorLocation();
+	const bool bFirst = !bCameraYawChosen;
+	if (bFirst)
+	{
+		// One choice per session: re-scoring every frame made the shot jump. Show the caught cat, so
+		// front and side views win and behind the armor is a last resort.
+		float BestScore = -1.f;
+		for (const bool bNeedCat : {true, false})
+		{
+			if (BestScore >= 0.f) break;
+			for (float Yaw : {0.f, 45.f, -45.f, 90.f, -90.f, 135.f, -135.f, 180.f})
+			{
+				FVector Candidate;
+				if (!Evaluate(Yaw, bNeedCat, Candidate)) continue;
+				const float AbsYaw = FMath::Abs(Yaw);
+				const float Score = FMath::Clamp((FVector::Distance(Candidate, Focus) - 120.f) / 180.f, .02f, 1.f)
+					* (AbsYaw < 1.f ? 1.f : AbsYaw < 46.f ? .9f : AbsYaw < 91.f ? .6f : AbsYaw < 136.f ? .2f : .1f);
+				if (Score > BestScore) { BestScore = Score; CameraYaw = Yaw; bCameraNeedsCat = bNeedCat; }
+			}
+		}
+		bCameraOverhead = BestScore < 0.f;
+		bCameraYawChosen = true;
 	}
-	if (BestScore < 0.f) return; // retain last safe/original framing when the room has no candidate
-	const float Alpha = Settings->CatchCameraBlendTime > 0.f ? FMath::Clamp(Elapsed / Settings->CatchCameraBlendTime, 0.f, 1.f) : 1.f;
-	FVector Blended = FMath::Lerp(CameraFrom, Best, FMath::SmoothStep(0.f, 1.f, Alpha));
+	// The rooms have no ceiling, so an overhead view always shows the pair when no eye-level shot fits.
+	FVector Candidate;
+	if (bCameraOverhead) Best = Focus + Heading.GetUnitAxis(EAxis::X) * 150.f + Heading.GetUnitAxis(EAxis::Y) * 60.f + FVector(0.f, 0.f, 430.f);
+	else if (Evaluate(CameraYaw, bCameraNeedsCat, Candidate)) Best = Candidate;
 	FHitResult Hit;
-	// A desired point can be safe while the interpolation goes through a wall. Sweep the motion.
-	if (GetWorld()->SweepSingleByChannel(Hit, Camera->GetActorLocation(), Blended, FQuat::Identity, ECC_Camera, Probe, Params)
-		|| GetWorld()->LineTraceTestByChannel(Blended, Focus, ECC_Visibility, Params)) Blended = Best;
+	auto PathBlocked = [&](const FVector& From, const FVector& To)
+	{
+		return GetWorld()->SweepSingleByChannel(Hit, From, To, FQuat::Identity, ECC_Camera, Probe, Params)
+			|| GetWorld()->LineTraceTestByChannel(To, Focus, ECC_Visibility, Params);
+	};
+	// A blend that would cross a wall becomes one clean cut on the first frame instead of a jump half way.
+	if (bFirst) bCameraCut = bCameraOverhead || PathBlocked(CameraFrom, (CameraFrom + Best) * .5f) || PathBlocked((CameraFrom + Best) * .5f, Best);
+	const float Alpha = Settings->CatchCameraBlendTime > 0.f ? FMath::Clamp(Elapsed / Settings->CatchCameraBlendTime, 0.f, 1.f) : 1.f;
+	FVector Blended;
+	if (bCameraCut) Blended = bFirst ? Best : FMath::VInterpTo(Camera->GetActorLocation(), Best, DeltaTime, 5.f);
+	else Blended = Alpha < 1.f ? FMath::Lerp(CameraFrom, Best, FMath::SmoothStep(0.f, 1.f, Alpha))
+		: FMath::VInterpTo(Camera->GetActorLocation(), Best, DeltaTime, 5.f);
+	if (!bCameraOverhead && !bFirst && PathBlocked(Camera->GetActorLocation(), Blended)) Blended = Best;
+	if (bFirst && bCameraCut && Player.IsValid() && Player->PlayerCameraManager) Player->PlayerCameraManager->SetGameCameraCutThisFrame();
 	Camera->SetActorLocationAndRotation(Blended, (Focus-Blended).Rotation());
+	// A wall can push the camera close; widen so the armor's head and the cat stay in frame.
+	const float FocusDistance = FMath::Max(1.f, FVector::Distance(Blended, Focus));
+	int32 Width = 0, Height = 0;
+	if (const auto* PC = Player.Get()) PC->GetViewportSize(Width, Height);
+	const float Aspect = Height > 0 ? FMath::Clamp(float(Width) / Height, 1.f, 2.4f) : 16.f / 9.f;
+	const float Fov = FMath::RadiansToDegrees(2.f * FMath::Atan(CameraFitHalfHeight / FocusDistance * Aspect));
+	Camera->GetCameraComponent()->SetFieldOfView(FMath::Clamp(Fov, 60.f, 90.f));
+	if (auto* Light = KeyLight.Get())
+	{
+		Light->SetWorldRotation((Focus - Light->GetComponentLocation()).Rotation());
+		Light->SetIntensity(KeyLightLux * FMath::Square(FVector::Distance(Light->GetComponentLocation(), Focus) / 100.f) * FMath::SmoothStep(0.f, 1.f, Alpha));
+	}
 }
 
 FVector UCatrunCapturePresentationComponent::HandsLocation() const

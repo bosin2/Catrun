@@ -34,6 +34,7 @@ private:
  UPROPERTY(meta=(BindWidgetOptional)) TObjectPtr<UBorder> RestartConfirmPanel;
  UPROPERTY(meta=(BindWidgetOptional)) TObjectPtr<UButton> RestartAccept;
  UPROPERTY(meta=(BindWidgetOptional)) TObjectPtr<UButton> RestartCancel;
+ bool MoveDirectionalFocus(const FKeyEvent& Event);
  bool bStageRestartPending = false;
  bool bSettingsWereEnabled = true;
  UPROPERTY(Transient) FCatrunKeyboardBindings DraftBindings;

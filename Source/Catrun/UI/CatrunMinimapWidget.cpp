@@ -311,8 +311,10 @@ bool UCatrunMinimapWidget::InitializeMap(ACatrunMinimapPresenter& InPresenter)
 	FrameSlot = Frame ? Cast<UCanvasPanelSlot>(Frame->Slot) : nullptr;
 	if (UBorder* Border = Cast<UBorder>(Frame))
 	{
-		const FSlateRoundedBoxBrush FrameBrush(CatrunHUDStyle::Ink.CopyWithNewOpacity(.42f),
+		FSlateRoundedBoxBrush FrameBrush(CatrunHUDStyle::Ink.CopyWithNewOpacity(.42f),
 			4.f, CatrunHUDStyle::Rim.CopyWithNewOpacity(.55f), 1.f);
+		// Rounded outlines ignore inherited opacity by default. Without this the rim stays on screen while the map is hidden.
+		FrameBrush.OutlineSettings.bUseBrushTransparency = true;
 		Border->SetBrush(FrameBrush);
 		Border->SetBrushColor(FLinearColor::White);
 	}

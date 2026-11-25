@@ -74,6 +74,11 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Sound")
 	bool HasGrid() const { return Grid.IsValid(); }
 
+	// Actor tag for furniture that fills its floor area up to head height (the Stage2 bookshelves).
+	// Sound goes around it like around a wall. ObstacleTag alone never blocks sound.
+	// The shape must be at least one grid cell thick.
+	static const FName SoundBlockerTag;
+
 	// Called by ACatrunDoor when it opens or closes.
 	void NotifyDoorStateChanged(ACatrunDoor* Door);
 
@@ -107,8 +112,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debug")
 	bool bDebugDrawGrid = false;
 
-	// Debug: draw the detection circle of every armor on the floor. Off in the real game; the
-	// armor's detection circle is not shown to the player.
+	// Debug: draw the detection circle of every armor on the floor, even where an armor hides it.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debug")
 	bool bDebugShowArmorDetection = false;
 
@@ -144,6 +148,8 @@ private:
 	void RefreshPuzzleObstacles() const;
 	mutable bool bPuzzleObstaclesDirty = true;
 	void RefreshDoorGates();
+	// Sound can be made or heard in this cell. Doors are not considered here.
+	bool IsSoundCell(int32 Cell) const;
 	void DeliverPendingSounds();
 	void AttachBellToPlayer();
 	void DebugDrawGrid() const;
@@ -160,8 +166,10 @@ private:
 	TArray<float> PictureDistance; // like LastDistance, but reaches a little further (for the picture)
 	float LastBudget = 0.f;
 
-	// Number of closed doors covering each cell. > 0 blocks sound.
+	// Number of closed doors and sound-blocking furniture covering each cell. > 0 blocks sound.
 	TArray<uint8> ClosedGateCells;
+	// 1 = covered by furniture with SoundBlockerTag. The armor path does not use this.
+	TArray<uint8> SoundBlockerCells;
 	TMap<TWeakObjectPtr<ACatrunDoor>, TArray<int32>> DoorCells;
 
 	bool bBellAttached = false;

@@ -1,14 +1,32 @@
 #include "CatrunNotice.h"
 #include "LevelFlow/CatrunLevelFlow.h"
+#include "UI/CatrunHUDStyle.h"
 
 #include "Blueprint/WidgetTree.h"
+#include "Brushes/SlateRoundedBoxBrush.h"
+#include "Components/Border.h"
 #include "Components/CanvasPanel.h"
 #include "Components/CanvasPanelSlot.h"
 #include "Components/TextBlock.h"
+#include "Engine/Font.h"
 #include "Engine/World.h"
 #include "Kismet/GameplayStatics.h"
 #include "Styling/CoreStyle.h"
 #include "TimerManager.h"
+
+namespace
+{
+	// Above the basket prompt (83%), below the cat. Long copy wraps instead of leaving a narrow viewport.
+	constexpr float NoticeAnchorY = .73f;
+	constexpr float NoticeWrapWidth = 960.f;
+
+	FSlateFontInfo NoticeFont(float Size)
+	{
+		if (const auto* Font = LoadObject<UFont>(nullptr, TEXT("/Game/Environment/Font/HSBombaram3_0_Regular_Font.HSBombaram3_0_Regular_Font")))
+			return FSlateFontInfo(Font, Size, TEXT("Default"));
+		return FCoreStyle::GetDefaultFontStyle("Bold", Size);
+	}
+}
 
 TSharedRef<SWidget> UCatrunNoticeWidget::RebuildWidget()
 {
@@ -18,18 +36,26 @@ TSharedRef<SWidget> UCatrunNoticeWidget::RebuildWidget()
 		WidgetTree->RootWidget = Root;
 
 		TextBlock = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), TEXT("Text"));
-		TextBlock->SetFont(FCoreStyle::GetDefaultFontStyle("Bold", 28));
-		TextBlock->SetColorAndOpacity(FSlateColor(FLinearColor::White));
-		TextBlock->SetShadowOffset(FVector2D(2.f, 2.f));
+		TextBlock->SetFont(NoticeFont(28.f));
+		TextBlock->SetColorAndOpacity(FSlateColor(CatrunHUDStyle::Text));
+		TextBlock->SetShadowOffset(FVector2D(1.f, 1.5f));
 		TextBlock->SetShadowColorAndOpacity(FLinearColor(0.f, 0.f, 0.f, 0.8f));
 		TextBlock->SetJustification(ETextJustify::Center);
+		TextBlock->SetWrapTextAt(NoticeWrapWidth);
 		TextBlock->SetText(PendingText);
 
-		if (UCanvasPanelSlot* TextSlot = Root->AddChildToCanvas(TextBlock))
+		// The same ink plate as the minimap keeps the line readable over candlelight and pale floors.
+		Plate = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("Plate"));
+		FSlateRoundedBoxBrush PlateBrush(CatrunHUDStyle::Ink.CopyWithNewOpacity(.62f), 4.f);
+		Plate->SetBrush(PlateBrush);
+		// This face keeps about twenty units of empty descent under each line; the padding centers the visible glyphs.
+		Plate->SetPadding(FMargin(26.f, 19.f, 26.f, 0.f));
+		Plate->SetContent(TextBlock);
+		if (UCanvasPanelSlot* PlateSlot = Root->AddChildToCanvas(Plate))
 		{
-			TextSlot->SetAnchors(FAnchors(0.5f, 0.82f)); // bottom middle of the screen
-			TextSlot->SetAlignment(FVector2D(0.5f, 0.5f));
-			TextSlot->SetAutoSize(true);
+			PlateSlot->SetAnchors(FAnchors(0.5f, NoticeAnchorY));
+			PlateSlot->SetAlignment(FVector2D(0.5f, 0.5f));
+			PlateSlot->SetAutoSize(true);
 		}
 	}
 	return Super::RebuildWidget();
@@ -77,8 +103,8 @@ bool UCatrunNoticeWidget::RefreshPresentation()
 
 void UCatrunNoticeWidget::SetScreenAnchor(FVector2D Anchor)
 {
-	if (TextBlock)
-		if (auto* TextSlot = Cast<UCanvasPanelSlot>(TextBlock->Slot)) TextSlot->SetAnchors(FAnchors(Anchor.X, Anchor.Y));
+	if (Plate)
+		if (auto* PlateSlot = Cast<UCanvasPanelSlot>(Plate->Slot)) PlateSlot->SetAnchors(FAnchors(Anchor.X, Anchor.Y));
 }
 
 UCatrunNoticeSubsystem* UCatrunNoticeSubsystem::Get(const UObject* WorldContextObject)
@@ -103,7 +129,7 @@ void UCatrunNoticeSubsystem::Deinitialize()
 
 FText UCatrunNoticeSubsystem::BellDeniedText()
 {
-	return NSLOCTEXT("Catrun", "BellDeniedExact", "방울을 울릴수없습니다");
+	return NSLOCTEXT("Catrun", "BellDeniedExact", "방울을 울릴 수 없습니다");
 }
 
 void UCatrunNoticeLibrary::ShowBottomNotice(const UObject* Context, const FText& Text, float Duration)

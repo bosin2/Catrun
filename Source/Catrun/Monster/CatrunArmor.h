@@ -227,10 +227,10 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Armor|Detection")
 	TObjectPtr<UCatrunAlertMarkComponent> AlertMark;
 
-	// Draw the detection circle of this armor on the floor (debug only). The level's sound system
-	// has a switch (bDebugShowArmorDetection) that shows the circles of all armors at once.
+	// Draw the catch range of this armor on the floor. The player relies on it, so every armor
+	// shows it unless a level hides it on purpose.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Armor|Detection")
-	bool bShowDetectionDisplay = false;
+	bool bShowDetectionDisplay = true;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Armor|Detection", meta=(ClampMin="0", ClampMax="1"))
 	float DetectionDisplayOpacity = .12f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Armor|Detection")

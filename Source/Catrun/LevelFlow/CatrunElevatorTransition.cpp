@@ -42,9 +42,13 @@ namespace
 {
     constexpr float AlignSeconds = .24f;
     constexpr float DepartureAlignSeconds = 1.f;
-    constexpr float PeekShotStartSeconds = 3.4f;
-    constexpr float PeekShotEndSeconds = 5.77f;
-    constexpr float PeekShotPlayRate = .74f;
+    // Cuts inside the continuous PeekLoafIn clip: approach | floor shot | edge, walk inside, loaf.
+    constexpr float PeekShotStartSeconds = 74.f / 30.f;
+    constexpr float PeekShotEndSeconds = 178.f / 30.f;
+    constexpr int32 PeekClipIndex = 5;
+    constexpr int32 RideClipIndex = 6;
+    constexpr float RideSeconds = 3.6f;
+    constexpr float RiseEaseSeconds = 1.6f;
     constexpr float BlackoutSeconds = .65f;
     constexpr float ApproachSeconds = .95f;
     constexpr float LoafReadSeconds = 1.25f;
@@ -142,6 +146,8 @@ void ACatrunElevatorTransition::BeginPlay()
     {
         WarehouseCamera->Tags.AddUnique(TEXT("CatrunGameplayCamera"));
         WarehouseCamera->Tags.AddUnique(TEXT("CatrunElevatorWarehouseCamera"));
+        WarehouseCameraRest = WarehouseCamera->GetActorTransform();
+        WarehouseCameraRestFOV = WarehouseCamera->FindComponentByClass<UCameraComponent>()->FieldOfView;
     }
 }
 
@@ -209,6 +215,19 @@ void ACatrunElevatorTransition::UpdateWarehouseView(ACharacter* Pawn, APlayerCon
     PC->SetViewTargetWithBlend(WarehouseCamera, .35f);
 }
 
+void ACatrunElevatorTransition::UpdateWarehouseFraming(bool bCabin, float DeltaSeconds)
+{
+    if (bArrivalSide || WarehouseCameraRestFOV <= 0.f || !IsUsableCamera(WarehouseCamera)) return;
+    const float Previous = WarehouseFraming;
+    WarehouseFraming = FMath::FInterpTo(WarehouseFraming, bCabin ? 1.f : 0.f, DeltaSeconds, 3.2f);
+    if (WarehouseFraming < .002f) WarehouseFraming = 0.f;
+    if (Previous == WarehouseFraming) return;
+    const FVector Cabin = (CabinPivot ? CabinPivot->GetActorLocation() : GetActorLocation()) + FVector::UpVector * 130.;
+    const FQuat Aim = (Cabin - WarehouseCameraRest.GetLocation()).Rotation().Quaternion();
+    WarehouseCamera->SetActorRotation(FQuat::Slerp(WarehouseCameraRest.GetRotation(), Aim, WarehouseFraming));
+    WarehouseCamera->FindComponentByClass<UCameraComponent>()->SetFieldOfView(FMath::Lerp(WarehouseCameraRestFOV, 48.f, WarehouseFraming));
+}
+
 void ACatrunElevatorTransition::UpdateOccluders(bool bCorridor, bool bCabin, bool bAscent)
 {
     const auto ShouldHide = [this, bCorridor, bCabin, bAscent](AActor* Actor)
@@ -243,6 +262,7 @@ void ACatrunElevatorTransition::UpdateFreeWalk(ACharacter* Pawn, APlayerControll
     const bool bWarehouse = Pawn && ContainsCenter(WarehouseVolume, *Pawn);
     UpdateZonePresentation(Pawn, PC, DeltaSeconds);
     UpdateWarehouseView(Pawn, PC, bWarehouse || bCabin);
+    UpdateWarehouseFraming(bCabin, DeltaSeconds);
     if (auto* Marks = UCatrunMarkSubsystem::Get(this)) Marks->RefreshCorridor();
     if (!Pawn || !PC || PC->IsMoveInputIgnored() || !PC->PlayerCameraManager || PC->PlayerCameraManager->PendingViewTarget.Target
         || !bCabin || !ContainsCenter(EntryVolume, *Pawn))
@@ -352,8 +372,29 @@ bool ACatrunElevatorTransition::ValidateClips(const ACharacter& Pawn) const
     const auto& Clips = bArrivalSide ? ArrivalClips : DepartureClips;
     if (Clips.Num() != (bArrivalSide ? 2 : 7)) return false;
     for (const UAnimSequence* Clip : Clips)
-        if (!MatchesCatSkeleton(Clip, Pawn)) return false;
+        if (CinematicMesh ? (!IsValid(Clip) || Clip->GetSkeleton() != CinematicMesh->GetSkeleton() || Clip->GetPlayLength() <= 0.f)
+            : !MatchesCatSkeleton(Clip, Pawn)) return false;
     return true;
+}
+
+void ACatrunElevatorTransition::WearCinematicMesh(ACharacter& Pawn)
+{
+    auto* Mesh = Pawn.GetMesh();
+    if (!CinematicMesh || Mesh->GetSkeletalMeshAsset() == CinematicMesh) return;
+    PlayMesh = Mesh->GetSkeletalMeshAsset();
+    PlayMaterials = Mesh->OverrideMaterials;
+    Mesh->EmptyOverrideMaterials();
+    Mesh->SetSkeletalMeshAsset(CinematicMesh);
+    // The play cat's AnimBP cannot drive this skeleton: hold the first cinematic pose through the alignment.
+    ActiveClip = (bArrivalSide ? ArrivalClips : DepartureClips)[0];
+    Mesh->PlayAnimation(ActiveClip, false);
+    if (auto* Single = Mesh->GetSingleNodeInstance())
+    {
+        Single->SetRootMotionMode(ERootMotionMode::NoRootMotionExtraction);
+        Single->SetPlaying(false);
+        Single->SetPosition(0.f, false);
+    }
+    bOwnPlayback = true;
 }
 
 void ACatrunElevatorTransition::SavePresentation(ACharacter& Pawn, APlayerController& PC)
@@ -390,6 +431,8 @@ void ACatrunElevatorTransition::SavePresentation(ACharacter& Pawn, APlayerContro
     SaveActor(FrontCamera);
     SaveActor(PeekCamera);
     SaveActor(CabinCamera);
+    SaveActor(LoafCamera);
+    CameraHeight = LoafShotSeconds = 0.f;
     bPlayedStart = bPlayedPull = bPlayedLatch = false;
     TimelineSeconds = PhaseSeconds = 0.f;
 }
@@ -413,13 +456,27 @@ bool ACatrunElevatorTransition::TryBegin(APawn* Pawn)
         return Reject(TEXT("Missing or invalid cinematic camera"));
     if (!ValidateClips(*Character)) return Reject(TEXT("The ordered animation clips do not match the possessed cat skeleton"));
     FText Failure;
-    if (!ExitTransition->AcquireExitLease(Character, Failure)) return Reject(Failure.ToString());
+    // The stage-start black from UCatrunRestartSubsystem is not another presentation owner; this arrival takes it over
+    // in the first frame so the gameplay camera is never shown and input is never released in between.
+    auto* CameraManager = PC->PlayerCameraManager.Get();
+    const bool bTakesOverStartFade = bArrivalSide && CameraManager && CameraManager->bEnableFading;
+    if (bTakesOverStartFade) CameraManager->bEnableFading = false;
+    if (!ExitTransition->AcquireExitLease(Character, Failure))
+    {
+        if (bTakesOverStartFade) CameraManager->bEnableFading = true;
+        return Reject(Failure.ToString());
+    }
     if (!ExitTransition->ValidateExitMotion(Character->GetActorLocation(), CatMark->GetActorLocation(), true, Failure))
     {
         ExitTransition->ReleaseExitLease(false);
+        if (bTakesOverStartFade) CameraManager->bEnableFading = true;
         return Reject(FString::Printf(TEXT("Cat mark is inaccessible: %s"), *Failure.ToString()));
     }
     SavePresentation(*Character, *PC);
+    WearCinematicMesh(*Character);
+    // Baked root travel carries the pose far from the component: fixed bounds would be occlusion-culled behind the platform.
+    SavedBoundsScale = Character->GetMesh()->BoundsScale;
+    Character->GetMesh()->SetBoundsScale(FMath::Max(8.f, SavedBoundsScale));
     if (bUseLocalElevatorLighting) SetLocalLighting(Character->GetMesh());
     UE_LOG(LogCatrunElevator, Log, TEXT("Elevator %s lease acquired"), bArrivalSide ? TEXT("arrival") : TEXT("departure"));
     State = ECatrunElevatorState::Aligning;
@@ -469,7 +526,7 @@ void ACatrunElevatorTransition::UpdateAlignment(float DeltaSeconds)
     State = bArrivalSide ? ECatrunElevatorState::Arrival : ECatrunElevatorState::Departure;
     // The gameplay roof is removed while walking inside. Crafted shots see the real roof.
     UpdateOccluders(false, false);
-    if (bArrivalSide) ApplyCabinMotion(-ArrivalApproachDistance, 0.f, 0.f, 0.f, true);
+    if (bArrivalSide) ApplyCabinMotion(-ArrivalApproachDistance, 0.f, 0.f, 0.f, true, 0.f);
     if (bArrivalSide) CutTo(CabinCamera);
 }
 
@@ -511,7 +568,42 @@ void ACatrunElevatorTransition::CutTo(AActor* Camera)
     if (!PC || !IsUsableCamera(Camera) || Camera == ActiveCamera.Get()) return;
     ExitTransition->RememberOwnedViewTarget(Camera);
     PC->SetViewTarget(Camera);
+    // A hard cut: without the flag the first frame smears motion blur across the two shots.
+    if (PC->PlayerCameraManager) PC->PlayerCameraManager->SetGameCameraCutThisFrame();
     ActiveCamera = Camera;
+    UpdateShotLights();
+}
+
+void ACatrunElevatorTransition::UpdateShotLights()
+{
+    const AActor* Camera = ActiveCamera.Get();
+    const bool bPeek = Camera && Camera == PeekCamera;
+    const bool bLoaf = Camera && (Camera == LoafCamera || Camera == CabinCamera);
+    for (AActor* Light : PeekLights) if (IsValid(Light)) Light->SetActorHiddenInGame(!bPeek);
+    for (AActor* Light : LoafLights) if (IsValid(Light)) Light->SetActorHiddenInGame(!bLoaf);
+}
+
+void ACatrunElevatorTransition::SetAscentPresentation(bool bAscending)
+{
+    if (!bAscending)
+    {
+        for (const auto& Toggled : AscentToggledActors)
+            if (AActor* Actor = Toggled.Get()) Actor->SetActorHiddenInGame(!Actor->IsHidden());
+        AscentToggledActors.Reset();
+        return;
+    }
+    if (!AscentToggledActors.IsEmpty()) return;
+    const auto Toggle = [this](const TArray<TObjectPtr<AActor>>& Actors, bool bHide)
+    {
+        for (AActor* Actor : Actors)
+        {
+            if (!IsValid(Actor) || Actor->IsHidden() == bHide) continue;
+            Actor->SetActorHiddenInGame(bHide);
+            AscentToggledActors.Add(Actor);
+        }
+    };
+    Toggle(AscentHiddenActors, true);
+    Toggle(AscentShownActors, false);
 }
 
 void ACatrunElevatorTransition::SetFade(float Alpha)
@@ -648,17 +740,41 @@ void ACatrunElevatorTransition::UpdatePeekCamera(float DeltaSeconds)
         Target = (Mesh->GetBoneIndex(Head) != INDEX_NONE ? Mesh->GetBoneLocation(Head) : Mesh->GetComponentLocation())
             + Forward * 8. + FVector::UpVector * 2.;
     }
+    // Keep the platform edge in frame: the face sits above centre and climbs a little as the cabin leaves.
+    Target -= FVector::UpVector * 7.;
     const FVector Direction = Target - PeekCamera->GetActorLocation();
     if (Direction.IsNearlyZero() || Direction.ContainsNaN()) return;
     FRotator Desired = Direction.Rotation();
     if (const auto* Rest = RestTransforms.Find(PeekCamera.Get())) Desired.Roll = Rest->Rotator().Roll;
     // Aim before the first cut; subsequent frames keep the stationary lens and smoothly track rotation only.
     const FRotator Rotation = ActiveCamera.Get() == PeekCamera
-        ? FMath::RInterpTo(PeekCamera->GetActorRotation(), Desired, DeltaSeconds, 8.f) : Desired;
+        ? FMath::RInterpTo(PeekCamera->GetActorRotation(), Desired, DeltaSeconds, 2.2f) : Desired;
     PeekCamera->SetActorRotation(Rotation);
 }
 
-void ACatrunElevatorTransition::ApplyCabinMotion(float Height, float Sway, float LanternSwing, float ChainPull, bool bMoveCat)
+void ACatrunElevatorTransition::UpdateLoafCamera(float DeltaSeconds)
+{
+    auto* Pawn = Cat.Get();
+    const FTransform* Rest = RestTransforms.Find(LoafCamera.Get());
+    if (!Pawn || !Rest || !IsUsableCamera(LoafCamera)) return;
+    auto* Mesh = Pawn->GetMesh();
+    Mesh->RefreshBoneTransforms();
+    static const FName Spine(TEXT("spine"));
+    // Work in cabin space: the lens never inherits the sway, so the timber visibly rocks around the cat.
+    FVector Target = (Mesh->GetBoneIndex(Spine) != INDEX_NONE ? Mesh->GetBoneLocation(Spine) : Mesh->GetComponentLocation())
+        - FVector::UpVector * CameraHeight;
+    if (LoafShotSeconds <= 0.f) LoafAim = Target;
+    LoafAim = FMath::VInterpTo(LoafAim, Target, DeltaSeconds, 2.6f);
+    LoafShotSeconds += DeltaSeconds;
+    const float Push = FMath::SmoothStep(.8f, 7.6f, LoafShotSeconds);
+    const FVector Location = Rest->GetLocation() + Rest->GetRotation().GetForwardVector() * (90.f * Push);
+    const FVector RestAim = Rest->GetLocation() + Rest->GetRotation().GetForwardVector() * FVector::Distance(Rest->GetLocation(), LoafAim);
+    const FVector Direction = FMath::Lerp(RestAim, LoafAim, .7) - Location;
+    if (Direction.IsNearlyZero() || Direction.ContainsNaN()) return;
+    LoafCamera->SetActorLocationAndRotation(Location + FVector::UpVector * CameraHeight, Direction.Rotation());
+}
+
+void ACatrunElevatorTransition::ApplyCabinMotion(float Height, float Sway, float LanternSwing, float ChainPull, bool bMoveCat, float CameraRise)
 {
     const FQuat CabinRotation(FVector::ForwardVector, FMath::DegreesToRadians(Sway));
     const FQuat LanternRotation(FVector::ForwardVector, FMath::DegreesToRadians(LanternSwing));
@@ -679,6 +795,13 @@ void ACatrunElevatorTransition::ApplyCabinMotion(float Height, float Sway, float
             if (RestTransforms.Contains(Parent)) { bHasMovingParent = true; break; }
         if (bHasMovingParent) continue;
         FTransform Transform = Item.Value;
+        if (Actor == FrontCamera || Actor == CabinCamera || Actor == LoafCamera)
+        {
+            // Lenses follow the height only. Sway and jolts stay visible as the cabin moving in frame.
+            Transform.AddToTranslation(FVector(0., 0., CameraRise));
+            Actor->SetActorTransform(Transform, false, nullptr, ETeleportType::TeleportPhysics);
+            continue;
+        }
         if (Actor == LanternActor || LanternActors.Contains(Actor))
         {
             Transform.SetLocation(LanternPivot + LanternRotation.RotateVector(Transform.GetLocation() - LanternPivot));
@@ -696,30 +819,19 @@ void ACatrunElevatorTransition::UpdateDeparture(float DeltaSeconds)
     while (RemainingSeconds > 0.f)
     {
         const float ClipLength = ActiveClip->GetPlayLength();
-        float Boundary = ClipLength;
-        float PlayRate = 1.f;
-        if (ActiveClipIndex == 5)
-        {
-            if (ClipSeconds < PeekShotStartSeconds) Boundary = FMath::Min(Boundary, PeekShotStartSeconds);
-            else if (ClipSeconds < PeekShotEndSeconds)
-            {
-                Boundary = FMath::Min(Boundary, PeekShotEndSeconds);
-                PlayRate = PeekShotPlayRate;
-            }
-        }
-        const float SecondsToBoundary = FMath::Max(0.f, Boundary - ClipSeconds) / PlayRate;
+        // The last clip is the looping loaf: it lasts as long as the ride, not as long as the asset.
+        const float Duration = ActiveClipIndex == RideClipIndex ? RideSeconds : ClipLength;
+        const float SecondsToBoundary = FMath::Max(0.f, Duration - ClipSeconds);
         if (RemainingSeconds < SecondsToBoundary)
         {
-            ClipSeconds += RemainingSeconds * PlayRate;
+            ClipSeconds += RemainingSeconds;
             break;
         }
-        ClipSeconds = Boundary;
+        ClipSeconds = Duration;
         RemainingSeconds -= SecondsToBoundary;
-        // Consume real time on both sides of a rate/clip boundary; do not slow the rest of C06.
-        if (ClipSeconds < ClipLength) continue;
         if (ActiveClipIndex == DepartureClips.Num() - 1)
         {
-            SampleClip(ClipLength);
+            SampleClip(FMath::Fmod(Duration, ClipLength));
             if (State != ECatrunElevatorState::Departure) return;
             State = ECatrunElevatorState::Blackout;
             PhaseSeconds = 0.f;
@@ -729,8 +841,7 @@ void ACatrunElevatorTransition::UpdateDeparture(float DeltaSeconds)
         StartClip(ActiveClipIndex + 1);
     }
     const float SampleTime = ClipSeconds;
-    const float Length = ActiveClip->GetPlayLength();
-    SampleClip(SampleTime);
+    SampleClip(ActiveClipIndex == RideClipIndex ? FMath::Fmod(SampleTime, ActiveClip->GetPlayLength()) : SampleTime);
     if (State != ECatrunElevatorState::Departure) return;
 
     if (ActiveClipIndex < 4)
@@ -748,33 +859,58 @@ void ACatrunElevatorTransition::UpdateDeparture(float DeltaSeconds)
     }
 
     const float StartupLength = DepartureClips[4]->GetPlayLength();
-    const float PeekLength = DepartureClips[5]->GetPlayLength();
+    const float PeekLength = DepartureClips[PeekClipIndex]->GetPlayLength();
     float MovingTime = SampleTime - StartImpact;
-    if (ActiveClipIndex >= 5) MovingTime += StartupLength;
-    if (ActiveClipIndex >= 6) MovingTime += PeekLength;
+    if (ActiveClipIndex >= PeekClipIndex) MovingTime += StartupLength;
+    if (ActiveClipIndex >= RideClipIndex) MovingTime += PeekLength;
     if (MovingTime >= 0.f && !bPlayedStart)
     {
         bPlayedStart = true;
         if (StartSound) UGameplayStatics::PlaySoundAtLocation(this, StartSound, MotionPivot);
     }
     MovingTime = FMath::Max(0.f, MovingTime);
-    const float RiseTime = StartupLength + PeekLength + DepartureClips[6]->GetPlayLength() - StartImpact;
-    const float RiseFraction = FMath::SmoothStep(0.f, RiseTime, MovingTime);
+    // Soft start, then a steady climb that is still moving when the picture goes black.
+    const float RiseTime = StartupLength + PeekLength + RideSeconds - StartImpact;
+    const float RiseFraction = (MovingTime < RiseEaseSeconds ? FMath::Square(MovingTime) / (2.f * RiseEaseSeconds)
+        : MovingTime - .5f * RiseEaseSeconds) / FMath::Max(.1f, RiseTime - .5f * RiseEaseSeconds);
     const float Jolt = 2.2f * FMath::Sin(MovingTime * 15.f) * FMath::Exp(-2.6f * MovingTime);
-    const float Sway = Jolt + .75f * FMath::Sin(MovingTime * 2.f) * FMath::SmoothStep(0.f, .85f, MovingTime);
+    const float Sway = Jolt + FMath::SmoothStep(0.f, .85f, MovingTime)
+        * (.75f * FMath::Sin(MovingTime * 2.f) + .25f * FMath::Sin(MovingTime * 5.3f + 1.1f));
     const float Swing = 5.5f * FMath::Sin(MovingTime * 3.5f) * FMath::SmoothStep(0.f, .65f, MovingTime);
-    ApplyCabinMotion(DepartureRiseDistance * RiseFraction, Sway, Swing, 0.f, true);
-    if (ActiveClipIndex == 5)
+    // Rail joints: a small knock every few seconds.
+    const float KnockAge = FMath::Fmod(MovingTime + .6f, 2.7f);
+    const float Knock = MovingTime > 2.f ? -.55f * FMath::Cos(26.f * KnockAge) * FMath::Exp(-7.f * KnockAge) : 0.f;
+    const float Rise = DepartureRiseDistance * FMath::Min(1.f, RiseFraction);
+    if (ActiveClipIndex >= PeekClipIndex)
     {
-        const bool bPeek = SampleTime >= PeekShotStartSeconds && SampleTime < PeekShotEndSeconds;
+        SetAscentPresentation(true);
+        const bool bPeek = ActiveClipIndex == PeekClipIndex && SampleTime >= PeekShotStartSeconds && SampleTime < PeekShotEndSeconds;
+        AActor* Shot = ActiveClipIndex == RideClipIndex ? CabinCamera.Get() : bPeek ? PeekCamera.Get()
+            : SampleTime >= PeekShotEndSeconds && IsUsableCamera(LoafCamera) ? LoafCamera.Get() : FrontCamera.Get();
+        const bool bCut = Shot != ActiveCamera.Get();
+        // The launch lens lets the cabin lift off first; the last one lets it leave through the top of the frame.
+        if (bCut && Shot != PeekCamera) CameraHeight = Rise;
+        if (Shot == CabinCamera) CameraHeight += FMath::Max(0.f, Rise - CameraHeight)
+            * (1.f - FMath::Exp(-DeltaSeconds * FMath::Lerp(6.f, .35f, FMath::SmoothStep(.5f, 1.8f, SampleTime))));
+        else if (Shot == LoafCamera) CameraHeight = Rise;
+        else if (Shot == FrontCamera) CameraHeight = FMath::FInterpTo(CameraHeight, Rise, DeltaSeconds, 1.f);
+        ApplyCabinMotion(Rise + Knock, Sway, Swing, 0.f, true, CameraHeight);
+        if (Shot == FrontCamera)
+        {
+            // Walking to the edge brings the cat closer and lower in frame; keep its paws above the letterbox.
+            FRotator Tilt = FrontCamera->GetActorRotation();
+            Tilt.Pitch -= 4.f * FMath::SmoothStep(.35f, PeekShotStartSeconds, SampleTime);
+            FrontCamera->SetActorRotation(Tilt);
+        }
         if (bPeek) UpdatePeekCamera(DeltaSeconds);
-        CutTo(bPeek ? PeekCamera.Get() : FrontCamera.Get());
+        else if (Shot == LoafCamera && Shot != FrontCamera) UpdateLoafCamera(DeltaSeconds);
+        CutTo(Shot);
+        if (ActiveClipIndex == RideClipIndex)
+            SetFade(FMath::SmoothStep(.58f * RideSeconds, .98f * RideSeconds, SampleTime));
+        return;
     }
-    if (ActiveClipIndex == 6)
-    {
-        CutTo(CabinCamera);
-        SetFade(FMath::SmoothStep(.55f * Length, Length, SampleTime));
-    }
+    CameraHeight = FMath::FInterpTo(CameraHeight, Rise, DeltaSeconds, 1.f);
+    ApplyCabinMotion(Rise + Knock, Sway, Swing, 0.f, true, CameraHeight);
 }
 
 void ACatrunElevatorTransition::UpdateArrival(float DeltaSeconds)
@@ -784,9 +920,10 @@ void ACatrunElevatorTransition::UpdateArrival(float DeltaSeconds)
     {
         const float Rise = FMath::SmoothStep(0.f, ApproachSeconds, PhaseSeconds);
         const float Sway = .8f * FMath::Sin(PI * Rise) * (1.f - Rise);
-        ApplyCabinMotion(-ArrivalApproachDistance * (1.f - Rise), Sway, Sway * 4.f, 0.f, true);
+        // The lens waits at the dock; riding up with the cabin it passed through the floor slab.
+        ApplyCabinMotion(-ArrivalApproachDistance * (1.f - Rise), Sway, Sway * 4.f, 0.f, true, 0.f);
         SampleClip(FMath::Fmod(PhaseSeconds, ActiveClip->GetPlayLength()));
-        if (State == ECatrunElevatorState::Arrival) SetFade(1.f - FMath::SmoothStep(0.f, .48f, PhaseSeconds));
+        if (State == ECatrunElevatorState::Arrival) SetFade(1.f - FMath::SmoothStep(.12f, .7f, PhaseSeconds));
         return;
     }
     if (ActiveClipIndex == 0) StartClip(1);
@@ -806,7 +943,7 @@ void ACatrunElevatorTransition::UpdateArrival(float DeltaSeconds)
         const float Bounce = -1.5f * FMath::Cos(26.f * LatchAge) * Damping;
         const float Roll = 2.f * FMath::Sin(27.f * LatchAge + PI * .25f) * Damping;
         const float LanternSwing = 4.f * FMath::Sin(18.f * LatchAge) * Damping;
-        ApplyCabinMotion(Bounce, Roll, LanternSwing, 0.f, true);
+        ApplyCabinMotion(Bounce, Roll, LanternSwing, 0.f, true, 0.f);
     }
     else if (bPlayedLatch)
         ApplyCabinMotion(0.f, 0.f, 0.f, 0.f, true);
@@ -857,11 +994,14 @@ void ACatrunElevatorTransition::BeginArrivalWalk()
     WalkDuration = FMath::Max(.3f, static_cast<float>(Path.Size2D()) / Speed);
     PhaseSeconds = 0.f;
     State = ECatrunElevatorState::ArrivalWalk;
+    // Stage3 lights must reach the cat outside, or it walks on a bright floor as a black cut-out.
+    if (LitMesh.IsValid()) LitMesh->SetLightingChannels(true, true, false);
     StartCabinWeight(Pawn);
     if (MatchesCatSkeleton(ArrivalExitWalkClip, *Pawn)) StartClipAsset(*ArrivalExitWalkClip, ArrivalWalkClipIndex);
     if (IsUsableCamera(ArrivalExitCamera))
     {
         TrackedArrivalExitCamera = ArrivalExitCamera.Get();
+        bReturnPath = true;
         ArrivalExitCameraStart = ArrivalExitCamera->GetActorTransform();
         CutTo(ArrivalExitCamera);
     }
@@ -956,14 +1096,72 @@ void ACatrunElevatorTransition::BeginArrivalBlend()
     }
     State = ECatrunElevatorState::ArrivalBlend;
     PhaseSeconds = 0.f;
+    if (LitMesh.IsValid()) LitMesh->SetLightingChannels(true, true, false);
+    auto* Exit = TrackedArrivalExitCamera.Get();
+    auto* ExitLens = Exit && Exit == ActiveCamera.Get() ? Exit->FindComponentByClass<UCameraComponent>() : nullptr;
+    if (bReturnPath && ExitLens)
+    {
+        ReturnSeconds = FMath::Clamp(FMath::IsFinite(ArrivalCameraBlendSeconds) ? ArrivalCameraBlendSeconds : 1.f, .1f, 3.f);
+        ReturnStart = Exit->GetActorTransform();
+        ReturnStartFOV = ReturnExitFOV = ExitLens->FieldOfView;
+        return;
+    }
+    bReturnPath = false;
     const float Duration = FMath::Clamp(FMath::IsFinite(ArrivalCameraBlendSeconds) ? ArrivalCameraBlendSeconds : .75f, .1f, 3.f);
     PC->SetViewTargetWithBlend(View, Duration, VTBlend_Cubic, 0.f, true);
+}
+
+void ACatrunElevatorTransition::UpdateReturnPath()
+{
+    auto* PC = Controller.Get();
+    auto* Exit = TrackedArrivalExitCamera.Get();
+    auto* Lens = Exit ? Exit->FindComponentByClass<UCameraComponent>() : nullptr;
+    AActor* View = GameplayCamera.Get();
+    if (!PC || !Lens || !IsUsableCamera(View) || !Cat.IsValid()) { CancelTransition(); return; }
+    const float Alpha = FMath::InterpEaseInOut(0.f, 1.f, FMath::Clamp(PhaseSeconds / ReturnSeconds, 0.f, 1.f), 2.5f);
+    if (Alpha >= 1.f)
+    {
+        bReturnPath = false;
+        PC->SetViewTarget(View);
+        return;
+    }
+    FMinimalViewInfo End;
+    View->CalcCamera(0.f, End);
+    // The straight path of a plain blend, but the cat keeps its place on screen instead of dropping out of frame.
+    const FVector Focus = Cat->GetActorLocation();
+    if (End.ProjectionMode == ECameraProjectionMode::Orthographic)
+    {
+        // Finish on a long lens that frames exactly what the orthographic gameplay view shows, so the hand-over does not jump.
+        const FVector Forward = End.Rotation.Vector();
+        const FVector Center = End.Location + Forward * ((Focus - End.Location) | Forward);
+        End.FOV = 22.f;
+        End.Location = Center - Forward * (End.OrthoWidth * .5f / FMath::Tan(FMath::DegreesToRadians(End.FOV * .5f)));
+    }
+    const auto Deviation = [&Focus](const FVector& Location, const FQuat& Rotation)
+    {
+        return (Focus - Location).Rotation().Quaternion().Inverse() * Rotation;
+    };
+    const FVector From = ReturnStart.GetLocation() - Focus;
+    const FVector To = End.Location - Focus;
+    FVector Direction = FMath::Lerp(From.GetSafeNormal(), To.GetSafeNormal(), Alpha);
+    Direction.Z += .3f * FMath::Sin(PI * Alpha);
+    const FVector Location = Focus + Direction.GetSafeNormal()
+        * FMath::Exp(FMath::Lerp(FMath::Loge(FMath::Max(1.f, From.Size())), FMath::Loge(FMath::Max(1.f, To.Size())), Alpha));
+    const FQuat Offset = FQuat::Slerp(Deviation(ReturnStart.GetLocation(), ReturnStart.GetRotation()),
+        Deviation(End.Location, End.Rotation.Quaternion()), Alpha);
+    Exit->SetActorLocationAndRotation(Location, (Focus - Location).Rotation().Quaternion() * Offset);
+    Lens->SetFieldOfView(FMath::Lerp(ReturnStartFOV, End.FOV, Alpha));
 }
 
 void ACatrunElevatorTransition::UpdateArrivalBlend(float DeltaSeconds)
 {
     PhaseSeconds += DeltaSeconds;
     LetterboxFraction *= 1.f - FMath::SmoothStep(0.f, .35f, PhaseSeconds);
+    if (bReturnPath)
+    {
+        UpdateReturnPath();
+        return;
+    }
     if (ExitTransition->IsArrivalViewSettled(GameplayCamera.Get())) FinishArrival();
     else if (PhaseSeconds > 3.5f) CancelTransition();
 }
@@ -982,11 +1180,20 @@ void ACatrunElevatorTransition::RestorePresentation()
 {
     if (!CabinWeight->IsResponding()) ApplyCabinMotion(0.f, 0.f, 0.f, 0.f, false);
     CabinWeight->SetScriptedRider(nullptr);
-    if (auto* Camera = TrackedArrivalExitCamera.Get()) Camera->SetActorTransform(ArrivalExitCameraStart);
+    if (auto* Camera = TrackedArrivalExitCamera.Get())
+    {
+        Camera->SetActorTransform(ArrivalExitCameraStart);
+        if (auto* Lens = Camera->FindComponentByClass<UCameraComponent>(); Lens && ReturnExitFOV > 0.f) Lens->SetFieldOfView(ReturnExitFOV);
+    }
+    ReturnExitFOV = 0.f;
+    bReturnPath = false;
     TrackedArrivalExitCamera.Reset();
     if (IsValid(PeekCamera))
         if (const auto* Rest = RestTransforms.Find(PeekCamera.Get())) PeekCamera->SetActorTransform(*Rest);
     RestTransforms.Reset();
+    SetAscentPresentation(false);
+    ActiveCamera.Reset();
+    UpdateShotLights();
     UpdateOccluders(false, false);
     RestoreCabinIsolation();
     SetFade(0.f);
@@ -996,10 +1203,19 @@ void ACatrunElevatorTransition::RestorePresentation()
     {
         auto* Mesh = Pawn->GetMesh();
         auto* Single = Mesh->GetSingleNodeInstance();
+        Mesh->SetBoundsScale(SavedBoundsScale);
         if (bOwnPlayback)
         {
             Mesh->SetRelativeTransform(OriginalMeshRelative);
-            if (Single && Single->GetCurrentAsset() == ActiveClip)
+            const bool bOurClip = Single && Single->GetCurrentAsset() == ActiveClip;
+            if (PlayMesh && Mesh->GetSkeletalMeshAsset() == CinematicMesh)
+            {
+                Mesh->Stop();
+                Mesh->SetSkeletalMeshAsset(PlayMesh);
+                Mesh->OverrideMaterials = PlayMaterials;
+                Mesh->MarkRenderStateDirty();
+            }
+            if (bOurClip)
             {
                 Mesh->SetAnimInstanceClass(SavedAnimClass);
                 Mesh->AnimationData = SavedAnimation;
@@ -1015,6 +1231,8 @@ void ACatrunElevatorTransition::RestorePresentation()
         }
     }
     bOwnPlayback = false;
+    PlayMesh = nullptr;
+    PlayMaterials.Reset();
     SetLocalLighting(nullptr);
     ActiveClip = nullptr;
     ActiveClipIndex = INDEX_NONE;
@@ -1050,6 +1268,7 @@ bool ACatrunElevatorTransition::SkipTransition()
     if (bArrivalSide)
     {
         if (State == ECatrunElevatorState::ArrivalBlend) return false;
+        bReturnPath = false;
         auto* Pawn = Cat.Get();
         if (!Pawn) { CancelTransition(); return false; }
         if (!CabinWeight->IsResponding()) ApplyCabinMotion(0.f, 0.f, 0.f, 0.f, false);
@@ -1099,7 +1318,7 @@ void ACatrunElevatorTransition::Tick(float DeltaSeconds)
     if (State == ECatrunElevatorState::Travelling) return;
     const bool bBlending = State == ECatrunElevatorState::ArrivalBlend;
     if (!ExitTransition->HasExitLease() || !Pawn || Pawn != Cat.Get() || PC != Controller.Get()
-        || (bBlending ? PC->GetViewTarget() != GameplayCamera.Get()
+        || (bBlending ? PC->GetViewTarget() != (bReturnPath ? TrackedArrivalExitCamera.Get() : GameplayCamera.Get())
             : (ActiveCamera.IsValid() && PC->GetViewTarget() != ActiveCamera.Get())))
     {
         CancelTransition();

@@ -1,4 +1,5 @@
 #include "AlertMarkComponent.h"
+#include "VisionFanComponent.h"
 
 #include "Camera/PlayerCameraManager.h"
 #include "Kismet/GameplayStatics.h"
@@ -28,6 +29,7 @@ void UCatrunAlertMarkComponent::TickComponent(float DeltaTime, ELevelTick TickTy
 	{
 		return;
 	}
+	SetHiddenInGame(UCatrunVisionFanComponent::IsCinematicView(GetWorld()));
 	TimeLeft -= DeltaTime;
 	if (TimeLeft <= 0.f)
 	{

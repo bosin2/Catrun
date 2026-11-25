@@ -109,7 +109,7 @@ void ACatrunStage3Objectives::CommitRelease(int32 Index)
 		Grid->EmitSound(Event);
 	}
 	if (auto* Notice = UCatrunNoticeSubsystem::Get(this))
-		Notice->ShowNotice(FText::FromString(AllReleased() ? TEXT("봉쇄 장치 3개 해제. 통제실의 동상을 발판에 놓으세요.") : TEXT("봉쇄 장치를 해제했어요.")),3.f);
+		Notice->ShowNotice(FText::FromString(AllReleased() ? TEXT("봉쇄 장치 3개를 해제했습니다. 통제실의 동상을 발판에 놓으세요.") : TEXT("봉쇄 장치를 해제했습니다.")),3.f);
 }
 void ACatrunStage3Objectives::UpdateChain(FCatrunReleaseDevice& D)
 {

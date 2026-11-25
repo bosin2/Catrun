@@ -4,11 +4,15 @@
 #include "Blueprint/WidgetTree.h"
 #include "Components/Border.h"
 #include "Components/Button.h"
+#include "Components/ComboBoxString.h"
 #include "Components/InputKeySelector.h"
+#include "Components/ScrollBox.h"
 #include "Components/TextBlock.h"
+#include "Components/WidgetSwitcher.h"
 #include "EnhancedInputSubsystems.h"
 #include "Engine/LocalPlayer.h"
 #include "GameFramework/PlayerController.h"
+#include "Framework/Application/SlateApplication.h"
 #include "LevelFlow/CatrunLevelFlow.h"
 void UCatrunSettingsWidget::NativeConstruct()
 {
@@ -118,9 +122,76 @@ bool UCatrunSettingsWidget::ReturnToMenuFromSettings()
  DismissSettings();
  return UCatrunLevelFlowLibrary::ReturnToMainMenu(this);
 }
+bool UCatrunSettingsWidget::MoveDirectionalFocus(const FKeyEvent& Event)
+{
+ // The authored ring serves Tab and stops Up/Down, which leaves a gamepad unable to reach most rows.
+ auto* PC=GetOwningPlayer();
+ if (!PC || !FSlateApplication::IsInitialized()) return false;
+ const EUINavigation Direction=FSlateApplication::Get().GetNavigationDirectionFromKey(Event);
+ const bool bVertical=Direction==EUINavigation::Up || Direction==EUINavigation::Down;
+ const bool bHorizontal=Direction==EUINavigation::Left || Direction==EUINavigation::Right;
+ if (!bVertical && !bHorizontal) return false;
+ const auto Collect=[this](std::initializer_list<const TCHAR*> Names)
+ {
+  TArray<UWidget*> Result;
+  for (const TCHAR* Name : Names)
+  {
+   UWidget* Widget=GetWidgetFromName(Name);
+   bool bShown=Widget && Widget->GetIsEnabled();
+   // The travel buttons stay visible inside a group that is collapsed on the main menu.
+   for (const UWidget* Part=Widget; Part && bShown; Part=Part->GetParent()) bShown=Part->IsVisible();
+   if (bShown) Result.Add(Widget);
+  }
+  return Result;
+ };
+ const auto* Switcher=Cast<UWidgetSwitcher>(GetWidgetFromName(TEXT("CategorySwitcher")));
+ const TArray<UWidget*> Categories=Collect({TEXT("ScreenCategoryButton"),TEXT("AudioCategoryButton"),TEXT("ControlsCategoryButton"),TEXT("DeveloperCategoryButton")});
+ TArray<UWidget*> Page;
+ switch (Switcher ? Switcher->GetActiveWidgetIndex() : INDEX_NONE)
+ {
+ case 0: Page=Collect({TEXT("WindowModeCombo"),TEXT("QualityCombo"),TEXT("FrameLimitCombo"),TEXT("VSyncCheckBox")}); break;
+ case 1: Page=Collect({TEXT("VolumeSlider")}); break;
+ case 2: Page=Collect({TEXT("KeyForward"),TEXT("KeyBack"),TEXT("KeyLeft"),TEXT("KeyRight"),TEXT("KeyRun"),TEXT("KeySneak"),TEXT("KeyBell"),TEXT("KeyInteract")}); break;
+ case 3: Page=Collect({TEXT("NoArmorCaptureCheckBox")}); break;
+ default: break;
+ }
+ const TArray<UWidget*> Footer=Collect({TEXT("DefaultsButton"),TEXT("RestartButton"),TEXT("MainMenuButton"),TEXT("ApplyButton"),TEXT("CloseButton")});
+ const auto Find=[PC](const TArray<UWidget*>& List)
+ {
+  return List.IndexOfByPredicate([PC](const UWidget* Widget) { return Widget->HasUserFocus(PC) || Widget->HasUserFocusedDescendants(PC); });
+ };
+ // An open list owns the arrows until it closes.
+ for (const UWidget* Widget : Page)
+  if (const auto* Combo=Cast<UComboBoxString>(Widget); Combo && Combo->IsOpen()) return false;
+ const int32 Step=Direction==EUINavigation::Down || Direction==EUINavigation::Right ? 1 : -1;
+ UWidget* Target=nullptr;
+ bool bOwned=false;
+ if (const int32 Index=Find(Categories); Index!=INDEX_NONE)
+ {
+  bOwned=bVertical;
+  if (bVertical) Target=Categories.IsValidIndex(Index+Step) ? Categories[Index+Step] : Step>0 && Footer.Num() ? Footer[0] : nullptr;
+ }
+ else if (const int32 Row=Find(Page); Row!=INDEX_NONE)
+ {
+  bOwned=bVertical;
+  if (bVertical) Target=Page.IsValidIndex(Row+Step) ? Page[Row+Step] : Step>0 && Footer.Num() ? Footer[0] : nullptr;
+ }
+ else if (const int32 Action=Find(Footer); Action!=INDEX_NONE)
+ {
+  bOwned=true;
+  if (bHorizontal) Target=Footer.IsValidIndex(Action+Step) ? Footer[Action+Step] : nullptr;
+  else if (Step<0) Target=Page.Num() ? Page.Last() : Categories.Num() ? Categories.Last() : nullptr;
+ }
+ if (Target)
+ {
+  Target->SetUserFocus(PC);
+  if (auto* Scroll=Cast<UScrollBox>(GetWidgetFromName(TEXT("SettingsBodyScroll"))); Scroll && Page.Contains(Target)) Scroll->ScrollWidgetIntoView(Target,false);
+ }
+ return bOwned;
+}
 FReply UCatrunSettingsWidget::NativeOnPreviewKeyDown(const FGeometry& Geometry, const FKeyEvent& Event)
 {
- if (Event.GetKey()==EKeys::Escape && !IsCapturingBinding())
+ if ((Event.GetKey()==EKeys::Escape || Event.GetKey()==EKeys::Gamepad_FaceButton_Right) && !IsCapturingBinding())
  {
   if (!Event.IsRepeat())
   {
@@ -129,5 +200,6 @@ FReply UCatrunSettingsWidget::NativeOnPreviewKeyDown(const FGeometry& Geometry, 
   }
   return FReply::Handled();
  }
+ if (!IsCapturingBinding() && !bStageRestartPending && MoveDirectionalFocus(Event)) return FReply::Handled();
  return Super::NativeOnPreviewKeyDown(Geometry,Event);
 }

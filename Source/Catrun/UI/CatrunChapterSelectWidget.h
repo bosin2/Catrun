@@ -33,8 +33,15 @@ protected:
 	virtual void NativeDestruct() override;
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 	virtual FReply NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent) override;
+	virtual FReply NativeOnPreviewKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent) override;
 private:
 	UFUNCTION() void CheckpointChanged(ECatrunCheckpointState State);
+	UFUNCTION() void SelectStage3();
+	/** The authored graph owns the first three cards. The fourth shares their layout and is driven here. */
+	void RefreshCards();
+	void RefreshUnderlines();
+	void FocusFirstAvailable();
+	bool MoveFocus(const FKeyEvent& Event);
 	void RestoreSource();
 	bool IsBusy() const;
 	TWeakObjectPtr<UWidget> PreviousPanel;

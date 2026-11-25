@@ -7,6 +7,7 @@ namespace CatrunHUDStyle
  inline const FLinearColor Ink = FLinearColor::FromSRGBColor(FColor::FromHex(TEXT("211F1C")));
  inline const FLinearColor Brass = FLinearColor::FromSRGBColor(FColor::FromHex(TEXT("B8A17A")));
  inline const FLinearColor Rim = FLinearColor::FromSRGBColor(FColor::FromHex(TEXT("756956")));
+ inline const FLinearColor Text = FLinearColor::FromSRGBColor(FColor::FromHex(TEXT("EEE6D3")));
  inline const FLinearColor Parchment = FLinearColor::FromSRGBColor(FColor::FromHex(TEXT("D5C6A4")));
  inline const FLinearColor Sage = FLinearColor::FromSRGBColor(FColor::FromHex(TEXT("B2BE94")));
  inline const FLinearColor Warning = FLinearColor::FromSRGBColor(FColor::FromHex(TEXT("D0AA70")));

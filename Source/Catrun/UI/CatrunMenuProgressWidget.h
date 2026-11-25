@@ -13,6 +13,7 @@ class CATRUN_API UCatrunMenuProgressWidget : public UUserWidget
 protected:
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
+	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
 	UFUNCTION(BlueprintImplementableEvent, Category="Catrun|Progress")
 	void RefreshContinue();
@@ -22,6 +23,9 @@ private:
 	void CheckpointChanged(ECatrunCheckpointState State);
 	void RetryProgressRead();
 	void RefreshMenu();
+	/** Keeps one menu button focused for keyboard and gamepad. The highlight still appears only after navigation input. */
+	void RestoreMenuFocus();
+	TWeakObjectPtr<UWidget> LastFocusedButton;
 	FTimerHandle ProgressReadTimer;
 
 	TWeakObjectPtr<UCatrunFlowSession> BoundSession;

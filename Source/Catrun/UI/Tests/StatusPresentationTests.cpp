@@ -1,7 +1,10 @@
 #if WITH_DEV_AUTOMATION_TESTS
 #include "UI/CatrunPlayerStatusWidget.h"
+#include "Components/BoxComponent.h"
 #include "Components/TextBlock.h"
+#include "Engine/TriggerBox.h"
 #include "Engine/World.h"
+#include "LevelFlow/CatrunElevatorTransition.h"
 #include "Engine/TextureRenderTarget2D.h"
 #include "HAL/FileManager.h"
 #include "ImageUtils.h"
@@ -57,6 +60,7 @@ bool FCatrunStatusPresentationTest::RunTest(const FString&)
  Widget->SetRenderOpacity(1.f);
  Widget->bShowStatus = true;
  Widget->bTimed = true;
+ Widget->ClockOpacity = 1.f;
  struct FPhase { const TCHAR* Name; float Stamina; float Bell; float Time; bool Blocked; bool Timed; FVector2D Size; };
  const FPhase Phases[] = {
   {TEXT("ready"), 1.f, 1.f, .72f, false, true, {1920,1080}},
@@ -104,6 +108,59 @@ bool FCatrunStatusPresentationTest::RunTest(const FString&)
   for (const FColor Pixel : Hidden.AsBGRA8()) Visible += Pixel.A != 0;
   TestEqual(TEXT("Presentation suppression leaves no status pixels"), Visible, 0);
  }
+ return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunStatusClockPlacementTest, "Catrun.UI.Status.ClockYieldsToTitleAndLift",
+ EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
+bool FCatrunStatusClockPlacementTest::RunTest(const FString&)
+{
+ UClass* Class = LoadClass<UCatrunPlayerStatusWidget>(nullptr,
+  TEXT("/Game/UI/Gameplay/WBP_PlayerStatus.WBP_PlayerStatus_C"));
+ if (!TestNotNull(TEXT("Production status Blueprint"), Class)) return false;
+ const auto Init = UWorld::InitializationValues().AllowAudioPlayback(false).CreatePhysicsScene(false)
+  .CreateNavigation(false).CreateAISystem(false);
+ UWorld* World = UWorld::CreateWorld(EWorldType::Game, false, NAME_None, nullptr, true, ERHIFeatureLevel::Num, &Init);
+ ON_SCOPE_EXIT { World->DestroyWorld(false); };
+ auto* Lift = World->SpawnActor<ACatrunElevatorTransition>();
+ auto* Cabin = World->SpawnActor<ATriggerBox>(FVector(1000, 0, 0), FRotator::ZeroRotator);
+ auto* Pawn = World->SpawnActor<APawn>();
+ if (!TestTrue(TEXT("Placement fixture"), Lift && Cabin && Pawn)) return false;
+ auto* Root = NewObject<USceneComponent>(Pawn);
+ Pawn->SetRootComponent(Root);
+ Root->RegisterComponent();
+ CastChecked<UBoxComponent>(Cabin->GetCollisionComponent())->SetBoxExtent(FVector(100.f));
+ Lift->CabinVolume = Cabin;
+ auto* Widget = CreateWidget<UCatrunPlayerStatusWidget>(World, Class);
+ if (!TestNotNull(TEXT("Production status instance"), Widget)) return false;
+ const auto Slate = Widget->TakeWidget();
+ Slate->SetCanTick(false);
+ Widget->bShowStatus = true;
+ TestEqual(TEXT("The departure lift is found once, at construction"), Widget->Elevators.Num(), 1);
+ Widget->UpdateClockPlacement(Pawn, .4f);
+ TestEqual(TEXT("The clock waits for the arriving stage title"), Widget->ClockOpacity, 0.f);
+ for (int32 I = 0; I < 20; ++I) Widget->UpdateClockPlacement(Pawn, .1f);
+ TestEqual(TEXT("The clock settles when no title arrives"), Widget->ClockOpacity, 1.f);
+ TestEqual(TEXT("Ordinary play keeps the top-center clock"), Widget->ClockDock, 0.f);
+ Widget->OverlayScanSeconds = 10.f;
+ Widget->bClockSpaceTaken = true;
+ for (int32 I = 0; I < 5; ++I) Widget->UpdateClockPlacement(Pawn, .1f);
+ TestEqual(TEXT("A title or tutorial card clears the clock"), Widget->ClockOpacity, 0.f);
+ Widget->bClockSpaceTaken = false;
+ for (int32 I = 0; I < 5; ++I) Widget->UpdateClockPlacement(Pawn, .1f);
+ TestEqual(TEXT("The clock returns after the title"), Widget->ClockOpacity, 1.f);
+ Pawn->SetActorLocation(FVector(1000, 0, 0));
+ for (int32 I = 0; I < 5; ++I) Widget->UpdateClockPlacement(Pawn, .1f);
+ TestEqual(TEXT("The lift view moves the clock to the empty map corner"), Widget->ClockDock, 1.f);
+ Widget->bShowStatus = false;
+ Pawn->SetActorLocation(FVector::ZeroVector);
+ Widget->UpdateClockPlacement(Pawn, .01f);
+ TestEqual(TEXT("A hidden HUD resumes in place without replaying the move"), Widget->ClockDock, 0.f);
+ Lift->bArrivalSide = true;
+ auto* Arrival = CreateWidget<UCatrunPlayerStatusWidget>(World, Class);
+ const auto ArrivalSlate = Arrival->TakeWidget();
+ TestEqual(TEXT("The Stage3 dock does not move the clock"), Arrival->Elevators.Num(), 0);
  return true;
 }
 

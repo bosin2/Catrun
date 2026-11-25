@@ -134,7 +134,7 @@ bool FCatrunCameraBaselineTest::RunTest(const FString&)
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunBellFeedbackTextTest, "Catrun.LevelFlow.ExactBellDenial", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 bool FCatrunBellFeedbackTextTest::RunTest(const FString&)
 {
-	TestEqual(TEXT("Native and BP feedback share the exact required copy"), UCatrunNoticeSubsystem::BellDeniedText().ToString(), FString(TEXT("방울을 울릴수없습니다")));
+	TestEqual(TEXT("Native and BP feedback share the exact required copy"), UCatrunNoticeSubsystem::BellDeniedText().ToString(), FString(TEXT("방울을 울릴 수 없습니다")));
 	return true;
 }
 #endif
