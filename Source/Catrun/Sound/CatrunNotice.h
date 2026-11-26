@@ -6,6 +6,7 @@
 #include "Subsystems/WorldSubsystem.h"
 #include "CatrunNotice.generated.h"
 
+class UBorder;
 class UTextBlock;
 
 enum class ECatrunNoticePolicy : uint8
@@ -32,6 +33,7 @@ protected:
 	virtual void NativeTick(const FGeometry& Geometry, float DeltaSeconds) override;
 
 private:
+	friend class FCatrunNoticeLayoutTest;
 	ECatrunNoticePolicy NoticePolicy = ECatrunNoticePolicy::Gameplay;
 	bool RefreshPresentation();
 	float RemainingReadableSeconds = 0.f;
@@ -39,6 +41,8 @@ private:
 	FText PendingText;
 	UPROPERTY(Transient)
 	TObjectPtr<UTextBlock> TextBlock;
+	UPROPERTY(Transient)
+	TObjectPtr<UBorder> Plate;
 };
 
 /** Shows short messages to the player ("you cannot ring the bell here"). */

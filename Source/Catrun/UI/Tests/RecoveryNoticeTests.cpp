@@ -5,6 +5,9 @@
 #include "Interaction/CatrunPuzzleSuspension.h"
 #include "Monster/CatrunRestartSubsystem.h"
 #include "Camera/PlayerCameraManager.h"
+#include "Components/Border.h"
+#include "Components/CanvasPanelSlot.h"
+#include "Components/TextBlock.h"
 #include "Engine/Engine.h"
 #include "Engine/World.h"
 #include "GameFramework/Character.h"
@@ -130,6 +133,33 @@ bool FCatrunRecoveryNoticeTest::RunTest(const FString&)
 	World->GetTimerManager().Tick(8.1f);
 	TestTrue(TEXT("Recovery notice still expires normally"), Widget->GetVisibility() == ESlateVisibility::Collapsed);
 	TestFalse(TEXT("Expired recovery timer is removed"), World->GetTimerManager().TimerExists(Notice->HideTimer));
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunNoticeLayoutTest,
+	"Catrun.UI.Notice.ReadableLayout",
+	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
+bool FCatrunNoticeLayoutTest::RunTest(const FString&)
+{
+	const auto Init = UWorld::InitializationValues().AllowAudioPlayback(false).CreatePhysicsScene(false)
+		.CreateNavigation(false).CreateAISystem(false);
+	UWorld* World = UWorld::CreateWorld(EWorldType::Game, false, NAME_None, nullptr, true, ERHIFeatureLevel::Num, &Init);
+	if (!TestNotNull(TEXT("Notice layout world"), World)) return false;
+	ON_SCOPE_EXIT { World->DestroyWorld(false); };
+	auto* Widget = NewObject<UCatrunNoticeWidget>(World);
+	if (!TestTrue(TEXT("Native notice widget initializes"), Widget->Initialize())) return false;
+	const auto Slate = Widget->TakeWidget();
+	Widget->SetNoticeText(INVTEXT("안전한 위치로 돌아갈 수 없습니다. 설정에서 스테이지를 다시 시작하거나 시작 메뉴로 돌아가세요."));
+	Slate->SlatePrepass(1.f);
+	if (!TestNotNull(TEXT("Backing plate"), Widget->Plate.Get())) return false;
+	TestTrue(TEXT("Long copy wraps inside a 4:3 viewport"), Widget->Plate->GetDesiredSize().X < 1100.f);
+	TestTrue(TEXT("Long copy uses more than one line"), Widget->TextBlock->GetDesiredSize().Y > 50.f);
+	const auto* PlateSlot = Cast<UCanvasPanelSlot>(Widget->Plate->Slot);
+	if (!TestNotNull(TEXT("Plate slot"), PlateSlot)) return false;
+	// The basket prompt is authored at 83%. A three-line notice must still end above it on a 1080-unit canvas.
+	TestTrue(TEXT("Notice stays clear of the interaction prompt"), PlateSlot->GetAnchors().Minimum.Y * 1080.f + 80.f < .83f * 1080.f - 18.f);
+	TestFalse(TEXT("Notice cannot take gameplay focus"), Widget->IsFocusable());
 	return true;
 }
 

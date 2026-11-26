@@ -6,6 +6,7 @@
 
 class ACatrunArmor;
 class ACameraActor;
+class USpotLightComponent;
 class APlayerController;
 class UCatrunSoundSettings;
 
@@ -46,6 +47,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Capture", meta=(ClampMin="0.1")) float PickupPlayRate = 1.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Capture", meta=(ClampMin="0.1")) float MissingAnimationDuration = 3.5f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Capture", meta=(ClampMin="1")) float CameraProbeRadius = 15.f;
+	/** Illuminance of the presentation-only key light on the pair. 0 disables it. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Capture", meta=(ClampMin="0")) float KeyLightLux = 1.6f;
+	/** Half of the vertical extent (cm) that must stay visible around the pair. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Capture", meta=(ClampMin="1")) float CameraFitHalfHeight = 160.f;
+	/** A settled camera that has to move farther than this in one frame (cm) is marked as a cut so it does not smear. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Capture", meta=(ClampMin="1")) float CameraCutDistance = 20.f;
+	/** Entry blend (alpha < 1) moves fast on purpose; only snaps and settled moves beyond the distance are cuts. */
+	static bool ShouldCutCameraMove(float StepDistance, bool bSnapped, float BlendAlpha, float CutDistance);
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Capture") FName LeftHandBone = TEXT("hand_l");
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Capture") FName RightHandBone = TEXT("hand_r");
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* Tick) override;
@@ -65,6 +74,9 @@ private:
 	TWeakObjectPtr<APlayerController> Player;
 	TWeakObjectPtr<AActor> PreviousView;
 	TWeakObjectPtr<ACameraActor> Camera;
+	TWeakObjectPtr<USpotLightComponent> KeyLight;
+	float CameraYaw = 0.f;
+	bool bCameraYawChosen = false, bCameraNeedsCat = true, bCameraOverhead = false, bCameraCut = false;
 	FTransform OriginalTransform;
 	FVector GrabFrom = FVector::ZeroVector;
 	FRotator GrabRotation = FRotator::ZeroRotator;
@@ -75,5 +87,5 @@ private:
 	uint8 MovementMode = 0, CustomMode = 0;
 	bool bAbortPreparation = false;
 	bool bBeginningCapture = false, bCleaningUp = false, bEndingPlay = false;
-	bool bCollision = true, bOwnFade = false, bOwnInputLock = false, bOwnCatch = false, bRestartIssued = false;
+	bool bCollision = true, bOwnFade = false, bOwnInputLock = false, bOwnCatch = false, bRestartIssued = false, bOwnMarkHide = false;
 };

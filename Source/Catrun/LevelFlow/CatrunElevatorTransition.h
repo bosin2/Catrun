@@ -17,8 +17,10 @@ class UAnimSequence;
 class UCatrunExitTransitionComponent;
 class UCatrunElevatorWeightComponent;
 class UGameViewportClient;
+class UMaterialInterface;
 class UPrimitiveComponent;
 class USceneComponent;
+class USkeletalMesh;
 class USoundBase;
 class UUserWidget;
 enum class ESlateVisibility : uint8;
@@ -72,6 +74,18 @@ public:
     TArray<TObjectPtr<AActor>> HideDuringAscent;
     UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="Elevator|Lighting")
     bool bUseLocalElevatorLighting = false;
+    /** Hidden in the map; lit only while PeekCamera is live. */
+    UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="Elevator|Lighting")
+    TArray<TObjectPtr<AActor>> PeekLights;
+    /** Hidden in the map; lit only while LoafCamera or CabinCamera is live during departure. */
+    UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="Elevator|Lighting")
+    TArray<TObjectPtr<AActor>> LoafLights;
+    /** Fixed head gear the rising cabin would otherwise pass through. */
+    UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="Elevator|Cabin")
+    TArray<TObjectPtr<AActor>> AscentHiddenActors;
+    /** Rails and rope continuing into the dark; hidden in the map, shown only while the cabin rises. */
+    UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="Elevator|Cabin")
+    TArray<TObjectPtr<AActor>> AscentShownActors;
     UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="Elevator|Marks")
     TObjectPtr<AActor> CatMark;
     UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="Elevator|Marks")
@@ -98,12 +112,18 @@ public:
     TObjectPtr<AActor> PeekCamera;
     UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="Elevator|Camera")
     TObjectPtr<AActor> CabinCamera;
+    /** Rides with the cabin: the cat at the edge, walking inside and loafing. Falls back to FrontCamera. */
+    UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="Elevator|Camera")
+    TObjectPtr<AActor> LoafCamera;
     UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="Elevator|Camera")
     TObjectPtr<AActor> WarehouseCamera;
     UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="Elevator|Camera")
     TObjectPtr<AActor> ArrivalExitCamera;
     UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="Elevator|Camera", meta=(ClampMin="0.1", ClampMax="3"))
     float ArrivalCameraBlendSeconds = .75f;
+    /** Optional cinematic-only cat worn by the pawn mesh while this director owns it. Clips must use its skeleton. Empty keeps the play cat. */
+    UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="Elevator|Animation")
+    TObjectPtr<USkeletalMesh> CinematicMesh;
     UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="Elevator|Animation")
     TArray<TObjectPtr<UAnimSequence>> DepartureClips;
     UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category="Elevator|Animation")
@@ -166,7 +186,14 @@ private:
     void RestoreMinimap();
     void PositionArrivalTitle(APlayerController* PC, float DeltaSeconds);
     void UpdateJumpCamera(float Position);
-    void ApplyCabinMotion(float Height, float Sway, float LanternSwing, float ChainPull, bool bMoveCat);
+    void ApplyCabinMotion(float Height, float Sway, float LanternSwing, float ChainPull, bool bMoveCat)
+    {
+        ApplyCabinMotion(Height, Sway, LanternSwing, ChainPull, bMoveCat, Height);
+    }
+    void ApplyCabinMotion(float Height, float Sway, float LanternSwing, float ChainPull, bool bMoveCat, float CameraRise);
+    void SetAscentPresentation(bool bAscending);
+    void UpdateShotLights();
+    void UpdateLoafCamera(float DeltaSeconds);
     void RestorePresentation();
     void StartCabinWeight(ACharacter* ScriptedRider = nullptr);
     void UpdateOccluders(bool bCorridor, bool bCabin, bool bAscent = false);
@@ -207,6 +234,8 @@ private:
     UPROPERTY(Transient) TSubclassOf<UAnimInstance> SavedAnimClass;
     UPROPERTY(Transient) FSingleAnimationPlayData SavedAnimation;
     UPROPERTY(Transient) TObjectPtr<UAnimSequence> ActiveClip;
+    UPROPERTY(Transient) TObjectPtr<USkeletalMesh> PlayMesh;
+    UPROPERTY(Transient) TArray<TObjectPtr<UMaterialInterface>> PlayMaterials;
     ECatrunElevatorState State = ECatrunElevatorState::Waiting;
     float TimelineSeconds = 0.f;
     float PhaseSeconds = 0.f;
@@ -241,4 +270,21 @@ private:
     void IsolateActor(AActor* Actor);
     void RestoreCabinIsolation();
     void UpdatePeekCamera(float DeltaSeconds);
+
+    void UpdateWarehouseFraming(bool bCabin, float DeltaSeconds);
+    void UpdateReturnPath();
+    FTransform ReturnStart;
+    float ReturnStartFOV = 0.f;
+    float ReturnExitFOV = 0.f;
+    float ReturnSeconds = 0.f;
+    bool bReturnPath = false;
+    FTransform WarehouseCameraRest;
+    float WarehouseCameraRestFOV = 0.f;
+    float WarehouseFraming = 0.f;
+    void WearCinematicMesh(ACharacter& Pawn);
+    float SavedBoundsScale = 1.f;
+    float CameraHeight = 0.f;
+    float LoafShotSeconds = 0.f;
+    FVector LoafAim = FVector::ZeroVector;
+    TArray<TWeakObjectPtr<AActor>> AscentToggledActors;
 };

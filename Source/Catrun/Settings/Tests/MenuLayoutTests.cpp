@@ -1,6 +1,7 @@
 #if WITH_EDITOR && WITH_DEV_AUTOMATION_TESTS
 
 #include "Blueprint/UserWidget.h"
+#include "Components/Button.h"
 #include "Components/ScrollBox.h"
 #include "Components/TextBlock.h"
 #include "Components/WidgetSwitcher.h"
@@ -23,7 +24,9 @@ struct FMenuViewport
 };
 
 const FMenuViewport Viewports[] = {
-	{{1920, 1080}, 3},
+	{{1920, 1080}, 4},
+	{{2560, 1080}, 4},
+	{{1680, 1050}, 4},
 	{{640, 360}, 3},
 	{{520, 780}, 2},
 	{{320, 700}, 1},
@@ -181,7 +184,7 @@ bool FCatrunMenuLayoutTest::RunTest(const FString&)
 		TestTrue(Label + TEXT(" back button stays visible"), Contains(Screen, PaintBounds(*Back)));
 		FArrangedChildren Cards(EVisibility::Visible);
 		Grid->GetCachedWidget()->ArrangeChildren(Grid->GetPaintSpaceGeometry(), Cards);
-		if (!TestEqual(Label + TEXT(" arranged chapter card count"), Cards.Num(), 3))
+		if (!TestEqual(Label + TEXT(" arranged chapter card count"), Cards.Num(), 4))
 		{
 			return false;
 		}
@@ -199,12 +202,18 @@ bool FCatrunMenuLayoutTest::RunTest(const FString&)
 			}
 		}
 		TestEqual(Label + TEXT(" first-row chapter columns"), Columns, Viewport.ExpectedChapterColumns);
-		if (Viewport.ExpectedChapterColumns < 3)
+		for (const FName ButtonName : {FName(TEXT("TutorialButton")), FName(TEXT("Stage1Button")), FName(TEXT("Stage2Button")),
+			FName(TEXT("Stage3Button")), FName(TEXT("ChapterBack"))})
+		{
+			const UButton* Button = Cast<UButton>(Chapter->GetWidgetFromName(ButtonName));
+			TestTrue(Label + TEXT(" keyboard and gamepad can focus ") + ButtonName.ToString(), Button && Button->GetIsFocusable());
+		}
+		if (Viewport.ExpectedChapterColumns < 4)
 		{
 			TestTrue(Label + TEXT(" remaining chapter rows scroll"), Scroll->GetScrollOffsetOfEnd() > 0.f);
 			Scroll->ScrollToEnd();
 			PaintMenu(ChapterWindow);
-			UWidget* LastCard = Chapter->GetWidgetFromName(TEXT("Stage2Button"));
+			UWidget* LastCard = Chapter->GetWidgetFromName(TEXT("Stage3Button"));
 			if (TestNotNull(TEXT("Final chapter button"), LastCard))
 			{
 				TestTrue(Label + TEXT(" final chapter reachable by scrolling"), Contains(PaintBounds(*Scroll), PaintBounds(*LastCard)));

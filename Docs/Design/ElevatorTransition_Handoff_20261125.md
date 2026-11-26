@@ -2,6 +2,19 @@
 
 기준: 2026-11-25, 한국 시간. 사용자 요청으로 구현 진행을 멈추고 현재 상태를 문서화했다.
 
+> **2026-11-26: 승강기 연출을 다시 만들어 적용했다.** 현재 기준은 `Docs/Reviews/Overnight_2026-11-26/Elevator.md`이며, 활성 DLL은 `UnrealEditor-Catrun.dll`이다. 아래는 Revision 3 기록이다.
+>
+> **적용 상태 갱신 (2026-11-25 23:35 KST): 3절 1)~4)를 본 프로젝트에 적용하고 재시작 후 확인까지 마쳤다.** 아래 0절, 2절 B, 3절의 "미실행/0회/적용 대기"와 이 문서 끝의 미완료 문구는 적용 전 기록이다.
+>
+> - 적용 전 확인: 에디터 PID 40748, `/Game/Maps/Stage2`, PIE=false, dirty=false.
+> - 카메라·태그: 변경 33건(카메라 transform 1, FOV 1, 태그 31), `/Game/Maps/Stage2`만 저장. SHA256 `462cfe77…` → `3887fffa…`. 보고서 `Saved/ElevatorTransition/live_departure_apply.json`, 백업 `Saved/ElevatorTransition/Backups/Stage2_BeforeLiveDeparture_20261125_231300_26016.umap`. 저장 후 읽기 전용 재검사로 값·태그 31개·dirty=false 확인.
+> - DLL: `published_for_next_launch`, `manifest_committed=true`. 보고서와 원본 manifest 백업은 후보 프로젝트 `Saved/ElevatorTransitionRevision3/Publish_20261125_141651_099059_fe40c8af`. canonical DLL은 변경 없음.
+> - 재시작: 사용자 승인 후 미저장 변경이 없음을 확인하고 정상 종료(WM_CLOSE). 마지막 재실행 PID 43664가 `UnrealEditor-Catrun_ElevatorRevision3.dll`을 로드했고 Stage2 카메라·태그 값이 유지됨을 읽기 전용으로 확인했다.
+> - 본 프로젝트 offscreen PIE(격리 저장): d3d12 58개 통과(`Saved/ElevatorTransition/MainRevision3_02_D3D12.log`, `Runtime/report.json`). 얼굴 샷 `07_PeekFromBelow00007`, `07b_PeekFaceMiddle00001`, `07c_PeekFaceRising00001`을 직접 확인해 후보와 대조했다. 실행 전 Runtime 백업은 `Saved/ElevatorTransition/Backups/Runtime_BeforeMainRevision3_20261125`.
+> - **`run_runtime.ps1`은 기본값이 d3d11이다. 화면 판정에는 `-RHI d3d12`를 쓴다.** d3d11도 58개를 통과했지만(`Runtime/main_revision3_d3d11_report.json`) 얼굴 샷에서 눈·코·방울이 거의 검게 나왔다. 간접광(Lumen) 차이로 추정한다.
+> - 메모리 때문에 검사 에디터와 작업 에디터를 동시에 띄우지 않았다.
+> - 커밋·푸시 없음.
+
 ## 0. 다음 AI가 먼저 알아야 할 현재 상태
 
 **최신 수정은 소스 작성, 별도 DLL 빌드, 실제 PIE 58개 검사, 얼굴 샷 이미지 확인까지 끝났다. 본 프로젝트 Stage2의 카메라·태그 저장과 새 DLL 활성화는 아직 실행하지 않았다.** 적용 스크립트 두 개는 준비됐고 각각 dry-run을 통과했다. 사용자가 인계 문서를 요청한 시점이 바로 실제 적용 직전이다.

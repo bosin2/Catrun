@@ -19,6 +19,8 @@
 
 using namespace CatrunGrid;
 
+const FName ASoundGridManager::SoundBlockerTag(TEXT("SoundBlocker"));
+
 FString ASoundGridManager::ExportBakedGridSnapshot() const
 {
 	FString Output;
@@ -186,6 +188,7 @@ void ASoundGridManager::AttachBellToPlayer()
 // ---------------------------------------------------------------------------
 
 // Finds, for every door, the cells under its gate box, and counts the closed doors per cell.
+// Sound-blocking furniture is added to the same count.
 void ASoundGridManager::RefreshDoorGates()
 {
 	UWorld* World = GetWorld();
@@ -219,6 +222,49 @@ void ASoundGridManager::RefreshDoorGates()
 			}
 		}
 	}
+
+	// Furniture that blocks sound. Cells are tested against the real (rotated) shape, so a turned
+	// shelf does not block the floor next to it.
+	SoundBlockerCells.Init(0, Grid.NumCells());
+	for (TActorIterator<AActor> It(World); It; ++It)
+	{
+		if (!It->ActorHasTag(SoundBlockerTag))
+		{
+			continue;
+		}
+		It->ForEachComponent<UPrimitiveComponent>(false, [this](const UPrimitiveComponent* Shape)
+		{
+			if (!Shape->IsRegistered() || !Shape->IsCollisionEnabled())
+			{
+				return;
+			}
+			const FBox Local = Shape->CalcBounds(FTransform::Identity).GetBox();
+			const FTransform& ToWorld = Shape->GetComponentTransform();
+			const FBox Covered = Shape->Bounds.GetBox();
+			for (int32 Cell = 0; Cell < Grid.NumCells(); ++Cell)
+			{
+				FVector Center = Grid.CellCenter(Cell);
+				if (Center.X < Covered.Min.X || Center.X > Covered.Max.X || Center.Y < Covered.Min.Y || Center.Y > Covered.Max.Y)
+				{
+					continue;
+				}
+				Center.Z = Covered.GetCenter().Z;
+				if (Local.IsInsideOrOn(ToWorld.InverseTransformPosition(Center)))
+				{
+					SoundBlockerCells[Cell] = 1;
+				}
+			}
+		});
+	}
+	for (int32 Cell = 0; Cell < Grid.NumCells(); ++Cell)
+	{
+		ClosedGateCells[Cell] += SoundBlockerCells[Cell];
+	}
+}
+
+bool ASoundGridManager::IsSoundCell(int32 Cell) const
+{
+	return Grid.IsWalkable(Cell) && !(SoundBlockerCells.IsValidIndex(Cell) && SoundBlockerCells[Cell] != 0);
 }
 
 void ASoundGridManager::NotifyDoorStateChanged(ACatrunDoor* Door)
@@ -253,7 +299,7 @@ bool ASoundGridManager::EmitSound(const FCatrunSoundEvent& Event)
 	RefreshPuzzleObstacles();
 
 	// 1) Where does the sound start? Use the closest floor cell to the given location.
-	const int32 SourceCell = Grid.FindNearestCell(Event.Location, 3, [this](int32 Cell) { return Grid.IsWalkable(Cell); });
+	const int32 SourceCell = Grid.FindNearestCell(Event.Location, 3, [this](int32 Cell) { return IsSoundCell(Cell); });
 	if (SourceCell == INDEX_NONE)
 	{
 		UE_LOG(LogCatrunSound, Warning, TEXT("EmitSound: no floor cell near %s."), *Event.Location.ToString());
@@ -327,7 +373,7 @@ float ASoundGridManager::GetRemainingBudgetAt(const FVector& WorldLocation) cons
 	{
 		return -1.f;
 	}
-	const int32 Cell = Grid.FindNearestCell(WorldLocation, 1, [this](int32 C) { return Grid.IsWalkable(C); });
+	const int32 Cell = Grid.FindNearestCell(WorldLocation, 1, [this](int32 C) { return IsSoundCell(C); });
 	if (Cell == INDEX_NONE || LastDistance[Cell] == CatrunSoundPropagation::Unreached)
 	{
 		return -1.f;

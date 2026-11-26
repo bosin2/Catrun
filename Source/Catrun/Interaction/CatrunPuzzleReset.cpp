@@ -66,7 +66,7 @@ bool ACatrunPuzzleReset::TryUse(APawn* Cat)
 	if (auto* Restart = UCatrunRestartSubsystem::Get(this); Restart && Restart->IsCatching()) return false;
 	const bool bReset = Puzzle->ResetStatue(PuzzleId);
 	if (auto* Notice = UCatrunNoticeSubsystem::Get(this))
-		Notice->ShowNotice(bReset ? FText::FromString(TEXT("이 방의 동상을 원위치로 되돌렸어요."))
-			: FText::FromString(TEXT("동상의 처음 위치가 막혀 있어요. 자리를 비운 뒤 다시 사용하세요.")), 3.f);
+		Notice->ShowNotice(bReset ? FText::FromString(TEXT("이 방의 동상을 원위치로 되돌렸습니다."))
+			: FText::FromString(TEXT("동상의 처음 위치가 막혀 있습니다. 자리를 비운 뒤 다시 사용하세요.")), 3.f);
 	return bReset;
 }

@@ -11,6 +11,7 @@
 #include "Components/TextBlock.h"
 #include "Components/VerticalBox.h"
 #include "Components/VerticalBoxSlot.h"
+#include "Engine/Font.h"
 #include "EngineUtils.h"
 #include "GameFramework/PlayerController.h"
 #include "GameFramework/Character.h"
@@ -22,6 +23,8 @@
 #include "Sound/CatrunNoBellZone.h"
 #include "Styling/CoreStyle.h"
 #include "HAL/IConsoleManager.h"
+#include "UI/CatrunHUDStyle.h"
+#include "Brushes/SlateRoundedBoxBrush.h"
 
 #if !UE_BUILD_SHIPPING
 static TAutoConsoleVariable<int32> CVarDebugGuidance(TEXT("catrun.DebugGuidance"), 0,
@@ -30,10 +33,17 @@ static TAutoConsoleVariable<int32> CVarDebugGuidance(TEXT("catrun.DebugGuidance"
 
 namespace
 {
-	const FLinearColor Ink(.92f,.89f,.82f,1);
-	const FLinearColor Accent(.64f,.85f,.82f,1);
-	const FLinearColor Back(.025f,.035f,.05f,.88f);
+	const FLinearColor Ink = CatrunHUDStyle::Text;
+	const FLinearColor Accent = CatrunHUDStyle::Brass;
+	const FLinearColor Back = CatrunHUDStyle::Ink.CopyWithNewOpacity(.82f);
 	FText Copy(const FString& Value) { return FText::FromString(Value); }
+	// The same face as every other menu and notice.
+	FSlateFontInfo CardFont(const ANSICHAR* Fallback, int32 Size)
+	{
+		if (const auto* Font = LoadObject<UFont>(nullptr, TEXT("/Game/Environment/Font/HSBombaram3_0_Regular_Font.HSBombaram3_0_Regular_Font")))
+			return FSlateFontInfo(Font, Size, TEXT("Default"));
+		return FCoreStyle::GetDefaultFontStyle(Fallback, Size);
+	}
 }
 
 ACatrunGuidanceZone::ACatrunGuidanceZone()
@@ -52,7 +62,7 @@ UTextBlock* UCatrunPlayHUD::AddText(UVerticalBox* Parent, FName Name, const FStr
 {
 	auto* Block = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass(), Name);
 	Block->SetText(Copy(Text));
-	Block->SetFont(FCoreStyle::GetDefaultFontStyle("Regular", Size));
+	Block->SetFont(CardFont("Regular", Size));
 	Block->SetColorAndOpacity(Color);
 	Block->SetAutoWrapText(true);
 	Parent->AddChildToVerticalBox(Block)->SetPadding(FMargin(0,4));
@@ -61,10 +71,10 @@ UTextBlock* UCatrunPlayHUD::AddText(UVerticalBox* Parent, FName Name, const FStr
 UButton* UCatrunPlayHUD::AddButton(UVerticalBox* Parent, FName Name, const FString& Text, UTextBlock*& Label)
 {
 	auto* Button = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass(), Name);
-	Button->SetBackgroundColor(FLinearColor(.15f,.24f,.27f,1));
+	Button->SetBackgroundColor(CatrunHUDStyle::Rim);
 	Label = WidgetTree->ConstructWidget<UTextBlock>();
 	Label->SetText(Copy(Text));
-	Label->SetFont(FCoreStyle::GetDefaultFontStyle("Bold", 21));
+	Label->SetFont(CardFont("Bold", 21));
 	Label->SetColorAndOpacity(Ink);
 	Label->SetMargin(FMargin(18,12));
 	Button->AddChild(Label);
@@ -82,8 +92,9 @@ TSharedRef<SWidget> UCatrunPlayHUD::RebuildWidget()
 		auto MakeCard = [&](FName Name, FVector2D Anchor, FVector2D Position, FVector2D Alignment, float Width, UBorder*& Border)
 		{
 			Border = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), Name);
-			Border->SetBrushColor(Back);
-			Border->SetPadding(FMargin(18,12));
+			const FSlateRoundedBoxBrush CardBrush(Back, 4.f);
+			Border->SetBrush(CardBrush);
+			Border->SetPadding(FMargin(18,18,18,6)); // The face is bottom-heavy; keep the visible text centered.
 			Border->SetVisibility(ESlateVisibility::HitTestInvisible);
 			auto* Fixed = WidgetTree->ConstructWidget<USizeBox>();
 			Fixed->SetWidthOverride(Width);
@@ -114,7 +125,7 @@ TSharedRef<SWidget> UCatrunPlayHUD::RebuildWidget()
 		AddText(BottomBox,TEXT("Controls"),TEXT("WASD 이동   ·   Ctrl 살금살금   ·   Shift 달리기   ·   Space 방울   ·   F 상호작용"),16,Ink);
 
 		PausePanel = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(),TEXT("PausePanel"));
-		PausePanel->SetBrushColor(FLinearColor(.01f,.015f,.025f,.94f));
+		PausePanel->SetBrushColor(CatrunHUDStyle::Ink.CopyWithNewOpacity(.94f));
 		PausePanel->SetHorizontalAlignment(HAlign_Center); PausePanel->SetVerticalAlignment(VAlign_Center);
 		auto* PauseSlot = Root->AddChildToCanvas(PausePanel);
 		PauseSlot->SetAnchors(FAnchors(0,0,1,1)); PauseSlot->SetOffsets(FMargin(0));
@@ -185,13 +196,18 @@ void UCatrunPlayHUD::Refresh()
 	for (TActorIterator<ACatrunGuidanceZone> It(GetWorld()); It; ++It)
 		if (It->Contains(Cat->GetActorLocation()) && (!Best || It->Priority > Best->Priority)) Best=*It;
 	if (Best) { Title=Best->Title.ToString(); Body=Best->Message.ToString(); }
-	FString Hint = TEXT("방울은 현재 위치에서 울려요. 울린 뒤 다른 길로 빠져나가세요.");
+	FString Hint = TEXT("방울은 현재 위치에서 울립니다. 울린 뒤 다른 길로 빠져나가세요.");
 	FString State = TEXT("흔적 없음");
-	if (ACatrunNoBellZone::IsBellForbidden(*Cat)) Hint=TEXT("캣홀 근처에서는 방울을 울릴 수 없어요. 통로를 벗어나세요.");
-	if (Marked) { State=TEXT("표식 · 바구니로"); Hint=FString::Printf(TEXT("촛불에 발각됐어요. 바구니 가까이에서 %s를 눌러 표식을 지우세요."),*InteractKey); }
+	if (ACatrunNoBellZone::IsBellForbidden(*Cat)) Hint=TEXT("캣홀 근처에서는 방울을 울릴 수 없습니다. 통로를 벗어나세요.");
+	if (Marked) { State=TEXT("표식 · 바구니로"); Hint=FString::Printf(TEXT("촛불에 발각됐습니다. 바구니 가까이에서 %s를 눌러 표식을 지우세요."),*InteractKey); }
 	if (Hidden) { State=TEXT("바구니 안 · 은신"); Hint=FString::Printf(TEXT("%s  바구니에서 나오기  ·  출구 앞이 안전한지 살펴보세요."),*InteractKey); }
-	if (Restart && Restart->IsCatching()) { State=TEXT("붙잡혔어요"); Hint=TEXT("잠시 후 이 구간의 시작 지점에서 다시 시작합니다."); }
-	if (Flow->IsStageComplete()) { Title=TEXT("현재 구간 완료!"); Body=TEXT("스테이지 2를 통과했어요. 이곳에 머물며 자유롭게 둘러볼 수 있어요."); State=TEXT("탈출 연습 완료"); Hint=TEXT("Esc 메뉴에서 다시 시작하거나 시작 메뉴로 돌아갈 수 있어요."); }
+	if (Restart && Restart->IsCatching()) { State=TEXT("붙잡힘"); Hint=TEXT("잠시 후 이 구간의 시작 지점에서 다시 시작합니다."); }
+	if (Flow->IsStageComplete())
+	{
+		const auto* Stages=GetDefault<UCatrunLevelFlowSettings>();
+		const int32 Index=Stages->FindStageIndex(GetWorld()->GetOutermost()->GetName());
+		const FText StageName=Stages->Stages.IsValidIndex(Index) ? Stages->GetStageDisplayName(Stages->Stages[Index].StageId) : FText::GetEmpty();
+		Title=FString::Printf(TEXT("%s 통과"),*StageName.ToString()); Body=TEXT("이곳에 머물며 둘러볼 수 있습니다. Esc를 누르면 다시 시작하거나 시작 메뉴로 돌아갈 수 있습니다."); State=TEXT("통과"); Hint=Body; }
 	ObjectiveTitle->SetText(Copy(Title)); ObjectiveBody->SetText(Copy(Body)); Context->SetText(Copy(Hint)); Status->SetText(Copy(State));
 	Status->SetColorAndOpacity(Marked && !Hidden ? FLinearColor(1,.45f,.4f,1) : Accent);
 	// Keep the level's opening and stair cinematics readable.

@@ -170,6 +170,7 @@ void UCatrunMarkSubsystem::Tick(float DeltaTime)
 		return;
 	}
 	UpdateVisual();
+	ApplyVisualVisibility(); // an owner destroyed without releasing must not hide the orb forever
 
 	FollowTimer -= DeltaTime;
 	if (FollowTimer <= 0.f)
@@ -256,6 +257,31 @@ void UCatrunMarkSubsystem::CreateVisual(APawn& Cat)
 	Light->SetCastShadows(false);
 	Light->SetupAttachment(Orb);
 	Light->RegisterComponent();
+	ApplyVisualVisibility();
+}
+
+void UCatrunMarkSubsystem::SetVisualSuppressed(const UObject* Owner, bool bSuppressed)
+{
+	if (!Owner) return;
+	if (bSuppressed) VisualSuppressors.AddUnique(Owner);
+	else VisualSuppressors.Remove(Owner);
+	ApplyVisualVisibility();
+}
+
+bool UCatrunMarkSubsystem::IsVisualSuppressed() const
+{
+	return VisualSuppressors.ContainsByPredicate([](const TWeakObjectPtr<const UObject>& Owner) { return Owner.IsValid(); });
+}
+
+bool UCatrunMarkSubsystem::IsVisualShown() const
+{
+	return Orb && Orb->IsVisible() && Light && Light->IsVisible();
+}
+
+void UCatrunMarkSubsystem::ApplyVisualVisibility()
+{
+	VisualSuppressors.RemoveAll([](const TWeakObjectPtr<const UObject>& Owner) { return !Owner.IsValid(); });
+	if (Orb) Orb->SetVisibility(VisualSuppressors.IsEmpty(), true); // propagates to the attached light
 }
 
 void UCatrunMarkSubsystem::DestroyVisual()

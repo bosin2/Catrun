@@ -38,3 +38,10 @@ Approved scope: build the walkable dark corridor and tall warehouse, assemble th
 
 - First expanded real PIE run passed 32 checks. Its measured first unloaded rebound peaked at +0.649 cm; loaded transient minimum -4.646 cm, then settled. Last visual fixes: truck the exit camera with the walking cat; preserve a clear release position for the actual gameplay camera; offset only the live Stage3 arrival title below the existing clock.
 - Forced regeneration/recompile of the elevator headers and generated translation unit resolved a cold map-load GC crash after the private class layout changed. Cold authoring then succeeded; no source cat assets needed replacement. Exact original crash cause is not proven beyond this successful rebuild/reload.
+
+## Revision 3 (2026-11-25 23:35 KST): applied to main and verified after restart
+- Floor-level face shot restored, surroundings/minimap hidden from cabin entry, and F camera blend before the jump. Scope and limits: `ElevatorTransition_Handoff_20261125.md`.
+- Main Stage2: `E23_Shot_Below` moved to `(729,-1310,14)` with FOV 36, plus 31 visibility tags. 33 editor mutations; only `/Game/Maps/Stage2` saved. Receipt `Saved/ElevatorTransition/live_departure_apply.json`; read-only recheck after saving passed.
+- Active module is `UnrealEditor-Catrun_ElevatorRevision3.dll` (manifest committed, canonical DLL unchanged). The editor was closed normally with no unsaved changes and relaunched; PID 43664 loaded it.
+- Main-project offscreen PIE with isolated saves: 58 checks passed on d3d12 (`MainRevision3_02_D3D12.log`, `Runtime/report.json`); floor face shots inspected and matched against the candidate. The d3d11 run also passed 58 but rendered the face nearly black, probably missing indirect light, so use `-RHI d3d12` for visual review.
+- Limits: entry points are placement fixtures, not a full manual playthrough. No commit or push.

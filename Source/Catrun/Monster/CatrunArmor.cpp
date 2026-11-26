@@ -829,7 +829,7 @@ void ACatrunArmor::UpdateDetection()
 		bDetectionConfigured = true;
 	}
 
-	// The circle is only drawn for debugging: by the level's switch or by this armor's own switch.
+	// The armor's own switch decides; the level's debug switch can force every circle on.
 	const bool bShowCircle = bShowDetectionDisplay || (SoundManager.IsValid() && SoundManager->bDebugShowArmorDetection);
 	if (bShowCircle != bDetectionDisplayShown)
 	{

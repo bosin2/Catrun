@@ -5,18 +5,43 @@
 #include "Sound/CatrunDoor.h"
 #include "Sound/CatrunSoundSettings.h"
 #include "Sound/SoundGridManager.h"
+#include "Camera/CameraComponent.h"
 #include "CollisionQueryParams.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/StaticMesh.h"
 #include "Engine/Texture2D.h"
 #include "Engine/World.h"
+#include "GameFramework/PlayerController.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Math/Float16Color.h"
 
 UCatrunVisionFanComponent::UCatrunVisionFanComponent()
 {
-	// The owner calls Update every frame, so the component needs no tick of its own.
-	PrimaryComponentTick.bCanEverTick = false;
+	// The owner calls Update every frame. This tick only hides the floor display while a cinematic
+	// camera owns the screen, also for owners that stop updating (capture, frozen AI).
+	PrimaryComponentTick.bCanEverTick = true;
+}
+
+bool UCatrunVisionFanComponent::IsCinematicView(const UWorld* World)
+{
+	// The gameplay and puzzle-reveal cameras are orthographic. The warehouse view is perspective but played.
+	const APlayerController* PC = World ? World->GetFirstPlayerController() : nullptr;
+	const AActor* View = PC ? PC->GetViewTarget() : nullptr;
+	if (!View || View->ActorHasTag(TEXT("CatrunGameplayCamera")) || View->ActorHasTag(TEXT("CatrunElevatorWarehouseCamera"))) return false;
+	const UCameraComponent* Camera = View->FindComponentByClass<UCameraComponent>();
+	return Camera && Camera->ProjectionMode == ECameraProjectionMode::Perspective;
+}
+
+void UCatrunVisionFanComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	ApplyDisplayVisibility();
+}
+
+void UCatrunVisionFanComponent::ApplyDisplayVisibility()
+{
+	const bool bShow = bDisplayVisible && !IsCinematicView(GetWorld());
+	if (Plane && Plane->GetVisibleFlag() != bShow) Plane->SetVisibility(bShow);
 }
 
 void UCatrunVisionFanComponent::Configure(float InRange, int32 InRayCount, const FLinearColor& InColor)
@@ -88,7 +113,7 @@ bool UCatrunVisionFanComponent::EnsureReady()
 		Plane->SetUsingAbsoluteRotation(true);
 		Plane->SetUsingAbsoluteScale(true);
 		Plane->SetWorldScale3D(FVector(GetDisplayRange() * 2.f / 100.f, GetDisplayRange() * 2.f / 100.f, 1.f)); // engine plane is 100 x 100 cm
-		Plane->SetVisibility(bDisplayVisible);
+		Plane->SetVisibility(bDisplayVisible && !IsCinematicView(GetWorld()));
 
 		Material = UMaterialInstanceDynamic::Create(DisplayMaterial, Owner);
 		Material->SetTextureParameterValue(TEXT("DistTex"), DistanceTexture);
@@ -234,8 +259,5 @@ void UCatrunVisionFanComponent::ClearOriginOverride()
 void UCatrunVisionFanComponent::SetDisplayVisible(bool bVisible)
 {
 	bDisplayVisible = bVisible;
-	if (Plane)
-	{
-		Plane->SetVisibility(bVisible);
-	}
+	ApplyDisplayVisibility();
 }

@@ -3,6 +3,7 @@
 #include "Perception/CatrunSafeRestore.h"
 #include "Sound/CatrunNotice.h"
 
+#include "Camera/CameraShakeBase.h"
 #include "Camera/PlayerCameraManager.h"
 #include "Engine/Engine.h"
 #include "Engine/World.h"
@@ -115,7 +116,7 @@ void UCatrunRestartSubsystem::ReportBlockedPawnRecovery(APawn& Pawn)
 {
 	BlockedRecoveryPawn = &Pawn;
 	if (auto* Notice = UCatrunNoticeSubsystem::Get(this))
-		Notice->ShowNotice(NSLOCTEXT("Catrun", "BlockedPawnRecovery", "안전한 위치로 돌아갈 수 없습니다. 설정에서 스테이지를 다시 시작하거나 타이틀로 돌아가세요."), 8.f, ECatrunNoticePolicy::BlockedRecovery);
+		Notice->ShowNotice(NSLOCTEXT("Catrun", "BlockedPawnRecovery", "안전한 위치로 돌아갈 수 없습니다. 설정에서 스테이지를 다시 시작하거나 시작 메뉴로 돌아가세요."), 8.f, ECatrunNoticePolicy::BlockedRecovery);
 	UE_LOG(LogTemp, Display, TEXT("Pawn recovery has no clear supported placement in %s."), *GetWorld()->GetName());
 }
 
@@ -131,6 +132,14 @@ bool UCatrunRestartSubsystem::BeginStageTimeout()
 		if (auto* Movement = Pawn->GetMovementComponent()) Movement->StopMovementImmediately();
 	if (auto* Notice = UCatrunNoticeSubsystem::Get(this))
 		Notice->ShowNotice(NSLOCTEXT("Catrun", "StageTimeout", "마왕이 깨어났다"), 1.6f, ECatrunNoticePolicy::StageTimeout);
+	if (auto* CameraManager = Controller->PlayerCameraManager.Get())
+	{
+		// Presentation only: the room shudders and darkens red before the unchanged 1.2s + .4s failure fade.
+		CameraManager->StartCameraFade(0.f, .45f, .6f, FLinearColor(.02f, 0.f, 0.f), false, true);
+		bTimeoutFadeStarted = true;
+		const FSoftClassPath Shake(TEXT("/Game/Environment/Stage2/GameplayPolish_20261125/Presentation/CameraShakeCorrection_20261125/CS_GateImpact.CS_GateImpact_C"));
+		if (UClass* ShakeClass = Shake.TryLoadClass<UCameraShakeBase>()) CameraManager->StartCameraShake(ShakeClass, 2.5f);
+	}
 	World->GetTimerManager().SetTimer(TimeoutTimer, this, &UCatrunRestartSubsystem::StartTimeoutFade, 1.2f, false);
 	return true;
 }
@@ -140,7 +149,7 @@ void UCatrunRestartSubsystem::StartTimeoutFade()
 	if (!IsCatchOwner(this)) return;
 	if (const auto* Controller = TimeoutController.Get(); Controller && Controller->PlayerCameraManager)
 	{
-		Controller->PlayerCameraManager->StartCameraFade(0.f, 1.f, .4f, FLinearColor::Black, false, true);
+		Controller->PlayerCameraManager->StartCameraFade(.45f, 1.f, .4f, FLinearColor::Black, false, true);
 		bTimeoutFadeStarted = true;
 	}
 	GetWorld()->GetTimerManager().SetTimer(TimeoutTimer, this, &UCatrunRestartSubsystem::CommitTimeoutRestart, .4f, false);
@@ -191,15 +200,19 @@ void UCatrunRestartSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 {
 	Super::OnWorldBeginPlay(InWorld);
 	auto* Flow = InWorld.GetSubsystem<UCatrunLevelFlowSubsystem>();
-	if (!Flow || !Flow->ShouldSkipStageIntro() || Flow->GetRestartFadeInDuration() <= 0.f)
-	{
-		return;
-	}
+	if (!Flow || Flow->IsMainMenuWorld()) return;
+	const auto* Routes = GetDefault<UCatrunLevelFlowSettings>();
+	const bool bRestartFade = Flow->ShouldSkipStageIntro() && Flow->GetRestartFadeInDuration() > 0.f;
+	// The first stage's intro continues the menu shot without black; every other stage starts behind black.
+	if (!bRestartFade && (!InWorld.GetGameViewport() || Routes->FindStageIndex(InWorld.GetOutermost()->GetName()) <= 0)) return;
 
 	// Fade in on the newly loaded level.
 	APlayerController* Controller = UGameplayStatics::GetPlayerController(&InWorld, 0);
 	if (Controller && Controller->PlayerCameraManager)
 	{
-		Controller->PlayerCameraManager->StartCameraFade(1.f, 0.f, Flow->GetRestartFadeInDuration(), FLinearColor::Black, false, false);
+		// StartCameraFade only takes effect on the next camera update; the first drawn frame must already be black.
+		Controller->PlayerCameraManager->SetManualCameraFade(1.f, FLinearColor::Black, false);
+		// Arrival Blueprints and sequences that begin play later replace this short default fade.
+		Controller->PlayerCameraManager->StartCameraFade(1.f, 0.f, bRestartFade ? Flow->GetRestartFadeInDuration() : .1f, FLinearColor::Black, false, false);
 	}
 }

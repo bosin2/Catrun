@@ -4,6 +4,8 @@
 #include "Blueprint/UserWidget.h"
 #include "CatrunPlayerStatusWidget.generated.h"
 
+class ACatrunElevatorTransition;
+class APawn;
 class UProgressBar;
 class UTextBlock;
 
@@ -28,6 +30,19 @@ protected:
 	UPROPERTY(meta=(BindWidgetOptional)) TObjectPtr<UTextBlock> ClockText;
 private:
 	friend class FCatrunStatusPresentationTest;
+	friend class FCatrunStatusClockPlacementTest;
+	void UpdateClockPlacement(const APawn* Pawn, float DeltaSeconds);
+	void ScanOverlays();
+	void AnnounceTimeLimit(const APawn& Pawn);
+	TWeakObjectPtr<AActor> TutorialExit;
+	bool bTimeLimitAnnounced = false;
+	TArray<TWeakObjectPtr<ACatrunElevatorTransition>> Elevators;
+	TWeakObjectPtr<UUserWidget> LabelledKeyHint;
+	float OverlayScanSeconds = 0.f;
+	float ClockHoldSeconds = 0.f;
+	float ClockOpacity = 1.f;
+	float ClockDock = 0.f;
+	bool bClockSpaceTaken = false;
 	float StaminaFraction = 1.f;
 	float BellFraction = 1.f;
 	float TimeFraction = 1.f;

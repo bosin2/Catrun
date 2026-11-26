@@ -58,6 +58,9 @@ public:
 
 	// Shows or hides the floor display. The sight itself keeps working while hidden.
 	void SetDisplayVisible(bool bVisible);
+	// True while a perspective presentation camera (sequence, capture) owns the local player's screen.
+	static bool IsCinematicView(const UWorld* World);
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	// Changes the color of the floor display (for example orange -> red when the cat is spotted).
 	void SetColor(const FLinearColor& NewColor);
@@ -82,6 +85,8 @@ private:
 
 	bool bOriginOverridden = false;
 	FVector OriginOverride = FVector::ZeroVector;
+
+	void ApplyDisplayVisibility();
 
 	// Keep the native default subobject's material reference available to the cooker.
 	UPROPERTY()
