@@ -136,6 +136,8 @@ def step(w):
         move(cat,-200,plan_y(3720));phase('final_gate');return
     if p=='final_gate':
         if time.monotonic()-S['changed']<5:return
+        # The 3.45 s opening runs on game time; under load wall time leads it, so wait for the stop (tick off).
+        if director.get_editor_property('bFinalGateOpen') and director.is_actor_tick_enabled() and time.monotonic()-S['changed']<15:return
         check('Final gate opens',director.get_editor_property('bFinalGateOpen'))
         l=director.get_editor_property('FinalLeafLeft').get_actor_location();r=director.get_editor_property('FinalLeafRight').get_actor_location()
         check('Final gate clears 600 cm passage',abs(r.x-l.x)>=619,{'left':xyz(l),'right':xyz(r)})

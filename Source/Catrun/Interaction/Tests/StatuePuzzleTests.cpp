@@ -250,6 +250,45 @@ bool FCatrunStageClockAdmissionTest::RunTest(const FString&)
 	return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunStageTimeoutRetryTest,"Catrun.LevelFlow.StageTimeoutRetriesAfterTravelFailure",EAutomationTestFlags::EditorContext|EAutomationTestFlags::EngineFilter)
+bool FCatrunStageTimeoutRetryTest::RunTest(const FString&)
+{
+	FStatueFixture F(246.f, true);
+	auto* PC = F.AddPlayer();
+	PC->SetPlayer(NewObject<ULocalPlayer>(GEngine));
+	if (!TestTrue(TEXT("The fixture controller owns a local player"), PC->GetLocalPlayer() && PC->IsLocalController())) return false;
+	F.World->BeginPlay();
+	auto* Flow = F.World->GetSubsystem<UCatrunLevelFlowSubsystem>();
+	auto* Restart = F.World->GetSubsystem<UCatrunRestartSubsystem>();
+	const float Budget = Flow->GetStageClockState().BudgetSeconds;
+	if (!TestTrue(TEXT("Recognized Stage2 has a timed allocation"), Budget > 0.f)) return false;
+	Flow->Tick(.01f);
+	Flow->Tick(Budget + 1.f);
+	if (!TestTrue(TEXT("Zero time acquires the timeout reservation"), Restart->IsCatchOwner(Restart))) return false;
+	TestFalse(TEXT("Capture cannot take a second reservation during timeout"), Restart->TryBeginCatch(F.Puzzle));
+
+	// Force the same-map restart to be refused synchronously; the fixture has a real world context, so it must never open a level.
+	Flow->bStageComplete = true;
+	++GFrameCounter; F.World->GetTimerManager().Tick(0.f);   // activate the pending presentation timer
+	++GFrameCounter; F.World->GetTimerManager().Tick(1.25f); // presentation -> failure fade
+	++GFrameCounter; F.World->GetTimerManager().Tick(0.f);   // activate the pending commit timer
+	++GFrameCounter; F.World->GetTimerManager().Tick(.45f);  // failure fade -> restart commit
+	Flow->bStageComplete = false;
+	TestFalse(TEXT("Failed restart travel releases the timeout reservation"), Restart->IsCatching());
+	TestFalse(TEXT("Failed restart travel releases move and look locks"), PC->IsMoveInputIgnored() || PC->IsLookInputIgnored());
+	TestEqual(TEXT("Failed restart travel leaves the clock at zero"), Flow->GetStageClockState().RemainingSeconds, 0.f);
+
+	Flow->Tick(1.f);
+	TestFalse(TEXT("Retry waits out the failure notice"), Restart->IsCatching());
+	Flow->Tick(5.f);
+	TestTrue(TEXT("Timeout re-arms and retries after the delay"), Restart->IsCatchOwner(Restart));
+	Flow->Tick(1.f);
+	TestTrue(TEXT("Retried timeout keeps a single owner"), Restart->IsCatchOwner(Restart));
+	TestFalse(TEXT("Capture cannot interrupt the retried timeout"), Restart->TryBeginCatch(F.Puzzle));
+	Restart->CancelCatch();
+	return true;
+}
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FStatuePlateGateTest,"Catrun.Stage2.PlateGateAndSafeClosing",EAutomationTestFlags::EditorContext|EAutomationTestFlags::EngineFilter)
 bool FStatuePlateGateTest::RunTest(const FString&)
 {

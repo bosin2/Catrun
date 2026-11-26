@@ -1,0 +1,303 @@
+{
+  "status": "compact_model_and_motion_ready_for_user_review",
+  "user_art_approval": false,
+  "ue_runtime_verified": false,
+  "new_mesh_and_skeleton_required": true,
+  "supersedes": "PortalSeated20261125 long-limbed revision",
+  "blend": "C:\\Users\\whghk\\.codex\\worktrees\\110f\\Catrun\\SourceArt\\BlackCat\\PortalCompact20261125\\SK_BlackCat_CompactPortal.blend",
+  "full_sequence_blend": "C:\\Users\\whghk\\.codex\\worktrees\\110f\\Catrun\\SourceArt\\BlackCat\\PortalCompact20261125\\SC_BlackCat_CompactPortal_Review.blend",
+  "video": "C:\\Users\\whghk\\.codex\\worktrees\\110f\\Catrun\\SourceArt\\BlackCat\\PortalCompact20261125\\Previews\\CompactPortal_30fps.mp4",
+  "comparison": "C:\\Users\\whghk\\.codex\\worktrees\\110f\\Catrun\\SourceArt\\BlackCat\\PortalCompact20261125\\Previews\\Comparison.png",
+  "mesh_fbx": "C:\\Users\\whghk\\.codex\\worktrees\\110f\\Catrun\\SourceArt\\BlackCat\\PortalCompact20261125\\FBX\\SK_BlackCat_CompactPortal.fbx",
+  "clips": [
+    {
+      "action": "AN_CompactPortal_SeatedListenTouch",
+      "fbx": "C:\\Users\\whghk\\.codex\\worktrees\\110f\\Catrun\\SourceArt\\BlackCat\\PortalCompact20261125\\FBX\\AN_CompactPortal_SeatedListenTouch.fbx",
+      "start": 1,
+      "end": 91,
+      "fps": 30,
+      "duration_seconds": 3.0,
+      "sha256": "61506fa7af56eb72b1590126cb9fbfbb028feddc66753116eaf04961b61aefae"
+    },
+    {
+      "action": "AN_CompactPortal_HipsBackWiggle",
+      "fbx": "C:\\Users\\whghk\\.codex\\worktrees\\110f\\Catrun\\SourceArt\\BlackCat\\PortalCompact20261125\\FBX\\AN_CompactPortal_HipsBackWiggle.fbx",
+      "start": 1,
+      "end": 53,
+      "fps": 30,
+      "duration_seconds": 1.7333333333333334,
+      "sha256": "f5304ffb077f545c94b4032bff3464a4da19f8688d0031b0313a32d02d8b886d"
+    },
+    {
+      "action": "AN_CompactPortal_SeatedTakeoff",
+      "fbx": "C:\\Users\\whghk\\.codex\\worktrees\\110f\\Catrun\\SourceArt\\BlackCat\\PortalCompact20261125\\FBX\\AN_CompactPortal_SeatedTakeoff.fbx",
+      "start": 1,
+      "end": 13,
+      "fps": 30,
+      "duration_seconds": 0.4,
+      "sha256": "8e3cc0d36f88530e818eb64531f7685cdbc12bb01ded602f3f1fa914d7ef6644"
+    },
+    {
+      "action": "AN_CompactPortal_AirReach",
+      "fbx": "C:\\Users\\whghk\\.codex\\worktrees\\110f\\Catrun\\SourceArt\\BlackCat\\PortalCompact20261125\\FBX\\AN_CompactPortal_AirReach.fbx",
+      "start": 1,
+      "end": 19,
+      "fps": 30,
+      "duration_seconds": 0.6,
+      "sha256": "901317f8642e5a4b9449a0a54a32c6c3a306bbce83d3139d91294ebff8fe3797"
+    },
+    {
+      "action": "AN_CompactPortal_WalkReview",
+      "fbx": "C:\\Users\\whghk\\.codex\\worktrees\\110f\\Catrun\\SourceArt\\BlackCat\\PortalCompact20261125\\FBX\\AN_CompactPortal_WalkReview.fbx",
+      "start": 1,
+      "end": 121,
+      "fps": 30,
+      "duration_seconds": 4.0,
+      "sha256": "4225be047a89a109059f5e4d43d85d6b0e9fdad21fdc50188f9ed65fab262c23"
+    }
+  ],
+  "fps": 30,
+  "video_frames": 293,
+  "video_duration_seconds": 9.766666666666667,
+  "limb_length_factor": 0.7,
+  "body_width_factor": 1.08,
+  "body_depth_factor": 1.06,
+  "body_triangles": 568,
+  "retained_triangles": 8256,
+  "total_triangles": 8824,
+  "bones": 108,
+  "original_bone_rest_changed": true,
+  "rest_shape_is_compact": true,
+  "head_size_preserved": true,
+  "root_motion_in_clips": false,
+  "timing": {
+    "sit": [
+      1,
+      19
+    ],
+    "ear": [
+      20,
+      27
+    ],
+    "head_tilt": [
+      24,
+      32
+    ],
+    "hold": [
+      32,
+      43
+    ],
+    "paw_gather": [
+      49,
+      52
+    ],
+    "contact": [
+      55,
+      60
+    ],
+    "paw_down": 72,
+    "two_wiggles": [
+      14,
+      38
+    ],
+    "wiggle_stop": [
+      38,
+      41
+    ],
+    "quick_compression": [
+      44,
+      50
+    ],
+    "compression_hold": [
+      50,
+      53
+    ],
+    "last_hind_ground_frame": 5,
+    "first_hind_airborne_frame": 6,
+    "launch_ends": 13
+  },
+  "contact": {
+    "paw": "paw_F_L",
+    "portal_plane_y_m": -0.07990285557508468,
+    "palm_center_model_local_m": [
+      0.0274199955,
+      -0.07990285557508468,
+      0.0521000028
+    ],
+    "max_plane_error_m": 9.417533877731366e-09
+  },
+  "qa": {
+    "body_scan": "C:\\Users\\whghk\\.codex\\worktrees\\110f\\Catrun\\SourceArt\\BlackCat\\PortalCompact20261125\\QA_Surface\\motion_scan_all_frames.json",
+    "body_scan_frames": 297,
+    "updated_launch_first_frame": "identical to previously validated final compression pose",
+    "native": {
+      "joins": [
+        {
+          "from": "AN_CompactPortal_WalkReview",
+          "to": "AN_CompactPortal_SeatedListenTouch",
+          "max_position_error_m": 4.571136223000457e-08
+        },
+        {
+          "from": "AN_CompactPortal_SeatedListenTouch",
+          "to": "AN_CompactPortal_HipsBackWiggle",
+          "max_position_error_m": 6.451215745348203e-08
+        },
+        {
+          "from": "AN_CompactPortal_HipsBackWiggle",
+          "to": "AN_CompactPortal_SeatedTakeoff",
+          "max_position_error_m": 2.474795891439073e-07
+        },
+        {
+          "from": "AN_CompactPortal_SeatedTakeoff",
+          "to": "AN_CompactPortal_AirReach",
+          "max_position_error_m": 3.204615886152769e-08
+        }
+      ],
+      "prepare_forepaw_mesh_max_displacement_m": {
+        "L": 2.448342385087503e-08,
+        "R": 2.3750358173010836e-08
+      },
+      "prepare_clearance": [
+        {
+          "frame": 1,
+          "face_portal_gap_m": 0.01863264840841293
+        },
+        {
+          "frame": 14,
+          "face_portal_gap_m": 0.00580058795213699
+        },
+        {
+          "frame": 38,
+          "face_portal_gap_m": 0.00580058795213699
+        },
+        {
+          "frame": 53,
+          "face_portal_gap_m": 0.005800595402717587
+        }
+      ],
+      "bones": 108,
+      "root_motion": false
+    },
+    "rebind": {
+      "compact_rest_applied": true,
+      "native_pose_max_position_error_m": 4.931614657816934e-08,
+      "native_pose_max_matrix_error": 1.4901161193847656e-06,
+      "mesh_max_vertex_error_m": {
+        "SK_BlackCat_Final": 1.0667608079680323e-07,
+        "BlackCat_PortalBody": 8.353402813066114e-07
+      },
+      "bones": 108,
+      "mesh_triangles": {
+        "SK_BlackCat_Final": 8256,
+        "BlackCat_PortalBody": 568
+      },
+      "original_78_bind_changed_for_short_proportions": true,
+      "old_source_actions_removed_from_compact_copy": true
+    },
+    "native_reopen_pixel_max_difference": {
+      "179": 1,
+      "268": 0,
+      "280": 0
+    },
+    "native_reopen_tolerance": {
+      "frames": [
+        179,
+        268,
+        280
+      ],
+      "max_channel_difference_allowed": 1,
+      "max_differing_pixels_per_frame_allowed": 4,
+      "rule": "Both limits must hold for every listed frame (8-bit RGBA, equal image shape); otherwise packaging stops.",
+      "measured": {
+        "179": {
+          "max_channel_difference": 1,
+          "differing_pixels": 1,
+          "total_pixels": 512000
+        },
+        "268": {
+          "max_channel_difference": 0,
+          "differing_pixels": 0,
+          "total_pixels": 512000
+        },
+        "280": {
+          "max_channel_difference": 0,
+          "differing_pixels": 0,
+          "total_pixels": 512000
+        }
+      },
+      "reason": "Video frames 0000-0261 were rendered by the first bake and 0262-0292 plus the saved scene by the second bake; floating-point rounding between the two bakes can change isolated pixels.",
+      "scope": "Only the listed frames are gated. This is not a claim that every video frame matches the saved scene bit for bit."
+    },
+    "fbx_roundtrip": "C:\\Users\\whghk\\.codex\\worktrees\\110f\\Catrun\\SourceArt\\BlackCat\\PortalCompact20261125\\QA\\fbx_roundtrip.json",
+    "compact_rest_structural": "C:\\Users\\whghk\\.codex\\worktrees\\110f\\Catrun\\SourceArt\\BlackCat\\PortalCompact20261125\\QA\\compact_rest_structural.json"
+  },
+  "recommended_ue_import": {
+    "new_isolated_skeleton": true,
+    "import_uniform_scale": 100,
+    "scale_verified_in_ue": false,
+    "convert_scene": true,
+    "convert_scene_unit": true,
+    "force_front_x_axis": false,
+    "preserve_local_transform": false,
+    "sample_rate": 30,
+    "compression": "Preserve frame keys / LeastDestructive; default key reduction previously caused drift on this small rig."
+  },
+  "limits": [
+    "Checks cover authored motion and each body/limb region, not every possible pose or every cross-part intersection.",
+    "Original source files and existing UE assets were not overwritten.",
+    "Flat-color UV stacking is intentional; not unique baked-texture UVs.",
+    "Normal-speed video was rendered; visual inspection used keyposes and frame sequences, not a claim of complete real-time playback perception."
+  ],
+  "files": [
+    {
+      "path": "C:\\Users\\whghk\\.codex\\worktrees\\110f\\Catrun\\SourceArt\\BlackCat\\PortalCompact20261125\\SK_BlackCat_CompactPortal.blend",
+      "bytes": 2141651,
+      "sha256": "3c470e13043f8bd7bb3f7bbcae27cc10e97b926730addfd39ef34f24800e8524"
+    },
+    {
+      "path": "C:\\Users\\whghk\\.codex\\worktrees\\110f\\Catrun\\SourceArt\\BlackCat\\PortalCompact20261125\\SC_BlackCat_CompactPortal_Review.blend",
+      "bytes": 4040079,
+      "sha256": "5b30f7ebbbb85ec25b972785e0f0efacb2962817a6dc8b7968a0dee863f7bdc5"
+    },
+    {
+      "path": "C:\\Users\\whghk\\.codex\\worktrees\\110f\\Catrun\\SourceArt\\BlackCat\\PortalCompact20261125\\Previews\\CompactPortal_30fps.mp4",
+      "bytes": 595123,
+      "sha256": "9d9d827b3bd814678143b980228289b19968fb8fa5968ae98bd6e61e317085a7"
+    },
+    {
+      "path": "C:\\Users\\whghk\\.codex\\worktrees\\110f\\Catrun\\SourceArt\\BlackCat\\PortalCompact20261125\\Previews\\Comparison.png",
+      "bytes": 558413,
+      "sha256": "7a8466dd1d407f8d0fa14fdf8f0e09f0e828bb729accbc6a4ac8a8b35a71e37a"
+    },
+    {
+      "path": "C:\\Users\\whghk\\.codex\\worktrees\\110f\\Catrun\\SourceArt\\BlackCat\\PortalCompact20261125\\FBX\\AN_CompactPortal_AirReach.fbx",
+      "bytes": 813500,
+      "sha256": "901317f8642e5a4b9449a0a54a32c6c3a306bbce83d3139d91294ebff8fe3797"
+    },
+    {
+      "path": "C:\\Users\\whghk\\.codex\\worktrees\\110f\\Catrun\\SourceArt\\BlackCat\\PortalCompact20261125\\FBX\\AN_CompactPortal_HipsBackWiggle.fbx",
+      "bytes": 1023148,
+      "sha256": "f5304ffb077f545c94b4032bff3464a4da19f8688d0031b0313a32d02d8b886d"
+    },
+    {
+      "path": "C:\\Users\\whghk\\.codex\\worktrees\\110f\\Catrun\\SourceArt\\BlackCat\\PortalCompact20261125\\FBX\\AN_CompactPortal_SeatedListenTouch.fbx",
+      "bytes": 1242396,
+      "sha256": "61506fa7af56eb72b1590126cb9fbfbb028feddc66753116eaf04961b61aefae"
+    },
+    {
+      "path": "C:\\Users\\whghk\\.codex\\worktrees\\110f\\Catrun\\SourceArt\\BlackCat\\PortalCompact20261125\\FBX\\AN_CompactPortal_SeatedTakeoff.fbx",
+      "bytes": 768364,
+      "sha256": "8e3cc0d36f88530e818eb64531f7685cdbc12bb01ded602f3f1fa914d7ef6644"
+    },
+    {
+      "path": "C:\\Users\\whghk\\.codex\\worktrees\\110f\\Catrun\\SourceArt\\BlackCat\\PortalCompact20261125\\FBX\\AN_CompactPortal_WalkReview.fbx",
+      "bytes": 1395388,
+      "sha256": "4225be047a89a109059f5e4d43d85d6b0e9fdad21fdc50188f9ed65fab262c23"
+    },
+    {
+      "path": "C:\\Users\\whghk\\.codex\\worktrees\\110f\\Catrun\\SourceArt\\BlackCat\\PortalCompact20261125\\FBX\\SK_BlackCat_CompactPortal.fbx",
+      "bytes": 660188,
+      "sha256": "83c7ecf3a20c61d3f91911abf1107a44efe55a53e7a37b26b33c151e2362fcf3"
+    }
+  ]
+}

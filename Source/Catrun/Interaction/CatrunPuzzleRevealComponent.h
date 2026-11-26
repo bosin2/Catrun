@@ -18,7 +18,8 @@ class CATRUN_API UCatrunPuzzleRevealComponent : public UActorComponent
 	GENERATED_BODY()
 public:
 	UCatrunPuzzleRevealComponent();
-	bool BeginReveal(FName Id, AActor* Gate, const FBox& GateBounds);
+	/** AlsoIgnored: extra gate parts (e.g. a second leaf) the camera probes must not treat as blockers. */
+	bool BeginReveal(FName Id, AActor* Gate, const FBox& GateBounds, TArrayView<AActor* const> AlsoIgnored = {});
 	bool CanOpenGate(FName Id) const;
 	void GateOpened(FName Id);
 	UFUNCTION(BlueprintCallable, Category="Puzzle|Reveal") void CancelReveal();
@@ -38,6 +39,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Puzzle|Reveal", meta=(ClampMin="0")) float CameraReturnTime = .6f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Puzzle|Reveal", meta=(ClampMin="1", ClampMax="15")) float MaximumLockTime = 8.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Puzzle|Reveal") FVector GateCameraOffset = FVector(0,-400,160);
+	/** False pans without camera collision probes (endpoint overlap, path sweep, gate line of sight).
+	 *  Only valid with preserved ortho framing: the pan is a pure screen-plane translation, like the follow camera,
+	 *  which itself sits inside pillar height. Statue gates keep the default. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Puzzle|Reveal") bool bProbeCameraCollision = true;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	virtual void EndPlay(const EEndPlayReason::Type Reason) override;
 private:
@@ -53,6 +58,7 @@ private:
 	TWeakObjectPtr<APlayerController> Player;
 	TWeakObjectPtr<AActor> PreviousView;
 	TWeakObjectPtr<AActor> TargetGate;
+	TArray<TWeakObjectPtr<AActor>> IgnoredGateParts;
 	TWeakObjectPtr<ACameraActor> Camera;
 	UPROPERTY(Transient) TObjectPtr<UInputComponent> InputBlocker;
 	FVector CameraStart = FVector::ZeroVector;

@@ -17,6 +17,8 @@ import traceback
 from pathlib import Path
 
 KEYS = ('W', 'A', 'S', 'D')
+# CatrunBasket::ExitOptionInput slot per single key (F, FR, R, BR, B, BL, L, FL).
+EXIT_SLOTS = {'W': 0, 'D': 2, 'S': 4, 'A': 6}
 DIRS = ('F', 'FR', 'R', 'BR', 'B', 'BL', 'L', 'FL')
 ZONES = ('Lobby', 'Exhibition', 'Warehouse', 'ControlAnnex')
 ORIGINAL_CANDLES = ('S3_Candle_Exhibition', 'S3_Candle_WarehouseNorth',
@@ -391,6 +393,8 @@ class RuntimeQA:
         self.case['select_is_fallback'] = fallback
         self.case['camera_yaw'], axes = self.axes()
         self.case['expected_direction'] = [*axes[key], 0.]
+        # Blocked options are never offered (AvailableExitMask); such a key must leave the selection as it was.
+        self.case['previous_direction'] = self.v(self.action.get_editor_property('ExitWorldDirection'))
         self.key(key, True)
         self.phase('select_exit')
 
@@ -521,11 +525,23 @@ class RuntimeQA:
                 self.select(self.case['key'])
         elif p == 'select_exit' and elapsed > .15:
             direction = self.action.get_editor_property('ExitWorldDirection')
-            assert (direction-self.u.Vector(*self.case['expected_direction'])).length() < .002, 'Exit direction differs from camera input'
+            mask = int(self.action.get_editor_property('AvailableExitMask'))
+            offered = bool(mask & (1 << EXIT_SLOTS[self.case['selected_key']]))
+            if offered:
+                assert (direction-self.u.Vector(*self.case['expected_direction'])).length() < .002, 'Exit direction differs from camera input'
+            else:
+                assert (direction-self.u.Vector(*self.case['previous_direction'])).length() < .002, 'A blocked (unoffered) exit key changed the selection'
             can_exit = bool(self.action.get_editor_property('CanExit'))
             self.key(self.case['selected_key'], False)
-            self.case.setdefault('direction_results', []).append({'key': self.case['selected_key'], 'direction': self.v(direction), 'can_exit': can_exit})
-            if not can_exit and self.case['select_is_fallback']:
+            self.case.setdefault('direction_results', []).append({'key': self.case['selected_key'], 'direction': self.v(direction),
+                                                                  'can_exit': can_exit, 'offered': offered, 'available_mask': mask})
+            if not offered:
+                if self.case['select_is_fallback'] or can_exit:
+                    self.fallback()
+                else:
+                    self.interact()
+                    self.phase('blocked_confirm')
+            elif not can_exit and self.case['select_is_fallback']:
                 self.fallback()
             else:
                 self.case['landing'] = self.v(self.action.get_editor_property('ExitWorldLocation'))

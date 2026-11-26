@@ -147,7 +147,7 @@ float UCatrunVisionFanComponent::TraceRay(const FVector& Start, const FVector& D
 	return GetWorld() ? CatrunPerception::SightDistance(*GetWorld(), Start, Start+Direction*MaxDistance, GetOwner()) : MaxDistance;
 }
 
-void UCatrunVisionFanComponent::Update(float CenterAngleDegrees, float HalfAngleDegrees)
+void UCatrunVisionFanComponent::Update(float CenterAngleDegrees, float HalfAngleDegrees, bool bWriteDisplay)
 {
 	if (!EnsureReady())
 	{
@@ -158,6 +158,9 @@ void UCatrunVisionFanComponent::Update(float CenterAngleDegrees, float HalfAngle
 
 	const FVector Origin = GetOrigin();
 	const FVector Start(Origin.X, Origin.Y, FloorZ + Settings->VisionTraceHeight);
+	LastOrigin = Origin;
+	LastStart = Start;
+	bHasFan = true;
 
 	// Ray i points to the middle of the i-th slice of the fan.
 	const float Slice = (2.f * HalfAngle) / RayCount;
@@ -167,32 +170,71 @@ void UCatrunVisionFanComponent::Update(float CenterAngleDegrees, float HalfAngle
 		// The first NearClip cm of every ray are skipped (not traced, not drawn).
 		const FVector Direction(FMath::Cos(AngleRad), FMath::Sin(AngleRad), 0.f);
 		RayDistances[i] = NearClip + TraceRay(Start + Direction * NearClip, Direction, FMath::Max(Range - NearClip, 1.f));
-		DisplayRayDistances[i] = DisplayRadiusPadding > 0.f
-			? NearClip + TraceRay(Start + Direction * NearClip, Direction, FMath::Max(GetDisplayRange() - NearClip, 1.f))
-			: RayDistances[i];
 	}
 
-	if (Plane && Material)
+	if (bWriteDisplay)
 	{
-		WriteTexture();
-		Plane->SetWorldLocation(FVector(Origin.X, Origin.Y, FloorZ + Settings->VisualHeight));
-		Material->SetVectorParameterValue(TEXT("Center"), FLinearColor(Origin.X, Origin.Y, NearClip, 0.f)); // z = near clip, see M_VisionFan
-		Material->SetScalarParameterValue(TEXT("CenterAngle"), CenterAngle);
-		Material->SetScalarParameterValue(TEXT("HalfAngle"), HalfAngle);
+		WriteDisplay();
 	}
+}
+
+void UCatrunVisionFanComponent::WriteDisplay()
+{
+	// The display is presentation only: hidden by the owner, it is neither traced nor uploaded.
+	if (!bReady || !bHasFan || !bDisplayVisible || !Plane || !Material || !Settings)
+	{
+		return;
+	}
+	const int32 Num = FMath::Min(RayCount, FMath::Min(RayDistances.Num(), DisplayRayDistances.Num()));
+	const float Slice = (2.f * HalfAngle) / RayCount;
+	for (int32 i = 0; i < Num; ++i)
+	{
+		if (DisplayRadiusPadding > 0.f)
+		{
+			const float AngleRad = FMath::DegreesToRadians(CenterAngle - HalfAngle + (i + 0.5f) * Slice);
+			const FVector Direction(FMath::Cos(AngleRad), FMath::Sin(AngleRad), 0.f);
+			DisplayRayDistances[i] = NearClip + TraceRay(LastStart + Direction * NearClip, Direction, FMath::Max(GetDisplayRange() - NearClip, 1.f));
+		}
+		else
+		{
+			DisplayRayDistances[i] = RayDistances[i];
+		}
+	}
+
+	WriteTexture();
+	Plane->SetWorldLocation(FVector(LastOrigin.X, LastOrigin.Y, FloorZ + Settings->VisualHeight));
+	Material->SetVectorParameterValue(TEXT("Center"), FLinearColor(LastOrigin.X, LastOrigin.Y, NearClip, 0.f)); // z = near clip, see M_VisionFan
+	Material->SetScalarParameterValue(TEXT("CenterAngle"), CenterAngle);
+	Material->SetScalarParameterValue(TEXT("HalfAngle"), HalfAngle);
 }
 
 void UCatrunVisionFanComponent::WriteTexture()
 {
+	if (!DistanceTexture || !DistanceTexture->GetPlatformData() || DistanceTexture->GetPlatformData()->Mips.IsEmpty())
+	{
+		return;
+	}
+	// The texture is created once with the RayCount of that moment; never write past it.
+	const int32 Width = DistanceTexture->GetSizeX();
+	ensureMsgf(Width == RayCount, TEXT("%s: vision texture has %d pixels but the fan has %d rays (Configure after first Update)."),
+		*GetNameSafe(GetOwner()), Width, RayCount);
+	const int32 Num = FMath::Min(FMath::Min(RayCount, Width), DisplayRayDistances.Num());
+	// An unchanged fan (a still monster) keeps the uploaded texture.
+	if (WrittenRayDistances.Num() == Num && FMemory::Memcmp(WrittenRayDistances.GetData(), DisplayRayDistances.GetData(), Num * sizeof(float)) == 0)
+	{
+		return;
+	}
 	FTexture2DMipMap& Mip = DistanceTexture->GetPlatformData()->Mips[0];
 	FFloat16Color* Pixels = static_cast<FFloat16Color*>(Mip.BulkData.Lock(LOCK_READ_WRITE));
-	for (int32 i = 0; i < RayCount; ++i)
+	for (int32 i = 0; i < Num; ++i)
 	{
 		Pixels[i] = FFloat16Color();
 		Pixels[i].R = DisplayRayDistances[i];
 	}
 	Mip.BulkData.Unlock();
 	DistanceTexture->UpdateResource();
+	WrittenRayDistances.SetNum(Num);
+	FMemory::Memcpy(WrittenRayDistances.GetData(), DisplayRayDistances.GetData(), Num * sizeof(float));
 }
 
 bool UCatrunVisionFanComponent::CanSee(const FVector& WorldPoint, float PointRadius) const
@@ -258,6 +300,12 @@ void UCatrunVisionFanComponent::ClearOriginOverride()
 
 void UCatrunVisionFanComponent::SetDisplayVisible(bool bVisible)
 {
+	const bool bWasVisible = bDisplayVisible;
 	bDisplayVisible = bVisible;
+	// While hidden the display was not updated: redraw the last fan before it shows again.
+	if (bVisible && !bWasVisible)
+	{
+		WriteDisplay();
+	}
 	ApplyDisplayVisibility();
 }

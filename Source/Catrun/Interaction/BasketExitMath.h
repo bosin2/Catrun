@@ -23,6 +23,26 @@ namespace CatrunBasket
 		return !Direction.ContainsNaN() && !Direction.GetSafeNormal2D().IsNearlyZero();
 	}
 
+	// Digital movement keys give exactly eight camera-relative exit options.
+	// Slot order: F, FR, R, BR, B, BL, L, FL in movement-input space (X forward, Y right).
+	constexpr int32 ExitOptionCount = 8;
+	inline FVector2D ExitOptionInput(int32 Slot)
+	{
+		static const FVector2D Inputs[ExitOptionCount] = {
+			FVector2D(1.,0.), FVector2D(1.,1.), FVector2D(0.,1.), FVector2D(-1.,1.),
+			FVector2D(-1.,0.), FVector2D(-1.,-1.), FVector2D(0.,-1.), FVector2D(1.,-1.)};
+		return Inputs[FMath::Clamp(Slot,0,ExitOptionCount-1)];
+	}
+
+	inline int32 ExitOptionSlot(const FVector2D& Input)
+	{
+		const double X = Input.X > .1 ? 1. : (Input.X < -.1 ? -1. : 0.);
+		const double Y = Input.Y > .1 ? 1. : (Input.Y < -.1 ? -1. : 0.);
+		for (int32 Slot=0; Slot<ExitOptionCount; ++Slot)
+			if (ExitOptionInput(Slot).Equals(FVector2D(X,Y))) return Slot;
+		return INDEX_NONE;
+	}
+
 	inline FVector SnapDirection(const FVector& Direction, const FVector& ReferenceForward)
 	{
 		if (Direction.GetSafeNormal2D().IsNearlyZero()) return FVector::ZeroVector;

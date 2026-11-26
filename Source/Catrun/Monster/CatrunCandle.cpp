@@ -285,7 +285,8 @@ void ACatrunCandle::Tick(float DeltaSeconds)
 	const float BackOffset = GetConeBackOffset(*S);
 	Sight->SetNearClip(BackOffset);
 	Sight->SetOriginOverride(GetActorLocation() - Forward * BackOffset);
-	Sight->Update(ConeCenter, S->CandleConeAngle * 0.5f);
+	// Sight only: the floor display is drawn once, after the patrol step below.
+	Sight->Update(ConeCenter, S->CandleConeAngle * 0.5f, false);
 	Body->SetWorldRotation(FRotator(0.f, ConeCenter + AutoBodyYaw + BodyYawOffset, 0.f));
 
 	CheckForCat(DeltaSeconds, Cat, *S);
@@ -296,6 +297,10 @@ void ACatrunCandle::Tick(float DeltaSeconds)
 	{
 		Sight->SetOriginOverride(GetActorLocation() - Forward * BackOffset);
 		Sight->Update(ConeCenter, S->CandleConeAngle * 0.5f);
+	}
+	else
+	{
+		Sight->WriteDisplay();
 	}
 
 	// While the candle is tracking the cat the "!" stays on. (Show keeps it visible for a short

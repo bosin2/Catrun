@@ -430,7 +430,9 @@ void UCatrunLevelFlowSubsystem::Tick(float DeltaSeconds)
 	{
 		// Do not charge the delta spanning release of a presentation or arrival.
 		if (bGameplayWasAdvancing) Session->AdvanceClock(DeltaSeconds);
-		if (!bTimeoutAttempted && Session->GetRemainingSeconds(PlayableStage) <= 0.f)
+		// A failed timeout restart waits out its notice before retrying; paused time does not count.
+		if (TimeoutRetryDelay > 0.f) TimeoutRetryDelay = FMath::Max(0.f, TimeoutRetryDelay - DeltaSeconds);
+		if (!bTimeoutAttempted && TimeoutRetryDelay <= 0.f && Session->GetRemainingSeconds(PlayableStage) <= 0.f)
 			if (auto* Restart = UCatrunRestartSubsystem::Get(this)) bTimeoutAttempted = Restart->BeginStageTimeout();
 	}
 	bGameplayWasAdvancing = bAdvancing;
@@ -1385,6 +1387,12 @@ void UCatrunLevelFlowSubsystem::ClearFailedTravel()
     TravelFailureOwner.Reset(); TravelFailureCallback = {};
     if (auto* PC = TravelLockController.Get()) PC->SetIgnoreMoveInput(false);
     TravelLockController.Reset();
+}
+
+void UCatrunLevelFlowSubsystem::RearmStageTimeout(float RetryDelay)
+{
+    bTimeoutAttempted = false;
+    TimeoutRetryDelay = FMath::Max(0.f, RetryDelay);
 }
 
 bool UCatrunLevelFlowSubsystem::AbortOwnedTravel(const UObject* Owner)

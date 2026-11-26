@@ -1,0 +1,17 @@
+{
+ "folder": "/Game/Cinematics/Stage1/Portal/RefinePortal20261126",
+ "fbx_dir": "C:/Users/whghk/Desktop/CastleKit/BlackCat/Refine_20261125/FBX",
+ "mesh": "SK_BlackCat_Refine",
+ "import_uniform_scale": 1.0,
+ "truth": "D:/CatrunWork/portal/refine_samples.json",
+ "clips": [
+  "AN_CompactPortal_WalkReview",
+  "AN_CompactPortal_SeatedListenTouch",
+  "AN_CompactPortal_HipsBackWiggle",
+  "AN_CompactPortal_SeatedTakeoff",
+  "AN_CompactPortal_AirReach",
+  "AN_BlackCat_JumpDown",
+  "AN_BlackCat_Landing"
+ ],
+ "mesh_folder": "/Game/Characters/BlackCat/Refine_20261125"
+}

@@ -27,6 +27,16 @@ def shot(w,name):
  p=OUT/(name+'.png');cmd(w,('Shot showui -nosuffix filename="' if name.endswith('_selection') else 'HighResShot 1600x900 filename="')+str(p)+'"');S['shots'].append(str(p))
 KEYS=['W','D','S','A','WD','SD','SA','WA']
 DIRS=['F','FR','R','BR','B','BL','L','FL']
+# CatrunBasket::ExitOptionInput slot order (F,FR,R,BR,B,BL,L,FL); bit N of AvailableExitMask = slot N passes the F exit test.
+SLOT={'W':0,'WD':1,'D':2,'SD':3,'S':4,'SA':5,'A':6,'WA':7}
+NO_EXIT='지금은 나갈 곳이 없습니다';OLD_BLOCKED='선택한 방향이 막혀 있습니다'
+def exit_mask(a):return int(a.get_editor_property('AvailableExitMask'))
+def offered(mask,keys):return bool(mask>>SLOT[keys]&1)
+def open_keys(mask):return [k for k in KEYS if offered(mask,k)]
+def prompt_text(w):
+ try:ws=u.WidgetBlueprintLibrary.get_all_widgets_of_class(w,u.CatrunBasketPromptWidget,False)
+ except Exception:return None
+ return str(ws[0].get_prompt_text()) if ws else None
 def direction(w,keys):
  yaw=math.radians(GS.get_player_camera_manager(w,0).get_camera_rotation().yaw)
  f=int('W' in keys)-int('S' in keys);r=int('D' in keys)-int('A' in keys);n=math.hypot(f,r)
@@ -115,13 +125,30 @@ def step(w):
    S['walk_index']=0;S['walk_started']=now;case['walk_samples']=[];phase('walk');return
   nextcase(w);return
  if p=='select' and elapsed>.25:
-  expected=direction(w,case['actual_keys']);actual=a.get_editor_property('ExitWorldDirection')
-  assert (actual-expected).length()<.002,('Exit snapped away from walking direction',xyz(actual),xyz(expected),case)
+  expected=direction(w,case['actual_keys']);actual=a.get_editor_property('ExitWorldDirection');clear=bool(a.get_editor_property('CanExit'))
+  mask=exit_mask(a);is_offered=offered(mask,case['actual_keys']);previous=u.Vector(*case['expected_direction']) if case.get('expected_direction') else u.Vector(0,0,0)
+  assert a.has_any_exit_option()==(mask!=0),('HasAnyExitOption disagrees with AvailableExitMask',mask)
   previews=cat.get_components_by_class(u.CatrunBasketExitPreview)
   assert len(previews)<=1 and all(v.get_instance_count()==48 for v in previews),'Multiple exit markers'
-  if a.get_editor_property('CanExit'):assert len(previews)==1 and previews[0].is_visible(),'Missing selected exit guide'
-  case['selections'].append({'keys':case['actual_keys'],'direction':xyz(actual),'clear':bool(a.get_editor_property('CanExit')),'guide_instances':previews[0].get_instance_count() if previews else 0})
-  case['expected_direction']=xyz(actual);release(w);phase('selection_release');return
+  guide=any(v.is_visible() for v in previews)
+  # Only an exit that passes the confirmation test is drawn; a blocked choice never gets a (red) guide.
+  assert guide==clear,('Guide visibility differs from CanExit',guide,clear)
+  text=prompt_text(w)
+  assert text is None or OLD_BLOCKED not in text,('Blocked choice is still described',text)
+  if mask==0 and not clear:assert text in (None,NO_EXIT),('Missing no-exit prompt',text)
+  if is_offered:
+   assert (actual-expected).length()<.002,('Exit snapped away from walking direction',xyz(actual),xyz(expected),case)
+   assert clear,('Offered option fails the exit test',case['actual_keys'],mask)
+  else:
+   # The key of a blocked option does nothing. (Same direction but not clear = it closed after selection.)
+   assert (actual-previous).length()<.002 or ((actual-expected).length()<.002 and not clear),('Blocked option was selectable',case['actual_keys'],mask,xyz(actual))
+  case['selections'].append({'keys':case['actual_keys'],'offered':is_offered,'mask':mask,'open_keys':open_keys(mask),'prompt':text,'direction':xyz(actual),'clear':clear,'guide_instances':previews[0].get_instance_count() if previews else 0})
+  release(w)
+  if not is_offered:
+   case.setdefault('blocked_not_offered',[]).append(case['actual_keys'])
+   if clear:phase('choose_next');return # A remembered open choice from before would exit in another direction.
+   case['expected_direction']=xyz(actual);pulse(w,'F');phase('blocked_confirm');return # F on it must keep the cat hidden.
+  case['expected_direction']=xyz(actual);phase('selection_release');return
  if p=='selection_release' and elapsed>.25:
   assert (a.get_editor_property('ExitWorldDirection')-u.Vector(*case['expected_direction'])).length()<.002,'Release changed selection'
   if case.get('primary') and len(case['selections'])==1:shot(w,case['map']+'_'+case['basket']+'_selection')
@@ -133,8 +160,10 @@ def step(w):
   assert state(a)=='HIDDEN' and not a.get_editor_property('Busy')
   assert (a.get_editor_property('ExitWorldDirection')-u.Vector(*case['expected_direction'])).length()<.002,'Blocked input auto-redirected'
   case['blocked_confirmed']=True
-  # Explicit test input chooses another direction; the game must never choose it.
-  tried=[x['keys'] for x in case['selections']];remaining=[k for k in KEYS if k not in tried]
+  phase('choose_next');return
+ if p=='choose_next':
+  # Explicit test input chooses another direction; the game must never choose it. Offered options first.
+  mask=exit_mask(a);tried=[x['keys'] for x in case['selections']];remaining=sorted([k for k in KEYS if k not in tried],key=lambda k:not offered(mask,k))
   assert remaining,('No physical direction available',case)
   case['actual_keys']=remaining[0];hold(w,case['actual_keys']);phase('select');return
  if p=='walk':

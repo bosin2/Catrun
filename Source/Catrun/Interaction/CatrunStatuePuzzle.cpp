@@ -12,6 +12,7 @@
 #include "GameFramework/PlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "LevelFlow/CatrunLevelFlow.h"
+#include "Monster/CatrunSightBlockerSubsystem.h"
 #include "Monster/CatrunRestartSubsystem.h"
 #include "Perception/CatrunCatStateComponent.h"
 #include "Perception/CatrunGroundSupport.h"
@@ -42,6 +43,15 @@ void ACatrunStatuePuzzle::InitializePuzzle()
 		}
 		for (AActor* Actor : {Link.Statue.Get(), Link.Plate.Get(), Link.Gate.Get()})
 			if (USceneComponent* Root = Actor->GetRootComponent()) Root->SetMobility(EComponentMobility::Movable);
+		// A hidden gameplay proxy (Stage 3 counterweights: hidden statue mesh inside a box, visible weight is a
+		// separate NoCollision actor) occludes sight by its simple collision. Visible statues keep complex sight.
+		if (UCatrunSightBlockerSubsystem* SightBlockers = UCatrunSightBlockerSubsystem::Get(GetWorld()))
+			Link.Statue->ForEachComponent<UPrimitiveComponent>(false, [SightBlockers](UPrimitiveComponent* Component)
+			{
+				if (Component->bHiddenInGame && Component->IsQueryCollisionEnabled()
+					&& Component->GetCollisionResponseToChannel(ECC_Visibility) == ECR_Block)
+					SightBlockers->Register(*Component);
+			});
 		Link.InitialStatue = Link.Statue->GetActorTransform();
 		Link.InitialPlate = Link.Plate->GetActorLocation();
 		Link.InitialGate = Link.Gate->GetActorLocation();

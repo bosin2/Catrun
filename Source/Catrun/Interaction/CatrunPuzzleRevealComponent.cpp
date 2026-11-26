@@ -94,7 +94,7 @@ bool UCatrunPuzzleRevealComponent::ShouldAbort() const
 	const auto* Restart = UCatrunRestartSubsystem::Get(this);
 	return Restart && Restart->IsCatching();
 }
-bool UCatrunPuzzleRevealComponent::BeginReveal(FName Id, AActor* Gate, const FBox& Bounds)
+bool UCatrunPuzzleRevealComponent::BeginReveal(FName Id, AActor* Gate, const FBox& Bounds, TArrayView<AActor* const> AlsoIgnored)
 {
 	if (!bEnabled || bStarting || bCleaning || bEnding || Phase != ECatrunPuzzleRevealPhase::Inactive || !IsValid(Gate) || ShouldAbort()) return false;
 	auto* PC = UGameplayStatics::GetPlayerController(this, 0);
@@ -105,6 +105,8 @@ bool UCatrunPuzzleRevealComponent::BeginReveal(FName Id, AActor* Gate, const FBo
 	Player = PC;
 	PreviousView = PC->GetViewTarget();
 	TargetGate = Gate;
+	IgnoredGateParts.Reset();
+	for (AActor* Part : AlsoIgnored) if (IsValid(Part)) IgnoredGateParts.Add(Part);
 	PuzzleId = Id;
 	++SessionId;
 	Elapsed = PhaseElapsed = 0;
@@ -133,6 +135,7 @@ bool UCatrunPuzzleRevealComponent::BeginReveal(FName Id, AActor* Gate, const FBo
 		const FVector Focus = Bounds.GetCenter();
 		FCollisionQueryParams Params(SCENE_QUERY_STAT(PuzzleReveal), false, Gate);
 		Params.AddIgnoredActor(PC->GetPawn());
+		for (const auto& Part : IgnoredGateParts) if (Part.IsValid()) Params.AddIgnoredActor(Part.Get());
 		const auto Probe = FCollisionShape::MakeSphere(10.f);
 		const FVector Forward = CameraStartRotation.Vector();
 		// Keep the gate at the same camera-space depth as the original player focus.
@@ -145,9 +148,9 @@ bool UCatrunPuzzleRevealComponent::BeginReveal(FName Id, AActor* Gate, const FBo
 			const FVector ProbeStart = ResolveCollisionLocation(CameraStart);
 			const FVector ProbeEnd = ResolveCollisionLocation(Candidate);
 			FHitResult Hit;
-			if (!GetWorld()->OverlapBlockingTestByChannel(ProbeEnd, FQuat::Identity, ECC_Camera, Probe, Params)
+			if (!bProbeCameraCollision || (!GetWorld()->OverlapBlockingTestByChannel(ProbeEnd, FQuat::Identity, ECC_Camera, Probe, Params)
 				&& !GetWorld()->SweepSingleByChannel(Hit, ProbeStart, ProbeEnd, FQuat::Identity, ECC_Camera, Probe, Params)
-				&& !GetWorld()->LineTraceTestByChannel(ProbeEnd, Focus, ECC_Visibility, Params))
+				&& !GetWorld()->LineTraceTestByChannel(ProbeEnd, Focus, ECC_Visibility, Params)))
 			{
 				CameraEnd = Candidate;
 				CameraEndRotation = bPreserveSessionFraming ? CameraStartRotation : (Focus-Candidate).Rotation();
@@ -222,8 +225,9 @@ void UCatrunPuzzleRevealComponent::TickComponent(float DeltaTime, ELevelTick Tic
 			const FVector Wanted = FMath::Lerp(bReturn ? CameraEnd : CameraStart, bReturn ? CameraStart : CameraEnd, FMath::SmoothStep(0.f,1.f,Alpha));
 			FCollisionQueryParams Params(SCENE_QUERY_STAT(PuzzleCameraMove), false, TargetGate.Get());
 			Params.AddIgnoredActor(Player->GetPawn());
+			for (const auto& Part : IgnoredGateParts) if (Part.IsValid()) Params.AddIgnoredActor(Part.Get());
 			FHitResult Hit;
-			if (!GetWorld()->SweepSingleByChannel(Hit, ResolveCollisionLocation(Camera->GetActorLocation()), ResolveCollisionLocation(Wanted), FQuat::Identity, ECC_Camera, FCollisionShape::MakeSphere(10.f), Params))
+			if (!bProbeCameraCollision || !GetWorld()->SweepSingleByChannel(Hit, ResolveCollisionLocation(Camera->GetActorLocation()), ResolveCollisionLocation(Wanted), FQuat::Identity, ECC_Camera, FCollisionShape::MakeSphere(10.f), Params))
 				Camera->SetActorLocation(Wanted);
 			Camera->SetActorRotation(bPreserveSessionFraming ? CameraStartRotation
 				: FMath::Lerp(bReturn ? CameraEndRotation : CameraStartRotation, bReturn ? CameraStartRotation : CameraEndRotation, Alpha));
@@ -252,7 +256,7 @@ void UCatrunPuzzleRevealComponent::Cleanup()
 	bOwnInput = false;
 	if (auto* Guard = UCatrunPuzzleSuspension::Get(this)) Guard->Release(this);
 	if (Camera.IsValid()) Camera->Destroy();
-	Camera.Reset(); Player.Reset(); PreviousView.Reset(); TargetGate.Reset();
+	Camera.Reset(); Player.Reset(); PreviousView.Reset(); TargetGate.Reset(); IgnoredGateParts.Reset();
 	SetComponentTickEnabled(false);
 	SetPhase(ECatrunPuzzleRevealPhase::Inactive);
 	bPreserveSessionFraming = false;

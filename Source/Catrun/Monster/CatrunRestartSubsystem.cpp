@@ -163,6 +163,8 @@ void UCatrunRestartSubsystem::CommitTimeoutRestart()
 		CancelCatch();
 		if (auto* Notice = UCatrunNoticeSubsystem::Get(this))
 			Notice->ShowNotice(NSLOCTEXT("Catrun", "TimeoutTravelFailed", "스테이지를 다시 시작하지 못했습니다. 설정에서 다시 시도하세요."), 5.f, ECatrunNoticePolicy::DeferredGameplay);
+		// The clock stays at zero in this surviving world, so the timeout must be able to retry.
+		if (auto* Flow = UCatrunLevelFlowSubsystem::Get(this)) Flow->RearmStageTimeout(5.f);
 	};
 	if (!RestartLevel(.5f, Failed, true)) Failed(FString());
 }

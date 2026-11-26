@@ -2,6 +2,7 @@
 #include "CatrunStatuePuzzle.h"
 #include "CatrunBasketInteractionComponent.h"
 #include "CatrunPuzzleSuspension.h"
+#include "CatrunPuzzleRevealComponent.h"
 #include "Components/PrimitiveComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Animation/AnimSequence.h"
@@ -21,6 +22,14 @@ ACatrunStage3Objectives::ACatrunStage3Objectives()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	SetRootComponent(CreateDefaultSubobject<USceneComponent>(TEXT("Root")));
+	// Same native reveal as the D1/D2 statue gates, owned here so the statue BP presentation
+	// (bound to the puzzle's own reveal) never sees the final gate.
+	FinalReveal = CreateDefaultSubobject<UCatrunPuzzleRevealComponent>(TEXT("FinalReveal"));
+	FinalReveal->CameraTravelTime = FinalRevealTravel;
+	FinalReveal->CameraReturnTime = FinalRevealReturn;
+	// Travel + 3.45 s opening + hold + return, with margin; still bounded like every reveal.
+	FinalReveal->MaximumLockTime = FinalRevealTravel + FinalGateDuration + FinalRevealHoldAfterOpen + FinalRevealReturn + 2.f;
+	FinalReveal->bProbeCameraCollision = false;
 }
 void ACatrunStage3Objectives::BeginPlay()
 {
@@ -202,6 +211,16 @@ void ACatrunStage3Objectives::EndPlay(const EEndPlayReason::Type Reason)
 void ACatrunStage3Objectives::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
+	// Once started, the final gate is a timed presentation: cat state, reveals and the statue seat no
+	// longer gate it (only a world pause stops it, because this actor does not tick while paused).
+	if (bFinalRevealPending)
+	{
+		// Like D1/D2: the leaves wait while the camera travels; a cancelled/timed-out reveal opens at once.
+		if (FinalReveal && FinalReveal->PuzzleId == FinalRevealId() && FinalReveal->Phase == ECatrunPuzzleRevealPhase::ToGate) return;
+		OpenFinalGate(0.f);
+		return;
+	}
+	if (bFinalGateOpen) { AdvanceFinalGate(DeltaSeconds); return; }
 	if (ActiveDevice!=INDEX_NONE) { UpdateInteraction(DeltaSeconds); return; }
 	APawn* Cat = UGameplayStatics::GetPlayerPawn(this,0);
 	if (!GameplayAvailable(Cat)) return;
@@ -227,10 +246,61 @@ void ACatrunStage3Objectives::Tick(float DeltaSeconds)
 	PromptIndex=Nearest;
 	if (!FinalLeafLeft || !FinalLeafRight || !AllReleased() || !Puzzle || !Puzzle->IsPuzzleSeated(LockedPuzzleId)) return;
 	// The independent final gate opens only at the final hall. Existing D1/D2 remain statue-driven.
-	if (!bFinalGateOpen && FVector::DistSquared2D(Cat->GetActorLocation(),(LeftStart+RightStart)*.5)>FMath::Square(400.f)) return;
-	bFinalGateOpen=true;
-	FinalOffset=FMath::FInterpConstantTo(FinalOffset,310.f,DeltaSeconds,90.f);
+	if (FVector::DistSquared2D(Cat->GetActorLocation(),(LeftStart+RightStart)*.5)>FMath::Square(400.f)) return;
+	BeginFinalGate();
+	if (bFinalGateOpen) AdvanceFinalGate(DeltaSeconds);
+}
+void ACatrunStage3Objectives::BeginFinalGate()
+{
+	if (bFinalGateOpen || bFinalRevealPending || !FinalLeafLeft || !FinalLeafRight) return;
+	FBox Bounds = FinalLeafLeft->GetComponentsBoundingBox(true) + FinalLeafRight->GetComponentsBoundingBox(true);
+	if (!Bounds.IsValid) Bounds = FBox::BuildAABB((LeftStart+RightStart)*.5, FVector(50.f));
+	AActor* const OtherLeaf[] = { FinalLeafRight.Get() };
+	if (FinalReveal && FinalReveal->BeginReveal(FinalRevealId(), FinalLeafLeft, Bounds, OtherLeaf))
+	{
+		bFinalRevealPending = true;
+		return;
+	}
+	// Presentation unavailable (disabled, contended or aborted): gameplay never waits on it.
+	bFinalGateOpen = true;
+	FinalHoldTime = 0.f;
+}
+void ACatrunStage3Objectives::OpenFinalGate(float DeltaSeconds)
+{
+	bFinalRevealPending = false;
+	bFinalGateOpen = true;
+	FinalHoldTime = 0.f;
+	AdvanceFinalGate(DeltaSeconds);
+}
+bool ACatrunStage3Objectives::IsFinalRevealOpening() const
+{
+	return FinalReveal && FinalReveal->PuzzleId == FinalRevealId() && FinalReveal->Phase == ECatrunPuzzleRevealPhase::Opening;
+}
+float ACatrunStage3Objectives::FinalGateOffsetAt(float Seconds)
+{
+	// Heavy opening with the same 3.45 s total as the former 90 cm/s slide (presentation BP timing relies on it):
+	// a still unlatch beat, then an ease-in-out slide that decelerates into the stops. The leaves share a
+	// pivot with a 3.6 cm seam, so the offset never goes negative (no inward motion).
+	if (Seconds<=FinalGateHold) return 0.f;
+	if (Seconds>=FinalGateDuration) return FinalGateTravel;
+	return FMath::InterpEaseInOut(0.f,FinalGateTravel,(Seconds-FinalGateHold)/(FinalGateDuration-FinalGateHold),2.6f);
+}
+void ACatrunStage3Objectives::AdvanceFinalGate(float DeltaSeconds)
+{
+	if (!FinalLeafLeft || !FinalLeafRight) { SetActorTickEnabled(false); return; }
+	const bool bWasOpen = FinalGateTime>=FinalGateDuration;
+	FinalGateTime=FMath::Min(FinalGateTime+FMath::Max(0.f,DeltaSeconds),FinalGateDuration);
+	if (FinalGateTime>=FinalGateDuration-1e-4f) FinalGateTime=FinalGateDuration;
+	FinalOffset=FinalGateOffsetAt(FinalGateTime);
 	FinalLeafLeft->SetActorLocation(LeftStart-FVector(FinalOffset,0,0));
 	FinalLeafRight->SetActorLocation(RightStart+FVector(FinalOffset,0,0));
-	if (FinalOffset>=310.f) SetActorTickEnabled(false);
+	if (FinalGateTime<FinalGateDuration) return;
+	if (IsFinalRevealOpening())
+	{
+		// Hold the camera on the open gate, then hand it back to the cat (eased return).
+		if (bWasOpen) FinalHoldTime += FMath::Max(0.f,DeltaSeconds);
+		if (FinalHoldTime < FinalRevealHoldAfterOpen) return;
+		FinalReveal->GateOpened(FinalRevealId());
+	}
+	SetActorTickEnabled(false);
 }

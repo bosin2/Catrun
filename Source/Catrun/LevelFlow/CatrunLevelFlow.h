@@ -225,6 +225,8 @@ public:
 	bool RequestSameMapRestart(UObject* Owner, float FadeInDuration, TFunction<void(const FString&)> Failure = {}, bool bFailureRestart = false);
 	/** Cancels only this surviving world's pending request belonging to Owner. Never invokes its failure callback. */
 	bool AbortOwnedTravel(const UObject* Owner);
+	/** A timeout whose restart travel failed may fire again after RetryDelay seconds of advancing gameplay time. */
+	void RearmStageTimeout(float RetryDelay);
 	bool ReserveExitTransition(UObject* Owner);
 	void ReleaseExitTransition(const UObject* Owner);
 	bool CompleteStageForExit(UObject* Owner);
@@ -279,6 +281,7 @@ private:
 	FName PlayableStage;
 	bool bGameplayWasAdvancing = false;
 	bool bTimeoutAttempted = false;
+	float TimeoutRetryDelay = 0.f;
 	bool bStatusClassResolved = false;
     bool bStageTitlePending = false;
     bool bArrivalTitleReleased = false;

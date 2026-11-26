@@ -95,6 +95,11 @@ def supported_center(world, cat, point):
     return center, hit_info(hit)
 
 
+def walkable(hit):
+    fields = hit.to_dict()
+    return fields["impact_normal"].z >= .65 and not isinstance(fields.get("hit_actor"), unreal.Pawn)
+
+
 def preflight_leg(world, cat, start, xy):
     """Physics shortlist only; native traversal remains the acceptance evidence."""
     target = unreal.Vector(xy[0], xy[1], start.z)
@@ -110,13 +115,18 @@ def preflight_leg(world, cat, start, xy):
         current, floor = supported_center(world, cat, probe)
         assert abs(current.z - previous.z) <= max_step + 3., ("Unexpected floor step/drop", vec(previous), vec(current), floor)
         endpoint = sweep(world, cat, current, current + unreal.Vector(0, 0, .1))
-        assert not endpoint, ("Occupied planned endpoint", vec(current), hit_info(endpoint))
+        # 2026-11-26: a capsule touching a walkable surface (door threshold seam, stair
+        # tread) is floor contact, not an obstacle; it is recorded, walls still fail.
+        assert not endpoint or walkable(endpoint), ("Occupied planned endpoint", vec(current), hit_info(endpoint))
         # Horizontal clearance above a supported step, followed by an endpoint fit.
         # No diagonal sweep through tread corners or false constant-Z stair descent.
         height = max(previous.z, current.z)
         hit = sweep(world, cat, unreal.Vector(previous.x, previous.y, height),
                     unreal.Vector(current.x, current.y, height))
-        assert not hit, ("Blocked planned segment", vec(previous), vec(current), hit_info(hit))
+        assert not hit or walkable(hit), ("Blocked planned segment", vec(previous), vec(current), hit_info(hit))
+        if endpoint or hit:
+            event("physics-preflight-walkable-contact", point=vec(current),
+                  endpoint=hit_info(endpoint), segment=hit_info(hit))
         floors.append({"xy": [current.x, current.y], "center_z": current.z, "floor": floor})
         previous = current
     event("physics-preflight-only", start=vec(start), target=xy, samples=floors)
@@ -166,6 +176,12 @@ def candle_view(candle):
     return math.degrees(math.atan2(position.y-center.y, position.x-center.x))
 
 
+def stamina(cat):
+    """Read-only sprint stamina (sprint stamina was added after this route was authored)."""
+    sprint = cat.get_component_by_class(unreal.CatrunSprintComponent)
+    return sprint.get_stamina() if sprint else None
+
+
 def authored_run(cat, game):
     STATE["want_run"] = True
     event("api-EnhancedInput-IA_Run", game=game, asset="/Game/Input/Actions/IA_Run",
@@ -180,8 +196,10 @@ def change(phase, game):
     event("phase", phase=phase, game=game)
 
 
-def queue(phase, points, next_phase, game):
+def queue(phase, points, next_phase, game, gaits=None):
+    """gaits: optional per-waypoint "run"/"walk"; None keeps the current IA_Run state."""
     STATE["points"] = [list(p) for p in points]
+    STATE["gaits"] = list(gaits) if gaits else None
     STATE["point_index"] = 0
     STATE["next_phase"] = next_phase
     STATE.pop("checked_point", None)
@@ -213,9 +231,14 @@ def move_queue(world, cat, pc, actions, game, doors):
     if actions.get_editor_property("Busy") or pc.is_move_input_ignored():
         STATE.pop("motion_window", None)
         return
+    points, index = STATE["points"], STATE["point_index"]
+    gaits = STATE.get("gaits")
+    if gaits and index < len(gaits) and STATE.get("want_run") != (gaits[index] == "run"):
+        # Walking = no IA_Run injection (original walk speed and smaller footstep).
+        STATE["want_run"] = gaits[index] == "run"
+        event("api-EnhancedInput-IA_Run-" + ("held" if STATE["want_run"] else "released"), game=game, waypoint=points[index])
     if STATE.get("want_run") and not cat.get_editor_property("IsRunning"):
         return
-    points, index = STATE["points"], STATE["point_index"]
     if index >= len(points):
         change(STATE["next_phase"], game)
         return
@@ -316,7 +339,7 @@ def tick(delta):
                 "armor_pelvis": vec(armor.get_component_by_class(unreal.SkeletalMeshComponent).get_socket_location("pelvis")),
                 "capture": str(capture), "separation_xy": math.hypot(position.x-enemy.x, position.y-enemy.y),
                 "cat_collision": cat.get_actor_enable_collision(), "armor_collision": armor.get_actor_enable_collision(),
-                "marked": marked, "candle_center_yaw": beam, "running": cat.get_editor_property("IsRunning"), "max_walk_speed": movement.max_walk_speed,
+                "marked": marked, "candle_center_yaw": beam, "running": cat.get_editor_property("IsRunning"), "stamina": stamina(cat), "max_walk_speed": movement.max_walk_speed,
                 "movement": str(movement.get_editor_property("MovementMode")), "busy": actions.get_editor_property("Busy"),
                 "move_ignored": pc.is_move_input_ignored(), "bell_forbidden": no_bell(world, cat), "clip": clip_name(cat),
                 "doors": {d.get_name(): d.is_open() for d in doors}, "intro": playing, "exit_overlap": overlap,
@@ -332,16 +355,23 @@ def tick(delta):
                 assert radius >= 165., "Unexpected sight weakening; this run must preserve authored detection"
                 gate = corridor.get_editor_property("GateBox").get_world_location()
                 assert abs(gate.x+228)<1 and abs(gate.y-662)<1, "Saved doorway center changed"
-                event("original-spawn-preflight", game=game, position=vec(position), radius=radius, corridor_center=vec(gate), actual_pov=str(pc.player_camera_manager.get_camera_rotation()))
+                event("original-spawn-preflight", game=game, position=vec(position), radius=radius, corridor_center=vec(gate), actual_pov=str(pc.player_camera_manager.get_camera_rotation()),
+                      candle=vec(candle.get_actor_location()), candle_yaw=candle.get_actor_rotation().yaw, armor=vec(enemy))
                 STATE["route_start_game"] = game
                 change("wait_candle_start", game)
         elif phase == "wait_candle_start":
-            if beam is not None and -108 < beam < -100 and beam_delta < 0:
+            # 2026-11-26: run speed rose 124 -> 134, so the same 4.3s approach now reaches
+            # (-180,-95) ~0.45s earlier in the sweep and meets the cone's trailing edge
+            # (spotted at beam ~-93). Starting ~0.6s later restores the beam phase of the
+            # successful 124-speed runs (arrival near beam -85 instead of -93).
+            if beam is not None and -114 < beam < -108 and beam_delta < 0:
                 authored_run(cat, game)
                 queue("approach", [(-30,-95), (-30,-180), (-180,-180), (-180,-95), (-210,-95)], "wait_candle_west", game)
         elif phase == "wait_candle_west":
-            if beam is not None and -86 < beam < -80 and beam_delta > 0:
-                event("beam-away-west-dash", game=game, beam=beam)
+            # Sprint stamina (100, -20/s) is mostly spent by the approach; the west dash
+            # waits at the safe corner for the next away-sweep with recovered stamina.
+            if beam is not None and -86 < beam < -80 and beam_delta > 0 and (stamina(cat) or 100.) >= 90.:
+                event("beam-away-west-dash", game=game, beam=beam, stamina=stamina(cat))
                 queue("approach", [(-210,220), (-210,405)], "ring_first", game)
         elif phase.startswith("bell_"):
             STATE["bell_clip_seen"] = STATE["bell_clip_seen"] or "Bell" in (clip_name(cat) or "")
@@ -362,11 +392,24 @@ def tick(delta):
         elif phase == "wait_lured":
             # Retreat through the cat-only hole, then use the native bedroom door
             # after the armor has committed to the annex. Real wall LOS remains active.
-            if corridor.is_open() and enemy.x < -230 and enemy.y > 575:
-                event("armor-committed-to-annex", game=game, armor=vec(enemy))
-                queue("cross_and_corridor", [(-128,400), (-128,530), (-128,730), (-128,930)], "begin_stairs", game)
+            # 2026-11-26: the old test (x<-230, y>575) fired while the armor was already
+            # LEAVING the annex for its post (-80,760) via the corridor, and the running cat
+            # was heard (11-23: "heard a sound (size 1, remaining 38)") and caught at the
+            # corridor. Cross instead while the armor is still travelling to the bell on
+            # the west passage: an armor investigating the bell (size 2) ignores the smaller
+            # running footsteps until it starts LOOKING, by which time the cat is out of range.
+            if corridor.is_open() and enemy.x < -340 and enemy.y > 250:
+                event("armor-committed-to-annex", game=game, armor=vec(enemy), action=str(armor.get_action()))
+                # Run away from the hole exit only while the armor is still on the west
+                # passage; stop running at x=-150 before it nears the annex (11-26 Fix01/02:
+                # the wave of a running step at (-130,400) reached it 0.3s after LOOKING
+                # began, remaining 23). The walk's smaller footstep does not reach the annex
+                # from the east half of the bedroom or the corridor; the stairs are run.
+                queue("cross_and_corridor", [(-150,400), (-128,400), (-128,530), (-128,730), (-128,930)], "begin_stairs", game,
+                      gaits=("run", "walk", "walk", "walk", "walk"))
         elif phase == "begin_stairs":
-            queue("descend", [(-130,1050), (-130,1128), (-130,1200), (-130,1272), (-130,1344), (-130,1443), (-130,1548)], "wait_exit", game)
+            queue("descend", [(-130,1050), (-130,1128), (-130,1200), (-130,1272), (-130,1344), (-130,1443), (-130,1548)], "wait_exit", game,
+                  gaits=("run",)*7)
         elif phase in ("approach", "hole", "annex_wait_approach", "cross_and_corridor", "descend"):
             move_queue(world, cat, pc, actions, game, doors)
         # No movement commands after overlap, during original cinematic or after travel.

@@ -286,16 +286,20 @@ void UCatrunMarkSubsystem::ApplyVisualVisibility()
 
 void UCatrunMarkSubsystem::DestroyVisual()
 {
-	if (Light)
+	// Free the fixed names so a mark re-applied before GC never reconstructs over a pending-kill component.
+	constexpr ERenameFlags RenameFlags = REN_DontCreateRedirectors | REN_DoNotDirty | REN_NonTransactional;
+	if (IsValid(Light))
 	{
 		Light->DestroyComponent();
-		Light = nullptr;
+		Light->Rename(nullptr, nullptr, RenameFlags);
 	}
-	if (Orb)
+	Light = nullptr;
+	if (IsValid(Orb))
 	{
 		Orb->DestroyComponent();
-		Orb = nullptr;
+		Orb->Rename(nullptr, nullptr, RenameFlags);
 	}
+	Orb = nullptr;
 }
 
 // The orb floats up and down a little and turns, so it reads as magic.

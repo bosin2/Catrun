@@ -1129,6 +1129,21 @@ void ACatrunArmor::TickOpeningDoor(float DeltaSeconds)
 		BeginDoorAnimation();
 	}
 
+	// Step 3: remember where the body is while the clip still plays. The pose read here is the one
+	// evaluated last frame, i.e. the one on screen.
+	const UAnimMontage* DoorMontage = nullptr;
+	float MontagePosition = 0.f, MontageRate = 0.f;
+	const bool bMontageAlive = GetDoorMontagePlayback(DoorMontage, MontagePosition, MontageRate);
+	if (bMontageAlive)
+	{
+		bDoorMontageSeen = true;
+	}
+	if (bMontageAlive || IsDoorSingleNodePlaying())
+	{
+		DoorAnimLastBoneLocation = GetMesh()->GetBoneLocation(DoorAnimTrackedBone, EBoneSpaces::WorldSpace);
+		bDoorAnimPoseRecorded = true;
+	}
+
 	// Step 3a: the hand takes hold of the door part-way through the animation.
 	if (!bDoorTriggered && ActionTime >= ActionDuration * DoorOpenMoment)
 	{
@@ -1147,7 +1162,17 @@ void ACatrunArmor::TickOpeningDoor(float DeltaSeconds)
 		}
 	}
 
-	if (ActionTime >= ActionDuration)
+	// A native single-node clip holds its last frame, so ActionTime decides as before. A Blueprint
+	// montage would end inside this frame's animation update (one frame ahead of ActionTime) and
+	// show the source pose back at the door, so the handoff happens now, in montage track time.
+	// A montage that has already gone (hitch, skipped update) hands off from the last seen pose.
+	bool bAnimationDone = ActionTime >= ActionDuration;
+	if (!bAnimationDone && bDoorMontageSeen)
+	{
+		bAnimationDone = !bMontageAlive
+			|| MontagePosition + DeltaSeconds * MontageRate >= DoorMontage->GetPlayLength() - KINDA_SMALL_NUMBER;
+	}
+	if (bAnimationDone)
 	{
 		if (!bDoorTriggered)
 		{
@@ -1205,6 +1230,8 @@ void ACatrunArmor::BeginDoorAnimation()
 	GetCharacterMovement()->StopMovementImmediately();
 	ActionTime = 0.f;
 	ActionDuration = AnimationLength(DoorOpenAnim);
+	bDoorAnimPoseRecorded = false;
+	bDoorMontageSeen = false;
 
 	// The animation is made for a door that swings the other way: mirror the body left-to-right.
 	if (bMirrorDoorAnimation)
@@ -1212,6 +1239,15 @@ void ACatrunArmor::BeginDoorAnimation()
 		GetMesh()->SetRelativeScale3D(FVector(-MeshBaseScale.X, MeshBaseScale.Y, MeshBaseScale.Z));
 	}
 	PlayAnimation(DoorOpenAnim, false);
+
+	// The handoff measures where the body walked. Off screen (or without a renderer) the default
+	// tick option advances the clip but leaves bones stale, so the walk would read as 0 cm.
+	if (!bDoorAnimTickForced)
+	{
+		SavedDoorAnimTickOption = GetMesh()->VisibilityBasedAnimTickOption;
+		bDoorAnimTickForced = true;
+	}
+	GetMesh()->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
 
 	// Evaluate the first frame right now so that the body position at the start can be measured.
 	GetMesh()->TickAnimation(0.f, false);
@@ -1222,7 +1258,22 @@ void ACatrunArmor::BeginDoorAnimation()
 void ACatrunArmor::EndDoorAnimation()
 {
 	// How far did the body walk during the animation (flat)? Move the actor by that much.
-	FVector Walked = GetMesh()->GetBoneLocation(DoorAnimTrackedBone, EBoneSpaces::WorldSpace) - DoorAnimStartBoneLocation;
+	// While the clip still plays, the live pose is the body on screen. Once a montage has ended the
+	// live pose is the slot's source pose at the actor (the door spot), so use the last seen pose.
+	const UAnimMontage* DoorMontage = nullptr;
+	float MontagePosition = 0.f, MontageRate = 0.f;
+	const bool bClipAlive = GetDoorMontagePlayback(DoorMontage, MontagePosition, MontageRate) || IsDoorSingleNodePlaying();
+	const bool bUseRecorded = !bClipAlive && bDoorAnimPoseRecorded;
+	const FVector EndBone = bUseRecorded ? DoorAnimLastBoneLocation
+		: GetMesh()->GetBoneLocation(DoorAnimTrackedBone, EBoneSpaces::WorldSpace);
+	bDoorAnimPoseRecorded = false;
+	bDoorMontageSeen = false;
+	if (bDoorAnimTickForced)
+	{
+		GetMesh()->VisibilityBasedAnimTickOption = SavedDoorAnimTickOption;
+		bDoorAnimTickForced = false;
+	}
+	FVector Walked = EndBone - DoorAnimStartBoneLocation;
 	Walked.Z = 0.f;
 	if (Walked.Size() > 400.f)
 	{
@@ -1233,10 +1284,47 @@ void ACatrunArmor::EndDoorAnimation()
 	{
 		GetMesh()->SetRelativeScale3D(MeshBaseScale);
 	}
+	const FVector BeforeHandoff = GetActorLocation();
 	FHitResult HandoffHit;
 	AddActorWorldOffset(Walked, true, &HandoffHit, ETeleportType::None);
 	// A late blocker keeps only achieved travel. Never bypass collision to match a presentation pose.
-	UE_LOG(LogCatrunSound, Log, TEXT("%s open-door animation moved the body %.0f cm."), *GetName(), Walked.Size());
+	UE_LOG(LogCatrunSound, Log, TEXT("%s open-door animation moved the body %.0f cm (%s pose); actor moved %.0f cm, blocked %d by %s."),
+		*GetName(), Walked.Size(), bUseRecorded ? TEXT("last seen") : TEXT("live"),
+		FVector::Dist2D(BeforeHandoff, GetActorLocation()), HandoffHit.bBlockingHit ? 1 : 0, *GetNameSafe(HandoffHit.GetActor()));
+}
+
+bool ACatrunArmor::GetDoorMontagePlayback(const UAnimMontage*& OutMontage, float& OutPosition, float& OutRate) const
+{
+	OutMontage = nullptr;
+	OutPosition = OutRate = 0.f;
+	const UAnimInstance* Instance = (DoorOpenAnim && GetMesh()) ? GetMesh()->GetAnimInstance() : nullptr;
+	const UAnimMontage* Montage = Instance ? Instance->GetCurrentActiveMontage() : nullptr;
+	if (!Montage)
+	{
+		return false;
+	}
+	bool bPlaysDoorClip = Montage == DoorOpenAnim.Get();
+	for (const FSlotAnimationTrack& Slot : Montage->SlotAnimTracks)
+	{
+		for (const FAnimSegment& Segment : Slot.AnimTrack.AnimSegments)
+		{
+			bPlaysDoorClip |= Segment.GetAnimReference() == DoorOpenAnim.Get();
+		}
+	}
+	if (!bPlaysDoorClip)
+	{
+		return false;
+	}
+	OutMontage = Montage;
+	OutPosition = Instance->Montage_GetPosition(Montage);
+	OutRate = Instance->Montage_GetEffectivePlayRate(Montage);
+	return true;
+}
+
+bool ACatrunArmor::IsDoorSingleNodePlaying() const
+{
+	UAnimSingleNodeInstance* Single = GetMesh() ? GetMesh()->GetSingleNodeInstance() : nullptr;
+	return DoorOpenAnim && Single && Single->GetCurrentAsset() == DoorOpenAnim.Get();
 }
 
 // A closed door counts only if the path really goes through its doorway soon. A door the armor

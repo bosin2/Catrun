@@ -10,6 +10,7 @@ class ACatrunDoor;
 class ACatrunPatrolPoint;
 class ASoundGridManager;
 class UAnimationAsset;
+class UAnimMontage;
 class UCatrunAlertMarkComponent;
 class UCatrunSoundSettings;
 class UCatrunVisionFanComponent;
@@ -314,6 +315,13 @@ private:
 	// Starts and ends the open-door animation: mirror the body, measure how far the body walks.
 	void BeginDoorAnimation();
 	void EndDoorAnimation();
+	// The Blueprint presentation plays the door clip as a dynamic montage. Its clock runs one frame
+	// ahead of ActionTime and, with no blend-out, ends by dropping straight back to the slot's source
+	// pose. These report the montage in its own track time, and whether a native single-node player
+	// still holds the clip.
+	bool GetDoorMontagePlayback(const UAnimMontage*& OutMontage, float& OutPosition, float& OutRate) const;
+	bool IsDoorSingleNodePlaying() const;
+	friend class FCatrunArmorDoorHandoffTest;
 
 	// Called when the armor should aim for the next corner: turns first if the heading is far off.
 	void BeginLeg();
@@ -396,6 +404,12 @@ private:
 	// Body position at the start of the open-door animation, and the mesh scale to restore after it.
 	FVector DoorAnimStartBoneLocation = FVector::ZeroVector;
 	FVector MeshBaseScale = FVector::OneVector;
+	// Last body position seen while the door clip was still playing, for a handoff after it is gone.
+	FVector DoorAnimLastBoneLocation = FVector::ZeroVector;
+	bool bDoorAnimPoseRecorded = false;
+	bool bDoorAnimTickForced = false;	// bones are kept refreshed off screen while the door clip plays
+	EVisibilityBasedAnimTickOption SavedDoorAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPose;
+	bool bDoorMontageSeen = false;	// the door clip has been seen playing as a montage this time
 
 	// Opening a door has three steps: walk to the spot in front of it, face it, play the animation.
 	enum class EDoorStep : uint8 { Approach, Facing, Animation };

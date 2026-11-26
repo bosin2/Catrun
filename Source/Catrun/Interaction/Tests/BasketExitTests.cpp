@@ -501,13 +501,16 @@ bool FCatrunBasketCandidateRegressionTest::RunTest(const FString&)
  auto* Blocker=F.Box(Blocked*41+FVector(0,0,26),FVector(3,3,24));
  F.Actions->ExitBasket();
  TestEqual(TEXT("Confirm rechecks blocker without an unexpected jump"),F.Actions->BasketPhase,ECatrunBasketPhase::Hidden);
- TestTrue(TEXT("Blocked direction stays selected; no automatic alternative"),!F.Actions->CanExit && F.Actions->ExitWorldDirection.Equals(Blocked,.001));
+ TestTrue(TEXT("A choice that closed is remembered but no longer offered; no automatic alternative"),!F.Actions->CanExit && F.Actions->ExitWorldDirection.Equals(Blocked,.001));
+ TestFalse(TEXT("Rebound right key is no longer an offered option"),F.Actions->IsExitInputAvailable(FVector2D(0,1)));
+ TestTrue(TEXT("A closed choice draws no guide (never a red path)"),!F.Actions->ExitPreview || !F.Actions->ExitPreview->IsVisible());
  F.Actions->TickComponent(.3f,LEVELTICK_All,nullptr);
  TestTrue(TEXT("Background check never redirects the player"),F.Actions->ExitWorldDirection.Equals(Blocked,.001));
  Blocker->Destroy();F.Actions->UpdateExitCandidate(true);
  TestTrue(TEXT("Same requested exit opens when obstruction is removed"),F.Actions->CanExit && F.Actions->ExitWorldDirection.Equals(Blocked,.001));
  F.Floor->Destroy();F.Actions->UpdateExitCandidate(true);
  TestTrue(TEXT("No floor blocks selected exit without redirecting it"),!F.Actions->CanExit && F.Actions->ExitWorldDirection.Equals(Blocked,.001));
+ TestFalse(TEXT("Without any floor no option is offered"),F.Actions->HasAnyExitOption());
  F.Actions->ExitBasket();TestEqual(TEXT("Unsupported selection keeps cat hidden"),F.Actions->BasketPhase,ECatrunBasketPhase::Hidden);
  F.Actions->AbortBasket();return true;
 }
@@ -705,6 +708,145 @@ bool FBasketConfiguredDirectionTest::RunTest(const FString&)
 	TestTrue(TEXT("An unset legacy opening does not prohibit a physical direction"),
 		CatrunBasket::IsDirectionAllowed(South, Basket->GetOpenDirection(), -135));
 	World->DestroyWorld(false);
+	return true;
+}
+
+namespace
+{
+	void PressExitOption(FBasketCollisionFixture& F, const FVector2D& Input)
+	{
+		TArray<FKey> Pressed;
+		if (Input.X>.5) Pressed.Add(UCatrunInputBindings::GetEffectiveKey(ECatrunInputSlot::Forward));
+		if (Input.X<-.5) Pressed.Add(UCatrunInputBindings::GetEffectiveKey(ECatrunInputSlot::Back));
+		if (Input.Y>.5) Pressed.Add(UCatrunInputBindings::GetEffectiveKey(ECatrunInputSlot::Right));
+		if (Input.Y<-.5) Pressed.Add(UCatrunInputBindings::GetEffectiveKey(ECatrunInputSlot::Left));
+		F.PC->PlayerInput->FlushPressedKeys();
+		for (const FKey& Key : Pressed)
+			F.PC->PlayerInput->InputKey(FInputKeyEventArgs(nullptr, INPUTDEVICEID_NONE, Key, IE_Pressed, 1.f, false, 0));
+		F.PC->PlayerInput->ProcessInputStack(TArray<UInputComponent*>(), .016f, false);
+	}
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunBasketBlockedOptionsHiddenTest, "Catrun.Basket.BlockedExitOptionsAreNotOffered",
+	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FCatrunBasketBlockedOptionsHiddenTest::RunTest(const FString&)
+{
+	auto* Settings=UCatrunUserSettings::GetCatrunUserSettings();
+	if (!TestNotNull(TEXT("Settings"),Settings)) return false;
+	struct FRestore { UCatrunUserSettings* S; FCatrunKeyboardBindings B; ~FRestore(){FText E;S->SetKeyboardBindings(B,E);} } Restore{Settings,Settings->GetKeyboardBindings()};
+	FText Error; Settings->SetKeyboardBindings(FCatrunKeyboardBindings(),Error);
+	{
+		// Camera yaw 0: forward = +X, right = +Y.
+		FBasketCollisionFixture F;
+		FMinimalViewInfo View; View.Rotation=FRotator(-55,0,0); F.PC->PlayerCameraManager->SetCameraCachePOV(View);
+		F.Basket->OpenDirectionLocal=FVector(1,0,0);
+		// Forward (+X) is walled off; right (+Y) has no floor; back and left stay open.
+		F.Floor->Destroy();
+		F.Floor=F.Box(FVector(0,-230,-10),FVector(500,270,10));
+		F.Box(FVector(41,0,26),FVector(2,30,24));
+		const FVector Entry(0,-82,26);
+		auto Enter=[&]
+		{
+			F.Basket->TryOccupy(F.Cat);
+			F.Actions->EnterBasket(F.Basket,Entry);
+			PressExitOption(F,FVector2D::ZeroVector);
+			F.Actions->FinishEnter();
+		};
+		Enter();
+		if (!TestEqual(TEXT("Fixture enters the basket"),F.Actions->BasketPhase,ECatrunBasketPhase::Hidden)) return false;
+		TestFalse(TEXT("Wall-blocked forward is not offered"),F.Actions->IsExitInputAvailable(FVector2D(1,0)));
+		TestFalse(TEXT("Floorless right is not offered"),F.Actions->IsExitInputAvailable(FVector2D(0,1)));
+		TestTrue(TEXT("Open back is offered"),F.Actions->IsExitInputAvailable(FVector2D(-1,0)));
+		TestTrue(TEXT("Open left is offered"),F.Actions->IsExitInputAvailable(FVector2D(0,-1)));
+		FHitResult Hit;
+		const FCollisionQueryParams Params(SCENE_QUERY_STAT(BasketBlockedOptionFixture),false,F.Cat);
+		TestTrue(TEXT("Forward really is blocked for the actual capsule"),F.SweepCapsule(Hit,FVector(0,0,26),FVector(82,0,26),Params));
+		for (int32 Slot=0; Slot<CatrunBasket::ExitOptionCount; ++Slot)
+		{
+			const FVector2D Input=CatrunBasket::ExitOptionInput(Slot);
+			const FVector Expected=CatrunBasket::MovementDirection(Input,View.Rotation);
+			if (F.Actions->BasketPhase!=ECatrunBasketPhase::Hidden) Enter();
+			const bool bOffered=F.Actions->IsExitInputAvailable(Input);
+			PressExitOption(F,Input);
+			F.Actions->UpdateExitCandidate(true);
+			F.Actions->UpdatePreview();
+			const FString Label=FString::Printf(TEXT("option %d (%.0f,%.0f)"),Slot,Input.X,Input.Y);
+			if (!bOffered)
+			{
+				TestTrue(FString::Printf(TEXT("Blocked %s cannot be selected"),*Label),F.Actions->ExitWorldDirection.IsNearlyZero() && !F.Actions->CanExit);
+				TestTrue(FString::Printf(TEXT("Blocked %s draws no guide"),*Label),!F.Actions->ExitPreview || !F.Actions->ExitPreview->IsVisible());
+				F.Actions->ExitBasket();
+				TestEqual(FString::Printf(TEXT("F on blocked %s keeps the cat hidden"),*Label),F.Actions->BasketPhase,ECatrunBasketPhase::Hidden);
+				continue;
+			}
+			TestTrue(FString::Printf(TEXT("Offered %s selects the camera-relative walking direction"),*Label),
+				F.Actions->ExitWorldDirection.Equals(Expected,.001) && F.Actions->CanExit);
+			TestTrue(FString::Printf(TEXT("Offered %s draws its single guide"),*Label),
+				F.Actions->ExitPreview && F.Actions->ExitPreview->IsVisible() && F.Actions->ExitPreview->GetInstanceCount()==48);
+			const FVector Landing=F.Actions->ExitWorldLocation;
+			F.Actions->ExitBasket();
+			if (!TestEqual(FString::Printf(TEXT("F on offered %s starts the exit"),*Label),F.Actions->BasketPhase,ECatrunBasketPhase::Exiting)) continue;
+			F.Actions->FinishExit();
+			TestEqual(FString::Printf(TEXT("Offered %s completes the exit"),*Label),F.Actions->BasketPhase,ECatrunBasketPhase::Outside);
+			TestTrue(FString::Printf(TEXT("Offered %s lands exactly where it was shown with collision restored"),*Label),
+				F.Cat->GetActorLocation().Equals(Landing,.01) && F.Cat->GetActorEnableCollision() && !F.Basket->Occupied);
+		}
+		// An offered choice that closes later disappears instead of turning red, then returns.
+		if (F.Actions->BasketPhase!=ECatrunBasketPhase::Hidden) Enter();
+		PressExitOption(F,FVector2D(0,-1));
+		F.Actions->UpdateExitCandidate(true);
+		TestTrue(TEXT("Left is selected while open"),F.Actions->CanExit);
+		auto* Armor=F.Box(FVector(0,-41,26),FVector(30,2,24));
+		PressExitOption(F,FVector2D::ZeroVector);
+		F.Actions->UpdateExitCandidate(true);
+		F.Actions->UpdatePreview();
+		TestTrue(TEXT("A newly blocked choice is withdrawn from the options"),!F.Actions->CanExit && !F.Actions->IsExitInputAvailable(FVector2D(0,-1)));
+		TestTrue(TEXT("A newly blocked choice draws no guide"),!F.Actions->ExitPreview || !F.Actions->ExitPreview->IsVisible());
+		F.Actions->ExitBasket();
+		TestEqual(TEXT("F after the choice closed keeps the cat hidden"),F.Actions->BasketPhase,ECatrunBasketPhase::Hidden);
+		Armor->Destroy();
+		F.Actions->UpdateExitCandidate(true);
+		TestTrue(TEXT("The remembered choice is offered again once clear"),F.Actions->CanExit && F.Actions->IsExitInputAvailable(FVector2D(0,-1)));
+		F.Actions->AbortBasket();
+	}
+	{
+		// Every direction blocked: the cat stays inside and no option exists.
+		FBasketCollisionFixture F;
+		FMinimalViewInfo View; View.Rotation=FRotator(-55,0,0); F.PC->PlayerCameraManager->SetCameraCachePOV(View);
+		auto* East=F.Box(FVector(41,0,26),FVector(2,60,24));
+		F.Box(FVector(-41,0,26),FVector(2,60,24));
+		F.Box(FVector(0,41,26),FVector(60,2,24));
+		F.Box(FVector(0,-41,26),FVector(60,2,24));
+		F.Basket->TryOccupy(F.Cat);
+		F.Actions->EnterBasket(F.Basket,FVector(82,0,26));
+		PressExitOption(F,FVector2D::ZeroVector);
+		F.Actions->FinishEnter();
+		TestFalse(TEXT("A fully enclosed basket offers no exit option"),F.Actions->HasAnyExitOption());
+		for (int32 Slot=0; Slot<CatrunBasket::ExitOptionCount; ++Slot)
+		{
+			PressExitOption(F,CatrunBasket::ExitOptionInput(Slot));
+			F.Actions->UpdateExitCandidate(true);
+			F.Actions->UpdatePreview();
+			TestTrue(TEXT("No key selects an exit when all are blocked"),F.Actions->ExitWorldDirection.IsNearlyZero() && !F.Actions->CanExit);
+			TestTrue(TEXT("No guide is drawn when all are blocked"),!F.Actions->ExitPreview || !F.Actions->ExitPreview->IsVisible());
+			F.Actions->ExitBasket();
+			TestEqual(TEXT("F keeps the cat hidden when all are blocked"),F.Actions->BasketPhase,ECatrunBasketPhase::Hidden);
+		}
+		TestTrue(TEXT("Enclosed cat stays at the hidden point with collision off and the basket reserved"),
+			F.Cat->GetActorLocation().Equals(F.Basket->GetHiddenLocation(),.01) && !F.Cat->GetActorEnableCollision()
+			&& F.Basket->Occupied && F.Actions->IsHidden && !F.Actions->Busy);
+		// Holding a blocked key does nothing until that side opens, then it becomes the choice.
+		PressExitOption(F,FVector2D(1,0));
+		East->Destroy();
+		F.Actions->UpdateExitCandidate(true);
+		TestTrue(TEXT("Opening one side offers exactly that option"),F.Actions->HasAnyExitOption()
+			&& F.Actions->IsExitInputAvailable(FVector2D(1,0)) && !F.Actions->IsExitInputAvailable(FVector2D(-1,0)));
+		TestTrue(TEXT("Held key selects the side once it is open"),F.Actions->CanExit && F.Actions->ExitWorldDirection.Equals(FVector(1,0,0),.001));
+		F.Actions->ExitBasket();
+		TestEqual(TEXT("The newly offered side exits"),F.Actions->BasketPhase,ECatrunBasketPhase::Exiting);
+		F.Actions->FinishExit();
+		TestEqual(TEXT("The newly offered side completes"),F.Actions->BasketPhase,ECatrunBasketPhase::Outside);
+	}
 	return true;
 }
 #endif

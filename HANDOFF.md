@@ -1,5 +1,19 @@
 # Catrun 작업 인계
 
+## 2026-11-26 — 품질점검 후 결함 5건 + 갑옷 문 회귀 수정 (미커밋)
+
+- 수정 전 소스 백업: `Saved/QualityFix20261126/Source_before`, `source_before.patch`. 빌드 로그·자동화 결과도 같은 폴더.
+- **갑옷 문 회귀**: BP montage가 `ActionTime`보다 1프레임 먼저 끝나 몸이 문 앞 정지점으로 튀고 actor 이동이 0cm였음. 몽타주 트랙 시간으로 같은 프레임에 넘기고, 끝난 경우 마지막으로 보인 뼈 위치 사용(`CatrunArmor.cpp` TickOpeningDoor/EndDoorAnimation). 테스트 `Catrun.Monsters.ArmorDoorHandoffKeepsBodyAfterMontageEnds`.
+- **Stage3 최종문**: 열리기 시작하면 고양이 상태·동상과 무관하게 3.45초 완주(프레젠터 BP와 동기). 안쪽 6cm 예비동작 제거(문짝 관입). 저장 애니 필드 UPROPERTY(Transient).
+- **시야 비용**: 태그+전 맵 2차 트레이스를 `UCatrunSightBlockerSubsystem`(숨겨진 석상 충돌만 등록)으로 교체 — 등록 0인 맵은 추가 비용 0. 시야 표시가 숨겨지면 표시 트레이스·텍스처 쓰기 생략, 값이 같으면 UpdateResource 생략. 촛불 중복 갱신 제거.
+- **시간초과 재시작 이동 실패** 시 5초 후 재발동(`RearmStageTimeout`). 5초는 임시값.
+- **표식 구슬/빛** 파괴 후 Rename으로 같은 이름 재사용 방지.
+- 검증: 빌드 성공, 네이티브 자동화 179개(일반168+경고11) 실패0 (`native03/Report/index.json`). PIE 회귀 `Saved/Regression20261126/QualityFix01`: bp_compile 57·stage_sweep 136·stage2_statues 19·stage3_puzzle 209·stage3_reset_replay 53·stage3_sound 24·campaign 통과. **tutorial_route 실패는 Baseline부터 있던 기존 실패**(동일 메시지). **stage3_baskets 실패("Exit direction differs from camera input")는 이번 수정과 무관한 기존 미커밋 바구니 8방향 작업과 QA 스크립트 기대값 차이로 보이며 미해결.**
+- 커밋·푸시 안 함. 실제 손플레이 확인 안 함.
+- **후속(같은 날)**: stage3_baskets 실패는 미커밋 바구니 작업의 새 규칙("막힌 방향은 선택 불가")과 QA 기대값 차이였음 → `Scripts/Stage3/PlacementRevision20261125/runtime_qa.py`가 `AvailableExitMask`로 제공 여부를 보고, 미제공 키는 선택 불변을 검사하도록 수정. QualityFix02: stage3_baskets 163·stage3_placement 174·baskets_stage1_2·baskets_wasd 통과.
+- 갑옷 문: 화면 밖/무렌더에서 기본 `AlwaysTickPose`가 뼈를 갱신하지 않아 여전히 0cm였음 → 문 애니 동안만 `AlwaysTickPoseAndRefreshBones`, 끝나면 원래 값 복원. QualityFix03 실제 맵 로그 Tutorial 111cm·Stage3 131cm. 네이티브 181개 실패0.
+- `Scripts/Stage3/verify_pie.py` 최종문 검사: 벽시계 5초 고정 대기 → 문 Tick 종료까지 대기(최대 15초). 부하 시 304/310cm에서 검사하던 경계 실패 제거. QualityFix04 stage3_puzzle 209 통과.
+
 ## 2026-11-25 — Stage2 → Stage3 승강기 시네마틱 최신 인계
 
 이 채팅의 상세 인계: [ElevatorTransition_Handoff_20261125.md](C:/Users/whghk/Catrun/Docs/Design/ElevatorTransition_Handoff_20261125.md).

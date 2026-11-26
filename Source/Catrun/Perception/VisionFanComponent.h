@@ -35,8 +35,13 @@ public:
 	void Configure(float InRange, int32 InRayCount, const FLinearColor& InColor);
 
 	// Recomputes the fan. CenterAngle is a yaw in degrees (0 = east, 90 = south), HalfAngle is
-	// half the width in degrees (180 = full circle).
-	void Update(float CenterAngleDegrees, float HalfAngleDegrees);
+	// half the width in degrees (180 = full circle). bWriteDisplay = false only recomputes the sight
+	// (CanSee); the owner then calls WriteDisplay once it knows the final fan for the frame.
+	void Update(float CenterAngleDegrees, float HalfAngleDegrees, bool bWriteDisplay = true);
+
+	// Draws the fan of the last Update on the floor display. Skipped while the display is hidden
+	// (SetDisplayVisible(true) redraws it). Never changes the sight itself.
+	void WriteDisplay();
 
 	// True if a point is inside the fan and not hidden behind a wall. PointRadius makes the
 	// test use the edge of the point's body instead of its centre.
@@ -116,8 +121,14 @@ private:
 	float HalfAngle = 15.f;
 	bool bReady = false;
 	bool bDisplayVisible = true;
+	// Origin and ray start of the last Update, reused by WriteDisplay.
+	bool bHasFan = false;
+	FVector LastOrigin = FVector::ZeroVector;
+	FVector LastStart = FVector::ZeroVector;
 
 	// Distance to the first blocker for every ray (cm), left edge of the fan first.
 	TArray<float> RayDistances;
 	TArray<float> DisplayRayDistances;
+	// Values last uploaded to DistanceTexture; an unchanged fan skips the texture upload.
+	TArray<float> WrittenRayDistances;
 };

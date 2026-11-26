@@ -127,6 +127,13 @@ bool FCatrunPortalMarkAdmissionTest::RunTest(const FString&)
             if (IsValid(Component) && Component->IsRegistered() && Component->GetFName() == Name) return true;
         return false;
     };
+    auto FindVisuals = [&](FName Name)
+    {
+        TArray<UActorComponent*> Found;
+        for (UActorComponent* Component : F.Cat->GetComponents())
+            if (IsValid(Component) && Component->IsRegistered() && Component->GetFName() == Name) Found.Add(Component);
+        return Found;
+    };
     if (!TestTrue(TEXT("Actual candle marks the cat and attaches both visuals"),
         Marks->IsMarked() && HasVisual(TEXT("CatrunMarkOrb")) && HasVisual(TEXT("CatrunMarkLight")))) return false;
     Candle->SetActorLocation(FVector(5000, 0, 0));
@@ -151,6 +158,9 @@ bool FCatrunPortalMarkAdmissionTest::RunTest(const FString&)
     F.Exit->Tags.Add(DirectorTag);
     if (!AcquireForTest(*this, F, Failure, TEXT("Stage1 portal accepts marked pawn"))) return false;
     TestTrue(TEXT("Lease acquisition alone preserves mark pending the presentation callback"), Marks->IsMarked());
+    const TArray<UActorComponent*> OldOrbs = FindVisuals(TEXT("CatrunMarkOrb"));
+    if (!TestEqual(TEXT("Exactly one mark orb exists before clearing"), OldOrbs.Num(), 1)) return false;
+    const TWeakObjectPtr<UActorComponent> OldOrb = OldOrbs[0];
     Lease->ProcessEvent(Clear, nullptr);
     TestFalse(TEXT("Accepted portal clears mark before playback"), Marks->IsMarked());
     TestFalse(TEXT("Mark orb is removed"), HasVisual(TEXT("CatrunMarkOrb")));
@@ -162,6 +172,12 @@ bool FCatrunPortalMarkAdmissionTest::RunTest(const FString&)
     Candle->Tick(.016f);
     TestTrue(TEXT("Fresh candle detection recreates mark and visuals"),
         Marks->IsMarked() && HasVisual(TEXT("CatrunMarkOrb")) && HasVisual(TEXT("CatrunMarkLight")));
+    // Re-marked in the same frame, before GC: the new visual must be a fresh object, not one rebuilt over the destroyed one.
+    const TArray<UActorComponent*> NewOrbs = FindVisuals(TEXT("CatrunMarkOrb"));
+    if (TestEqual(TEXT("Exactly one registered mark orb after re-marking"), NewOrbs.Num(), 1))
+        TestTrue(TEXT("Re-marking creates a new orb object"), NewOrbs[0] != OldOrb.Get(true));
+    TestEqual(TEXT("Exactly one registered mark light after re-marking"), FindVisuals(TEXT("CatrunMarkLight")).Num(), 1);
+    TestFalse(TEXT("The destroyed orb is no longer valid"), OldOrb.IsValid());
     return true;
 }
 

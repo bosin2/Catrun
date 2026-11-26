@@ -339,6 +339,20 @@ void UCatrunBasketInteractionComponent::TickComponent(float DeltaTime, ELevelTic
 	}
 }
 
+bool UCatrunBasketInteractionComponent::GetExitCameraRotation(FRotator& OutRotation) const
+{
+	const auto* PC=IsValid(CatOwner) ? Cast<APlayerController>(CatOwner->GetController()) : nullptr;
+	if (!PC || !PC->PlayerCameraManager) return false;
+	OutRotation=PC->PlayerCameraManager->GetCameraRotation();
+	return true;
+}
+
+bool UCatrunBasketInteractionComponent::IsExitInputAvailable(const FVector2D& Input) const
+{
+	const int32 Slot=CatrunBasket::ExitOptionSlot(Input);
+	return Slot!=INDEX_NONE && (AvailableExitMask & (1u<<Slot))!=0;
+}
+
 bool UCatrunBasketInteractionComponent::ReadExitDirectionInput()
 {
 	const auto* PC=Cast<APlayerController>(CatOwner->GetController());
@@ -348,41 +362,99 @@ bool UCatrunBasketInteractionComponent::ReadExitDirectionInput()
 		return PC->IsInputKeyDown(Key) || PC->WasInputKeyJustPressed(Key);
 	});
 	if (Input.IsNearlyZero()) return false; // Release keeps the last deliberate direction.
+	// A blocked option is not selectable: the key does nothing until that option opens.
+	if (!IsExitInputAvailable(Input)) return false;
 	const FVector Direction=CatrunBasket::MovementDirection(Input,PC->PlayerCameraManager->GetCameraRotation());
 	if (Direction.IsNearlyZero() || Direction.Equals(ExitWorldDirection,.001)) return false;
 	ExitWorldDirection=Direction;
 	return true;
 }
 
+bool UCatrunBasketInteractionComponent::EvaluateExitFrom(const FVector& SupportedOrigin, const FVector& Direction, FVector& OutLanding) const
+{
+	OutLanding=FVector::ZeroVector;
+	if (!IsValid(CatOwner) || !IsValid(ActiveBasket) || Direction.GetSafeNormal2D().IsNearlyZero()) return false;
+	const FVector Candidate=ActiveBasket->GetHiddenLocation()+Direction*ActiveBasket->GetTraversalDistance(Direction, ExitDistance);
+	if (!FindExitSupport(Candidate, OutLanding)) return false;
+	FTransform LandingTransform=CatOwner->GetActorTransform();
+	LandingTransform.SetLocation(OutLanding);
+	LandingTransform.SetRotation(Direction.Rotation().Quaternion());
+	// Same three checks FinishExit repeats at landing time.
+	return IsExitPathClear(SupportedOrigin, OutLanding)
+		&& (!bSavedCollision || CatrunRestore::IsPlacementClear(*CatOwner, LandingTransform));
+}
+
+bool UCatrunBasketInteractionComponent::EvaluateExitDirection(const FVector& Direction, FVector& OutLanding) const
+{
+	OutLanding=FVector::ZeroVector;
+	FVector SupportedOrigin;
+	// Equivalent to IsBasketExitPathClear: ground the hidden origin, then test the transit.
+	return IsValid(CatOwner) && IsValid(ActiveBasket)
+		&& FindExitSupport(ActiveBasket->GetHiddenLocation(), SupportedOrigin)
+		&& EvaluateExitFrom(SupportedOrigin, Direction, OutLanding);
+}
+
+void UCatrunBasketInteractionComponent::RefreshExitOptions()
+{
+	AvailableExitMask=0;
+	FRotator Camera;
+	if (!IsValid(CatOwner) || !IsValid(ActiveBasket) || !GetExitCameraRotation(Camera)) return;
+	LastExitCameraRotation=Camera;
+	FVector SupportedOrigin;
+	if (!FindExitSupport(ActiveBasket->GetHiddenLocation(), SupportedOrigin)) return;
+	for (int32 Slot=0; Slot<CatrunBasket::ExitOptionCount; ++Slot)
+	{
+		FVector Landing;
+		const FVector Direction=CatrunBasket::MovementDirection(CatrunBasket::ExitOptionInput(Slot),Camera);
+		if (EvaluateExitFrom(SupportedOrigin, Direction, Landing)) AvailableExitMask=static_cast<uint8>(AvailableExitMask | (1u<<Slot));
+	}
+}
+
 bool UCatrunBasketInteractionComponent::UpdateExitCandidate(bool bForce, bool bReadDirectionInput)
 {
 	const FVector Origin = ActiveBasket->GetHiddenLocation();
 	const FVector Forward = ActiveBasket->GetTraversalForward();
-	const FVector Previous = ExitWorldDirection;
-	if (bReadDirectionInput && ReadExitDirectionInput()) bForce=true;
 	const double Now = GetWorld()->GetTimeSeconds();
-	// Only the occupied basket's selected exit is checked. Keys/F are immediate;
-	// dynamic blockers without input are sampled at 5Hz, and landing is rechecked.
-	if (!bForce && Previous.Equals(ExitWorldDirection,.001) && LastBasketOrigin.Equals(Origin,.1)
-		&& LastBasketForward.Equals(Forward,.001) && Now<NextObstacleCheck) return false;
-	LastBasketOrigin = Origin;
-	LastBasketForward = Forward;
-	NextObstacleCheck = Now+.2;
+	FRotator Camera;
+	const bool bCameraMoved = GetExitCameraRotation(Camera)
+		&& FMath::Abs(FRotator::NormalizeAxis(Camera.Yaw-LastExitCameraRotation.Yaw)) > .1;
+	// Only the occupied basket is checked. Its eight options are refreshed on demand
+	// (enter/F/camera/basket move) and at 5Hz for dynamic blockers such as patrolling armor.
+	const bool bRefresh = bForce || bCameraMoved || !LastBasketOrigin.Equals(Origin,.1)
+		|| !LastBasketForward.Equals(Forward,.001) || Now>=NextObstacleCheck;
+	const uint8 PreviousMask = AvailableExitMask;
+	if (bRefresh)
+	{
+		LastBasketOrigin = Origin;
+		LastBasketForward = Forward;
+		NextObstacleCheck = Now+.2;
+		RefreshExitOptions();
+	}
+	// Input is read after the refresh so a key can never select an option that was just closed.
+	const bool bSelectionChanged = bReadDirectionInput && ReadExitDirectionInput();
+	if (!bRefresh && !bSelectionChanged) return false;
+	const bool bPreviousCanExit = CanExit;
+	const FVector PreviousLanding = ExitWorldLocation;
 	CanExit = false;
 	bHasExitSupport = false;
-	if (ExitWorldDirection.IsNearlyZero()) return true;
-	const FVector Candidate = Origin + ExitWorldDirection*ActiveBasket->GetTraversalDistance(ExitWorldDirection, ExitDistance);
-	if (!FindExitSupport(Candidate, ExitWorldLocation)) return true;
-	bHasExitSupport = true;
-	// Keep the guide centered on the selected landing, not the off-center capsule contact.
-	const UCapsuleComponent* Capsule = CatOwner->GetCapsuleComponent();
-	FloorLocation = ExitWorldLocation - FVector(0,0,Capsule->GetScaledCapsuleHalfHeight()+2.f);
-	FTransform LandingTransform = CatOwner->GetActorTransform();
-	LandingTransform.SetLocation(ExitWorldLocation);
-	LandingTransform.SetRotation(ExitWorldDirection.Rotation().Quaternion());
-	CanExit = IsBasketExitPathClear(ExitWorldLocation)
-		&& (!bSavedCollision || CatrunRestore::IsPlacementClear(*CatOwner, LandingTransform));
-	return true;
+	if (!ExitWorldDirection.IsNearlyZero())
+	{
+		// The remembered choice is re-tested with the exact confirmation test. When blocked it is
+		// hidden (never drawn red) and stays remembered so it reappears once the blocker leaves.
+		FVector Landing;
+		CanExit = EvaluateExitDirection(ExitWorldDirection, Landing);
+		if (CanExit)
+		{
+			ExitWorldLocation = Landing;
+			bHasExitSupport = true;
+			// Keep the guide centered on the selected landing, not the off-center capsule contact.
+			const UCapsuleComponent* Capsule = CatOwner->GetCapsuleComponent();
+			FloorLocation = ExitWorldLocation - FVector(0,0,Capsule->GetScaledCapsuleHalfHeight()+2.f);
+		}
+	}
+	// Report a change only when something the player sees can differ.
+	return bForce || bSelectionChanged || PreviousMask!=AvailableExitMask || bPreviousCanExit!=CanExit
+		|| (CanExit && !PreviousLanding.Equals(ExitWorldLocation,.1));
 }
 
 bool UCatrunBasketInteractionComponent::FindExitSupport(const FVector& Reference, FVector& OutCenter) const
@@ -438,7 +510,8 @@ void UCatrunBasketInteractionComponent::UpdatePreview()
 		}
 	}
 	if (BasketPromptWidget) BasketPromptWidget->SetPromptActive(BasketPhase==ECatrunBasketPhase::Hidden);
-	if (!bHasExitSupport || ExitWorldDirection.IsNearlyZero())
+	// Only an exit that passes the confirmation test is drawn. Blocked choices get no guide at all.
+	if (BasketPhase!=ECatrunBasketPhase::Hidden || !CanExit || !bHasExitSupport || ExitWorldDirection.IsNearlyZero())
 	{
 		if (ExitPreview) ExitPreview->HidePath();
 		return;
@@ -448,9 +521,7 @@ void UCatrunBasketInteractionComponent::UpdatePreview()
 		ExitPreview = NewObject<UCatrunBasketExitPreview>(CatOwner, NAME_None, RF_Transient);
 		ExitPreview->RegisterComponent(); // 숨겨진 고양이 메시와 독립된 월드 좌표로 안내를 그린다.
 	}
-	FCatrunBasketPreviewStyle Style=PreviewStyle;
-	if (!CanExit) Style.Color=FLinearColor(1.7f,.15f,.1f);
-	ExitPreview->ShowPath(ActiveBasket->GetHiddenLocation()+ExitWorldDirection*8.+FVector(0,0,32),FloorLocation+FVector(0,0,3),Style);
+	ExitPreview->ShowPath(ActiveBasket->GetHiddenLocation()+ExitWorldDirection*8.+FVector(0,0,32),FloorLocation+FVector(0,0,3),PreviewStyle);
 }
 
 void UCatrunBasketInteractionComponent::ExitBasket()
@@ -527,6 +598,7 @@ void UCatrunBasketInteractionComponent::FinishExit()
 	Busy = false;
 	CanExit = false;
 	bHasExitSupport = false;
+	AvailableExitMask = 0;
 	BasketPhase = ECatrunBasketPhase::Outside;
 	SetComponentTickInterval(.15f);
 	SetComponentTickEnabled(true);
@@ -549,6 +621,7 @@ void UCatrunBasketInteractionComponent::AbortBasket()
 	Busy = false;
 	CanExit = false;
 	bHasExitSupport = false;
+	AvailableExitMask = 0;
 	BasketPhase = ECatrunBasketPhase::Outside;
 	SetComponentTickInterval(.15f);
 	SetComponentTickEnabled(true);

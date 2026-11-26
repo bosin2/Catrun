@@ -86,6 +86,13 @@ public:
 	FVector ExitWorldDirection = FVector::ForwardVector;
 	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Basket|State")
 	FVector ExitWorldLocation = FVector::ZeroVector;
+	/** Bit N = CatrunBasket::ExitOptionInput(N) passes the same exit test that F confirmation uses. Blocked options are never offered. */
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category="Basket|State")
+	uint8 AvailableExitMask = 0;
+	UFUNCTION(BlueprintPure, Category="Basket|State")
+	bool HasAnyExitOption() const { return AvailableExitMask != 0; }
+	/** Whether a camera-relative movement input (W/A/S/D and diagonals) currently names an offered exit. */
+	bool IsExitInputAvailable(const FVector2D& Input) const;
 
 protected:
 	/** Simple BP presentation hook forwards to the existing OnBellRung dispatcher. */
@@ -113,6 +120,7 @@ private:
 	friend class FCatrunBasketDestroyedInputTest;
 #endif
 	friend class FCatrunBasketCandidateRegressionTest;
+	friend class FCatrunBasketBlockedOptionsHiddenTest;
 	friend class FCatrunBasketRestoreRegressionTest;
 	friend class FCatrunBasketComplexSupportTest;
 	void FindAndEnterBasket();
@@ -127,6 +135,12 @@ private:
 	void FinishExit();
 	bool UpdateExitCandidate(bool bForce, bool bReadDirectionInput = true);
 	bool ReadExitDirectionInput();
+	// The single exit test: landing support, full capsule transit and restored-collision footprint.
+	bool EvaluateExitDirection(const FVector& Direction, FVector& OutLanding) const;
+	bool EvaluateExitFrom(const FVector& SupportedOrigin, const FVector& Direction, FVector& OutLanding) const;
+	void RefreshExitOptions();
+	bool GetExitCameraRotation(FRotator& OutRotation) const;
+	FRotator LastExitCameraRotation = FRotator::ZeroRotator;
 	bool bHasExitSupport = false;
 	bool FindExitSupport(const FVector& Reference, FVector& OutCenter) const;
 	bool IsBasketExitPathClear(const FVector& Destination) const;

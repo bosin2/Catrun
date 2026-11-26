@@ -6,6 +6,19 @@ ED=u.get_editor_subsystem(u.UnrealEditorSubsystem);LEVEL=u.get_editor_subsystem(
 APPLY=json.loads((ROOT/'Saved/BasketIntegration20261125/apply_report.json').read_text(encoding='utf8'));assert APPLY['success']
 S={'phase':'setup','started':time.monotonic(),'map_index':0,'maps':['Stage1','Stage2'],'cases':[],'events':[],'screenshots':[],'scope':'Real saved Stage1/Stage2 in PIE, real F/WASD input injection; cat start positions are transient test fixtures. Armor capture disabled only in this isolated process.'}
 KEYS=['W','A','S','D'];DIRS=['F','FR','R','BR','B','BL','L','FL']
+# CatrunBasket::ExitOptionInput slot order (F,FR,R,BR,B,BL,L,FL); bit N of AvailableExitMask = slot N passes the F exit test.
+SLOT={'W':0,'D':2,'S':4,'A':6}
+NO_EXIT='지금은 나갈 곳이 없습니다';OLD_BLOCKED='선택한 방향이 막혀 있습니다'
+def exit_mask(a):return int(a.get_editor_property('AvailableExitMask'))
+def offered(mask,k):return bool(mask>>SLOT[k]&1)
+def prompt_text(world):
+    try:ws=u.WidgetBlueprintLibrary.get_all_widgets_of_class(world,u.CatrunBasketPromptWidget,False)
+    except Exception:return None
+    return str(ws[0].get_prompt_text()) if ws else None
+def guide_visible(cat):
+    previews=cat.get_components_by_class(u.CatrunBasketExitPreview)
+    assert len(previews)<=1,'Multiple exit markers'
+    return any(v.is_visible() for v in previews)
 def xyz(v):return [round(v.x,4),round(v.y,4),round(v.z,4)]
 def persist(file='progress.json'):
     (OUT/file).write_text(json.dumps({k:v for k,v in S.items() if k!='handle'},indent=2,ensure_ascii=False),encoding='utf8')
@@ -108,9 +121,21 @@ def step(world):
         key(world,case['key'],True);phase('select_exit');return
     if p=='select_exit':
         if now-S['changed']<.15:return
-        actual=action.get_editor_property('ExitWorldDirection');expected=u.Vector(*case['expected_direction'])
-        assert (actual-expected).length()<.002,('Not camera-relative WASD',case['key'],xyz(actual),xyz(expected))
-        case['actual_direction']=xyz(actual);case['can_exit']=action.get_editor_property('CanExit');case['landing']=xyz(action.get_editor_property('ExitWorldLocation'));case['expected_exit_clip']=expected_clip(basket,actual,'Exit')
+        actual=action.get_editor_property('ExitWorldDirection');expected=u.Vector(*case['expected_direction']);clear=bool(action.get_editor_property('CanExit'))
+        mask=exit_mask(action);case['exit_mask']=mask;case['offered']=offered(mask,case['key']);case['prompt']=prompt_text(world)
+        assert action.has_any_exit_option()==(mask!=0),('HasAnyExitOption disagrees with AvailableExitMask',mask)
+        # Only an exit that passes the confirmation test is drawn; blocked choices get no (red) guide.
+        assert guide_visible(cat)==clear,('Guide visibility differs from CanExit',clear)
+        assert case['prompt'] is None or OLD_BLOCKED not in case['prompt'],('Blocked choice is still described',case['prompt'])
+        if mask==0 and not clear:assert case['prompt'] in (None,NO_EXIT),('Missing no-exit prompt',case['prompt'])
+        if case['offered']:
+            assert (actual-expected).length()<.002,('Not camera-relative WASD',case['key'],xyz(actual),xyz(expected))
+            assert clear,('Offered option fails the exit test',case['key'],mask)
+        else:
+            # A blocked option is not selectable: the key leaves the empty post-entry choice untouched.
+            # (Same direction but not clear = the option closed right after it was selected.)
+            assert actual.length()<.001 or ((actual-expected).length()<.002 and not clear),('Blocked option was selectable',case['key'],mask,xyz(actual))
+        case['actual_direction']=xyz(actual);case['can_exit']=clear;case['landing']=xyz(action.get_editor_property('ExitWorldLocation'));case['expected_exit_clip']=expected_clip(basket,actual,'Exit') if clear else None
         key(world,case['key'],False)
         if not case['can_exit']:
             send_interact(world);phase('blocked_confirm');return
@@ -120,16 +145,21 @@ def step(world):
         assert namephase(action)=='HIDDEN' and not action.get_editor_property('Busy'),'Blocked F must not start an exit'
         case['blocked_confirmation_preserved_hidden']=True
         # Use a single other camera key to leave for the next independent case.
-        S['fallback_index']=0;phase('fallback');return
+        S['fallback_index']=0;S.pop('fallback_order',None);phase('fallback');return
     if p=='fallback':
+        # Offered options first; the game must never pick one by itself.
+        if 'fallback_order' not in S:mask=exit_mask(action);S['fallback_order']=sorted(KEYS,key=lambda k:not offered(mask,k));case.setdefault('fallback_masks',[]).append(mask)
         if S.get('fallback_down'):
             if now-S['changed']<.15:return
             k=S.pop('fallback_down');key(world,k,False)
-            if action.get_editor_property('CanExit'):
-                case['fallback_key']=k;case['landing']=xyz(action.get_editor_property('ExitWorldLocation'));case['expected_exit_clip']=expected_clip(basket,action.get_editor_property('ExitWorldDirection'),'Exit');send_interact(world);phase('exiting');return
+            actual=action.get_editor_property('ExitWorldDirection');clear=bool(action.get_editor_property('CanExit'))
+            assert guide_visible(cat)==clear,('Guide visibility differs from CanExit',k,clear)
+            if offered(exit_mask(action),k):assert clear and (actual-u.Vector(*axes(pc)[1][k])).length()<.002,('Offered fallback option not selectable',k)
+            if clear and (actual-u.Vector(*axes(pc)[1][k])).length()<.002:
+                S.pop('fallback_order',None);case['fallback_key']=k;case['landing']=xyz(action.get_editor_property('ExitWorldLocation'));case['expected_exit_clip']=expected_clip(basket,actual,'Exit');send_interact(world);phase('exiting');return
             S['fallback_index']+=1
-        assert S['fallback_index']<4,('No single-key way out',case)
-        S['fallback_down']=KEYS[S['fallback_index']];key(world,S['fallback_down'],True);S['changed']=now;return
+        assert S['fallback_index']<4,('No single-key way out',case,{'mask':exit_mask(action),'prompt':prompt_text(world)})
+        S['fallback_down']=S['fallback_order'][S['fallback_index']];key(world,S['fallback_down'],True);S['changed']=now;return
     if p=='exiting':
         bp=namephase(action)
         if bp=='HIDDEN':
@@ -142,7 +172,7 @@ def step(world):
                 assert not cloth(basket).is_component_tick_enabled()
                 case.setdefault('late_safety_returns',[]).append({'landing':case['landing'],'clip':case['expected_exit_clip'],'samples':case['exit_samples'],'game':GS.get_time_seconds(world)})
                 assert len(case['late_safety_returns'])<5,'Repeatedly unable to find a safe landing'
-                case['exit_samples']=[];S['fallback_index']=0;phase('fallback');return
+                case['exit_samples']=[];S['fallback_index']=0;S.pop('fallback_order',None);phase('fallback');return
             assert now-S['changed']<.6,('F input did not exit',case['basket'],case['key']);return
         if bp=='EXITING':
             row=sample(cat,basket)

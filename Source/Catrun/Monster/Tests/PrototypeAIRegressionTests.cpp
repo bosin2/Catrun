@@ -22,6 +22,7 @@
 #include "Perception/CatrunGroundSupport.h"
 #include "Monster/CatrunPerceptionPolicy.h"
 #include "Monster/CatrunRestartSubsystem.h"
+#include "Monster/CatrunSightBlockerSubsystem.h"
 #include "Monster/CatrunMarkSubsystem.h"
 #include "Interaction/CatrunBasketInteractionComponent.h"
 #include "Interaction/CatrunHideBasket.h"
@@ -36,6 +37,11 @@
 #include "Engine/Engine.h"
 #include "Engine/GameInstance.h"
 #include "Engine/Texture2D.h"
+#include "Engine/StaticMesh.h"
+#include "PhysicsEngine/BodySetup.h"
+#if WITH_EDITOR
+#include "StaticMeshCompiler.h"
+#endif
 #include "TimerManager.h"
 #include "Engine/World.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -1039,6 +1045,194 @@ bool FCatrunDynamicSightCoverageTest::RunTest(const FString&)
 	TestTrue(TEXT("Armor Pawn body does not cut fan holes"),FMath::IsNearlyEqual(Candle->Sight->GetFreeDistance(Candle->GetActorLocation(),FVector::ForwardVector,300.f),300.f));
 	auto* OtherCandle=F.Spawn<ACatrunCandle>(FVector(-50,0,0));
 	TestTrue(TEXT("Candle AActor Pawn capsule is also intentionally excluded"),CatrunPerception::HasDirectSight(*Candle,*F.Cat,F.Settings->VisionTraceHeight));
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunPushWeightBlocksCandleSightTest,"Catrun.PrototypeAI.PushWeightBlocksCandleSightAndFan",EAutomationTestFlags::EditorContext|EAutomationTestFlags::EngineFilter)
+bool FCatrunPushWeightBlocksCandleSightTest::RunTest(const FString&)
+{
+	// Stage 3 counterweights: the pushed gameplay actor is a hidden statue mesh (complex triangles narrower
+	// than the block) whose simple collision is the 120x120x150 weight box. Sight must stop at the box.
+	auto* Mesh = LoadObject<UStaticMesh>(nullptr, TEXT("/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_GuardianStatue.SM_S3_GuardianStatue"));
+	if (!TestNotNull(TEXT("Stage3 weight gameplay mesh exists"), Mesh)) return false;
+#if WITH_EDITOR
+	// A freshly loaded editor mesh builds asynchronously; UStaticMeshComponent creates no physics state
+	// (no simple or complex collision) until that build finishes. Maps are fully built before play.
+	FStaticMeshCompilingManager::Get().FinishCompilation({Mesh});
+#endif
+	if (!TestTrue(TEXT("Stage3 weight mesh has collision geometry"), Mesh->GetBodySetup() && Mesh->GetBodySetup()->AggGeom.BoxElems.Num() == 1)) return false;
+	FPrototypeWorld F;
+	auto* Registry = UCatrunSightBlockerSubsystem::Get(F.World);
+	if (!TestNotNull(TEXT("World has a sight blocker registry"), Registry)) return false;
+	TestEqual(TEXT("A world without hidden statue proxies registers no sight blockers"), Registry->Num(), 0);
+	// Stage 3 floor is z=0: the cat stands on it and the candle/armor LOS and the fan both trace at
+	// VisionTraceHeight (100) above it, inside the 150cm weight box.
+	F.Cat->SetActorLocation(FVector(0,0,F.Cat->GetCapsuleComponent()->GetScaledCapsuleHalfHeight()));
+	auto* Candle = F.Spawn<ACatrunCandle>(FVector(-300,0,60));
+	Candle->bAutoAlignEyes=false; Candle->bPenaltiesEnabled=false;
+	Candle->Tick(.01f);
+	auto* Weight = F.Spawn<AActor>(FVector::ZeroVector);
+	auto* Body = NewObject<UStaticMeshComponent>(Weight); Weight->SetRootComponent(Body);
+	Body->SetMobility(EComponentMobility::Movable);
+	Body->SetStaticMesh(Mesh); Body->SetCollisionProfileName(TEXT("BlockAllDynamic"));
+	Body->SetHiddenInGame(true); Body->RegisterComponent();
+	TestTrue(TEXT("Weight body has a physics state"),Body->GetBodyInstance() && Body->GetBodyInstance()->IsValidBodyInstance());
+	auto* Plate = F.Box(FVector(-150,600,5),FVector(60,60,5));
+	auto* Gate = F.Box(FVector(400,600,100),FVector(5,100,100));
+	auto* Puzzle = F.Spawn<ACatrunStatuePuzzle>(FVector::ZeroVector);
+	FCatrunStatuePuzzleLink Link; Link.PuzzleId = TEXT("WeightSight"); Link.Statue = Weight; Link.Plate = Plate; Link.Gate = Gate;
+	Puzzle->Links.Add(Link);
+	const FVector Forward = FVector::ForwardVector;
+	auto Sample = [&](float Lateral, bool& bLOSBlocked, bool& bFanBlocked)
+	{
+		Weight->SetActorLocation(FVector(-150,-Lateral,0));
+		bLOSBlocked = !CatrunPerception::HasDirectSight(*Candle,*F.Cat,F.Settings->VisionTraceHeight);
+		bFanBlocked = Candle->Sight->GetFreeDistance(Candle->GetActorLocation(),Forward,400.f) < 250.f;
+	};
+	// Before puzzle setup the hidden proxy is unregistered: the complex-only trace passes beside the statue
+	// mesh. This proves the fixture reproduces the Stage 3 leak, so the checks after setup are not vacuous.
+	int32 LeaksBefore = 0;
+	for (const float Lateral : {0.f, 25.f, 45.f, 55.f})
+	{
+		bool bLOS=false, bFan=false; Sample(Lateral,bLOS,bFan);
+		LeaksBefore += (!bLOS) + (!bFan);
+	}
+	AddInfo(FString::Printf(TEXT("Unregistered weight leaked %d of 8 LOS/fan samples (complex triangles only)."), LeaksBefore));
+	TestTrue(TEXT("Unregistered hidden statue mesh leaks sight beside the weight box"), LeaksBefore > 0);
+	Puzzle->InitializePuzzle();
+	TestTrue(TEXT("Statue puzzle registers the hidden weight proxy as a solid sight blocker"),Registry->IsRegistered(Body));
+	TestEqual(TEXT("Only the hidden proxy is registered"),Registry->Num(),1);
+	for (const float Lateral : {0.f, 25.f, 45.f, 55.f})
+	{
+		bool bLOS=false, bFan=false; Sample(Lateral,bLOS,bFan);
+		TestTrue(*FString::Printf(TEXT("Weight blocks candle direct LOS %.0fcm off centre"),Lateral),bLOS);
+		TestTrue(*FString::Printf(TEXT("Weight clips displayed vision fan %.0fcm off centre"),Lateral),bFan);
+	}
+	// Pushed aside (outside the 60cm half extent) the weight no longer blocks.
+	Weight->SetActorLocation(FVector(-150,-90,0));
+	TestTrue(TEXT("Weight pushed out of the line clears direct LOS"),CatrunPerception::HasDirectSight(*Candle,*F.Cat,F.Settings->VisionTraceHeight));
+	TestTrue(TEXT("Weight pushed out of the line clears the fan"),FMath::IsNearlyEqual(Candle->Sight->GetFreeDistance(Candle->GetActorLocation(),Forward,400.f),400.f));
+	// Pawn bodies stay non-occluding even if one were registered.
+	auto* Armor = F.Spawn<ACatrunArmor>(FVector(-150,0,90));
+	Registry->Register(*Armor->GetCapsuleComponent());
+	TestTrue(TEXT("Registered Pawn capsule still does not occlude LOS"),CatrunPerception::HasDirectSight(*Candle,*F.Cat,F.Settings->VisionTraceHeight));
+	TestTrue(TEXT("Registered Pawn capsule still does not clip the fan"),FMath::IsNearlyEqual(Candle->Sight->GetFreeDistance(Candle->GetActorLocation(),Forward,400.f),400.f));
+	// A destroyed proxy leaves the registry.
+	Weight->Destroy();
+	TestFalse(TEXT("Destroyed weight is no longer registered"),Registry->IsRegistered(Body));
+	TestEqual(TEXT("Destroyed weight is pruned from the registry"),Registry->Num(),1);
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunVisibleStatueKeepsComplexSightTest,"Catrun.PrototypeAI.VisibleStatueKeepsComplexSight",EAutomationTestFlags::EditorContext|EAutomationTestFlags::EngineFilter)
+bool FCatrunVisibleStatueKeepsComplexSightTest::RunTest(const FString&)
+{
+	// Stage 1/2 statues are visible: the player sees their render triangles, so sight keeps tracing them
+	// (complex) and the puzzle does not register them.
+	auto* Mesh = LoadObject<UStaticMesh>(nullptr, TEXT("/Game/Environment/Stage3/FinalGuard/Meshes/SM_S3_GuardianStatue.SM_S3_GuardianStatue"));
+	if (!TestNotNull(TEXT("Statue mesh exists"), Mesh)) return false;
+#if WITH_EDITOR
+	FStaticMeshCompilingManager::Get().FinishCompilation({Mesh});
+#endif
+	FPrototypeWorld F;
+	auto* Registry = UCatrunSightBlockerSubsystem::Get(F.World);
+	if (!TestNotNull(TEXT("World has a sight blocker registry"), Registry)) return false;
+	F.Cat->SetActorLocation(FVector(0,0,F.Cat->GetCapsuleComponent()->GetScaledCapsuleHalfHeight()));
+	auto* Candle = F.Spawn<ACatrunCandle>(FVector(-300,0,60));
+	Candle->bAutoAlignEyes=false; Candle->bPenaltiesEnabled=false;
+	Candle->Tick(.01f);
+	auto* Statue = F.Spawn<AActor>(FVector::ZeroVector);
+	auto* Body = NewObject<UStaticMeshComponent>(Statue); Statue->SetRootComponent(Body);
+	Body->SetMobility(EComponentMobility::Movable);
+	Body->SetStaticMesh(Mesh); Body->SetCollisionProfileName(TEXT("BlockAllDynamic"));
+	Body->RegisterComponent();
+	auto* Plate = F.Box(FVector(-150,600,5),FVector(60,60,5));
+	auto* Gate = F.Box(FVector(400,600,100),FVector(5,100,100));
+	auto* Puzzle = F.Spawn<ACatrunStatuePuzzle>(FVector::ZeroVector);
+	FCatrunStatuePuzzleLink Link; Link.PuzzleId = TEXT("VisibleStatue"); Link.Statue = Statue; Link.Plate = Plate; Link.Gate = Gate;
+	Puzzle->Links.Add(Link);
+	const float Laterals[] = {0.f, 25.f, 45.f, 55.f};
+	TArray<float> FanBefore; TArray<bool> LOSBefore;
+	for (const float Lateral : Laterals)
+	{
+		Statue->SetActorLocation(FVector(-150,-Lateral,0));
+		FanBefore.Add(Candle->Sight->GetFreeDistance(Candle->GetActorLocation(),FVector::ForwardVector,400.f));
+		LOSBefore.Add(CatrunPerception::HasDirectSight(*Candle,*F.Cat,F.Settings->VisionTraceHeight));
+	}
+	Puzzle->InitializePuzzle();
+	TestFalse(TEXT("Visible statue is not registered as a simple-collision sight blocker"),Registry->IsRegistered(Body));
+	TestEqual(TEXT("Visible statue leaves the registry empty"),Registry->Num(),0);
+	for (int32 i = 0; i < int32(UE_ARRAY_COUNT(Laterals)); ++i)
+	{
+		Statue->SetActorLocation(FVector(-150,-Laterals[i],0));
+		TestEqual(*FString::Printf(TEXT("Fan distance unchanged %.0fcm off centre"),Laterals[i]),
+			Candle->Sight->GetFreeDistance(Candle->GetActorLocation(),FVector::ForwardVector,400.f),FanBefore[i]);
+		TestTrue(*FString::Printf(TEXT("Direct LOS unchanged %.0fcm off centre"),Laterals[i]),
+			CatrunPerception::HasDirectSight(*Candle,*F.Cat,F.Settings->VisionTraceHeight) == LOSBefore[i]);
+	}
+	return true;
+}
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunHiddenFanDisplayKeepsSightTest,"Catrun.PrototypeAI.HiddenFanDisplayKeepsSightAndRedraws",EAutomationTestFlags::EditorContext|EAutomationTestFlags::EngineFilter)
+bool FCatrunHiddenFanDisplayKeepsSightTest::RunTest(const FString&)
+{
+	FPrototypeWorld F;
+	F.Settings->ArmorDetectRadius = 150.f;
+	F.Settings->CatSightRadius = 15.f;
+	auto* Armor = F.Spawn<ACatrunArmor>(FVector(800,800,90));
+	Armor->DispatchBeginPlay();
+	Armor->bShowDetectionDisplay = true;
+	Armor->Tick(.01f);
+	auto* Fan = Armor->Detection.Get();
+	auto* Plane = FindObject<UStaticMeshComponent>(Armor, TEXT("Detection_VisionPlane"));
+	if (!TestNotNull(TEXT("Armor created its floor plane"), Plane)) return false;
+	auto* MID = Cast<UMaterialInstanceDynamic>(Plane->GetMaterial(0));
+	auto* Tex = MID ? Cast<UTexture2D>(MID->K2_GetTextureParameterValue(TEXT("DistTex"))) : nullptr;
+	if (!TestNotNull(TEXT("Armor display has its distance texture"), Tex)) return false;
+	const FVector Origin = Armor->GetActorLocation();
+	auto SampleSight = [&]()
+	{
+		TArray<bool> Seen;
+		for (int32 Deg = 0; Deg < 360; Deg += 15)
+			for (const float R : {100.f, 140.f, 165.f, 166.f})
+			{
+				const float Rad = FMath::DegreesToRadians(float(Deg));
+				Seen.Add(Fan->CanSee(Origin + FVector(FMath::Cos(Rad)*R, FMath::Sin(Rad)*R, 0.f), 15.f));
+			}
+		return Seen;
+	};
+	// Ray order covers [-180, 180] degrees: east is the middle pixel.
+	auto ReadEast = [&]()
+	{
+		FTexture2DMipMap& Mip = Tex->GetPlatformData()->Mips[0];
+		const auto* Samples = static_cast<const FFloat16Color*>(Mip.BulkData.LockReadOnly());
+		const float East = Samples[Tex->GetSizeX() / 2].R.GetFloat();
+		Mip.BulkData.Unlock();
+		return East;
+	};
+	TestEqual(TEXT("Open display samples the padded boundary"), ReadEast(), 165.f);
+	auto* Far = F.Box(Origin+FVector(80,0,0),FVector(5,100,100));
+	Armor->Tick(.01f);
+	const TArray<bool> Shown = SampleSight();
+	const float EastFar = ReadEast();
+	TestTrue(TEXT("Shown display samples the wall"), EastFar >= 75.f && EastFar < 80.f);
+	// Hidden: sight is identical, only the display stops updating.
+	Armor->bShowDetectionDisplay = false;
+	Armor->Tick(.01f);
+	TestFalse(TEXT("Armor hides its display"), Plane->IsVisible());
+	TestTrue(TEXT("Hidden display leaves CanSee identical"), SampleSight() == Shown);
+	// Move the wall while hidden: sight follows at once, the display is redrawn when shown again.
+	Far->Destroy();
+	F.Box(Origin+FVector(50,0,0),FVector(5,100,100));
+	Armor->Tick(.01f);
+	const TArray<bool> HiddenNear = SampleSight();
+	TestFalse(TEXT("Hidden display still updates sight"), HiddenNear == Shown);
+	Armor->bShowDetectionDisplay = true;
+	Armor->Tick(.01f);
+	TestTrue(TEXT("Armor shows its display again"), Plane->IsVisible());
+	TestTrue(TEXT("Showing the display leaves CanSee identical"), SampleSight() == HiddenNear);
+	const float EastNear = ReadEast();
+	TestTrue(TEXT("Shown display redraws the wall moved while hidden"), EastNear >= 45.f && EastNear < 50.f);
 	return true;
 }
 
