@@ -28,7 +28,7 @@ PIE에서는 MoviePlayer 로딩 표시를 검증할 수 없다. Standalone 또�
   - [RogueAction.h](https://github.com/tomlooman/ActionRoguelike/blob/master/Source/ActionRoguelike/ActionSystem/RogueAction.h): 실행 가능 판정, 실행 상태, 쿨다운 조회, 연출 함수 구분.
   - [RogueActionComponent.h](https://github.com/tomlooman/ActionRoguelike/blob/master/Source/ActionRoguelike/ActionSystem/RogueActionComponent.h): 시작·종료 이벤트, 행동 일괄 종료, 컴포넌트 단위 상태 관리.
 
-Catrun에서는 기존 컴포넌트를 유지하면서 공통 판정·쿨다운은 C++ 한 곳에서 결정하고 BP는 입력 요청과 연출 이벤트를 연결하는 기준으로 활용한다. 구체적 적용 순서는 `ImplementationResponsibilities.md`를 따른다. 이 문서를 추가했다고 방울·갑옷 구조 정리가 완료된 것은 아니다.
+Catrun에서는 기존 컴포넌트를 유지하면서 공통 판정·쿨다운은 C++ 한 곳에서 결정하고 BP는 입력 요청과 연출 이벤트를 연결하는 기준으로 활용한다. 구체적 적용 기준은 현행 [GameDesign.md](GameDesign.md)를 따른다. 이 문서를 추가했다고 방울·갑옷 구조 정리가 완료된 것은 아니다.
 
 원본에 포함된 에셋은 별도 이용 조건이 있다. 현재는 구조만 참고하며, 직접 코드나 에셋을 가져올 때는 해당 항목의 이용 조건을 별도로 확인한다.
 

@@ -8,7 +8,6 @@
 
 - 전체 기획서: [GameDesign.md](../Design/GameDesign.md)
 - 사용자 판단이 필요한 내용: [팀회의 안건 11개](TeamAgenda_2026-11-25.md)
-- 날짜 고정 전체본: [GameDesign_Current_2026-11-25.md](../Design/GameDesign_Current_2026-11-25.md)
 - 원래 사용자 원문: [GameDesign_Source.md](../Design/GameDesign_Source.md)
 
 ## 1. 점검 기준과 증거의 한계

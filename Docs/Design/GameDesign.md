@@ -8,7 +8,7 @@ Stage3 통합 정정(2026-11-25): `/Game/Maps/Stage3`와 동상 2개·봉쇄 장
 
 이 문서는 기존 요약을 확장한 **현행 통합 기획서**다. 최초 원문은 `GameDesign_Source.md`에 보존한다. 2026-11-24~25의 스태미나·제한시간·진행 저장 요구가 이전 원문의 각성도·재시작 규칙보다 우선한다. 확정 요구, 현재 구현, 미정 사항을 구분한다. 구현이 존재한다는 것은 전체 플레이 검증이 끝났다는 뜻이 아니다.
 
-근거: [최신 확장 요구](GameplayExpansion_Request_2026-11-24.md), [11월23일 레벨 변경 요구](StageRevision_Request_2026-11-23.md), [승인된 프로토타입 범위](../superpowers/specs/2026-11-04-playable-prototype-design.md). 점검 결과는 [전체 감사](../Reviews/ProjectAudit_2026-11-25.md), 미정 사항은 [팀회의 안건](../Reviews/TeamAgenda_2026-11-25.md)을 따른다.
+근거: [최신 확장 요구](GameplayExpansion_Request_2026-11-24.md), [11월23일 레벨 변경 요구](StageRevision_Request_2026-11-23.md). 점검 결과는 [전체 감사](../Reviews/ProjectAudit_2026-11-25.md), 미정 사항은 [팀회의 안건](../Reviews/TeamAgenda_2026-11-25.md)을 따른다.
 
 ## 0. 게임 개요와 범위
 
