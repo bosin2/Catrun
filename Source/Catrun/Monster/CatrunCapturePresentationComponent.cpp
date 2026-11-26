@@ -101,6 +101,8 @@ bool UCatrunCapturePresentationComponent::BeginCapture(APawn* InCat, const UCatr
 		return false;
 	}
 	ArmorMeshState.Save(OwnerArmor->GetMesh());
+	// The candle mark orb floats over the cat and lights the close-up red; hide only its visual while this session owns the screen.
+	if (auto* Marks = UCatrunMarkSubsystem::Get(this)) { Marks->SetVisualSuppressed(this, true); bOwnMarkHide = true; }
 	FramingFromYaw = OwnerArmor->GetActorRotation().Yaw;
 	const FVector ToCat = (InCat->GetActorLocation()-OwnerArmor->GetActorLocation()).GetSafeNormal2D();
 	FramingTargetYaw = ToCat.IsNearlyZero() ? FramingFromYaw : FMath::GridSnap(ToCat.Rotation().Yaw, 90.f);
@@ -261,8 +263,11 @@ void UCatrunCapturePresentationComponent::UpdateCamera(float DeltaTime)
 	if (bCameraCut) Blended = bFirst ? Best : FMath::VInterpTo(Camera->GetActorLocation(), Best, DeltaTime, 5.f);
 	else Blended = Alpha < 1.f ? FMath::Lerp(CameraFrom, Best, FMath::SmoothStep(0.f, 1.f, Alpha))
 		: FMath::VInterpTo(Camera->GetActorLocation(), Best, DeltaTime, 5.f);
-	if (!bCameraOverhead && !bFirst && PathBlocked(Camera->GetActorLocation(), Blended)) Blended = Best;
-	if (bFirst && bCameraCut && Player.IsValid() && Player->PlayerCameraManager) Player->PlayerCameraManager->SetGameCameraCutThisFrame();
+	const FVector Previous = Camera->GetActorLocation();
+	const bool bSnapped = !bCameraOverhead && !bFirst && PathBlocked(Previous, Blended);
+	if (bSnapped) Blended = Best;
+	const bool bCutNow = bFirst ? bCameraCut : ShouldCutCameraMove(FVector::Distance(Previous, Blended), bSnapped, Alpha, CameraCutDistance);
+	if (bCutNow && Player.IsValid() && Player->PlayerCameraManager) Player->PlayerCameraManager->SetGameCameraCutThisFrame();
 	Camera->SetActorLocationAndRotation(Blended, (Focus-Blended).Rotation());
 	// A wall can push the camera close; widen so the armor's head and the cat stay in frame.
 	const float FocusDistance = FMath::Max(1.f, FVector::Distance(Blended, Focus));
@@ -421,10 +426,18 @@ void UCatrunCapturePresentationComponent::TickComponent(float DeltaTime, ELevelT
 	}
 }
 
+bool UCatrunCapturePresentationComponent::ShouldCutCameraMove(float StepDistance, bool bSnapped, float BlendAlpha, float CutDistance)
+{
+	// A snap past an obstacle, or a settled shot that still jumps, is a new shot rather than motion.
+	return StepDistance > CutDistance && (bSnapped || BlendAlpha >= 1.f);
+}
+
 void UCatrunCapturePresentationComponent::Cleanup(bool bRestoreTransform)
 {
 	if (bCleaningUp) return;
 	bCleaningUp = true;
+	if (bOwnMarkHide) if (auto* Marks = UCatrunMarkSubsystem::Get(this)) Marks->SetVisualSuppressed(this, false);
+	bOwnMarkHide = false;
 	if (auto* Pawn = Cat.Get())
 	{
 		const FTransform Desired = bRestoreTransform ? OriginalTransform : Pawn->GetActorTransform();

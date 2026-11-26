@@ -1,6 +1,6 @@
 # 전체 스테이지 회귀검사 — 통합 전/후 비교 (2026-11-26)
 
-07:25 기준 문서다. **통합 뒤 남은 실패는 1단계(`tutorial_route`)이고 통합 전에도 같은 이유로 실패했다.** 통합으로 생긴 회귀 1건(승강기 도착 시작 지연)은 수정·빌드 뒤 다시 검사해 사라졌다.
+07:25 기준 문서이고, 09시대에 Final02(포획 다듬기 Fix2)를 덧붙였다(맨 아래 절). **통합 뒤 남은 실패는 1단계(`tutorial_route`)이고 통합 전에도 같은 이유로 실패했다.** 통합으로 생긴 회귀 1건(승강기 도착 시작 지연)은 수정·빌드 뒤 다시 검사해 사라졌다.
 
 판정은 종료코드가 아니라 보고서(`index.json`, `report.json`)로 했다. 대부분 체크포인트 배치와 적 격리 fixture가 들어간 자동 검사이며 **사람이 처음부터 끝까지 플레이한 완주가 아니다.**
 
@@ -12,6 +12,7 @@
 | After01 | 06:06 통합본 | `UnrealEditor-Catrun.dll` 05:56 | Stage2 `51b961ee`, Stage3 `af85cd64`, Tutorial `2bdec84b` |
 | After02 | 06:40 포탈 2차본(시퀀스 2개·BP 1개만 변경) | 05:56. `stage2_arrival_flow`만 07:05 | 같음 |
 | Final01 | 커밋 대상 최종본(승강기 도착 수정 포함) | 07:05 `a1074c59…` | 같음 |
+| Final02 | Final01 + 포획 다듬기 Fix2(표식 구슬 숨김·포획 카메라 컷, C++ 5개, 새 테스트 3개) | 08:53:05 `UnrealEditor-Catrun.dll` | 같음 |
 
 Stage1 `bfd2163f`와 MainMenu `f98e2360`은 전후가 같다. 검사 중 Content·Source·Config·DLL·사용자 저장의 변경은 0건이다(단계별 전후와 Final01 전후 해시).
 
@@ -117,4 +118,20 @@ python -B -u Scripts/Regression20261126/run_regression.py run After03 --compare 
 - `stage2_arrival`과 `elevator_runtime`은 통합본에서 항상 실패하므로 `--skip stage2_arrival,elevator_runtime`을 붙인다.
 - `ElevatorTransition/verify_reentry_visibility.py` 원본은 시작할 때 에셋을 다시 저장한다. 실행기는 그 줄을 메모리에서만 뺀다.
 - `stale_objects.py`는 obj보다 새로운 헤더를 찾는다. 헤더가 예전 시각으로 들어온 경우는 찾지 못하므로 통합 빌드는 `fixes/force_full_rebuild_touch.ps1` 뒤에 한다.
-- 증거: `Saved/Regression20261126/Baseline`, `After01`, `After02`, `FixTrial`, `Final01`, `OldDllNative`, 크래시 콜스택 `Baseline/native`.
+- 증거: `Saved/Regression20261126/Baseline`, `After01`, `After02`, `FixTrial`, `Final01`, `Final02`, `OldDllNative`, 크래시 콜스택 `Baseline/native`.
+
+## Final02 — 포획 다듬기 Fix2 (DLL 08:53:05)
+
+요청받은 4단계를 본 프로젝트에서 다시 돌렸다. 모두 통과했고 이전과 비교해 줄어든 결과는 없다(`COMPARE_After01_Final02.md`, 회귀 0건).
+
+| 단계 | 이전 | Final02 |
+|---|---|---|
+| native | PASS 167 (Final01) | **PASS 170**. 새 검사 3개 성공, 없어진 검사 0개, 경고 포함 성공 10개로 같음 |
+| stage_sweep (포획→재시작·수동 재시작·6초 시간초과 포함, 맵 5개) | PASS 136, 스킵 2 (After01) | PASS 136, 스킵 2 |
+| campaign | PASS 완료 (Final01) | PASS 완료 |
+| elevator_redirect | PASS 74 (Final01) | PASS 74, `Elevator could not start` 0건 |
+
+- 새 검사: `Catrun.Monsters.MarkVisualSuppressionKeepsMark`, `Catrun.PrototypeAI.CaptureHidesMarkVisualOnlyWhileOwning`, `Catrun.PrototypeAI.CaptureCameraCutsOnlyJumps` 모두 오류·경고 0.
+- 로그: native·campaign 경고 종류와 개수가 Final01과 같다. `stage_sweep`에 새로 보인 것은 이미 기록한 `BP_Stage2PortalArrival` 주석 노드 경고(After01이 포탈 2차본 이전이라 생긴 차이)뿐이다. `elevator_redirect`의 VSM 큐 오버플로 1건은 이번에는 나오지 않았다.
+- 각 단계 전후로 Content·Source·Config·DLL·사용자 저장 변경 0건.
+- 미확인: 표식 구슬이 실제 화면에서 숨는 모습과 포획 카메라 컷의 프레임 화면 판정은 하지 않았다(자동화 검사와 상태 값만 확인). 포획이 들어가는 다른 단계(`tutorial_route`, 바구니, Stage3 퍼즐 등)는 요청 범위 밖이라 Fix2로 다시 돌리지 않았다.

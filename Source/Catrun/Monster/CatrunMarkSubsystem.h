@@ -41,6 +41,14 @@ public:
     void ApplyMark(APawn& Cat);
 	void ClearMark(const TCHAR* Reason);
 	bool IsMarked() const { return bMarked; }
+	/**
+	 * Hides only the orb and its light while a presentation owns the screen (the capture close-up).
+	 * The mark itself, the following armor and every timer are unchanged. Owners stack; the visual
+	 * returns when the last live owner releases it.
+	 */
+	void SetVisualSuppressed(const UObject* Owner, bool bSuppressed);
+	bool IsVisualSuppressed() const;
+	bool IsVisualShown() const;
 
 	virtual bool ShouldCreateSubsystem(UObject* Outer) const override;
 	virtual bool IsTickable() const override { return bMarked && Super::IsTickable(); }
@@ -53,6 +61,7 @@ private:
 	void CreateVisual(APawn& Cat);
 	void DestroyVisual();
 	void UpdateVisual();
+	void ApplyVisualVisibility();
 	void UpdateFollowingArmor(const APawn& Cat);
     void RefreshElevatorCorridor();
     void ForgetCorridorCat(APawn& Cat, const TCHAR* Reason);
@@ -74,4 +83,5 @@ private:
 	TObjectPtr<UPointLightComponent> Light;
 
 	float OrbHeight = 80.f;
+	TArray<TWeakObjectPtr<const UObject>> VisualSuppressors;
 };
