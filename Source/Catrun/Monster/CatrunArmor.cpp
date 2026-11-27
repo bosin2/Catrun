@@ -207,8 +207,8 @@ void ACatrunArmor::OnSoundHeard_Implementation(const FCatrunSoundEvent& Event, f
 	RunCause = Event.Kind == ECatrunSoundKind::Bell ? ERunCause::Bell : ERunCause::Noise;
 	ApplyMoveSpeed(); // a new sound may change the speed in the middle of a run
 	Destination = Event.Location;
-	UE_LOG(LogCatrunSound, Log, TEXT("%s heard a sound (size %d, remaining %.0f), path has %d corners."),
-		*GetName(), (int32)Event.Size, RemainingBudget, PathCorners.Num());
+	UE_LOG(LogCatrunSound, Log, TEXT("%s (%s) at (%.0f, %.0f) heard a sound (size %d, remaining %.0f), path has %d corners."),
+		*GetName(), *GetActorNameOrLabel(), GetActorLocation().X, GetActorLocation().Y, (int32)Event.Size, RemainingBudget, PathCorners.Num());
 
 	// Idle can also mean a failed patrol path is waiting to retry. That wait does not rearm the reaction.
 	const bool bHasPatrol = HasPatrol();

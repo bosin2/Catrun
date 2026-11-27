@@ -112,6 +112,15 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debug")
 	bool bDebugDrawGrid = false;
 
+	// Draw where the ARMOR may walk (viewport and PIE). For finding spots the armor cannot pass.
+	//  blue dot   = the armor can stand here
+	//  orange dot = floor, but closer than ArmorClearance to a SoundWall/SoundObstacle wall or a statue
+	//  red line   = wall edge between two floor cells (sound and armor cannot cross)
+	//  no dot     = no SoundFloor under the cell centre (the armor and sound treat it as void)
+	// In PIE the console command "catrun.DebugArmorArea 1" shows the same without editing the level.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debug")
+	bool bDebugDrawArmorArea = false;
+
 	// Debug: draw the detection circle of every armor on the floor, even where an armor hides it.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debug")
 	bool bDebugShowArmorDetection = false;
@@ -133,7 +142,7 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
-	virtual bool ShouldTickIfViewportsOnly() const override { return bDebugDrawGrid; }
+	virtual bool ShouldTickIfViewportsOnly() const override { return bDebugDrawGrid || bDebugDrawArmorArea; }
 
 	// Settings asset (DA_SoundSettings). Default values are used when empty.
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Sound")
@@ -153,6 +162,7 @@ private:
 	void DeliverPendingSounds();
 	void AttachBellToPlayer();
 	void DebugDrawGrid() const;
+	void DebugDrawArmorArea() const;
 
 	// The baked grid, saved with the level.
 	UPROPERTY()

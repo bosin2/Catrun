@@ -30,6 +30,16 @@ public:
 	static bool IsNoArmorCaptureEnabled();
 	UFUNCTION(BlueprintCallable, Category="Catrun|Settings")
 	static void SetNoArmorCaptureEnabled(bool bEnabled);
+	/** Developer: draws where the armor may walk (catrun.DebugArmorArea). This run only, like NoArmorCapture. */
+	UFUNCTION(BlueprintPure, Category="Catrun|Settings")
+	static bool IsArmorAreaDebugEnabled();
+	UFUNCTION(BlueprintCallable, Category="Catrun|Settings")
+	static void SetArmorAreaDebugEnabled(bool bEnabled);
+	/** Developer: the cat's sprint stamina never runs out (catrun.InfiniteStamina). This run only. */
+	UFUNCTION(BlueprintPure, Category="Catrun|Settings")
+	static bool IsInfiniteStaminaEnabled();
+	UFUNCTION(BlueprintCallable, Category="Catrun|Settings")
+	static void SetInfiniteStaminaEnabled(bool bEnabled);
  UFUNCTION(BlueprintPure, Category="Catrun|Settings")
  FCatrunKeyboardBindings GetKeyboardBindings() const;
  // Rejection leaves the whole stored draft unchanged. Persistence belongs to Apply.

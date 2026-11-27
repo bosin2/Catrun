@@ -2,6 +2,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "CatrunStatuePuzzle.h"
 #include "CatrunStage3Objectives.generated.h"
 
 class ACatrunStatuePuzzle;
@@ -10,6 +11,7 @@ class ACharacter;
 class APlayerController;
 class UAnimSequence;
 class UCatrunPuzzleRevealComponent;
+class UCameraShakeBase;
 
 USTRUCT(BlueprintType)
 struct FCatrunReleaseDevice
@@ -39,6 +41,12 @@ public:
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite) TObjectPtr<AActor> FinalLeafLeft;
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite) TObjectPtr<AActor> FinalLeafRight;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) float InteractionRange = 95.f;
+	/** Sound made when a ring is pulled, as travel distance in cm along open paths (the armors that hear it come).
+	 *  0 = use LargeBudget of the level's sound settings (DA_SoundSettings), shared with every other large sound. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Sound", meta=(ClampMin="0", Units="Centimeters")) float ReleaseSoundBudget = 0.f;
+	/** BP_S3Polish_Presenter starts this endless shake when a gate starts moving. It is stopped (blended out)
+	 *  here when the final gate, or a D1/D2 statue gate, has finished opening. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Presentation") TSoftClassPtr<UCameraShakeBase> GateMotionShake;
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite) TObjectPtr<UAnimSequence> ReleaseAnimation;
 	/** Authored muzzle track in character-local centimetres, sampled at 30Hz. */
 	UPROPERTY(EditInstanceOnly, BlueprintReadWrite) TArray<FVector> MouthOffsets;
@@ -67,6 +75,8 @@ public:
 	void BeginFinalGate();
 private:
 	bool GameplayAvailable(APawn* Cat) const;
+	void StopGateMotionShake() const;
+	UFUNCTION() void HandlePuzzleEvent(FName PuzzleId, ECatrunStatueEvent Event, int32 Revision);
 	void AdvanceFinalGate(float DeltaSeconds);
 	void UpdateInteraction(float DeltaSeconds);
 	void FinishInteraction(bool bInterrupted);

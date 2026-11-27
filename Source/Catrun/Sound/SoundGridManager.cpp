@@ -10,6 +10,8 @@
 #include "SoundPropagation.h"
 #include "Components/BoxComponent.h"
 #include "DrawDebugHelpers.h"
+#include "HAL/IConsoleManager.h"
+#include "Pathfinding/ArmorPathfinder.h"
 #include "EngineUtils.h"
 #include "Engine/World.h"
 #include "GameFramework/Pawn.h"
@@ -18,6 +20,12 @@
 #include "Policies/CondensedJsonPrintPolicy.h"
 
 using namespace CatrunGrid;
+
+namespace
+{
+	TAutoConsoleVariable<int32> CVarDebugArmorArea(TEXT("catrun.DebugArmorArea"), 0,
+		TEXT("Draw the armor walkable area of the sound grid. 0: off, 1: blue = armor can stand, orange = too narrow for the armor, red = wall edge."), ECVF_Cheat);
+}
 
 const FName ASoundGridManager::SoundBlockerTag(TEXT("SoundBlocker"));
 
@@ -134,6 +142,10 @@ void ASoundGridManager::Tick(float DeltaSeconds)
 	if (bDebugDrawGrid)
 	{
 		DebugDrawGrid();
+	}
+	if (bDebugDrawArmorArea || CVarDebugArmorArea.GetValueOnGameThread() != 0)
+	{
+		DebugDrawArmorArea();
 	}
 }
 
@@ -310,8 +322,14 @@ bool ASoundGridManager::EmitSound(const FCatrunSoundEvent& Event)
 	const bool bPlayerBell = Event.Source == ECatrunSoundSource::Cat && Event.Kind == ECatrunSoundKind::Bell;
 	LastBudget = bPlayerBell && FMath::IsFinite(PlayerBellBudgetOverride) && PlayerBellBudgetOverride > 0.f
 		? PlayerBellBudgetOverride : Settings->GetBudget(Event.Size);
+	if (FMath::IsFinite(Event.BudgetOverride) && Event.BudgetOverride > 0.f) LastBudget = Event.BudgetOverride;
 	const int32 NumReached = CatrunSoundPropagation::Run(Grid, ClosedGateCells, SourceCell, LastBudget, LastDistance);
-	UE_LOG(LogCatrunSound, Log, TEXT("EmitSound: size=%d budget=%.0f reached %d cells."), static_cast<int32>(Event.Size), LastBudget, NumReached);
+	static const TCHAR* const KindNames[] = { TEXT("bell"), TEXT("footstep"), TEXT("device") };
+	const int32 KindIndex = static_cast<int32>(Event.Kind);
+	UE_LOG(LogCatrunSound, Log, TEXT("EmitSound: %s from %s at (%.0f, %.0f), size=%d budget=%.0f reached %d cells."),
+		KindIndex >= 0 && KindIndex < 3 ? KindNames[KindIndex] : TEXT("?"),
+		Event.Instigator ? *Event.Instigator->GetActorNameOrLabel() : TEXT("-"), Event.Location.X, Event.Location.Y,
+		static_cast<int32>(Event.Size), LastBudget, NumReached);
 
 	// 3) The wave is drawn by the ripple blueprints. They copy this picture of the spread in
 	// OnSoundEmitted. It needs distances a little beyond the budget, so the end of the wave fades
@@ -415,6 +433,70 @@ void ASoundGridManager::DebugDrawGrid() const
 		if (South != INDEX_NONE && Grid.IsWalkable(South) && !Grid.IsEdgeOpen(Cell, DirS))
 		{
 			DrawDebugLine(World, FVector(Center.X - Half, Center.Y + Half, Z), FVector(Center.X + Half, Center.Y + Half, Z), FColor::Red, false, -1.f, 0, 2.f);
+		}
+	}
+#endif
+}
+
+void ASoundGridManager::DebugDrawArmorArea() const
+{
+#if ENABLE_DRAW_DEBUG
+	UWorld* World = GetWorld();
+	if (!World || !HasGrid())
+	{
+		return;
+	}
+	RefreshPuzzleObstacles(); // statue clearance, exactly as the armor path search sees it
+	const float Clearance = Settings ? Settings->ArmorClearance : 35.f;
+	const float Z = Grid.Origin.Z + 3.f;
+	const float Half = Grid.CellSize * 0.5f;
+	// In play only the area around the cat is drawn (the whole map is too much per frame).
+	const APawn* Cat = World->IsGameWorld() ? UGameplayStatics::GetPlayerPawn(this, 0) : nullptr;
+	constexpr float PlayRadius = 2500.f;
+	const auto Kind = [&](int32 Cell) -> int32 // 0 nothing, 1 armor can stand, 2 too narrow for the armor
+	{
+		if (!Grid.IsWalkable(Cell)) return 0;
+		if (Cat && FVector::DistSquared2D(Grid.CellCenter(Cell), Cat->GetActorLocation()) > FMath::Square(PlayRadius)) return 0;
+		return CatrunArmorPath::CanStand(Grid, Cell, Clearance) ? 1 : 2;
+	};
+	// Debug points are not drawn in every view, lines are: each row of the grid is painted with thick
+	// lines, one line per run of cells of the same kind.
+	const float Thickness = Grid.CellSize * 0.55f;
+	for (int32 Y = 0; Y < Grid.Height; ++Y)
+	{
+		int32 RunStart = 0, RunKind = 0;
+		for (int32 X = 0; X <= Grid.Width; ++X)
+		{
+			const int32 CellKind = X < Grid.Width ? Kind(Grid.CellIndex(X, Y)) : 0;
+			if (CellKind == RunKind) continue;
+			if (RunKind != 0)
+			{
+				const FVector First = Grid.CellCenter(Grid.CellIndex(RunStart, Y));
+				const FVector Last = Grid.CellCenter(Grid.CellIndex(X - 1, Y));
+				DrawDebugLine(World, FVector(First.X - Half, First.Y, Z), FVector(Last.X + Half, Last.Y, Z),
+					RunKind == 1 ? FColor(40, 120, 255) : FColor(255, 140, 0), false, -1.f, 0, Thickness);
+			}
+			RunStart = X;
+			RunKind = CellKind;
+		}
+	}
+	// Wall edges between two floor cells, above the colour.
+	for (int32 Cell = 0; Cell < Grid.NumCells(); ++Cell)
+	{
+		if (Kind(Cell) == 0)
+		{
+			continue;
+		}
+		const FVector Center = Grid.CellCenter(Cell);
+		const int32 East = Grid.Neighbor(Cell, DirE);
+		if (East != INDEX_NONE && Grid.IsWalkable(East) && !Grid.IsEdgeOpen(Cell, DirE))
+		{
+			DrawDebugLine(World, FVector(Center.X + Half, Center.Y - Half, Z + 1.f), FVector(Center.X + Half, Center.Y + Half, Z + 1.f), FColor::Red, false, -1.f, 0, 3.f);
+		}
+		const int32 South = Grid.Neighbor(Cell, DirS);
+		if (South != INDEX_NONE && Grid.IsWalkable(South) && !Grid.IsEdgeOpen(Cell, DirS))
+		{
+			DrawDebugLine(World, FVector(Center.X - Half, Center.Y + Half, Z + 1.f), FVector(Center.X + Half, Center.Y + Half, Z + 1.f), FColor::Red, false, -1.f, 0, 3.f);
 		}
 	}
 #endif

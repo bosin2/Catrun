@@ -979,6 +979,52 @@ bool FCatrunCandlePatrolSafetyTest::RunTest(const FString&)
 	return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunCandlePatrolFacingTest,"Catrun.PrototypeAI.CandlePatrolFacesAheadAndTurnsBackAtStatueOrArmor",EAutomationTestFlags::EditorContext|EAutomationTestFlags::EngineFilter)
+bool FCatrunCandlePatrolFacingTest::RunTest(const FString&)
+{
+	FPrototypeWorld F;
+	F.Cat->SetActorLocation(FVector(-1500,-1500,90));
+	F.Box(FVector(0,0,-12),FVector(900,900,10)); // floor top -2, capsule bottom 0
+	auto* Candle = F.Spawn<ACatrunCandle>(FVector::ZeroVector); Candle->bAutoAlignEyes = false;
+	Candle->bPatrolEnabled = true;
+	Candle->PatrolRelativePoints = {FVector(-400,0,0), FVector(400,0,0)};
+	Candle->PatrolSpeed = 100.f; Candle->PatrolTurnSpeed = 180.f; Candle->PatrolPauseSeconds = 0.f;
+	Candle->ResetPatrol();
+	Candle->UpdatePatrol(.25f);
+	TestTrue(TEXT("Turns in place toward a point behind it before walking"), Candle->GetActorLocation().IsNearlyZero() && FMath::Abs(Candle->GetActorRotation().Yaw) > 30.f);
+	for (int32 I=0; I<10; ++I) Candle->UpdatePatrol(.1f);
+	TestTrue(TEXT("Faces the walking direction"), FMath::Abs(FMath::FindDeltaAngleDegrees(Candle->GetActorRotation().Yaw, 180.f)) <= 1.f);
+	TestTrue(TEXT("Then walks toward its point"), Candle->GetActorLocation().X < -5.f);
+
+	// No back-and-forth sweep while walking a route.
+	F.Settings->CandleSweepSpeed = 500.f; F.Settings->CandleSweepEndPause = 0.f;
+	for (int32 I=0; I<5; ++I) Candle->Tick(.1f);
+	TestTrue(TEXT("Route candle looks straight ahead (no sweep)"), FMath::IsNearlyZero(Candle->SweepOffset));
+
+	// An armor ahead: turn back toward the other patrol point instead of waiting in front of it.
+	const int32 Before = Candle->PatrolIndex;
+	auto* Armor = F.Spawn<ACatrunArmor>(Candle->GetActorLocation() + FVector(-80,0,90));
+	Candle->UpdatePatrol(.05f);
+	TestTrue(TEXT("Armor ahead reverses the route"), Candle->PatrolIndex != Before && Candle->PatrolStep == -1);
+	Armor->Destroy();
+
+	// A statue of the statue puzzle ahead does the same.
+	Candle->SetActorLocation(FVector::ZeroVector); Candle->SetActorRotation(FRotator::ZeroRotator); Candle->ResetPatrol();
+	Candle->PatrolIndex = 1; // walking toward +X
+	auto* Statue = F.Box(FVector(80,0,60), FVector(20,20,50));
+	auto* Puzzle = F.World->SpawnActor<ACatrunStatuePuzzle>();
+	FCatrunStatuePuzzleLink Link; Link.PuzzleId = TEXT("T"); Link.Statue = Statue; Puzzle->Links.Add(Link);
+	Candle->UpdatePatrol(.05f);
+	TestEqual(TEXT("Statue ahead turns the candle back to the opposite point"), Candle->PatrolIndex, 0);
+
+	// An ordinary wall still only stops it (unchanged behavior).
+	Puzzle->Links.Reset();
+	Candle->PatrolIndex = 1; Candle->PatrolStep = 1; Candle->PatrolWaitLeft = 0.f;
+	Candle->UpdatePatrol(.05f);
+	TestEqual(TEXT("Plain obstacle keeps the waypoint"), Candle->PatrolIndex, 1);
+	return true;
+}
+
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunSuspendedSoundDeliveryTest,"Catrun.PrototypeAI.SuspendedSoundPreservesDelayAndStableBoundedDrain",EAutomationTestFlags::EditorContext|EAutomationTestFlags::EngineFilter)
 bool FCatrunSuspendedSoundDeliveryTest::RunTest(const FString&)
 {
