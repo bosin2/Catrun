@@ -4,6 +4,10 @@
 #include "Blueprint/WidgetTree.h"
 #include "Components/Border.h"
 #include "Components/Button.h"
+#include "Components/CheckBox.h"
+#include "Components/PanelSlot.h"
+#include "Components/PanelWidget.h"
+#include "Components/VerticalBox.h"
 #include "Components/ComboBoxString.h"
 #include "Components/InputKeySelector.h"
 #include "Components/ScrollBox.h"
@@ -14,6 +18,97 @@
 #include "GameFramework/PlayerController.h"
 #include "Framework/Application/SlateApplication.h"
 #include "LevelFlow/CatrunLevelFlow.h"
+namespace
+{
+ // Copies the authored look of a widget or slot. Hierarchy, slots, navigation objects and event
+ // bindings are not copied: the copy gets its own children and its own events.
+ void CopyLook(const UObject* Source, UObject* Target)
+ {
+  for (TFieldIterator<FProperty> It(Source->GetClass()); It; ++It)
+  {
+   const FProperty* Property = *It;
+   if (Property->HasAnyPropertyFlags(CPF_Transient | CPF_InstancedReference | CPF_ContainsInstancedReference)
+    || Property->IsA<FMulticastDelegateProperty>() || Property->IsA<FDelegateProperty>()
+    || Property->GetFName() == TEXT("Slot") || Property->GetFName() == TEXT("Slots") || Property->GetFName() == TEXT("Content")
+    || Property->GetFName() == TEXT("Parent") || Property->GetFName() == TEXT("Navigation")) continue;
+   Property->CopyCompleteValue_InContainer(Target, Source);
+  }
+ }
+}
+void UCatrunSettingsWidget::NativeOnInitialized()
+{
+ Super::NativeOnInitialized();
+ // Before the Slate widgets are built, so the new rows are in their final place from the start.
+ if (IsDesignTime() || !WidgetTree || !UCatrunUserSettings::IsDeveloperModeAvailable()) return;
+ ArmorAreaCheckBox = AddDeveloperRow(TEXT("NoArmorCaptureCheckBox"), TEXT("ArmorAreaCheckBox"),
+  NSLOCTEXT("Catrun","ArmorAreaDebugLabel","갑옷 이동 영역 보기"));
+ if (ArmorAreaCheckBox) ArmorAreaCheckBox->OnCheckStateChanged.AddUniqueDynamic(this, &ThisClass::HandleArmorAreaChanged);
+ InfiniteStaminaCheckBox = AddDeveloperRow(TEXT("ArmorAreaCheckBox"), TEXT("InfiniteStaminaCheckBox"),
+  NSLOCTEXT("Catrun","InfiniteStaminaLabel","스태미나 무제한"));
+ if (InfiniteStaminaCheckBox) InfiniteStaminaCheckBox->OnCheckStateChanged.AddUniqueDynamic(this, &ThisClass::HandleInfiniteStaminaChanged);
+}
+UWidget* UCatrunSettingsWidget::CloneRowWidget(UWidget* Source, UCheckBox* SourceBox, FName BoxName, const FText& Label, UCheckBox*& OutBox, bool& bLabelSet)
+{
+ if (!Source || Source->IsA<UUserWidget>()) return nullptr;
+ const FName Name = Source == SourceBox ? BoxName : MakeUniqueObjectName(WidgetTree, Source->GetClass(), FName(*(Source->GetName() + TEXT("_") + BoxName.ToString())));
+ UWidget* Copy = WidgetTree->ConstructWidget<UWidget>(Source->GetClass(), Name);
+ CopyLook(Source, Copy);
+ if (Source == SourceBox) OutBox = Cast<UCheckBox>(Copy);
+ if (auto* Text = Cast<UTextBlock>(Copy); Text && !bLabelSet)
+ {
+  Text->SetText(Label);
+  bLabelSet = true;
+ }
+ if (const auto* SourcePanel = Cast<UPanelWidget>(Source))
+ {
+  auto* Panel = CastChecked<UPanelWidget>(Copy);
+  for (int32 I = 0; I < SourcePanel->GetChildrenCount(); ++I)
+  {
+   UWidget* Child = SourcePanel->GetChildAt(I);
+   UWidget* ChildCopy = CloneRowWidget(Child, SourceBox, BoxName, Label, OutBox, bLabelSet);
+   if (!ChildCopy) continue;
+   if (UPanelSlot* NewSlot = Panel->AddChild(ChildCopy); NewSlot && Child->Slot && NewSlot->GetClass() == Child->Slot->GetClass())
+   {
+    CopyLook(Child->Slot, NewSlot);
+    NewSlot->SynchronizeProperties();
+   }
+  }
+ }
+ return Copy;
+}
+UCheckBox* UCatrunSettingsWidget::AddDeveloperRow(FName AboveBox, FName BoxName, const FText& Label)
+{
+ // The new row copies the original "갑옷에게 잡히지 않기" row (same look) and goes below AboveBox's row.
+ auto* Template = Cast<UCheckBox>(GetWidgetFromName(TEXT("NoArmorCaptureCheckBox")));
+ UCheckBox* Above = AboveBox == TEXT("ArmorAreaCheckBox") ? ArmorAreaCheckBox.Get() : Cast<UCheckBox>(GetWidgetFromName(AboveBox));
+ if (!Template || !Above) return nullptr;
+ const auto RowOf = [](UWidget* Widget)
+ {
+  // The whole row is the ancestor that sits directly in the vertical list of the developer tab.
+  while (Widget->GetParent() && !Widget->GetParent()->IsA<UVerticalBox>()) Widget = Widget->GetParent();
+  return Widget;
+ };
+ UWidget* TemplateRow = RowOf(Template);
+ UWidget* AboveRow = RowOf(Above);
+ auto* List = Cast<UVerticalBox>(AboveRow->GetParent());
+ if (!List || TemplateRow->GetParent() != List) return nullptr;
+ UCheckBox* Box = nullptr;
+ bool bLabelSet = false;
+ UWidget* Copy = CloneRowWidget(TemplateRow, Template, BoxName, Label, Box, bLabelSet);
+ if (!Copy || !Box) return nullptr;
+ UPanelSlot* NewSlot = List->InsertChildAt(List->GetChildIndex(AboveRow) + 1, Copy);
+ if (NewSlot && TemplateRow->Slot && NewSlot->GetClass() == TemplateRow->Slot->GetClass()) { CopyLook(TemplateRow->Slot, NewSlot); NewSlot->SynchronizeProperties(); }
+ return Box;
+}
+void UCatrunSettingsWidget::HandleArmorAreaChanged(bool bIsChecked)
+{
+ // Immediate, like the row above it: the armor area shows as soon as the box is ticked.
+ if (UCatrunUserSettings::IsDeveloperModeAvailable()) UCatrunUserSettings::SetArmorAreaDebugEnabled(bIsChecked);
+}
+void UCatrunSettingsWidget::HandleInfiniteStaminaChanged(bool bIsChecked)
+{
+ if (UCatrunUserSettings::IsDeveloperModeAvailable()) UCatrunUserSettings::SetInfiniteStaminaEnabled(bIsChecked);
+}
 void UCatrunSettingsWidget::NativeConstruct()
 {
  const auto* Settings=UCatrunUserSettings::GetCatrunUserSettings();
@@ -34,6 +129,8 @@ void UCatrunSettingsWidget::NativeConstruct()
     Selector->SetEscapeKeys({EKeys::Escape});
    }
   });
+ if (ArmorAreaCheckBox) ArmorAreaCheckBox->SetIsChecked(UCatrunUserSettings::IsArmorAreaDebugEnabled());
+ if (InfiniteStaminaCheckBox) InfiniteStaminaCheckBox->SetIsChecked(UCatrunUserSettings::IsInfiniteStaminaEnabled());
  OnSettingsDraftInitialized();
 }
 void UCatrunSettingsWidget::InitializeSettingsDraft()
@@ -152,7 +249,7 @@ bool UCatrunSettingsWidget::MoveDirectionalFocus(const FKeyEvent& Event)
  case 0: Page=Collect({TEXT("WindowModeCombo"),TEXT("QualityCombo"),TEXT("FrameLimitCombo"),TEXT("VSyncCheckBox")}); break;
  case 1: Page=Collect({TEXT("VolumeSlider")}); break;
  case 2: Page=Collect({TEXT("KeyForward"),TEXT("KeyBack"),TEXT("KeyLeft"),TEXT("KeyRight"),TEXT("KeyRun"),TEXT("KeySneak"),TEXT("KeyBell"),TEXT("KeyInteract")}); break;
- case 3: Page=Collect({TEXT("NoArmorCaptureCheckBox")}); break;
+ case 3: Page=Collect({TEXT("NoArmorCaptureCheckBox"),TEXT("ArmorAreaCheckBox"),TEXT("InfiniteStaminaCheckBox")}); break;
  default: break;
  }
  const TArray<UWidget*> Footer=Collect({TEXT("DefaultsButton"),TEXT("RestartButton"),TEXT("MainMenuButton"),TEXT("ApplyButton"),TEXT("CloseButton")});

@@ -109,6 +109,40 @@ void UCatrunUserSettings::SetNoArmorCaptureEnabled(bool bEnabled)
 #endif
 }
 
+bool UCatrunUserSettings::IsArmorAreaDebugEnabled()
+{
+#if !UE_BUILD_SHIPPING
+	if (const IConsoleVariable* Variable = IConsoleManager::Get().FindConsoleVariable(TEXT("catrun.DebugArmorArea")))
+		return Variable->GetInt() != 0;
+#endif
+	return false;
+}
+
+void UCatrunUserSettings::SetArmorAreaDebugEnabled(bool bEnabled)
+{
+#if !UE_BUILD_SHIPPING
+	if (IConsoleVariable* Variable = IConsoleManager::Get().FindConsoleVariable(TEXT("catrun.DebugArmorArea")))
+		Variable->Set(bEnabled ? 1 : 0, ECVF_SetByConsole);
+#endif
+}
+
+bool UCatrunUserSettings::IsInfiniteStaminaEnabled()
+{
+#if !UE_BUILD_SHIPPING
+	if (const IConsoleVariable* Variable = IConsoleManager::Get().FindConsoleVariable(TEXT("catrun.InfiniteStamina")))
+		return Variable->GetInt() != 0;
+#endif
+	return false;
+}
+
+void UCatrunUserSettings::SetInfiniteStaminaEnabled(bool bEnabled)
+{
+#if !UE_BUILD_SHIPPING
+	if (IConsoleVariable* Variable = IConsoleManager::Get().FindConsoleVariable(TEXT("catrun.InfiniteStamina")))
+		Variable->Set(bEnabled ? 1 : 0, ECVF_SetByConsole);
+#endif
+}
+
 FCatrunKeyboardBindings UCatrunUserSettings::GetKeyboardBindings() const
 {
  return ReadKeyboardBindings(KeyboardBindings);

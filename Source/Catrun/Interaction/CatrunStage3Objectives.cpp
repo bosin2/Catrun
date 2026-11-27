@@ -7,6 +7,8 @@
 #include "Components/CapsuleComponent.h"
 #include "Animation/AnimSequence.h"
 #include "Animation/AnimSingleNodeInstance.h"
+#include "Camera/CameraShakeBase.h"
+#include "Camera/PlayerCameraManager.h"
 #include "Engine/World.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -22,6 +24,7 @@ ACatrunStage3Objectives::ACatrunStage3Objectives()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	SetRootComponent(CreateDefaultSubobject<USceneComponent>(TEXT("Root")));
+	GateMotionShake = TSoftClassPtr<UCameraShakeBase>(FSoftObjectPath(TEXT("/Game/Environment/Stage2/GameplayPolish_20261125/Presentation/CameraShakeCorrection_20261125/CS_GateMotion.CS_GateMotion_C")));
 	// Same native reveal as the D1/D2 statue gates, owned here so the statue BP presentation
 	// (bound to the puzzle's own reveal) never sees the final gate.
 	FinalReveal = CreateDefaultSubobject<UCatrunPuzzleRevealComponent>(TEXT("FinalReveal"));
@@ -39,6 +42,21 @@ void ACatrunStage3Objectives::BeginPlay()
 	if (FinalLeafRight) RightStart = FinalLeafRight->GetActorLocation();
 	if (Puzzle) for (auto& Link : Puzzle->Links)
 		if (Link.PuzzleId == LockedPuzzleId) Link.bExternalGateUnlocked = false;
+	if (Puzzle) Puzzle->OnPuzzleEvent.AddUniqueDynamic(this, &ACatrunStage3Objectives::HandlePuzzleEvent);
+}
+void ACatrunStage3Objectives::HandlePuzzleEvent(FName, ECatrunStatueEvent Event, int32)
+{
+	// The presenter's motion shake has no end of its own (duration -1): end it with the gate.
+	if (Event == ECatrunStatueEvent::Completed) StopGateMotionShake();
+}
+void ACatrunStage3Objectives::StopGateMotionShake() const
+{
+	UWorld* World = GetWorld();
+	UClass* Shake = GateMotionShake.LoadSynchronous();
+	if (!World || !Shake) return;
+	for (FConstPlayerControllerIterator It = World->GetPlayerControllerIterator(); It; ++It)
+		if (const APlayerController* PC = It->Get(); PC && PC->PlayerCameraManager)
+			PC->PlayerCameraManager->StopAllInstancesOfCameraShake(Shake, false); // blend out, no snap
 }
 bool ACatrunStage3Objectives::AllReleased() const
 {
@@ -115,6 +133,7 @@ void ACatrunStage3Objectives::CommitRelease(int32 Index)
 		FCatrunSoundEvent Event;
 		Event.Source = ECatrunSoundSource::Device; Event.Kind = ECatrunSoundKind::Device;
 		Event.Size = ECatrunSoundSize::Large; Event.Location = D.Ring->GetActorLocation(); Event.Instigator = this;
+		Event.BudgetOverride = ReleaseSoundBudget;
 		Grid->EmitSound(Event);
 	}
 	if (auto* Notice = UCatrunNoticeSubsystem::Get(this))
@@ -295,6 +314,7 @@ void ACatrunStage3Objectives::AdvanceFinalGate(float DeltaSeconds)
 	FinalLeafLeft->SetActorLocation(LeftStart-FVector(FinalOffset,0,0));
 	FinalLeafRight->SetActorLocation(RightStart+FVector(FinalOffset,0,0));
 	if (FinalGateTime<FinalGateDuration) return;
+	if (!bWasOpen) StopGateMotionShake(); // the leaves stopped: so does the rumble (impact shake is separate)
 	if (IsFinalRevealOpening())
 	{
 		// Hold the camera on the open gate, then hand it back to the cat (eased return).

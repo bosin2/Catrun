@@ -14,6 +14,9 @@
 #include "Animation/AnimationAsset.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/Pawn.h"
+#include "EngineUtils.h"
+#include "CatrunArmor.h"
+#include "Interaction/CatrunStatuePuzzle.h"
 
 ACatrunCandle::ACatrunCandle()
 {
@@ -271,17 +274,24 @@ void ACatrunCandle::Tick(float DeltaSeconds)
 			TrackCat(DeltaSeconds, *Cat, *S);
 		}
 	}
+	else if (HasPatrolRoute())
+	{
+		// Walking a route: look straight ahead, no back-and-forth sweep. After tracking, the cone
+		// comes back to the middle.
+		SweepOffset = FMath::FInterpConstantTo(SweepOffset, 0.f, DeltaSeconds, FMath::Max(1.f, S->CandleTrackSpeed));
+		PauseLeft = 0.f;
+	}
 	else
 	{
 		UpdateSweep(DeltaSeconds, *S);
 	}
 
 	// The cone and the body (eyes) turn together.
-	const float ConeCenter = GetActorRotation().Yaw + SweepOffset;
+	float ConeCenter = GetActorRotation().Yaw + SweepOffset;
 	// The cone's point sits behind the body and the part of the cone behind the body is cut off, so
 	// the view starts at the body (and a wall behind the candle does not matter).
 	const float ConeCenterRad = FMath::DegreesToRadians(ConeCenter);
-	const FVector Forward(FMath::Cos(ConeCenterRad), FMath::Sin(ConeCenterRad), 0.f);
+	FVector Forward(FMath::Cos(ConeCenterRad), FMath::Sin(ConeCenterRad), 0.f);
 	const float BackOffset = GetConeBackOffset(*S);
 	Sight->SetNearClip(BackOffset);
 	Sight->SetOriginOverride(GetActorLocation() - Forward * BackOffset);
@@ -292,8 +302,16 @@ void ACatrunCandle::Tick(float DeltaSeconds)
 	CheckForCat(DeltaSeconds, Cat, *S);
 	// Check visibility before moving: a newly spotted cat freezes this very step.
 	const FVector BeforePatrol = GetActorLocation();
+	const float YawBeforePatrol = GetActorRotation().Yaw;
 	UpdatePatrol(DeltaSeconds);
-	if (!BeforePatrol.Equals(GetActorLocation()))
+	const bool bTurned = !FMath::IsNearlyEqual(YawBeforePatrol, GetActorRotation().Yaw);
+	if (bTurned)
+	{
+		ConeCenter = GetActorRotation().Yaw + SweepOffset;
+		Forward = FVector(FMath::Cos(FMath::DegreesToRadians(ConeCenter)), FMath::Sin(FMath::DegreesToRadians(ConeCenter)), 0.f);
+		Body->SetWorldRotation(FRotator(0.f, ConeCenter + AutoBodyYaw + BodyYawOffset, 0.f));
+	}
+	if (bTurned || !BeforePatrol.Equals(GetActorLocation()))
 	{
 		Sight->SetOriginOverride(GetActorLocation() - Forward * BackOffset);
 		Sight->Update(ConeCenter, S->CandleConeAngle * 0.5f);
@@ -362,8 +380,9 @@ bool ACatrunCandle::FindPatrolFloor(const FVector& Center, float& OutFloor) cons
 	return true;
 }
 
-bool ACatrunCandle::TryPatrolStep(const FVector& Delta)
+bool ACatrunCandle::TryPatrolStep(const FVector& Delta, AActor** OutBlocker)
 {
+	if (OutBlocker) *OutBlocker = nullptr;
 	if (!BlockingCapsule || !GetWorld() || !BlockingCapsule->IsQueryCollisionEnabled()) return false;
 	const FVector Start = BlockingCapsule->GetComponentLocation(), End = Start+Delta;
 	FCollisionQueryParams Params(SCENE_QUERY_STAT(CandlePatrolMove), false, this);
@@ -373,8 +392,12 @@ bool ACatrunCandle::TryPatrolStep(const FVector& Delta)
 	const auto Shape = BlockingCapsule->GetCollisionShape();
 	const auto Rotation = BlockingCapsule->GetComponentQuat();
 	FHitResult Hit;
-	if (GetWorld()->SweepSingleByChannel(Hit, Start, End, Rotation, BlockingCapsule->GetCollisionObjectType(), Shape, Params, Responses)
-		|| GetWorld()->OverlapBlockingTestByChannel(End, Rotation, BlockingCapsule->GetCollisionObjectType(), Shape, Params, Responses)) return false;
+	if (GetWorld()->SweepSingleByChannel(Hit, Start, End, Rotation, BlockingCapsule->GetCollisionObjectType(), Shape, Params, Responses))
+	{
+		if (OutBlocker) *OutBlocker = Hit.GetActor();
+		return false;
+	}
+	if (GetWorld()->OverlapBlockingTestByChannel(End, Rotation, BlockingCapsule->GetCollisionObjectType(), Shape, Params, Responses)) return false;
 	float FromFloor, ToFloor;
 	if (!FindPatrolFloor(Start, FromFloor) || !FindPatrolFloor(End, ToFloor)
 		|| FMath::Abs(ToFloor-FromFloor) > PatrolMaxFloorHeightChange
@@ -383,21 +406,105 @@ bool ACatrunCandle::TryPatrolStep(const FVector& Delta)
 	return SetActorLocation(GetActorLocation()+Delta, false, nullptr, ETeleportType::None);
 }
 
+bool ACatrunCandle::HasPatrolRoute() const
+{
+	return bPatrolEnabled && BlockingCapsule && (!PatrolPoints.IsEmpty() || !PatrolRelativePoints.IsEmpty());
+}
+
+bool ACatrunCandle::GetPatrolTarget(FVector& OutTarget) const
+{
+	const bool bActors = !PatrolPoints.IsEmpty();
+	const int32 Count = bActors ? PatrolPoints.Num() : PatrolRelativePoints.Num();
+	if (!Count) return false;
+	const int32 Index = FMath::Clamp(PatrolIndex, 0, Count-1);
+	if (bActors && !IsValid(PatrolPoints[Index])) return false; // keep intent, never jump to a different route
+	OutTarget = bActors ? PatrolPoints[Index]->GetActorLocation() : PatrolOrigin.TransformPosition(PatrolRelativePoints[Index]);
+	return true;
+}
+
+bool ACatrunCandle::IsPatrolEncounter(const AActor* Actor) const
+{
+	for (; Actor; Actor = Actor->GetAttachParentActor())
+	{
+		if (Actor->IsA<ACatrunArmor>()) return true;
+		for (TActorIterator<ACatrunStatuePuzzle> It(GetWorld()); It; ++It)
+			for (const FCatrunStatuePuzzleLink& Link : It->Links)
+				if (Link.Statue.Get() == Actor) return true;
+	}
+	return false;
+}
+
+AActor* ACatrunCandle::FindPatrolEncounter(const FVector& Direction) const
+{
+	if (!GetWorld() || !BlockingCapsule || PatrolEncounterDistance <= 0.f || Direction.IsNearlyZero()) return nullptr;
+	const FVector Ahead = Direction.GetSafeNormal2D();
+	const FVector Start = BlockingCapsule->GetComponentLocation();
+	const FVector End = Start + Ahead * PatrolEncounterDistance;
+	FCollisionQueryParams Params(SCENE_QUERY_STAT(CandlePatrolEncounter), false, this);
+	FCollisionResponseParams Responses;
+	BlockingCapsule->InitSweepCollisionParams(Params, Responses);
+	Params.AddIgnoredActor(this);
+	TArray<FHitResult> Hits;
+	GetWorld()->SweepMultiByChannel(Hits, Start, End, BlockingCapsule->GetComponentQuat(), BlockingCapsule->GetCollisionObjectType(),
+		BlockingCapsule->GetCollisionShape(), Params, Responses);
+	for (const FHitResult& Hit : Hits)
+	{
+		AActor* Actor = Hit.GetActor();
+		// Only things in front: an armor coming from behind does not turn the candle around.
+		if (!Actor || FVector::DotProduct((Actor->GetActorLocation()-Start).GetSafeNormal2D(), Ahead) <= 0.f) continue;
+		if (IsPatrolEncounter(Actor)) return Actor;
+	}
+	return nullptr;
+}
+
+void ACatrunCandle::ReversePatrol()
+{
+	const int32 Count = !PatrolPoints.IsEmpty() ? PatrolPoints.Num() : PatrolRelativePoints.Num();
+	if (Count < 2) return;
+	// Head for the point the candle came from. On the very first leg there is none: take the other way.
+	int32 Previous = PatrolIndex - PatrolStep;
+	if (bPatrolLoop) Previous = (Previous + Count) % Count;
+	else if (Previous < 0 || Previous >= Count) Previous = PatrolIndex + PatrolStep;
+	PatrolStep = -PatrolStep;
+	PatrolIndex = FMath::Clamp(Previous, 0, Count-1);
+	PatrolWaitLeft = FMath::Max(PatrolWaitLeft, PatrolEncounterPause);
+	UE_LOG(LogCatrunSound, Log, TEXT("%s met a statue/armor and turns back to patrol point %d."), *GetName(), PatrolIndex);
+}
+
+bool ACatrunCandle::TurnPatrolFacing(float Yaw, float DeltaSeconds)
+{
+	const float Current = GetActorRotation().Yaw;
+	const float Delta = FMath::FindDeltaAngleDegrees(Current, Yaw);
+	if (FMath::Abs(Delta) <= 1.f)
+	{
+		if (!FMath::IsNearlyZero(Delta)) SetActorRotation(FRotator(0.f, Yaw, 0.f));
+		return true;
+	}
+	const float MaxStep = FMath::Max(1.f, PatrolTurnSpeed) * DeltaSeconds;
+	const float Step = FMath::Clamp(Delta, -MaxStep, MaxStep);
+	SetActorRotation(FRotator(0.f, Current + Step, 0.f));
+	return FMath::Abs(Delta - Step) <= 1.f;
+}
+
 void ACatrunCandle::UpdatePatrol(float DeltaSeconds)
 {
 	if (!bPatrolEnabled || bTracking || UCatrunPuzzleSuspension::IsSuspended(this) || DeltaSeconds <= 0.f) return;
-	if (PatrolWaitLeft > 0.f) { PatrolWaitLeft = FMath::Max(0.f, PatrolWaitLeft-DeltaSeconds); return; }
 	const bool bActors = !PatrolPoints.IsEmpty();
 	const int32 Count = bActors ? PatrolPoints.Num() : PatrolRelativePoints.Num();
 	if (!Count || !BlockingCapsule) return;
 	PatrolIndex = FMath::Clamp(PatrolIndex, 0, Count-1);
-	if (bActors && !IsValid(PatrolPoints[PatrolIndex])) return; // keep intent, never jump to a different route
-	const FVector Target = bActors ? PatrolPoints[PatrolIndex]->GetActorLocation() : PatrolOrigin.TransformPosition(PatrolRelativePoints[PatrolIndex]);
-	FVector Remaining = Target-GetActorLocation();
+	FVector Target;
+	if (!GetPatrolTarget(Target)) return;
+	const FVector Remaining = Target-GetActorLocation();
+	// Face the next point, also while pausing (the candle turns around during the pause).
+	bool bFacing = true;
+	if (bPatrolFaceTravelDirection && Remaining.Size2D() > 1.f)
+		bFacing = TurnPatrolFacing(Remaining.Rotation().Yaw, DeltaSeconds);
+	if (PatrolWaitLeft > 0.f) { PatrolWaitLeft = FMath::Max(0.f, PatrolWaitLeft-DeltaSeconds); return; }
 	if (Remaining.Size() <= 1.f)
 	{
 		PatrolWaitLeft = FMath::Max(0.f, PatrolPauseSeconds);
-		if (bPatrolLoop) PatrolIndex = (PatrolIndex+1)%Count;
+		if (bPatrolLoop) PatrolIndex = (PatrolIndex+PatrolStep+Count)%Count;
 		else if (Count > 1)
 		{
 			if (PatrolIndex+PatrolStep < 0 || PatrolIndex+PatrolStep >= Count) PatrolStep = -PatrolStep;
@@ -405,14 +512,22 @@ void ACatrunCandle::UpdatePatrol(float DeltaSeconds)
 		}
 		return;
 	}
+	if (!bFacing) return; // finish turning in place first
+	const FVector Direction = Remaining.GetSafeNormal();
+	// A statue or an armor ahead: turn back to the point the candle came from.
+	if (FindPatrolEncounter(Direction)) { ReversePatrol(); return; }
 	// Bounded work AND distance per substep. Large frame stalls cannot bridge an unsupported gap.
 	float Travel = FMath::Min(Remaining.Size(), FMath::Max(0.f, PatrolSpeed)*DeltaSeconds);
-	const FVector Direction = Remaining.GetSafeNormal();
 	const float StepSize = FMath::Max(1.f, BlockingCapsule->GetScaledCapsuleRadius()*.25f);
 	for (int32 Step=0; Step<64 && Travel>UE_KINDA_SMALL_NUMBER; ++Step)
 	{
 		const float Distance = FMath::Min(Travel, StepSize);
-		if (!TryPatrolStep(Direction*Distance)) break;
+		AActor* Blocker = nullptr;
+		if (!TryPatrolStep(Direction*Distance, &Blocker))
+		{
+			if (IsPatrolEncounter(Blocker)) ReversePatrol();
+			break;
+		}
 		Travel -= Distance;
 	}
 }

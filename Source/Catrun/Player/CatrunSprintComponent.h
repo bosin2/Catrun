@@ -48,6 +48,7 @@ public:
 private:
 	friend class FCatrunSprintResourceTest;
 	friend class FCatrunSprintTravelTest;
+	friend class FCatrunInfiniteStaminaTest;
 	void ResetStamina();
 	void AdvanceStamina(double DeltaSeconds, bool bDraining);
 	void ApplyExhaustion(bool bNewExhausted);

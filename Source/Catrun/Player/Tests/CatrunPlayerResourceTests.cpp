@@ -1,6 +1,7 @@
 #if WITH_DEV_AUTOMATION_TESTS
 
 #include "Misc/AutomationTest.h"
+#include "HAL/IConsoleManager.h"
 #include "Camera/CameraActor.h"
 #include "Components/BoxComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -291,4 +292,24 @@ bool FCatrunBlueprintBellStatusTest::RunTest(const FString&)
 	return true;
 }
 
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunInfiniteStaminaTest, "Catrun.Player.DeveloperInfiniteStaminaNeverDrains",
+	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+bool FCatrunInfiniteStaminaTest::RunTest(const FString&)
+{
+	IConsoleVariable* Infinite = IConsoleManager::Get().FindConsoleVariable(TEXT("catrun.InfiniteStamina"));
+	if (!TestNotNull(TEXT("Developer switch exists"), Infinite)) return false;
+	const int32 Before = Infinite->GetInt();
+	auto* Sprint = NewObject<UCatrunSprintComponent>();
+	Sprint->ResetStamina();
+	Infinite->Set(1, ECVF_SetByConsole);
+	Sprint->AdvanceStamina(30., true);
+	TestEqual(TEXT("Unlimited: sprinting 30 s keeps full stamina"), Sprint->GetStamina(), Sprint->GetMaxStamina());
+	TestFalse(TEXT("Unlimited: never exhausted"), Sprint->IsExhausted());
+	Infinite->Set(0, ECVF_SetByConsole);
+	Sprint->AdvanceStamina(1., true);
+	TestTrue(TEXT("Normal again: sprinting drains"), Sprint->GetStamina() < Sprint->GetMaxStamina());
+	Infinite->Set(Before, ECVF_SetByConsole);
+	return true;
+}
 #endif

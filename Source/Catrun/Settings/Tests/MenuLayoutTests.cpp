@@ -2,9 +2,14 @@
 
 #include "Blueprint/UserWidget.h"
 #include "Components/Button.h"
+#include "Components/CheckBox.h"
+#include "Components/PanelWidget.h"
+#include "HAL/IConsoleManager.h"
 #include "Components/ScrollBox.h"
 #include "Components/TextBlock.h"
 #include "Components/WidgetSwitcher.h"
+#include "Components/VerticalBox.h"
+#include "Blueprint/WidgetTree.h"
 #include "Engine/UserInterfaceSettings.h"
 #include "Engine/World.h"
 #include "Framework/Application/SlateApplication.h"
@@ -220,6 +225,82 @@ bool FCatrunMenuLayoutTest::RunTest(const FString&)
 			}
 		}
 	}
+	return true;
+}
+
+
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FCatrunArmorAreaSettingRowTest, "Catrun.Settings.ArmorAreaRowBelowNoArmorCapture",
+	EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
+
+bool FCatrunArmorAreaSettingRowTest::RunTest(const FString&)
+{
+	UClass* SettingsClass = LoadClass<UUserWidget>(nullptr, TEXT("/Game/UI/Settings/WBP_Setting.WBP_Setting_C"));
+	if (!TestNotNull(TEXT("Saved settings widget"), SettingsClass) || !FSlateApplication::IsInitialized()) return false;
+	const auto Init = UWorld::InitializationValues().AllowAudioPlayback(false)
+		.CreatePhysicsScene(false).CreateNavigation(false).CreateAISystem(false);
+	UWorld* World = UWorld::CreateWorld(EWorldType::Game, false, NAME_None, nullptr, true, ERHIFeatureLevel::Num, &Init);
+	if (!TestNotNull(TEXT("Widget world"), World)) return false;
+	ON_SCOPE_EXIT { World->DestroyWorld(false); };
+	UUserWidget* Settings = CreateWidget<UUserWidget>(World, SettingsClass);
+	if (!TestNotNull(TEXT("Runtime settings instance"), Settings)) return false;
+	auto* Source = Cast<UCheckBox>(Settings->GetWidgetFromName(TEXT("NoArmorCaptureCheckBox")));
+	auto* Added = Cast<UCheckBox>(Settings->GetWidgetFromName(TEXT("ArmorAreaCheckBox")));
+	if (!TestNotNull(TEXT("Original developer checkbox"), Source) || !TestNotNull(TEXT("Armor area checkbox is added"), Added)) return false;
+	TestTrue(TEXT("Same checkbox look"), Added->GetWidgetStyle().UncheckedImage == Source->GetWidgetStyle().UncheckedImage
+		&& Added->GetWidgetStyle().CheckedImage == Source->GetWidgetStyle().CheckedImage);
+	const auto RowOf = [](UWidget* Widget)
+	{
+		while (Widget->GetParent() && !Widget->GetParent()->IsA<UVerticalBox>()) Widget = Widget->GetParent();
+		return Widget;
+	};
+	UWidget* SourceRow = RowOf(Source);
+	UWidget* AddedRow = RowOf(Added);
+	UPanelWidget* List = SourceRow->GetParent();
+	TestTrue(TEXT("Same developer list"), List && AddedRow->GetParent() == List);
+	if (List) TestEqual(TEXT("Directly below the original row"), List->GetChildIndex(AddedRow), List->GetChildIndex(SourceRow) + 1);
+	bool bLabel = false;
+	Settings->WidgetTree->ForEachWidget([&](UWidget* Widget)
+	{
+		if (const auto* Text = Cast<UTextBlock>(Widget)) bLabel |= Text->GetText().ToString() == TEXT("갑옷 이동 영역 보기");
+	});
+	TestTrue(TEXT("Korean label"), bLabel);
+	const TSharedRef<SVirtualWindow> Window = MakeVirtualViewport(*Settings, {1920, 1080});
+	if (UWidgetSwitcher* Categories = Cast<UWidgetSwitcher>(Settings->GetWidgetFromName(TEXT("CategorySwitcher"))))
+		Categories->SetActiveWidgetIndex(3);
+	if (UWidget* Group = Settings->GetWidgetFromName(TEXT("DeveloperGroup"))) Group->SetVisibility(ESlateVisibility::Visible);
+	PaintMenu(Window);
+	const FSlateRect A = PaintBounds(*SourceRow), B = PaintBounds(*AddedRow);
+	TestTrue(TEXT("Same row height"), HasArea(A) && FMath::IsNearlyEqual(A.Bottom - A.Top, B.Bottom - B.Top, 1.f));
+	TestTrue(TEXT("Painted below the original row"), B.Top >= A.Bottom - 1.f);
+	IConsoleVariable* Area = IConsoleManager::Get().FindConsoleVariable(TEXT("catrun.DebugArmorArea"));
+	if (!TestNotNull(TEXT("Armor area switch"), Area)) return false;
+	const int32 Before = Area->GetInt();
+	Added->SetIsChecked(true); Added->OnCheckStateChanged.Broadcast(true);
+	TestEqual(TEXT("Ticking shows the armor area"), Area->GetInt(), 1);
+	Added->SetIsChecked(false); Added->OnCheckStateChanged.Broadcast(false);
+	TestEqual(TEXT("Unticking hides it"), Area->GetInt(), 0);
+	if (IConsoleVariable* Capture = IConsoleManager::Get().FindConsoleVariable(TEXT("catrun.NoArmorCapture")))
+		TestEqual(TEXT("The original setting is not touched"), Capture->GetInt(), 0);
+	Area->Set(Before, ECVF_SetByConsole);
+	auto* Stamina = Cast<UCheckBox>(Settings->GetWidgetFromName(TEXT("InfiniteStaminaCheckBox")));
+	if (!TestNotNull(TEXT("Infinite stamina checkbox is added"), Stamina)) return false;
+	UWidget* StaminaRow = RowOf(Stamina);
+	if (List) TestEqual(TEXT("Infinite stamina directly below the armor area row"), List->GetChildIndex(StaminaRow), List->GetChildIndex(AddedRow) + 1);
+	bool bStaminaLabel = false;
+	Settings->WidgetTree->ForEachWidget([&](UWidget* Widget)
+	{
+		if (const auto* Text = Cast<UTextBlock>(Widget)) bStaminaLabel |= Text->GetText().ToString() == TEXT("스태미나 무제한");
+	});
+	TestTrue(TEXT("Infinite stamina Korean label"), bStaminaLabel);
+	IConsoleVariable* Infinite = IConsoleManager::Get().FindConsoleVariable(TEXT("catrun.InfiniteStamina"));
+	if (!TestNotNull(TEXT("Infinite stamina switch"), Infinite)) return false;
+	const int32 StaminaBefore = Infinite->GetInt();
+	Stamina->SetIsChecked(true); Stamina->OnCheckStateChanged.Broadcast(true);
+	TestEqual(TEXT("Ticking turns on unlimited stamina"), Infinite->GetInt(), 1);
+	TestEqual(TEXT("Other developer rows unchanged"), Area->GetInt(), Before);
+	Stamina->SetIsChecked(false); Stamina->OnCheckStateChanged.Broadcast(false);
+	TestEqual(TEXT("Unticking turns it off"), Infinite->GetInt(), 0);
+	Infinite->Set(StaminaBefore, ECVF_SetByConsole);
 	return true;
 }
 

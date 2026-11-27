@@ -27,7 +27,9 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnCandleSpottedCat, ACatrunCandle*
  *  - Sound does not draw the candle's view any more.
  *
  * Two modes:
- *  - Patrol: the cone sweeps. Orange display.
+ *  - Patrol: the cone sweeps. Orange display. A candle that walks a route (bPatrolEnabled) does not
+ *    sweep: it looks straight ahead along its walking direction, and turns back to the previous patrol
+ *    point when a statue or an armor is in front of it.
  *  - Tracking: the moment the cone sees the cat it is spotted at once (no gauge): a "!" shows,
  *    the candle reacts, the cone turns red and FOLLOWS the cat (never beyond the total range).
  *    When the cat has been out of the cone for CandleLoseSightDelay seconds the candle goes back
@@ -102,6 +104,16 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Candle|Patrol") bool bPatrolLoop = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Candle|Patrol", meta=(ClampMin="1")) float PatrolFloorProbeDistance = 200.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Candle|Patrol", meta=(ClampMin="0")) float PatrolMaxFloorHeightChange = 12.f;
+	// While walking a patrol route (bPatrolEnabled) the view does not sweep: it looks straight ahead.
+	// On: "ahead" is the walking direction, and the candle turns in place toward its next point.
+	// Off: "ahead" is the direction the actor was placed with in the level.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Candle|Patrol") bool bPatrolFaceTravelDirection = true;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Candle|Patrol", meta=(ClampMin="1", Units="DegreesPerSecond")) float PatrolTurnSpeed = 180.f;
+	// A statue or armor this close ahead (cm, in front of the collision capsule) makes the candle turn
+	// back and walk to the patrol point it came from, instead of waiting in front of it.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Candle|Patrol", meta=(ClampMin="0")) float PatrolEncounterDistance = 40.f;
+	// Short stop when turning back from a statue/armor (the turn happens during this stop).
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Candle|Patrol", meta=(ClampMin="0")) float PatrolEncounterPause = .3f;
 
 	// True while the candle is following the cat with its view.
 	UFUNCTION(BlueprintPure, Category = "Candle")
@@ -114,9 +126,22 @@ private:
 	friend class FCatrunPuzzleSuspensionTest;
 	friend class FCatrunCandlePatrolSafetyTest;
 	friend class FCatrunCandleLocalSweepTest;
+	friend class FCatrunCandlePatrolFacingTest;
 	void ResetPatrol();
 	void UpdatePatrol(float DeltaSeconds);
-	bool TryPatrolStep(const FVector& Delta);
+	bool TryPatrolStep(const FVector& Delta, AActor** OutBlocker = nullptr);
+	// True when the candle walks a route (patrol enabled and at least one point).
+	bool HasPatrolRoute() const;
+	// The point the candle is walking to now (false when there is none).
+	bool GetPatrolTarget(FVector& OutTarget) const;
+	// Statues of the statue puzzles and armors make a patrolling candle turn back.
+	bool IsPatrolEncounter(const AActor* Actor) const;
+	// Looks PatrolEncounterDistance ahead along Direction for a statue or an armor.
+	AActor* FindPatrolEncounter(const FVector& Direction) const;
+	// Turn back toward the previous patrol point.
+	void ReversePatrol();
+	// Turns the actor toward Yaw at PatrolTurnSpeed. Returns true when it faces Yaw.
+	bool TurnPatrolFacing(float Yaw, float DeltaSeconds);
 	bool FindPatrolFloor(const FVector& CapsuleCenter, float& OutFloor) const;
 	FTransform PatrolOrigin;
 	int32 PatrolIndex = 0, PatrolStep = 1;

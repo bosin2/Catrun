@@ -61,6 +61,9 @@ struct FCatrunSoundEvent
 
 	UPROPERTY(BlueprintReadWrite)
 	TObjectPtr<AActor> Instigator = nullptr;
+
+	// Travel distance (cm) of this one sound. 0 or less = the budget of Size from the sound settings.
+	float BudgetOverride = 0.f;
 };
 
 UINTERFACE(BlueprintType, MinimalAPI)

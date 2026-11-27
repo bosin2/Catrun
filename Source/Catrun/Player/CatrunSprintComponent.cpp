@@ -1,4 +1,5 @@
 #include "CatrunSprintComponent.h"
+#include "HAL/IConsoleManager.h"
 
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -9,6 +10,10 @@
 
 namespace
 {
+#if !UE_BUILD_SHIPPING
+	TAutoConsoleVariable<int32> CVarInfiniteStamina(TEXT("catrun.InfiniteStamina"), 0,
+		TEXT("Developer: the cat's sprint stamina never runs out. 0: normal, 1: unlimited."), ECVF_Cheat);
+#endif
 bool ReadMovementFlag(const ACharacter* Cat, FName Name)
 {
 	const auto* Property = Cat ? FindFProperty<FBoolProperty>(Cat->GetClass(), Name) : nullptr;
@@ -131,6 +136,16 @@ void UCatrunSprintComponent::ResetStamina()
 void UCatrunSprintComponent::AdvanceStamina(double DeltaSeconds, bool bDraining)
 {
 	if (DeltaSeconds <= 0. || !FMath::IsFinite(DeltaSeconds)) return;
+#if !UE_BUILD_SHIPPING
+	if (CVarInfiniteStamina.GetValueOnGameThread() != 0)
+	{
+		// Developer: always full, never exhausted; sprinting itself still works normally.
+		Stamina = GetMaxStamina();
+		SecondsWithoutDrain = 0.;
+		ApplyExhaustion(false);
+		return;
+	}
+#endif
 	const double Maximum = GetMaxStamina();
 	const double Drain = FMath::Max(0.f, DrainPerSecond);
 	if (bDraining && !bExhausted && Drain > 0.)
